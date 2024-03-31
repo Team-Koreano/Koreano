@@ -1,13 +1,13 @@
-package org.example.userapi;
+package org.ecommerce.orderapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UserApiApplication {
+public class OrderApiApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(UserApiApplication.class, args);
+    SpringApplication.run(OrderApiApplication.class, args);
   }
 
 }
