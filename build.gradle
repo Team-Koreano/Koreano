@@ -1,0 +1,89 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+bootJar.enabled = false
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        mavenCentral()
+    }
+
+    // 관리하는 모듈의 공통 dependencies
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        implementation 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    sourceCompatibility = '17'
+}
+project(':user-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':bucket-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':order-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':payment-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':product-management-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':product-search-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':statistic-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}
+
+project(':user-api'){
+    dependencies {
+        implementation(project(':common'))
+    }
+}

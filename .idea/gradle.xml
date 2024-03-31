@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/bucket-api" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/order-api" />
+            <option value="$PROJECT_DIR$/payment-api" />
+            <option value="$PROJECT_DIR$/product-management-api" />
+            <option value="$PROJECT_DIR$/product-search-api" />
+            <option value="$PROJECT_DIR$/statistic-api" />
+            <option value="$PROJECT_DIR$/user-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/bucket-api" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/bucket-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/common" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/common" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/payment-api" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/payment-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/product-management-api" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/product-management-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/product-search-api" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/product-search-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/user-api" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/user-api" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
