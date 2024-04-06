@@ -1,6 +1,5 @@
 package org.ecommerce.productsearchapi.entity;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
