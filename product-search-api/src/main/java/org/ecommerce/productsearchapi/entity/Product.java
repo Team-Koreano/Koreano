@@ -6,6 +6,7 @@ import org.ecommerce.productsearchapi.entity.type.Acidity;
 import org.ecommerce.productsearchapi.entity.type.Bean;
 import org.ecommerce.productsearchapi.entity.type.Category;
 import org.ecommerce.productsearchapi.entity.type.Status;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,10 +43,11 @@ public class Product {
 	@Column(name = "stock", nullable = false)
 	private Integer stock;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller_id", nullable = false)
 	private SellerRep sellerRep;
 
+	@ColumnDefault("0")
 	@Column(name = "favorite_count")
 	private Integer favoriteCount;
 
@@ -65,6 +68,7 @@ public class Product {
 	@Column(name = "information")
 	private String information;
 
+	@ColumnDefault("AVAILABLE")
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Status status;
