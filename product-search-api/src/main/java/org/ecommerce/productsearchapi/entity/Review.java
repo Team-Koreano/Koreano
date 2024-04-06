@@ -1,5 +1,10 @@
 package org.ecommerce.productsearchapi.entity;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,6 +38,14 @@ public class Review {
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
+
+	@CreationTimestamp
+	@Column(name = "create_datetime", nullable = false, updatable = false)
+	private LocalDateTime createDatetime;
+
+	@UpdateTimestamp
+	@Column(name = "update_datetime", insertable = false)
+	private LocalDateTime updateDatetime;
 
 
 }

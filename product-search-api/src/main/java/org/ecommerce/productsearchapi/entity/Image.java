@@ -1,6 +1,7 @@
 package org.ecommerce.productsearchapi.entity;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -35,10 +36,10 @@ public class Image {
 	private Boolean isThumbnail;
 
 	@CreationTimestamp
-	@Column(name = "create_date", nullable = false, updatable = false)
-	private Timestamp createDate;
+	@Column(name = "create_datetime", nullable = false, updatable = false)
+	private LocalDateTime createDatetime;
 
-	@Column(name = "update_date")
-	private Timestamp updateDate;
+	@Column(name = "update_date", insertable = false)
+	private LocalDateTime updateDatetime;
 
 }
