@@ -34,15 +34,14 @@ public class SellerAccount {
 	@Column(name = "bank_name", nullable = false)
 	private String bankName;
 
+	@CreationTimestamp
+	@Column(name = "create_datetime",updatable = false)
+	private LocalDateTime createDatetime;
 
 	@Column(name = "is_deleted")
-	private boolean isDeleted;
-
-	@CreationTimestamp
-	@Column(name = "create_date")
-	private LocalDateTime createDate;
+	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_date")
-	private LocalDateTime updateDate;
+	@Column(name = "update_datetime")
+	private LocalDateTime updateDatetime;
 }

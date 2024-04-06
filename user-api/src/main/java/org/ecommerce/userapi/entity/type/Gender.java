@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.entity;
+package org.ecommerce.userapi.entity.type;
 
 import lombok.Getter;
 

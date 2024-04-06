@@ -2,21 +2,17 @@ package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -38,22 +34,20 @@ public class Address {
 	@Column(name = "password", nullable = false)
 	private String password;
 
-
 	@Column(name = "post_address", nullable = false)
 	private String postAddress;
 
 	@Column(name = "detail", nullable = false)
 	private String detail;
 
-
 	@CreationTimestamp
-	@Column(name = "create_date")
-	private LocalDateTime createDate;
+	@Column(name = "create_datetime",updatable = false)
+	private LocalDateTime createDatetime;
 
 	@Column(name = "is_deleted")
-	private boolean isDeleted;
+	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_date")
-	private LocalDateTime updateDate;
+	@Column(name = "update_datetime")
+	private LocalDateTime updateDatetime;
 }

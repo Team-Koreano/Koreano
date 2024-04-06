@@ -1,7 +1,7 @@
 package org.ecommerce.userapi.dto;
 
-import org.ecommerce.userapi.entity.Gender;
-import org.ecommerce.userapi.entity.Status;
+import org.ecommerce.userapi.entity.type.Gender;
+import org.ecommerce.userapi.entity.type.Status;
 
 import lombok.Builder;
 import lombok.Setter;

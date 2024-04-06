@@ -2,6 +2,7 @@ package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
 
+import org.ecommerce.userapi.entity.type.Status;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -37,16 +38,16 @@ public class Seller {
 	@Column(name = "phone_number", nullable = false)
 	private String phoneNumber;
 
-	@Column(name = "is_deleted")
-	private boolean isDeleted;
-
 	@CreationTimestamp
-	@Column(name = "create_date")
-	private LocalDateTime createDate;
+	@Column(name = "create_datetime",updatable = false)
+	private LocalDateTime createDatetime;
+
+	@Column(name = "is_deleted")
+	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_date")
-	private LocalDateTime updateDate;
+	@Column(name = "update_datetime")
+	private LocalDateTime updateDatetime;
 
 	@ColumnDefault("0")
 	@Column(name = "beanpay")

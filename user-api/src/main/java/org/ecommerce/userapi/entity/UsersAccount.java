@@ -20,28 +20,29 @@ import lombok.Getter;
 @Table(name = "users_account")
 @Getter
 public class UsersAccount {
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Integer id;
 
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name = "users_id")
-		private Users usersId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
 
-		@Column(name = "number",nullable = false)
-		private Short number;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "users_id")
+	private Users usersId;
 
-		@Column(name = "bank_name", nullable = false)
-		private String bankName;
+	@Column(name = "number",nullable = false)
+	private Short number;
 
-		@Column(name = "is_deleted")
-		private boolean isDeleted;
+	@Column(name = "bank_name", nullable = false)
+	private String bankName;
 
-		@CreationTimestamp
-		@Column(name = "create_date")
-		private LocalDateTime createDate;
+	@CreationTimestamp
+	@Column(name = "create_datetime",updatable = false)
+	private LocalDateTime createDatetime;
 
-		@UpdateTimestamp
-		@Column(name = "update_date")
-		private LocalDateTime updateDate;
+	@Column(name = "is_deleted")
+	private Boolean isDeleted;
+
+	@UpdateTimestamp
+	@Column(name = "update_datetime")
+	private LocalDateTime updateDatetime;
 }

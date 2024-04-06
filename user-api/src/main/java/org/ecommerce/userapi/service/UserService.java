@@ -1,7 +1,7 @@
 package org.ecommerce.userapi.service;
 
 import org.ecommerce.userapi.dto.UserDto;
-import org.ecommerce.userapi.entity.Status;
+import org.ecommerce.userapi.entity.type.Status;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
