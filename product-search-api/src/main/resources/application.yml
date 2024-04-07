@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: product-search-api
+  h2:
+    console:
+      enabled: true
+      path: /product-search/h2-console
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
