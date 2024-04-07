@@ -27,13 +27,13 @@ public class ProductController {
 	}
 
 	@PostMapping("/")
-	public Response<Void> createProduct(@RequestBody ProductDto.Request.CreateProductDto createProductDto) {
-		productService.createProduct(createProductDto);
+	public Response<Void> createProduct(@RequestBody ProductDto.Request.Register register) {
+		productService.createProduct(register);
 		return new Response<>(200, null);
 	}
 
 	@GetMapping("/")
-	public Response<List<ProductDto.Response.GetProductDto>> getProductList() {
+	public Response<List<ProductDto.Response.Get>> getProductList() {
 		return new Response<>(200, productService.getProductDtoList());
 	}
 }

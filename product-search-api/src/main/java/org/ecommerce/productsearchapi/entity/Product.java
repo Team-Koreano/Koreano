@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.productsearchapi.entity.type.Acidity;
 import org.ecommerce.productsearchapi.entity.type.Bean;
-import org.ecommerce.productsearchapi.entity.type.Category;
-import org.ecommerce.productsearchapi.entity.type.Status;
+import org.ecommerce.productsearchapi.entity.type.ProductCategory;
+import org.ecommerce.productsearchapi.entity.type.ProductStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -40,7 +40,7 @@ public class Product {
 
 	@Column(name = "category", nullable = false)
 	@Enumerated(EnumType.STRING)
-	private Category category;
+	private ProductCategory category;
 
 	@Column(name = "price", nullable = false)
 	private Integer price;
@@ -74,7 +74,7 @@ public class Product {
 
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
-	private Status status;
+	private ProductStatus status;
 
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)

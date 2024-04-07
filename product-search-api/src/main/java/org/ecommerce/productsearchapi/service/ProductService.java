@@ -7,8 +7,8 @@ import org.ecommerce.productsearchapi.entity.Product;
 import org.ecommerce.productsearchapi.entity.SellerRep;
 import org.ecommerce.productsearchapi.entity.type.Acidity;
 import org.ecommerce.productsearchapi.entity.type.Bean;
-import org.ecommerce.productsearchapi.entity.type.Category;
-import org.ecommerce.productsearchapi.entity.type.Status;
+import org.ecommerce.productsearchapi.entity.type.ProductCategory;
+import org.ecommerce.productsearchapi.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.ecommerce.productsearchapi.repository.SellerRepository;
 import org.springframework.stereotype.Service;
@@ -29,19 +29,21 @@ public class ProductService {
 		sellerRepository.save(sellerRep);
 	}
 
-	public void createProduct(ProductDto.Request.CreateProductDto productDto) {
+	public void createProduct(ProductDto.Request.Register productDto) {
 
-		SellerRep sellerRep = sellerRepository.findById(productDto.sellerId()).get();
+		SellerRep sellerRep;
+		sellerRep = sellerRepository.findById(productDto.sellerId()).get();
 
-		Product product = Product.builder()
-			.category(Category.valueOf(productDto.category()))
+		Product product;
+		product = Product.builder()
+			.category(ProductCategory.valueOf(productDto.category()))
 			.price(productDto.price())
 			.stock(productDto.stock())
 			.sellerRep(sellerRep)
 			.isDecaf(productDto.isDecaf())
 			.name(productDto.name())
 			.bean(Bean.valueOf(productDto.bean()))
-			.status(Status.AVAILABLE)
+			.status(ProductStatus.AVAILABLE)
 			.acidity(Acidity.valueOf(productDto.acidity()))
 			.information(productDto.information())
 			.favoriteCount(0)
@@ -51,10 +53,11 @@ public class ProductService {
 
 	}
 
-	public List<ProductDto.Response.GetProductDto> getProductDtoList() {
-		List<Product> productList = productRepository.findAll();
+	public List<ProductDto.Response.Get> getProductDtoList() {
+		List<Product> productList;
+		productList = productRepository.findAll();
 		return productList.stream().map(product ->
-				ProductDto.Response.GetProductDto.builder()
+				ProductDto.Response.Get.builder()
 					.id(product.getId())
 					.name(product.getName())
 					.information(product.getInformation())

@@ -5,7 +5,7 @@ import lombok.Builder;
 public class ProductDto {
 	public static class Request {
 		@Builder
-		public record CreateProductDto(
+		public record Register(
 			String category,
 			Integer price,
 			Integer stock,
@@ -20,7 +20,7 @@ public class ProductDto {
 	}
 	public static class Response {
 		@Builder
-		public record GetProductDto(
+		public record Get(
 			Integer id,
 			Boolean is_decaf,
 			Integer price,
