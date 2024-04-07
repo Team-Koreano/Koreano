@@ -19,5 +19,19 @@ public class ProductDto {
 		){}
 	}
 	public static class Response {
+		@Builder
+		public record GetProductDto(
+			Integer id,
+			Boolean is_decaf,
+			Integer price,
+			Integer sellerId,
+			Integer stock,
+			String acidity,
+			String bean,
+			String category,
+			String information,
+			String name,
+			String status
+		){}
 	}
 }

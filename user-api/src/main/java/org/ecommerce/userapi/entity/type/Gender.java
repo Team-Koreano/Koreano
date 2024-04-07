@@ -1,15 +1,24 @@
 package org.ecommerce.userapi.entity.type;
 
-import lombok.Getter;
+import org.ecommerce.common.utils.mapper.EnumMapperType;
 
-@Getter
-public enum Gender {
-	FEMALE("남자"),
-	MALE("여자");
+import lombok.AllArgsConstructor;
 
-	private final String value;
+@AllArgsConstructor
+public enum Gender implements EnumMapperType {
 
-	Gender(String value) {
-		this.value = value;
+	MALE("남성"),
+	FEMALE("여성");
+
+	private final String title;
+
+	@Override
+	public String getCode() {
+		return name();
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
 	}
 }
