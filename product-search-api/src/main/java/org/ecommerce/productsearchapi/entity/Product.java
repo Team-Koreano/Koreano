@@ -21,10 +21,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "product")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class Product {
 
@@ -47,7 +53,6 @@ public class Product {
 	@JoinColumn(name = "seller_id", nullable = false)
 	private SellerRep sellerRep;
 
-	@ColumnDefault("0")
 	@Column(name = "favorite_count")
 	private Integer favoriteCount;
 
@@ -68,7 +73,6 @@ public class Product {
 	@Column(name = "information")
 	private String information;
 
-	@ColumnDefault("AVAILABLE")
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Status status;
