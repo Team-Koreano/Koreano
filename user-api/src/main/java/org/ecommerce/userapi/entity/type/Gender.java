@@ -3,7 +3,6 @@ package org.ecommerce.userapi.entity.type;
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @AllArgsConstructor
 public enum Gender implements EnumMapperType {

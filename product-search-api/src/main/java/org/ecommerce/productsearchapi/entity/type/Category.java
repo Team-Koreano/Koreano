@@ -2,11 +2,8 @@ package org.ecommerce.productsearchapi.entity.type;
 
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
-
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
 public enum Category implements EnumMapperType {
 	/**

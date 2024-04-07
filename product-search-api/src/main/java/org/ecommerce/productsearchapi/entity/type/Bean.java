@@ -1,7 +1,6 @@
 package org.ecommerce.productsearchapi.entity.type;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
-
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
