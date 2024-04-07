@@ -26,7 +26,7 @@ public class Address {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "users_id")
-	private Users usersId;
+	private Users users;
 
 	@Column(name = "name",nullable = false)
 	private String name;
@@ -48,6 +48,6 @@ public class Address {
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime")
+	@Column(name = "update_datetime",insertable = false)
 	private LocalDateTime updateDatetime;
 }

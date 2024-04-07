@@ -26,7 +26,7 @@ public class SellerAccount {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller_id")
-	private Seller sellerId;
+	private Seller seller;
 
 	@Column(name = "number",nullable = false)
 	private Short number;
@@ -42,6 +42,6 @@ public class SellerAccount {
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime")
+	@Column(name = "update_datetime",insertable = false)
 	private LocalDateTime updateDatetime;
 }

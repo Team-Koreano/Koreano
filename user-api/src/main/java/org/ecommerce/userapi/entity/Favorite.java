@@ -21,7 +21,7 @@ public class Favorite {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "users_id")
-	private Users usersId;
+	private Users users;
 
 	@Column(name = "product_id",nullable = false)
 	private Integer productId;
