@@ -17,7 +17,7 @@ public class PaymentController {
 	private final PaymentServiceImpl paymentService;
 
 	@GetMapping
-	public Response<String> testApi() {
+	public Response<Void> testApi() {
 		paymentService.createPayment();
 		return new Response<>(200, null);
 	}
