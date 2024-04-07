@@ -1,17 +1,27 @@
 package org.ecommerce.userapi.entity.type;
 
-import lombok.Getter;
+import org.ecommerce.common.utils.mapper.EnumMapperType;
 
-@Getter
-public enum Status {
+import lombok.AllArgsConstructor;
 
-	GENERAL("일반"),
-	WITHDRAWAL("탈퇴"),
-	SUSPEND("정지");
+@AllArgsConstructor
+public enum Status implements EnumMapperType {
 
-	private final String value;
 
-	Status(String value) {
-		this.value = value;
+	GENERAL("일반_회원"),
+	WITHDRAWAL("탈퇴_회원"),
+	SUSPEND("정지_회원")
+	;
+
+	private final String title;
+
+	@Override
+	public String getCode() {
+		return name();
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
 	}
 }
