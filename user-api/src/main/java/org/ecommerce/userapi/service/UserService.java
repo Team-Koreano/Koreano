@@ -1,7 +1,7 @@
 package org.ecommerce.userapi.service;
 
 import org.ecommerce.userapi.dto.UserDto;
-import org.ecommerce.userapi.entity.type.Status;
+import org.ecommerce.userapi.entity.type.UserStatus;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class UserService {
 
 		private final UserRepository userRepository;
 
-		public ResponseEntity<?> createUser(UserDto.Request.CreateUserDto createUser){
+		public ResponseEntity<?> createUser(UserDto.Request.Register createUser){
 
 			Users user = Users.builder()
 				.age(createUser.age())
@@ -25,7 +25,7 @@ public class UserService {
 				.email(createUser.email())
 				.name(createUser.name())
 				.isDeleted(false)
-				.status(Status.GENERAL)
+				.userStatus(UserStatus.GENERAL)
 				.phoneNumber(createUser.phoneNumber())
 				.password(createUser.password())
 				.gender(createUser.gender())

@@ -1,7 +1,7 @@
 package org.ecommerce.userapi.dto;
 
 import org.ecommerce.userapi.entity.type.Gender;
-import org.ecommerce.userapi.entity.type.Status;
+import org.ecommerce.userapi.entity.type.UserStatus;
 
 import lombok.Builder;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import lombok.Setter;
 public class UserDto {
 
 	public static class Request{
-		public record CreateUserDto(
+		public record Register(
 			String email,
 			String name,
 			String password,
@@ -20,7 +20,7 @@ public class UserDto {
 			String phoneNumber,
 
 			Integer beanPay,
-			Status status
+			UserStatus userStatus
 		){}
 }
 	public static class Response{

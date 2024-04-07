@@ -5,7 +5,7 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public enum Status implements EnumMapperType {
+public enum UserStatus implements EnumMapperType {
 
 
 	GENERAL("일반_회원"),

@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
     @PostMapping("/general")
-    public ResponseEntity<?> generalRegistration(@RequestBody UserDto.Request.CreateUserDto createUserDto) {
-        return userService.createUser(createUserDto);
+    public ResponseEntity<?> generalRegistration(@RequestBody UserDto.Request.Register register) {
+        return userService.createUser(register);
     }
 
 }
