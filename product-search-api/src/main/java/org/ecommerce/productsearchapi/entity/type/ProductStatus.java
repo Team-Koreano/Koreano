@@ -4,22 +4,17 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public enum Category implements EnumMapperType {
+public enum ProductStatus implements EnumMapperType {
 	/**
-	 * BEAN 원두
-	 * CUP 커피 잔
-	 * CUP_STAND 컵 받침
-	 * BLENDER 블렌더
-	 * MACHINE 커피머신
+	 * AVAILABLE 구매 가능한 상태
+	 * OUT_OF_STOCK 재고가 없는 상태
+	 * DISCONTINUED 단종, 판매 중단 상태
 	 */
-	BEAN("원두"),
-	CUP("커피 잔"),
-	CUP_STAND("컵 받침"),
-	BLENDER("블렌더"),
-	MACHINE("커피머신")
+	AVAILABLE("구매 가능"),
+	OUT_OF_STOCK("재고 없음"),
+	DISCONTINUED("판매 중단")
 	;
 	private final String title;
-
 	@Override
 	public String getCode() {
 		return name();
@@ -29,4 +24,5 @@ public enum Category implements EnumMapperType {
 	public String getTitle() {
 		return title;
 	}
+
 }
