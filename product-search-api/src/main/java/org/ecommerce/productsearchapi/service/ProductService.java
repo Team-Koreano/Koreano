@@ -1,5 +1,7 @@
 package org.ecommerce.productsearchapi.service;
 
+import java.util.List;
+
 import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.entity.Product;
 import org.ecommerce.productsearchapi.entity.SellerRep;
@@ -42,10 +44,30 @@ public class ProductService {
 			.status(Status.AVAILABLE)
 			.acidity(Acidity.valueOf(productDto.acidity()))
 			.information(productDto.information())
+			.favoriteCount(0)
 			.build();
 
 		productRepository.save(product);
 
+	}
+
+	public List<ProductDto.Response.GetProductDto> getProductDtoList() {
+		List<Product> productList = productRepository.findAll();
+		return productList.stream().map(product ->
+				ProductDto.Response.GetProductDto.builder()
+					.id(product.getId())
+					.name(product.getName())
+					.information(product.getInformation())
+					.status(product.getStatus().getTitle())
+					.is_decaf(product.getIsDecaf())
+					.price(product.getPrice())
+					.stock(product.getStock())
+					.acidity(product.getAcidity().getTitle())
+					.category(product.getCategory().getTitle())
+					.sellerId(product.getSellerRep().getId())
+					.bean(product.getBean().getTitle())
+					.build()
+			).toList();
 	}
 
 }
