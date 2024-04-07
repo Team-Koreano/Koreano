@@ -6,7 +6,6 @@ import org.ecommerce.productsearchapi.entity.type.Acidity;
 import org.ecommerce.productsearchapi.entity.type.Bean;
 import org.ecommerce.productsearchapi.entity.type.Category;
 import org.ecommerce.productsearchapi.entity.type.Status;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
