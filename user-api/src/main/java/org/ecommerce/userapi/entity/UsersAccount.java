@@ -27,7 +27,7 @@ public class UsersAccount {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "users_id")
-	private Users usersId;
+	private Users users;
 
 	@Column(name = "number",nullable = false)
 	private Short number;
@@ -43,6 +43,6 @@ public class UsersAccount {
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime")
+	@Column(name = "update_datetime",insertable = false)
 	private LocalDateTime updateDatetime;
 }

@@ -3,7 +3,7 @@ package org.ecommerce.userapi.entity;
 import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.type.Gender;
-import org.ecommerce.userapi.entity.type.Status;
+import org.ecommerce.userapi.entity.type.UserStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -57,7 +57,7 @@ public class Users {
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime")
+	@Column(name = "update_datetime",insertable = false)
 	private LocalDateTime updateDatetime;
 
 	@ColumnDefault("0")
@@ -66,6 +66,6 @@ public class Users {
 
 	@ColumnDefault("0")
 	@Column(name = "status")
-	private Status status;
+	private UserStatus userStatus;
 
 }
