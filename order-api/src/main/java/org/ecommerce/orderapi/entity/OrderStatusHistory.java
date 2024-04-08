@@ -2,8 +2,13 @@ package org.ecommerce.orderapi.entity;
 
 import java.time.LocalDateTime;
 
+import org.ecommerce.orderapi.entity.type.OrderStatus;
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,8 +32,10 @@ public class OrderStatusHistory {
 	private OrderDetail orderDetail;
 
 	@Column(name = "change_status", nullable = false)
-	private String changeStatus;
+	@Enumerated(EnumType.STRING)
+	private OrderStatus changeStatus;
 
-	@Column(name = "status_change_datetime", nullable = false)
+	@CreationTimestamp
+	@Column(name = "status_change_datetime", nullable = false, updatable = false)
 	private LocalDateTime statusChangeDatetime;
 }

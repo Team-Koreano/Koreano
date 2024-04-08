@@ -1,7 +1,12 @@
 package org.ecommerce.orderapi.entity;
 
+import org.ecommerce.orderapi.entity.type.OrderStatus;
+import org.ecommerce.orderapi.entity.type.OrderStatusReason;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,8 +51,10 @@ public class OrderDetail {
 	private String seller;
 
 	@Column(name = "status", nullable = false)
-	private String status;
+	@Enumerated(EnumType.STRING)
+	private OrderStatus status;
 
 	@Column(name = "status_reason")
-	private String statusReason;
+	@Enumerated(EnumType.STRING)
+	private OrderStatusReason statusReason;
 }
