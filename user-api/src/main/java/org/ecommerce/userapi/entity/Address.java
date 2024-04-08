@@ -31,9 +31,6 @@ public class Address {
 	@Column(name = "name",nullable = false)
 	private String name;
 
-	@Column(name = "password", nullable = false)
-	private String password;
-
 	@Column(name = "post_address", nullable = false)
 	private String postAddress;
 
