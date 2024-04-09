@@ -42,7 +42,7 @@ jobs:
         run: pwd
 
       - name: Check Path
-        run: ls
+        run: ls -a
   
       # - name: permission
       #   run: chmod +x gradlew 
