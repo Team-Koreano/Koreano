@@ -40,7 +40,7 @@ jobs:
         run: ls
   
       - name: Run Tests
-        run: chmod +x ./gradlew test
+        run: chmod +x ./gradlew --info test
         working-directory: ./
         
       - name: Archive coverage data
