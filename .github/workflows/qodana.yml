@@ -36,7 +36,6 @@ jobs:
       - name: Create coverage-data directory and copy contents
         run: |
           mkdir -p ./.qodana/code-coverage
-          cp -R ./build/kover/bin-reports/* ./.qodana/code-coverage/
         
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
