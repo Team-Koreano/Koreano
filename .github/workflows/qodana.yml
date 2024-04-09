@@ -28,10 +28,29 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'gradle'
+          
+      - name: Validate Gradle Wrapper
+        run: chmod +x ./gradlew --version
+        working-directory: ./
+        
+      - name: Check Current Path
+        run: pwd
 
+      - name: Check Path
+        run: ls
+  
+      - name: Run Tests
+        run: chmod +x ./gradlew :test
+        working-directory: ./
+        
+      - name: Archive coverage data
+        uses: actions/upload-artifact@v2
+        with:
+          name: gradle-coverage-data-jacoco
+          path: ./.qodana/code-coverage
+      
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@latest
+        uses: JetBrains/qodana-action@v2023.2
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
