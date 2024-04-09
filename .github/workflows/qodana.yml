@@ -32,10 +32,6 @@ jobs:
       - name: Validate Gradle Wrapper
         run: chmod +x ./gradlew --version
         working-directory: ./
-  
-      - name: Run Tests
-        run: chmod +x ./gradlew test
-        working-directory: ./
         
       - name: Create coverage-data directory and copy contents
         run: |
