@@ -33,10 +33,10 @@ jobs:
         run: chmod +x ./gradlew --version
         working-directory: ./
 
-      # - name: Create code coverage folder if not exists
-      #   run: |
-      #     mkdir -p .qodana/code-coverage
-      #   working-directory: ./
+      - name: Create code coverage folder if not exists
+        run: |
+          mkdir -p .qodana/code-coverage
+        working-directory: ./
 
       - name: Check Current Path
         run: pwd
