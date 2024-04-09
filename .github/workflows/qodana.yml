@@ -33,10 +33,10 @@ jobs:
         run: chmod +x ./gradlew --version
         working-directory: ./
 
-      - name: Create code coverage folder if not exists
-        run: |
-          mkdir -p .qodana/code-coverage
-        working-directory: ./
+      # - name: Create code coverage folder if not exists
+      #   run: |
+      #     mkdir -p .qodana/code-coverage
+      #   working-directory: ./
 
       - name: Check Current Path
         run: pwd
@@ -53,7 +53,12 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gradle-coverage-data-jacoco
-          path: .qodana/
+          path: .qodana/code-coverage
+          
+      - name: check file
+        run: |
+          cd .qodana
+          cd code-coverage
 
       - name: Check Path
         run: ls -a
