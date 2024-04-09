@@ -57,6 +57,7 @@ jobs:
         with:
           name: gradle-coverage-data-jacoco
           path: .qodana/code-coverage
+          working-directory: ./
       
       # - name: 'Qodana Scan'
       #   uses: JetBrains/qodana-action@v2023.2
