@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gradle-coverage-data-jacoco
-          path: ./.qodana
+          path: .qodana
       
       # - name: 'Qodana Scan'
       #   uses: JetBrains/qodana-action@v2023.2
