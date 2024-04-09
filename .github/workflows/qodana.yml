@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - chore/qodana
+      - 'chore/qodana'
   pull_request:
     branches:
       - "**"
