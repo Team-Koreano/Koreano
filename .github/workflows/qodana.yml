@@ -40,7 +40,8 @@ jobs:
         run: ls
   
       - name: Run Tests
-        run: chmod +x ./gradlew.bat test
+        run: chmod +x ./gradlew :test
+        working-directory: ./
         
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
