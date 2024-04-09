@@ -34,7 +34,7 @@ jobs:
         working-directory: ./
   
       - name: Run Tests
-        run: chmod +x ./gradlew test
+        run: chmod +x ./gradlew :subprodjcts:test
         working-directory: ./
         
       - name: Archive coverage data
