@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - chore/qodana
   pull_request:
     branches:
       - "**"
