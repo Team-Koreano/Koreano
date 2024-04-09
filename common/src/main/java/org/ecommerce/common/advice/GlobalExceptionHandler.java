@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<Response<String>> handleCustomException(CustomException e) {
 		Response<String> errorResponse = new Response<>(e.getErrorCode().getCode(), e.getErrorMessage());
-		
+
 		return ResponseEntity.status(e.getErrorCode().getCode()).body(errorResponse);
 	}
 
@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<Response<String>> handleException(Exception e) {
 
 		Response<String> errorResponse = new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-			"INTERNAL_SERVER_ERROR!");
+			e.getMessage());
 
 		log.error("\u001B[31mcode: " + HttpStatus.INTERNAL_SERVER_ERROR.value() + "\u001B[0m");
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(errorResponse);
