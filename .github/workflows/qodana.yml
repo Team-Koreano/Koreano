@@ -57,8 +57,7 @@ jobs:
           
       - name: check file
         run: |
-          cd .qodana
-          cd code-coverage
+          cd .qodana/code-coverage
 
       - name: Check Path
         run: ls -a
