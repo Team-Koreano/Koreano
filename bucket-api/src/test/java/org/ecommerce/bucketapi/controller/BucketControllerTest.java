@@ -9,8 +9,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.bucketapi.dto.BucketDTO;
+import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.service.BucketService;
+import org.ecommerce.common.vo.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,11 +37,11 @@ public class BucketControllerTest {
 	@MockBean
 	private BucketService bucketService;
 
-	private List<BucketDTO.Response> createTestBucketsResponse() {
-		List<BucketDTO.Response> bucketResponse = new ArrayList<>();
-		bucketResponse.add(new BucketDTO.Response(1L, 1, 101, 3, LocalDate.now()));
-		bucketResponse.add(new BucketDTO.Response(2L, 2, 102, 2, LocalDate.now()));
-		bucketResponse.add(new BucketDTO.Response(3L, 1, 103, 1, LocalDate.now()));
+	private List<BucketDto.Response> createTestBucketsResponse() {
+		List<BucketDto.Response> bucketResponse = new ArrayList<>();
+		bucketResponse.add(new BucketDto.Response(1L, 1, 101, 3, LocalDate.now()));
+		bucketResponse.add(new BucketDto.Response(2L, 2, 102, 2, LocalDate.now()));
+		bucketResponse.add(new BucketDto.Response(3L, 1, 103, 1, LocalDate.now()));
 
 		return bucketResponse;
 	}
@@ -62,11 +63,11 @@ public class BucketControllerTest {
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
 			.andReturn();
 
-		final List<BucketDTO.Response> bucketResponse = objectMapper.readValue(
+		final List<BucketDto.Response> bucketResponse = objectMapper.readValue(
 			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<List<BucketDTO.Response>>() {
+			new TypeReference<Response<List<BucketDto.Response>>>() {
 			}
-		);
+		).result();
 
 		assertThat(bucketResponse).usingRecursiveComparison()
 			.isEqualTo(createTestBucketsResponse());

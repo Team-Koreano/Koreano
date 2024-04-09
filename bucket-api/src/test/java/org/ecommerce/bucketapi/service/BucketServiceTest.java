@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.bucketapi.dto.BucketDTO;
+import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.entity.Bucket;
 import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,11 @@ public class BucketServiceTest {
 		new Bucket(3L, 1, 103, 1, CREATE_DATE)
 	);
 
-	private List<BucketDTO.Response> createTestBucketsResponse() {
-		List<BucketDTO.Response> bucketResponse = new ArrayList<>();
-		bucketResponse.add(new BucketDTO.Response(1L, 1, 101, 3, CREATE_DATE));
-		bucketResponse.add(new BucketDTO.Response(2L, 1, 102, 2, CREATE_DATE));
-		bucketResponse.add(new BucketDTO.Response(3L, 1, 103, 1, CREATE_DATE));
+	private List<BucketDto.Response> createTestBucketsResponse() {
+		List<BucketDto.Response> bucketResponse = new ArrayList<>();
+		bucketResponse.add(new BucketDto.Response(1L, 1, 101, 3, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(2L, 1, 102, 2, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(3L, 1, 103, 1, CREATE_DATE));
 
 		return bucketResponse;
 	}
@@ -49,7 +49,7 @@ public class BucketServiceTest {
 			.willReturn(BUCKETS);
 
 		// when
-		final List<BucketDTO.Response> actual = bucketService.getAllBuckets(1);
+		final List<BucketDto.Response> actual = bucketService.getAllBuckets(1);
 
 		// then
 		assertThat(actual).usingRecursiveComparison()

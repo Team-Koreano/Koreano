@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import org.ecommerce.bucketapi.entity.Bucket;
 
-public class BucketDTO {
+public class BucketDto {
 
 	public static class Request {
 

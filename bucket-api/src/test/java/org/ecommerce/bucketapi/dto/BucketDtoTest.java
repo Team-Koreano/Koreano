@@ -25,7 +25,7 @@ public class BucketDtoTest {
 	void 장바구니_응답() {
 		// given
 		// when
-		final BucketDTO.Response actual = BucketDTO.Response.of(BUCKET);
+		final BucketDto.Response actual = BucketDto.Response.of(BUCKET);
 
 		// then
 		assertThat(actual.id()).isEqualTo(1L);
