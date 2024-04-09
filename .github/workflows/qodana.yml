@@ -34,10 +34,10 @@ jobs:
         working-directory: ./
         
       - name: Check Current Path
-        run: chmod +x pwd
+        run: pwd
 
       - name: Check Path
-        run: chmod +x ls
+        run: ls
   
       - name: Run Tests
         run: chmod +x ./gradlew test
