@@ -41,7 +41,7 @@ jobs:
 
       - name: Create code coverage folder if not exists
         run: |
-          mkdir -p ./.qodana/code-coverage
+          mkdir -p .qodana/code-coverage
         working-directory: ./
   
       - name: permission
