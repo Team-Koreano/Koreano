@@ -39,10 +39,14 @@ jobs:
       - name: Check Path
         run: ls
   
-      - name: Run Tests
-        run: chmod +x ./gradlew --info test
+      - name: permission
+        run: chmod +x gradlew 
         working-directory: ./
-        
+
+      - name: Run Tests
+        run: ./gradlew test
+        working-directory: ./    
+
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
         with:
