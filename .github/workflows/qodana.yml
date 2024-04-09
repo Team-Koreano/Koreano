@@ -38,6 +38,11 @@ jobs:
 
       - name: Check Path
         run: ls
+
+      - name: Create code coverage folder if not exists
+        run: |
+          mkdir -p ./.qodana/code-coverage
+        working-directory: ./
   
       - name: permission
         run: chmod +x gradlew 
