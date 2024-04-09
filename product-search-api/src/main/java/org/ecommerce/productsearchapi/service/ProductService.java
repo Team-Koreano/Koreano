@@ -31,6 +31,8 @@ public class ProductService {
 
 	public void createProduct(ProductDto.Request.Register productDto) {
 
+		// 코드 커버리지 검사 테스트를 위한 코드 수정 주석
+
 		SellerRep sellerRep;
 		sellerRep = sellerRepository.findById(productDto.sellerId()).get();
 
