@@ -32,6 +32,12 @@ jobs:
       - name: Validate Gradle Wrapper
         run: chmod +x ./gradlew --version
         working-directory: ./
+        
+      - name: Check Current Path
+        run: chmod +x pwd
+
+      - name: Check Path
+        run: chmod +x ls
   
       - name: Run Tests
         run: chmod +x ./gradlew test
