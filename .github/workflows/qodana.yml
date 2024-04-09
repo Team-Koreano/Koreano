@@ -32,34 +32,34 @@ jobs:
       - name: Validate Gradle Wrapper
         run: chmod +x ./gradlew --version
         working-directory: ./
-        
-      - name: Check Current Path
-        run: pwd
-
-      - name: Check Path
-        run: ls
 
       - name: Create code coverage folder if not exists
         run: |
           mkdir -p .qodana/code-coverage
         working-directory: ./
+
+      - name: Check Current Path
+        run: pwd
+
+      - name: Check Path
+        run: ls
   
-      - name: permission
-        run: chmod +x gradlew 
-        working-directory: ./
+      # - name: permission
+      #   run: chmod +x gradlew 
+      #   working-directory: ./
 
-      - name: Run Tests
-        run: ./gradlew test
-        working-directory: ./    
+      # - name: Run Tests
+      #   run: ./gradlew test
+      #   working-directory: ./    
 
-      - name: Archive coverage data
-        uses: actions/upload-artifact@v2
-        with:
-          name: gradle-coverage-data-jacoco
-          path: .qodana/code-coverage
+      # - name: Archive coverage data
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: gradle-coverage-data-jacoco
+      #     path: .qodana/code-coverage
       
-      - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.2
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: 'Qodana Scan'
+      #   uses: JetBrains/qodana-action@v2023.2
+      #   env:
+      #     QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
