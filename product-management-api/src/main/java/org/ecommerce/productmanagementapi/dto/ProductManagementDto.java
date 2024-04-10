@@ -5,21 +5,6 @@ import java.time.LocalDateTime;
 import org.ecommerce.product.entity.Product;
 
 public class ProductManagementDto {
-	public static class Request {
-		public record Register(
-			String category,
-			Integer price,
-			Integer stock,
-			Integer sellerId,
-			Boolean isDecaf,
-			String name,
-			String bean,
-			String acidity,
-			String status,
-			String information
-		) {
-		}
-	}
 
 	public record Response(
 		Integer id,
