@@ -39,7 +39,7 @@ public class Image {
 	@Column(name = "create_datetime", nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "update_date", insertable = false)
+	@Column(name = "update_datetime")
 	private LocalDateTime updateDatetime;
 
 }

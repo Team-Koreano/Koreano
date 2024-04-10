@@ -48,8 +48,7 @@ public class Review {
 	private LocalDateTime createDatetime;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column(name = "update_datetime")
 	private LocalDateTime updateDatetime;
-
 
 }
