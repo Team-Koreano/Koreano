@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
 	private final UserRepository userRepository;
 
 	private final BCryptPasswordEncoder passwordEncoder;
 
-	@Transactional
 	public UserDto.Response.Register registerUser(UserDto.Request.Register createUser) {
 
 		checkDuplicateEmail(createUser.email());
