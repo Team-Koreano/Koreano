@@ -319,3 +319,6 @@ SuperTokenCreateTest.java
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,java,maven,eclipse,windows,macos,intellij+all,visualstudiocode,netbeans
 ./src/main/resources/application-local.yml
+
+#Qodana
+.qodana/
