@@ -1,7 +1,9 @@
 package org.ecommerce.userapi.service;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,8 +21,10 @@ public class SellerService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final SellerRepository sellerRepository;
 
+	public SellerDto.Response.Register registerSeller(SellerDto.Request.Register createSeller) {
 
-	public SellerDto.Response.Register registerUser(SellerDto.Request.Register createSeller) {
+		checkDuplicateEmail(createSeller.email());
+		checkDuplicatePhoneNumber(createSeller.phoneNumber());
 
 		Seller seller = Seller.create(createSeller.email(), createSeller.name(),
 			passwordEncoder.encode(createSeller.password()),
@@ -30,8 +34,15 @@ public class SellerService {
 		return SellerDto.Response.Register.of(seller);
 	}
 
-	private void CheckDuplicateEmail(String email){
-		if (sellerRepository.existsByEmail(email)){
+	private void checkDuplicateEmail(String email) {
+		if (sellerRepository.existsByEmail(email)) {
+			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
+		}
+	}
+
+	private void checkDuplicatePhoneNumber(String phoneNumber) {
+		if (sellerRepository.existsByPhoneNumber(phoneNumber)) {
+			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
 	}
 }
