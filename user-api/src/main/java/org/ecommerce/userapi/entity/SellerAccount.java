@@ -28,20 +28,20 @@ public class SellerAccount {
 	@JoinColumn(name = "seller_id")
 	private Seller seller;
 
-	@Column(name = "number",nullable = false)
+	@Column(name = "number", nullable = false)
 	private Short number;
 
 	@Column(name = "bank_name", nullable = false)
 	private String bankName;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime",updatable = false)
+	@Column(name = "create_datetime", updatable = false)
 	private LocalDateTime createDatetime;
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime",insertable = false)
+	@Column(name = "update_datetime", insertable = false)
 	private LocalDateTime updateDatetime;
 }

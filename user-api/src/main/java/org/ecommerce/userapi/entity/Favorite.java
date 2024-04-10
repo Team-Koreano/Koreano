@@ -23,6 +23,6 @@ public class Favorite {
 	@JoinColumn(name = "users_id")
 	private Users users;
 
-	@Column(name = "product_id",nullable = false)
+	@Column(name = "product_id", nullable = false)
 	private Integer productId;
 }

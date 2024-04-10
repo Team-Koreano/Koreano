@@ -23,10 +23,10 @@ public class Seller {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "email",nullable = false)
+	@Column(name = "email", nullable = false)
 	private String email;
 
-	@Column(name = "name",nullable = false)
+	@Column(name = "name", nullable = false)
 	private String name;
 
 	@Column(name = "password", nullable = false)
@@ -39,14 +39,14 @@ public class Seller {
 	private String phoneNumber;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime",updatable = false)
+	@Column(name = "create_datetime", updatable = false)
 	private LocalDateTime createDatetime;
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime",insertable = false)
+	@Column(name = "update_datetime", insertable = false)
 	private LocalDateTime updateDatetime;
 
 	@ColumnDefault("0")
@@ -56,4 +56,17 @@ public class Seller {
 	@ColumnDefault("0")
 	@Column(name = "status")
 	private UserStatus userStatus;
+
+	public static Seller create(String email, String name, String password, String address, String phoneNumber) {
+		Seller seller = new Seller();
+		seller.email = email;
+		seller.name = name;
+		seller.address = address;
+		seller.password = password;
+		seller.beanPay = 0;
+		seller.isDeleted = false;
+		seller.phoneNumber = phoneNumber;
+		seller.userStatus = UserStatus.GENERAL;
+		return seller;
+	}
 }
