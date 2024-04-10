@@ -45,7 +45,7 @@ class SellerControllerTest {
 	private WebApplicationContext context;
 
 	@BeforeEach
-	public void setup() {
+	public void 기초_셋팅() {
 		this.mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
 			.addFilter(new CharacterEncodingFilter("UTF-8", true))

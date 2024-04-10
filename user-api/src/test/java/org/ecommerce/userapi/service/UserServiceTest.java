@@ -29,7 +29,7 @@ class UserServiceTest {
 	private UserRepository userRepository;
 
 	@BeforeEach
-	public void 초기셋팅() {
+	public void 기초_셋팅() {
 		Users user1 = Users.create(
 			"user1@example.com",
 			"John Doe",
@@ -60,7 +60,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void 회원등록() {
+	void 회원_등록() {
 		//given
 		UserDto.Request.Register newUserRequest = UserDto.Request.Register.builder()
 			.email("newuser@example.com")

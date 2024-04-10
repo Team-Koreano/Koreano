@@ -47,7 +47,7 @@ public class UserControllerTest {
 	private WebApplicationContext context;
 
 	@BeforeEach
-	public void setup() {
+	public void 기초_셋팅() {
 		this.mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
 			.addFilter(new CharacterEncodingFilter("UTF-8", true))
@@ -64,7 +64,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	void 회원등록() throws Exception {
+	void 회원_등록() throws Exception {
 		//given
 		UserDto.Request.Register registerRequest = UserDto.Request.Register.builder()
 			.email("test@example.com")
