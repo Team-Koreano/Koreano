@@ -35,6 +35,9 @@ public class Image {
 	@Column(name = "is_thumbnail")
 	private Boolean isThumbnail;
 
+	@Column(name = "sequence_number")
+	private Short sequenceNumber;
+
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
