@@ -5,6 +5,7 @@ import java.util.List;
 import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.service.BucketService;
 import org.ecommerce.common.vo.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class BucketController {
 	@GetMapping
 	public Response<List<BucketDto.Response>> getBuckets() {
 		final List<BucketDto.Response> bucketResponse = bucketService.getAllBuckets(USER_ID);
-		return new Response<>(200, bucketResponse);
+		return new Response<>(HttpStatus.OK.value(), bucketResponse);
 	}
 
 	@PostMapping
@@ -35,6 +36,6 @@ public class BucketController {
 		@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
 		final BucketDto.Response bucketResponse = bucketService.addBucket(USER_ID, addRequest);
-		return new Response<>(200, bucketResponse);
+		return new Response<>(HttpStatus.OK.value(), bucketResponse);
 	}
 }
