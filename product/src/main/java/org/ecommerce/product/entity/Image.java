@@ -1,9 +1,8 @@
-package org.ecommerce.productsearchapi.entity;
+package org.ecommerce.product.entity;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,9 +16,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
-@Table(name = "review")
+@Table(name = "image")
 @Getter
-public class Review {
+public class Image {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,29 +26,20 @@ public class Review {
 	private Integer id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id", nullable = false)
+	@JoinColumn(name = "product_id")
 	private Product product;
 
-	@Column(name = "content")
-	private String content;
+	@Column(name = "image_url")
+	private String imageUrl;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private UserRep userRep;
-
-	@Column(name = "star_point", nullable = false)
-	private Double starPoint;
-
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Column(name = "is_thumbnail")
+	private Boolean isThumbnail;
 
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
 
-	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column(name = "update_date", insertable = false)
 	private LocalDateTime updateDatetime;
-
 
 }

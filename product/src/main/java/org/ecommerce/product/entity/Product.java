@@ -1,11 +1,11 @@
-package org.ecommerce.productsearchapi.entity;
+package org.ecommerce.product.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.productsearchapi.entity.type.Acidity;
-import org.ecommerce.productsearchapi.entity.type.Bean;
-import org.ecommerce.productsearchapi.entity.type.ProductCategory;
-import org.ecommerce.productsearchapi.entity.type.ProductStatus;
+import org.ecommerce.product.entity.type.Acidity;
+import org.ecommerce.product.entity.type.Bean;
+import org.ecommerce.product.entity.type.ProductCategory;
+import org.ecommerce.product.entity.type.ProductStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

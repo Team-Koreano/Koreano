@@ -2,13 +2,13 @@ package org.ecommerce.productsearchapi.service;
 
 import java.util.List;
 
+import org.ecommerce.product.entity.Product;
+import org.ecommerce.product.entity.SellerRep;
+import org.ecommerce.product.entity.type.Acidity;
+import org.ecommerce.product.entity.type.Bean;
+import org.ecommerce.product.entity.type.ProductCategory;
+import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductDto;
-import org.ecommerce.productsearchapi.entity.Product;
-import org.ecommerce.productsearchapi.entity.SellerRep;
-import org.ecommerce.productsearchapi.entity.type.Acidity;
-import org.ecommerce.productsearchapi.entity.type.Bean;
-import org.ecommerce.productsearchapi.entity.type.ProductCategory;
-import org.ecommerce.productsearchapi.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.ecommerce.productsearchapi.repository.SellerRepository;
 import org.springframework.stereotype.Service;
