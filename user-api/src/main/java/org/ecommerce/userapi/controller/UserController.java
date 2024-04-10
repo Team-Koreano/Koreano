@@ -21,7 +21,7 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/register")
-	public Response<?> register(@RequestBody UserDto.Request.Register register) {
+	public Response<UserDto.Response.Register> register(@RequestBody UserDto.Request.Register register) {
 		UserDto.Response.Register responseUser = userService.registerUser(register);
 		return new Response<>(HttpStatus.OK.value(), responseUser);
 	}
