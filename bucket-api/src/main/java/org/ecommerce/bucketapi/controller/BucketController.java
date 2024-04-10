@@ -34,7 +34,6 @@ public class BucketController {
 	public Response<BucketDto.Response> addBucket(
 		@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
-		bucketService.validateBucketByUser(USER_ID, addRequest.productId());
 		final BucketDto.Response bucketResponse = bucketService.addBucket(USER_ID, addRequest);
 		return new Response<>(200, bucketResponse);
 	}
