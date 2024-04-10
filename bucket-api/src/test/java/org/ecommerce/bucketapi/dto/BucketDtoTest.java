@@ -16,6 +16,7 @@ public class BucketDtoTest {
 	private static final Bucket BUCKET = new Bucket(
 		1L,
 		1,
+		"seller",
 		101,
 		3,
 		CREATE_DATE
@@ -30,6 +31,7 @@ public class BucketDtoTest {
 		// then
 		assertThat(actual.id()).isEqualTo(1L);
 		assertThat(actual.userId()).isEqualTo(1);
+		assertThat(actual.seller()).isEqualTo("seller");
 		assertThat(actual.productId()).isEqualTo(101);
 		assertThat(actual.quantity()).isEqualTo(3);
 		assertThat(actual.createDate()).isEqualTo(CREATE_DATE);

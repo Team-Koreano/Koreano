@@ -28,16 +28,16 @@ public class BucketServiceTest {
 	private static final LocalDate CREATE_DATE = LocalDate.now();
 
 	private static final List<Bucket> BUCKETS = List.of(
-		new Bucket(1L, 1, 101, 3, CREATE_DATE),
-		new Bucket(2L, 1, 102, 2, CREATE_DATE),
-		new Bucket(3L, 1, 103, 1, CREATE_DATE)
+		new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
+		new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE),
+		new Bucket(3L, 1, "seller3", 103, 1, CREATE_DATE)
 	);
 
 	private List<BucketDto.Response> createTestBucketsResponse() {
 		List<BucketDto.Response> bucketResponse = new ArrayList<>();
-		bucketResponse.add(new BucketDto.Response(1L, 1, 101, 3, CREATE_DATE));
-		bucketResponse.add(new BucketDto.Response(2L, 1, 102, 2, CREATE_DATE));
-		bucketResponse.add(new BucketDto.Response(3L, 1, 103, 1, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(1L, 1, "seller1", 101, 3, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(2L, 1, "seller2", 102, 2, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(3L, 1, "seller3", 103, 1, CREATE_DATE));
 
 		return bucketResponse;
 	}
@@ -54,5 +54,14 @@ public class BucketServiceTest {
 		// then
 		assertThat(actual).usingRecursiveComparison()
 			.isEqualTo(createTestBucketsResponse());
+	}
+
+	@Test
+	void 장바구니에_존재하는_상품_담기() {
+		// given
+
+		// when
+
+		// then
 	}
 }

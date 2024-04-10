@@ -25,20 +25,20 @@ public class Bucket {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "user_id")
+	@Column
 	private Integer userId;
 
-	@Column(name = "seller")
+	@Column
 	private String seller;
 
-	@Column(name = "product_id")
+	@Column
 	private Integer productId;
 
-	@Column(name = "quantity")
+	@Column
 	private Integer quantity;
 
 	@CreationTimestamp
-	@Column(name = "create_date")
+	@Column
 	private LocalDate createDate;
 
 	public static Bucket ofAdd(
