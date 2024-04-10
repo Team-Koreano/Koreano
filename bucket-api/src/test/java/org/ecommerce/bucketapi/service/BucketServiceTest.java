@@ -27,6 +27,8 @@ public class BucketServiceTest {
 
 	private static final LocalDate CREATE_DATE = LocalDate.now();
 
+	private static final Bucket BUCKET = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
+
 	private static final List<Bucket> BUCKETS = List.of(
 		new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
 		new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE),
@@ -40,6 +42,10 @@ public class BucketServiceTest {
 		bucketResponse.add(new BucketDto.Response(3L, 1, "seller3", 103, 1, CREATE_DATE));
 
 		return bucketResponse;
+	}
+
+	private BucketDto.Response createTestBucketResponse() {
+		return new BucketDto.Response(1L, 1, "seller", 101, 3, CREATE_DATE);
 	}
 
 	@Test
@@ -57,11 +63,20 @@ public class BucketServiceTest {
 	}
 
 	@Test
-	void 장바구니에_존재하는_상품_담기() {
+	void 장바구니에_상품_담기() {
 		// given
+		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
+			"seller",
+			101,
+			3
+		);
+		given(bucketRepository.save(any(Bucket.class)))
+			.willReturn(BUCKET);
 
 		// when
+		final BucketDto.Response actual = bucketService.addBucket(1, bucketAddRequest);
 
 		// then
+		assertThat(actual).isEqualTo(createTestBucketResponse());
 	}
 }

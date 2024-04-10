@@ -48,7 +48,7 @@ public class BucketControllerTest {
 	}
 
 	private BucketDto.Response createTestBucketResponse() {
-		return new BucketDto.Response(1L, 1, "seller1", 101, 3, LocalDate.now());
+		return new BucketDto.Response(1L, 1, "seller", 101, 3, LocalDate.now());
 	}
 
 	private ResultActions performGetRequest() throws Exception {
@@ -89,14 +89,14 @@ public class BucketControllerTest {
 		// given
 		when(bucketService.addBucket(anyInt(), any(BucketDto.Request.Add.class)))
 			.thenReturn(createTestBucketResponse());
-		final BucketDto.Request.Add BucketAddRequest = new BucketDto.Request.Add(
+		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
 			"seller",
 			101,
 			3
 		);
 
 		// when
-		final ResultActions resultActions = performPostRequest(BucketAddRequest);
+		final ResultActions resultActions = performPostRequest(bucketAddRequest);
 
 		// then
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
@@ -109,5 +109,41 @@ public class BucketControllerTest {
 		).result();
 
 		assertThat(bucketResponse).isEqualTo(createTestBucketResponse());
+	}
+
+	@Test
+	void 판매자_입력_없이_장바구니_담기() throws Exception{
+		// given
+		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
+			null,
+			101,
+			3
+		);
+
+		// when
+		final ResultActions resultActions = performPostRequest(bucketAddRequest);
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("400"))
+			.andExpect(jsonPath("$.result").value("판매자를 입력해 주세요."));
+	}
+
+	@Test
+	void 상품_수량_선택_없이_장바구니_담기() throws Exception{
+		// given
+		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
+			"seller",
+			101,
+			null
+		);
+
+		// when
+		final ResultActions resultActions = performPostRequest(bucketAddRequest);
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("400"))
+			.andExpect(jsonPath("$.result").value("상품 수량을 입력해 주세요."));
 	}
 }
