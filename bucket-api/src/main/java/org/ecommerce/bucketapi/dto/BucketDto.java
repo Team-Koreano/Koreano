@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.ecommerce.bucketapi.entity.Bucket;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class BucketDto {
@@ -13,7 +14,7 @@ public class BucketDto {
 
 		public record Add(
 
-			@NotNull(message = "판매자를 입력해 주세요.")
+			@NotBlank(message = "판매자를 입력해 주세요.")
 			String seller,
 
 			@NotNull(message = "상품 번호를 입력해 주세요.")
