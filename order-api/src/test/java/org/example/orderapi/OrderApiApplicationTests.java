@@ -1,9 +1,10 @@
 package org.example.orderapi;
 
+import org.ecommerce.orderapi.OrderApiApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = OrderApiApplication.class)
 class OrderApiApplicationTests {
 
   @Test
