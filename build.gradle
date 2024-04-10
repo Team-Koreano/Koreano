@@ -75,13 +75,13 @@ subprojects {
     sourceCompatibility = '17'
 }
 
-project(':common'){
+project(':common') {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-aop'
     }
 }
 
-project(':user-api'){
+project(':user-api') {
     dependencies {
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -96,7 +96,7 @@ project(':user-api'){
     }
 }
 
-project(':bucket-api'){
+project(':bucket-api') {
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -106,7 +106,7 @@ project(':bucket-api'){
     }
 }
 
-project(':order-api'){
+project(':order-api') {
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -114,12 +114,19 @@ project(':order-api'){
     }
 }
 
-project(':payment-api'){
+project(':payment-api') {
     dependencies {
         implementation(project(':common'))
         testImplementation 'com.h2database:h2:2.2.222'
         implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2020.0.3"
+        }
     }
 }
 
