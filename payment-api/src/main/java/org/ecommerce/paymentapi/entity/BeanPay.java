@@ -1,11 +1,13 @@
 package org.ecommerce.paymentapi.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +31,9 @@ public class BeanPay {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Column(length = 50)
+	private String paymentKey;
 
 	@Column(name = "user_id")
 	private Integer userId;
