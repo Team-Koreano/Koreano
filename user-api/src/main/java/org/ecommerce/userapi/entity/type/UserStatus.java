@@ -3,8 +3,10 @@ package org.ecommerce.userapi.entity.type;
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public enum UserStatus implements EnumMapperType {
 
 	GENERAL("일반 회원"),
@@ -18,8 +20,4 @@ public enum UserStatus implements EnumMapperType {
 		return name();
 	}
 
-	@Override
-	public String getTitle() {
-		return title;
-	}
 }
