@@ -1,6 +1,6 @@
 package org.ecommerce.productsearchapi.repository;
 
-import org.ecommerce.productsearchapi.entity.Product;
+import org.ecommerce.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -28,23 +28,23 @@ public class Address {
 	@JoinColumn(name = "users_id")
 	private Users users;
 
-	@Column(name = "name",nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "post_address", nullable = false)
+	@Column(nullable = false)
 	private String postAddress;
 
-	@Column(name = "detail", nullable = false)
+	@Column(nullable = false)
 	private String detail;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime",updatable = false)
+	@Column(updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Column()
+	private boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime",insertable = false)
+	@Column()
 	private LocalDateTime updateDatetime;
 }

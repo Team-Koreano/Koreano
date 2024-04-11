@@ -8,5 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
+
 	List<Bucket> findAllByUserId(final Integer userId);
+
+	boolean existsByUserIdAndProductId(final Integer userId, final Integer productId);
 }
