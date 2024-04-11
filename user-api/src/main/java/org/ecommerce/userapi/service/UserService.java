@@ -22,7 +22,7 @@ public class UserService {
 
 	private final BCryptPasswordEncoder passwordEncoder;
 
-	public UserDto.Response.Register registerUser(UserDto.Request.Register createUser) {
+	public UserDto.Response.Register registerRequest(UserDto.Request.Register createUser) {
 
 		checkDuplicateEmail(createUser.email());
 		checkDuplicatePhoneNumber(createUser.phoneNumber());

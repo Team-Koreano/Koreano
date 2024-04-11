@@ -83,7 +83,7 @@ public class UserControllerTest {
 
 		String content = objectMapper.writeValueAsString(registerRequest);
 
-		when(userService.registerUser(registerRequest)).thenReturn(expectedResponse);
+		when(userService.registerRequest(registerRequest)).thenReturn(expectedResponse);
 
 		//when
 		final ResultActions resultActions = performPostRequest(content);

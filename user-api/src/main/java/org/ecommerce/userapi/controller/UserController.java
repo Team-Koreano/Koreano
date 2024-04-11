@@ -22,7 +22,7 @@ public class UserController {
 
 	@PostMapping("/register")
 	public Response<UserDto.Response.Register> register(@RequestBody UserDto.Request.Register register) {
-		UserDto.Response.Register responseUser = userService.registerUser(register);
+		UserDto.Response.Register responseUser = userService.registerRequest(register);
 		return new Response<>(HttpStatus.OK.value(), responseUser);
 	}
 }

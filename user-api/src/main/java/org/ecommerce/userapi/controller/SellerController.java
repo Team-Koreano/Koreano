@@ -21,7 +21,7 @@ public class SellerController {
 
 	@PostMapping("/register")
 	public Response<SellerDto.Response.Register> register(@RequestBody SellerDto.Request.Register register) {
-		SellerDto.Response.Register responseSeller = sellerService.registerSeller(register);
+		SellerDto.Response.Register responseSeller = sellerService.registerRequest(register);
 		return new Response<>(HttpStatus.OK.value(), responseSeller);
 	}
 }

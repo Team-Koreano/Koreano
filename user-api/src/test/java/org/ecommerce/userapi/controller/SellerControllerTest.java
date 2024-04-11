@@ -79,7 +79,7 @@ class SellerControllerTest {
 
 		String content = objectMapper.writeValueAsString(registerRequest);
 
-		when(sellerService.registerSeller(registerRequest)).thenReturn(expectedResponse);
+		when(sellerService.registerRequest(registerRequest)).thenReturn(expectedResponse);
 
 		//when
 		final ResultActions resultActions = performPostRequest(content);

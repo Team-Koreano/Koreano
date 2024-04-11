@@ -74,7 +74,7 @@ class UserServiceTest {
 		when(userRepository.existsByEmail(newUserRequest.email())).thenReturn(false);
 		when(userRepository.existsByPhoneNumber(newUserRequest.phoneNumber())).thenReturn(false);
 
-		UserDto.Response.Register response = userService.registerUser(newUserRequest);
+		UserDto.Response.Register response = userService.registerRequest(newUserRequest);
 
 		Users savedUser = Users.ofRegister(
 			newUserRequest.email(),
@@ -102,7 +102,7 @@ class UserServiceTest {
 		when(userRepository.existsByEmail(duplicatedEmailRequest.email())).thenReturn(true);
 
 		//then
-		Assertions.assertThatThrownBy(() -> userService.registerUser(duplicatedEmailRequest))
+		Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedEmailRequest))
 			.isInstanceOf(CustomException.class);
 
 		//given
@@ -119,7 +119,7 @@ class UserServiceTest {
 		when(userRepository.existsByPhoneNumber(duplicatedPhoneRequest.phoneNumber())).thenReturn(true);
 
 		//then
-		Assertions.assertThatThrownBy(() -> userService.registerUser(duplicatedPhoneRequest))
+		Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
 			.isInstanceOf(CustomException.class);
 	}
 }

@@ -40,7 +40,7 @@ class SellerServiceTest {
 		when(sellerRepository.existsByEmail(newSellerReqeust.email())).thenReturn(false);
 		when(sellerRepository.existsByPhoneNumber(newSellerReqeust.phoneNumber())).thenReturn(false);
 
-		SellerDto.Response.Register response = sellerService.registerSeller(newSellerReqeust);
+		SellerDto.Response.Register response = sellerService.registerRequest(newSellerReqeust);
 
 		Seller savedSeller = Seller.ofRegister(
 			newSellerReqeust.email(),
@@ -65,7 +65,7 @@ class SellerServiceTest {
 		when(sellerRepository.existsByEmail(duplicatedEmailRequest.email())).thenReturn(true);
 
 		//then
-		Assertions.assertThatThrownBy(() -> sellerService.registerSeller(duplicatedEmailRequest))
+		Assertions.assertThatThrownBy(() -> sellerService.registerRequest(duplicatedEmailRequest))
 			.isInstanceOf(CustomException.class);
 
 		//given
@@ -81,7 +81,7 @@ class SellerServiceTest {
 		when(sellerRepository.existsByPhoneNumber(duplicatedPhoneRequest.phoneNumber())).thenReturn(true);
 
 		//then
-		Assertions.assertThatThrownBy(() -> sellerService.registerSeller(duplicatedPhoneRequest))
+		Assertions.assertThatThrownBy(() -> sellerService.registerRequest(duplicatedPhoneRequest))
 			.isInstanceOf(CustomException.class);
 	}
 }

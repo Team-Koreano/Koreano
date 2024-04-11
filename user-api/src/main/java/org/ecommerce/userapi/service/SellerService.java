@@ -21,7 +21,7 @@ public class SellerService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final SellerRepository sellerRepository;
 
-	public SellerDto.Response.Register registerSeller(SellerDto.Request.Register createSeller) {
+	public SellerDto.Response.Register registerRequest(SellerDto.Request.Register createSeller) {
 
 		checkDuplicateEmail(createSeller.email());
 		checkDuplicatePhoneNumber(createSeller.phoneNumber());
