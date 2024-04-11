@@ -62,14 +62,13 @@ class UserServiceTest {
 	@Test
 	void 회원_등록() {
 		//given
-		UserDto.Request.Register newUserRequest = UserDto.Request.Register.builder()
-			.email("newuser@example.com")
-			.name("New User")
-			.password("newpassword")
-			.gender(Gender.MALE)
-			.age((short)40)
-			.phoneNumber("01012341234")
-			.build();
+		UserDto.Request.Register newUserRequest = new UserDto.Request.Register(
+			"newuser@example.com",
+			"New User",
+			"newpassword",
+			Gender.MALE,
+			(short)40,
+			"01012341234");
 
 		//when
 		when(userRepository.existsByEmail(newUserRequest.email())).thenReturn(false);
@@ -91,15 +90,14 @@ class UserServiceTest {
 
 		// given
 		// 중복 이메일 케이스
-		UserDto.Request.Register duplicatedEmailRequest = UserDto.Request.Register.builder()
-			.email("user3@example.com")
-			.name("Duplicate Email")
-			.password("password")
-			.gender(Gender.FEMALE)
-			.age((short)25)
-			.phoneNumber("01012345678")
-			.build();
 
+		UserDto.Request.Register duplicatedEmailRequest = new UserDto.Request.Register(
+			"user3@example.com",
+			"Duplicate Email",
+			"newpassword",
+			Gender.MALE,
+			(short)40,
+			"01012342345");
 		//when
 		when(userRepository.existsByEmail(duplicatedEmailRequest.email())).thenReturn(true);
 
@@ -109,15 +107,13 @@ class UserServiceTest {
 
 		//given
 		// 중복 전화번호 케이스
-		UserDto.Request.Register duplicatedPhoneRequest = UserDto.Request.Register.builder()
-			.email("newuser2@example.com")
-			.name("Duplicate Phone")
-			.password("password")
-			.gender(Gender.MALE)
-			.age((short)30)
-			.phoneNumber("01099876543")
-			.build();
-
+		UserDto.Request.Register duplicatedPhoneRequest = new UserDto.Request.Register(
+			"newuser2@example.com",
+			"Duplicate Phone",
+			"newpassword",
+			Gender.MALE,
+			(short)40,
+			"01099876543");
 		//when
 		when(userRepository.existsByEmail(duplicatedPhoneRequest.email())).thenReturn(false);
 		when(userRepository.existsByPhoneNumber(duplicatedPhoneRequest.phoneNumber())).thenReturn(true);

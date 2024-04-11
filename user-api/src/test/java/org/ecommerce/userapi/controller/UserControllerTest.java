@@ -56,7 +56,7 @@ public class UserControllerTest {
 	}
 
 	private ResultActions performPostRequest(String content) throws Exception {
-		return mockMvc.perform(post("/user/register")
+		return mockMvc.perform(post("/users/register")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -66,22 +66,20 @@ public class UserControllerTest {
 	@Test
 	void 회원_등록() throws Exception {
 		//given
-		UserDto.Request.Register registerRequest = UserDto.Request.Register.builder()
-			.email("test@example.com")
-			.name("Test User")
-			.password("password")
-			.gender(Gender.MALE)
-			.age((short)30)
-			.phoneNumber("01012345678")
-			.build();
+		UserDto.Request.Register registerRequest = new UserDto.Request.Register(
+			"test@example.com",
+			"Test User",
+			"password",
+			Gender.MALE,
+			(short)30,
+			"01012345678");
 
-		UserDto.Response.Register expectedResponse = UserDto.Response.Register.builder()
-			.email(registerRequest.email())
-			.name(registerRequest.name())
-			.age(registerRequest.age())
-			.gender(registerRequest.gender())
-			.phoneNumber(registerRequest.phoneNumber())
-			.build();
+		UserDto.Response.Register expectedResponse = new UserDto.Response.Register(
+			registerRequest.email(),
+			registerRequest.name(),
+			registerRequest.gender(),
+			registerRequest.age(),
+			registerRequest.phoneNumber());
 
 		String content = objectMapper.writeValueAsString(registerRequest);
 

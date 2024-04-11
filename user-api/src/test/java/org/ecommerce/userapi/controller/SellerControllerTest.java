@@ -54,7 +54,7 @@ class SellerControllerTest {
 	}
 
 	private ResultActions performPostRequest(String content) throws Exception {
-		return mockMvc.perform(post("/seller/register")
+		return mockMvc.perform(post("/sellers/register")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -64,19 +64,18 @@ class SellerControllerTest {
 	@Test
 	void 셀러_등록() throws Exception {
 		//given
-		SellerDto.Request.Register registerRequest = SellerDto.Request.Register.builder()
-			.email("test@example.com")
-			.name("Test User")
-			.password("password")
-			.address("homeTown")
-			.build();
+		SellerDto.Request.Register registerRequest = new SellerDto.Request.Register(
+			"test@example.com",
+			"Test User",
+			"password",
+			"homeTown",
+			"010-0000-0000");
 
-		SellerDto.Response.Register expectedResponse = SellerDto.Response.Register.builder()
-			.email(registerRequest.email())
-			.name(registerRequest.name())
-			.address(registerRequest.address())
-			.phoneNumber(registerRequest.phoneNumber())
-			.build();
+		SellerDto.Response.Register expectedResponse = new SellerDto.Response.Register(
+			registerRequest.email(),
+			registerRequest.name(),
+			registerRequest.address(),
+			registerRequest.phoneNumber());
 
 		String content = objectMapper.writeValueAsString(registerRequest);
 

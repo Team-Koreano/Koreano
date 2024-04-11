@@ -29,12 +29,12 @@ class SellerServiceTest {
 	@Test
 	void 셀러_등록() {
 		//given
-		SellerDto.Request.Register newSellerReqeust = SellerDto.Request.Register.builder()
-			.email("newuser@example.com")
-			.name("New User")
-			.password("newpassword")
-			.phoneNumber("01012341234")
-			.build();
+		SellerDto.Request.Register newSellerReqeust = new SellerDto.Request.Register(
+			"newuser@example.com",
+			"New User",
+			"newpassword",
+			"manchester",
+			"01012341234");
 
 		//when
 		when(sellerRepository.existsByEmail(newSellerReqeust.email())).thenReturn(false);
@@ -55,12 +55,11 @@ class SellerServiceTest {
 
 		// given
 		// 중복 이메일 케이스
-		SellerDto.Request.Register duplicatedEmailRequest = SellerDto.Request.Register.builder()
-			.email("user3@example.com")
-			.name("Duplicate Email")
-			.password("password")
-			.phoneNumber("01012345678")
-			.build();
+		SellerDto.Request.Register duplicatedEmailRequest = new SellerDto.Request.Register("user3@example.com"
+			,"Duplicate Email"
+			,"password",
+			"manchester"
+			,"01012345678");
 
 		//when
 		when(sellerRepository.existsByEmail(duplicatedEmailRequest.email())).thenReturn(true);
@@ -71,12 +70,11 @@ class SellerServiceTest {
 
 		//given
 		// 중복 전화번호 케이스
-		SellerDto.Request.Register duplicatedPhoneRequest = SellerDto.Request.Register.builder()
-			.email("newuser2@example.com")
-			.name("Duplicate Phone")
-			.password("password")
-			.phoneNumber("01099876543")
-			.build();
+		SellerDto.Request.Register duplicatedPhoneRequest = new SellerDto.Request.Register("user3@example.com"
+			,"Duplicate Phone"
+			,"password",
+			"manchester"
+			,"01099876543");
 
 		//when
 		when(sellerRepository.existsByEmail(duplicatedPhoneRequest.email())).thenReturn(false);
