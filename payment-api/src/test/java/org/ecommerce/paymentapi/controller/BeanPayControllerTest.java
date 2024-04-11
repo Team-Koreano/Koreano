@@ -33,9 +33,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
-@WebMvcTest(PaymentController.class)
+@WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class PaymentControllerTest {
+class BeanPayControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
@@ -49,4 +49,28 @@ class PaymentControllerTest {
 	@Autowired
 	private ObjectMapper mapper;
 
+	final LocalDateTime now = LocalDateTime.now();
+	final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
+	final BeanPay entity = new BeanPay(1L, "paymentKey", 1, 10_000, BeanPayStatus.DEPOSIT, ProcessStatus.PENDING, now);
+	final BeanPayDto.Response response = new BeanPayDto.Response(1L, 1, 10_000, BeanPayStatus.DEPOSIT,
+		ProcessStatus.PENDING, now);
+
+	@Test
+	void 사전결제객체_생성() throws Exception {
+		//given
+		when(beanPayService.preChargeBeanPay(request))
+			.thenReturn(response);
+		final Response<BeanPayDto.Response> response = new Response<>(200, this.response);
+
+		//when
+		MvcResult mvcResult = mvc.perform(get("/beanpay/payments")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsBytes(request)))
+			.andExpect(status().isOk()).andReturn();
+
+		//then
+		String actual = mvcResult.getResponse().getContentAsString();
+		String expect = mapper.writeValueAsString(response);
+		assertEquals(actual, expect);
+	}
 }
