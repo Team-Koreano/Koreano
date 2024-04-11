@@ -1,11 +1,13 @@
 package org.ecommerce.userapi.service;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.UserDto;
-import org.ecommerce.userapi.entity.type.UserStatus;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,26 +15,33 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
-		private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-		public ResponseEntity<?> createUser(UserDto.Request.Register createUser){
+	private final BCryptPasswordEncoder passwordEncoder;
 
-			Users user = Users.builder()
-				.age(createUser.age())
-				.beanPay(0)
-				.email(createUser.email())
-				.name(createUser.name())
-				.isDeleted(false)
-				.userStatus(UserStatus.GENERAL)
-				.phoneNumber(createUser.phoneNumber())
-				.password(createUser.password())
-				.gender(createUser.gender())
-				.build();
+	public UserDto.Response.Register registerRequest(UserDto.Request.Register createUser) {
 
-			userRepository.save(user);
+		checkDuplicateEmail(createUser.email());
+		checkDuplicatePhoneNumber(createUser.phoneNumber());
 
-			return ResponseEntity.ok(createUser);
+		Users users = Users.ofRegister(createUser.email(), createUser.name(), passwordEncoder.encode(createUser.password()),
+			createUser.gender(), createUser.age(), createUser.phoneNumber());
+		userRepository.save(users);
+		return UserDto.Response.Register.of(users);
+	}
+
+	private void checkDuplicateEmail(String email) {
+		if (userRepository.existsByEmail(email)) {
+			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
 		}
+	}
+
+	private void checkDuplicatePhoneNumber(String phoneNumber) {
+		if (userRepository.existsByPhoneNumber(phoneNumber)) {
+			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
+		}
+	}
 }

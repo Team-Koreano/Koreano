@@ -1,17 +1,14 @@
 package org.ecommerce.userapi.dto;
 
-import org.ecommerce.userapi.entity.Users;
-import org.ecommerce.userapi.entity.type.Gender;
+import org.ecommerce.userapi.entity.Seller;
 
-public class UserDto {
-
+public class SellerDto {
 	public static class Request {
 		public record Register(
 			String email,
 			String name,
 			String password,
-			Gender gender,
-			Short age,
+			String address,
 			String phoneNumber
 		) {
 		}
@@ -21,18 +18,15 @@ public class UserDto {
 		public record Register(
 			String email,
 			String name,
-			Gender gender,
-			Short age,
+			String address,
 			String phoneNumber
 		) {
-
-			public static Register of(final Users users) {
+			public static Register of(final Seller seller) {
 				return new Register(
-					users.getEmail(),
-					users.getName(),
-					users.getGender(),
-					users.getAge(),
-					users.getPhoneNumber()
+					seller.getEmail(),
+					seller.getName(),
+					seller.getAddress(),
+					seller.getPhoneNumber()
 				);
 			}
 

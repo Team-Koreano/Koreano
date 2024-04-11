@@ -1,8 +1,8 @@
 package org.ecommerce.userapi.controller;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.userapi.dto.UserDto;
-import org.ecommerce.userapi.service.UserService;
+import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.service.SellerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,14 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/users")
-public class UserController {
-
-	private final UserService userService;
+@RequestMapping("/sellers")
+public class SellerController {
+	private final SellerService sellerService;
 
 	@PostMapping("/register")
-	public Response<UserDto.Response.Register> register(@RequestBody UserDto.Request.Register register) {
-		UserDto.Response.Register responseUser = userService.registerRequest(register);
-		return new Response<>(HttpStatus.OK.value(), responseUser);
+	public Response<SellerDto.Response.Register> register(@RequestBody SellerDto.Request.Register register) {
+		SellerDto.Response.Register responseSeller = sellerService.registerRequest(register);
+		return new Response<>(HttpStatus.OK.value(), responseSeller);
 	}
 }
