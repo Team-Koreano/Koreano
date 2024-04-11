@@ -48,7 +48,6 @@ class SellerControllerTest {
 	public void 기초_셋팅() {
 		this.mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
-			.addFilter(new CharacterEncodingFilter("UTF-8", true))
 			.apply(springSecurity())
 			.build();
 	}
