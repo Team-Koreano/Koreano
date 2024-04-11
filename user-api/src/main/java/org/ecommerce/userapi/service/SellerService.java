@@ -26,7 +26,7 @@ public class SellerService {
 		checkDuplicateEmail(createSeller.email());
 		checkDuplicatePhoneNumber(createSeller.phoneNumber());
 
-		Seller seller = Seller.create(createSeller.email(), createSeller.name(),
+		Seller seller = Seller.ofRegister(createSeller.email(), createSeller.name(),
 			passwordEncoder.encode(createSeller.password()),
 			createSeller.address(), createSeller.phoneNumber());
 		sellerRepository.save(seller);

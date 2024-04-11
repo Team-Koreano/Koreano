@@ -70,7 +70,7 @@ public class Users {
 	@Column(name = "status")
 	private UserStatus userStatus;
 
-	public static Users create(String email, String name, String password, Gender gender, Short age,
+	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
 		String phoneNumber) {
 		Users users = new Users();
 		users.email = email;

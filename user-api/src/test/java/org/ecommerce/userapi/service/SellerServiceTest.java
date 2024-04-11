@@ -42,7 +42,7 @@ class SellerServiceTest {
 
 		SellerDto.Response.Register response = sellerService.registerSeller(newSellerReqeust);
 
-		Seller savedSeller = Seller.create(
+		Seller savedSeller = Seller.ofRegister(
 			newSellerReqeust.email(),
 			newSellerReqeust.name(),
 			bCryptPasswordEncoder.encode(newSellerReqeust.password()),

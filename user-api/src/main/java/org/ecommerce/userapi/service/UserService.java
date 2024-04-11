@@ -27,7 +27,7 @@ public class UserService {
 		checkDuplicateEmail(createUser.email());
 		checkDuplicatePhoneNumber(createUser.phoneNumber());
 
-		Users users = Users.create(createUser.email(), createUser.name(), passwordEncoder.encode(createUser.password()),
+		Users users = Users.ofRegister(createUser.email(), createUser.name(), passwordEncoder.encode(createUser.password()),
 			createUser.gender(), createUser.age(), createUser.phoneNumber());
 		userRepository.save(users);
 		return UserDto.Response.Register.of(users);

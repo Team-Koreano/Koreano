@@ -61,7 +61,7 @@ public class Seller {
 	@Column(name = "status")
 	private UserStatus userStatus;
 
-	public static Seller create(String email, String name, String password, String address, String phoneNumber) {
+	public static Seller ofRegister(String email, String name, String password, String address, String phoneNumber) {
 		Seller seller = new Seller();
 		seller.email = email;
 		seller.name = name;

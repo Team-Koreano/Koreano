@@ -30,7 +30,7 @@ class UserServiceTest {
 
 	@BeforeEach
 	public void 기초_셋팅() {
-		Users user1 = Users.create(
+		Users user1 = Users.ofRegister(
 			"user1@example.com",
 			"John Doe",
 			"password1",
@@ -38,7 +38,7 @@ class UserServiceTest {
 			(short)25,
 			"01012345678"
 		);
-		Users user2 = Users.create(
+		Users user2 = Users.ofRegister(
 			"user2@example.com",
 			"Jane Smith",
 			"password2",
@@ -46,7 +46,7 @@ class UserServiceTest {
 			(short)30,
 			"01087654321"
 		);
-		Users user3 = Users.create(
+		Users user3 = Users.ofRegister(
 			"user3@example.com",
 			"Bob Johnson",
 			"password3",
@@ -76,7 +76,7 @@ class UserServiceTest {
 
 		UserDto.Response.Register response = userService.registerUser(newUserRequest);
 
-		Users savedUser = Users.create(
+		Users savedUser = Users.ofRegister(
 			newUserRequest.email(),
 			newUserRequest.name(),
 			bCryptPasswordEncoder.encode(newUserRequest.password()),
