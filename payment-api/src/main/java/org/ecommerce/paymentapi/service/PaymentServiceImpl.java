@@ -14,13 +14,4 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentServiceImpl {
 	private final PaymentRepository paymentRepository;
 
-	public void createPayment() {
-		Payment payment = Payment.builder()
-			.orderId(1L)
-			.totalAmount(10)
-			.orderName("아라비아 커피 외 2개")
-			.isDeleted(false)
-			.build();
-		paymentRepository.save(payment);
-	}
 }
