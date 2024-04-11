@@ -48,6 +48,7 @@ subprojects {
 
     jacocoTestReport {
         reports {
+            html.required = false
             xml.required = true
         }
         finalizedBy 'jacocoTestCoverageVerification'
@@ -74,30 +75,38 @@ subprojects {
     sourceCompatibility = '17'
 }
 
-project(':common') {
+project(':common'){
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-aop'
     }
 }
 
-project(':user-api') {
+project(':user-api'){
     dependencies {
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
+        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+        testImplementation 'org.springframework.security:spring-security-test'
+
+        runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+        runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
         runtimeOnly 'com.h2database:h2'
     }
 }
 
-project(':bucket-api') {
+project(':bucket-api'){
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         runtimeOnly 'com.h2database:h2'
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
     }
 }
 
-project(':order-api') {
+project(':order-api'){
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -120,6 +129,7 @@ project(':payment-api') {
         }
     }
 }
+
 project(':product'){
     dependencies {
         implementation(project(':common'))
@@ -127,29 +137,30 @@ project(':product'){
     }
 }
 
-project(':product-management-api') {
+project(':product-management-api'){
     dependencies {
         implementation(project(':common'))
+        implementation(project(':product'))
     }
 }
 
-project(':product-search-api') {
+project(':product-search-api'){
     dependencies {
         implementation(project(':common'))
+        implementation(project(':product'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         runtimeOnly 'com.h2database:h2'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
     }
 }
 
-project(':statistic-api') {
+project(':statistic-api'){
     dependencies {
         implementation(project(':common'))
     }
 }
 
-project(':user-api') {
+project(':user-api'){
     dependencies {
         implementation(project(':common'))
     }
