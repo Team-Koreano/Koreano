@@ -7,7 +7,9 @@ import org.ecommerce.bucketapi.service.BucketService;
 import org.ecommerce.common.vo.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +38,16 @@ public class BucketController {
 		@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
 		final BucketDto.Response bucketResponse = bucketService.addBucket(USER_ID, addRequest);
+		return new Response<>(HttpStatus.OK.value(), bucketResponse);
+	}
+
+	@PutMapping("/{bucketId}")
+	public Response<BucketDto.Response> updateBucket(
+		@PathVariable("bucketId") final Long bucketId,
+		@RequestBody @Valid final BucketDto.Request.Update updateRequest
+	) {
+		bucketService.validateBucketByUser(USER_ID, bucketId);
+		final BucketDto.Response bucketResponse = bucketService.updateBucket(bucketId, updateRequest);
 		return new Response<>(HttpStatus.OK.value(), bucketResponse);
 	}
 }
