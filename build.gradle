@@ -48,7 +48,6 @@ subprojects {
 
     jacocoTestReport {
         reports {
-            html.required = false
             xml.required = true
         }
         finalizedBy 'jacocoTestCoverageVerification'
@@ -75,13 +74,13 @@ subprojects {
     sourceCompatibility = '17'
 }
 
-project(':common'){
+project(':common') {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-aop'
     }
 }
 
-project(':user-api'){
+project(':user-api') {
     dependencies {
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -90,7 +89,7 @@ project(':user-api'){
     }
 }
 
-project(':bucket-api'){
+project(':bucket-api') {
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -98,7 +97,7 @@ project(':bucket-api'){
     }
 }
 
-project(':order-api'){
+project(':order-api') {
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -106,7 +105,6 @@ project(':order-api'){
     }
 }
 
-project(':payment-api'){
 project(':payment-api') {
     dependencies {
         implementation(project(':common'))
@@ -129,13 +127,13 @@ project(':product'){
     }
 }
 
-project(':product-management-api'){
+project(':product-management-api') {
     dependencies {
         implementation(project(':common'))
     }
 }
 
-project(':product-search-api'){
+project(':product-search-api') {
     dependencies {
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -145,13 +143,13 @@ project(':product-search-api'){
     }
 }
 
-project(':statistic-api'){
+project(':statistic-api') {
     dependencies {
         implementation(project(':common'))
     }
 }
 
-project(':user-api'){
+project(':user-api') {
     dependencies {
         implementation(project(':common'))
     }
