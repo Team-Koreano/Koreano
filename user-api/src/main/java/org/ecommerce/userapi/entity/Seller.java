@@ -27,34 +27,34 @@ public class Seller {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "email", nullable = false)
+	@Column(nullable = false)
 	private String email;
 
-	@Column(name = "name", nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "password", nullable = false)
+	@Column(nullable = false)
 	private String password;
 
-	@Column(name = "address")
+	@Column()
 	private String address;
 
-	@Column(name = "phone_number", nullable = false)
+	@Column(nullable = false)
 	private String phoneNumber;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime", updatable = false)
+	@Column(updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "is_deleted")
+	@Column()
 	private Boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column()
 	private LocalDateTime updateDatetime;
 
 	@ColumnDefault("0")
-	@Column(name = "beanpay")
+	@Column()
 	private Integer beanPay;
 
 	@ColumnDefault("0")

@@ -32,38 +32,38 @@ public class Users {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "email", nullable = false)
+	@Column(nullable = false)
 	private String email;
 
-	@Column(name = "name", nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "password", nullable = false)
+	@Column(nullable = false)
 	private String password;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "gender")
+	@Column(nullable = false)
 	private Gender gender;
 
-	@Column(name = "age", nullable = false)
+	@Column(nullable = false)
 	private Short age;
 
-	@Column(name = "phone_number", nullable = false)
+	@Column(nullable = false)
 	private String phoneNumber;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime", updatable = false)
+	@Column(updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Column()
+	private boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column()
 	private LocalDateTime updateDatetime;
 
 	@ColumnDefault("0")
-	@Column(name = "beanpay")
+	@Column()
 	private Integer beanPay;
 
 	@ColumnDefault("0")

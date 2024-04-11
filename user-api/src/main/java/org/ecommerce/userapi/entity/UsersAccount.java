@@ -29,20 +29,20 @@ public class UsersAccount {
 	@JoinColumn(name = "users_id")
 	private Users users;
 
-	@Column(name = "number", nullable = false)
+	@Column(nullable = false)
 	private Short number;
 
-	@Column(name = "bank_name", nullable = false)
+	@Column(nullable = false)
 	private String bankName;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime", updatable = false)
+	@Column(updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Column()
+	private boolean isDeleted;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column()
 	private LocalDateTime updateDatetime;
 }
