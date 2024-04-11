@@ -61,6 +61,12 @@ public class BucketControllerTest {
 			.content(objectMapper.writeValueAsString(bucketAddRequest)));
 	}
 
+	private ResultActions performPutRequest(final BucketDto.Request.Update bucketUpdateRequest) throws Exception {
+		return mockMvc.perform(put("/buckets/2")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(bucketUpdateRequest)));
+	}
+
 	@Test
 	void 장바구니_조회() throws Exception {
 		// given
@@ -112,7 +118,7 @@ public class BucketControllerTest {
 	}
 
 	@Test
-	void 판매자_입력_없이_장바구니_담기() throws Exception{
+	void 판매자_입력_없이_장바구니_담기() throws Exception {
 		// given
 		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
 			null,
@@ -130,7 +136,7 @@ public class BucketControllerTest {
 	}
 
 	@Test
-	void 상품_수량_선택_없이_장바구니_담기() throws Exception{
+	void 상품_수량_선택_없이_장바구니_담기() throws Exception {
 		// given
 		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
 			"seller",
@@ -140,6 +146,44 @@ public class BucketControllerTest {
 
 		// when
 		final ResultActions resultActions = performPostRequest(bucketAddRequest);
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.status").value("400"))
+			.andExpect(jsonPath("$.result").value("상품 수량을 입력해 주세요."));
+	}
+
+	@Test
+	void 장바구니_상품_수정() throws Exception {
+		// given
+		doNothing().when(bucketService).validateBucketByUser(anyInt(), anyLong());
+		when(bucketService.updateBucket(anyLong(), any(BucketDto.Request.Update.class)))
+			.thenReturn(createTestBucketResponse());
+		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(777);
+
+		// when
+		final ResultActions resultActions = performPutRequest(bucketUpdateRequest);
+
+		// then
+		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
+			.andReturn();
+
+		final BucketDto.Response bucketResponse = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<Response<BucketDto.Response>>() {
+			}
+		).result();
+
+		assertThat(bucketResponse).isEqualTo(createTestBucketResponse());
+	}
+
+	@Test
+	void 상품_수량_선택_없이_장바구니_수정() throws Exception {
+		// given
+		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(null);
+
+		// when
+		final ResultActions resultActions = performPutRequest(bucketUpdateRequest);
 
 		// then
 		resultActions.andExpect(status().isBadRequest())

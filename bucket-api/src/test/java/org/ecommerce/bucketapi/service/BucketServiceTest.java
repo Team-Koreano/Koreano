@@ -6,10 +6,13 @@ import static org.mockito.BDDMockito.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.entity.Bucket;
+import org.ecommerce.bucketapi.exception.BucketErrorCode;
 import org.ecommerce.bucketapi.repository.BucketRepository;
+import org.ecommerce.common.error.CustomException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,7 +66,7 @@ public class BucketServiceTest {
 	}
 
 	@Test
-	void 장바구니에_상품_담기() {
+	void 장바구니에_담기() {
 		// given
 		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
 			"seller",
@@ -78,5 +81,53 @@ public class BucketServiceTest {
 
 		// then
 		assertThat(actual).isEqualTo(createTestBucketResponse());
+	}
+
+	@Test
+	void 장바구니_수정() {
+		// given
+		final Bucket bucket = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
+		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(777);
+		given(bucketRepository.findById(anyLong()))
+			.willReturn(Optional.of(bucket));
+
+		// when
+		final BucketDto.Response actual = bucketService.updateBucket(1L, bucketUpdateRequest);
+
+		// then
+		assertThat(actual.quantity()).isEqualTo(777);
+	}
+
+	@Test
+	void 장바구니가_존재하지_않을_때() {
+		// given
+		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(777);
+		given(bucketRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		// when
+		// then
+		assertThatThrownBy(() -> bucketService.updateBucket(1L, bucketUpdateRequest))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode")
+			.isEqualTo(BucketErrorCode.NOT_FOUND_BUCKET_ID)
+			.extracting("message")
+			.isEqualTo("존재하지 않는 장바구니 번호 입니다.");
+	}
+
+	@Test
+	void 회원_번호에_대한_장바구니_번호가_유효하지_않을_때() {
+		// given
+		given(bucketRepository.existsByUserIdAndId(anyInt(), anyLong()))
+			.willReturn(false);
+
+		// when
+		// then
+		assertThatThrownBy(() -> bucketService.validateBucketByUser(1, 1L))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode")
+			.isEqualTo(BucketErrorCode.INVALID_BUCKET_WITH_USER)
+			.extracting("message")
+			.isEqualTo("요청한 유저와 ID에 해당하는 장바구니가 존재하지 않습니다.");
 	}
 }
