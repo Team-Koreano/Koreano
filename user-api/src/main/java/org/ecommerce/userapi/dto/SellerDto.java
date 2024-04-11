@@ -2,11 +2,8 @@ package org.ecommerce.userapi.dto;
 
 import org.ecommerce.userapi.entity.Seller;
 
-import lombok.Builder;
-
 public class SellerDto {
 	public static class Request {
-		@Builder
 		public record Register(
 			String email,
 			String name,
@@ -18,7 +15,6 @@ public class SellerDto {
 	}
 
 	public static class Response {
-		@Builder
 		public record Register(
 			String email,
 			String name,
