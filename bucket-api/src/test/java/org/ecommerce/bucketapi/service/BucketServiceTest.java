@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.bucketapi.dto.BucketDTO;
+import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.entity.Bucket;
 import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.junit.jupiter.api.Test;
@@ -27,19 +27,25 @@ public class BucketServiceTest {
 
 	private static final LocalDate CREATE_DATE = LocalDate.now();
 
+	private static final Bucket BUCKET = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
+
 	private static final List<Bucket> BUCKETS = List.of(
-		new Bucket(1L, 1, 101, 3, CREATE_DATE),
-		new Bucket(2L, 1, 102, 2, CREATE_DATE),
-		new Bucket(3L, 1, 103, 1, CREATE_DATE)
+		new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
+		new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE),
+		new Bucket(3L, 1, "seller3", 103, 1, CREATE_DATE)
 	);
 
-	private List<BucketDTO.Response> createTestBucketsResponse() {
-		List<BucketDTO.Response> bucketResponse = new ArrayList<>();
-		bucketResponse.add(new BucketDTO.Response(1L, 1, 101, 3, CREATE_DATE));
-		bucketResponse.add(new BucketDTO.Response(2L, 1, 102, 2, CREATE_DATE));
-		bucketResponse.add(new BucketDTO.Response(3L, 1, 103, 1, CREATE_DATE));
+	private List<BucketDto.Response> createTestBucketsResponse() {
+		List<BucketDto.Response> bucketResponse = new ArrayList<>();
+		bucketResponse.add(new BucketDto.Response(1L, 1, "seller1", 101, 3, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(2L, 1, "seller2", 102, 2, CREATE_DATE));
+		bucketResponse.add(new BucketDto.Response(3L, 1, "seller3", 103, 1, CREATE_DATE));
 
 		return bucketResponse;
+	}
+
+	private BucketDto.Response createTestBucketResponse() {
+		return new BucketDto.Response(1L, 1, "seller", 101, 3, CREATE_DATE);
 	}
 
 	@Test
@@ -49,10 +55,28 @@ public class BucketServiceTest {
 			.willReturn(BUCKETS);
 
 		// when
-		final List<BucketDTO.Response> actual = bucketService.getAllBuckets(1);
+		final List<BucketDto.Response> actual = bucketService.getAllBuckets(1);
 
 		// then
 		assertThat(actual).usingRecursiveComparison()
 			.isEqualTo(createTestBucketsResponse());
+	}
+
+	@Test
+	void 장바구니에_상품_담기() {
+		// given
+		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
+			"seller",
+			101,
+			3
+		);
+		given(bucketRepository.save(any(Bucket.class)))
+			.willReturn(BUCKET);
+
+		// when
+		final BucketDto.Response actual = bucketService.addBucket(1, bucketAddRequest);
+
+		// then
+		assertThat(actual).isEqualTo(createTestBucketResponse());
 	}
 }
