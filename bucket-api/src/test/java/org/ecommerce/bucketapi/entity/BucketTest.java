@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 
-import org.ecommerce.bucketapi.dto.BucketDto;
 import org.junit.jupiter.api.Test;
 
 public class BucketTest {
@@ -20,21 +19,29 @@ public class BucketTest {
 		Bucket bucket = Bucket.ofAdd(1, "seller", 101, 3);
 
 		// then
-		assertThat(bucket.getUserId()).isEqualTo(1);
-		assertThat(bucket.getSeller()).isEqualTo("seller");
-		assertThat(bucket.getProductId()).isEqualTo(101);
-		assertThat(bucket.getQuantity()).isEqualTo(3);
+		assertThat(bucket.getUserId()).isEqualTo(BUCKET.getUserId());
+		assertThat(bucket.getSeller()).isEqualTo(BUCKET.getSeller());
+		assertThat(bucket.getProductId()).isEqualTo(BUCKET.getProductId());
+		assertThat(bucket.getQuantity()).isEqualTo(BUCKET.getQuantity());
 	}
 
 	@Test
 	void 장바구니_상품_수정() {
 		// given
-		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(777);
+		final Integer newQuantity = 777;
+		final Bucket bucket = new Bucket(
+				1L,
+				1,
+				"seller",
+				101,
+				3,
+				LocalDate.of(2024, 4, 14)
+		);
 
 		// when
-		BUCKET.update(bucketUpdateRequest);
+		bucket.update(newQuantity);
 
 		// then
-		assertThat(BUCKET.getQuantity()).isEqualTo(777);
+		assertThat(bucket.getQuantity()).isEqualTo(newQuantity);
 	}
 }

@@ -29,11 +29,11 @@ public class BucketDtoTest {
 		final BucketDto.Response actual = BucketDto.Response.of(BUCKET);
 
 		// then
-		assertThat(actual.id()).isEqualTo(1L);
-		assertThat(actual.userId()).isEqualTo(1);
-		assertThat(actual.seller()).isEqualTo("seller");
-		assertThat(actual.productId()).isEqualTo(101);
-		assertThat(actual.quantity()).isEqualTo(3);
-		assertThat(actual.createDate()).isEqualTo(CREATE_DATE);
+		assertThat(actual.id()).isEqualTo(BUCKET.getId());
+		assertThat(actual.userId()).isEqualTo(BUCKET.getUserId());
+		assertThat(actual.seller()).isEqualTo(BUCKET.getSeller());
+		assertThat(actual.productId()).isEqualTo(BUCKET.getProductId());
+		assertThat(actual.quantity()).isEqualTo(BUCKET.getQuantity());
+		assertThat(actual.createDate()).isEqualTo(BUCKET.getCreateDate());
 	}
 }
