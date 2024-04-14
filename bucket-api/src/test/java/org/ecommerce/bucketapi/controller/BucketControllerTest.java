@@ -38,8 +38,6 @@ public class BucketControllerTest {
 	@MockBean
 	private BucketService bucketService;
 
-	private final String URL = "/api/buckets/v1";
-
 	private List<BucketDto.Response> getDefaultBucketsResponse() {
 		List<BucketDto.Response> bucketResponse = new ArrayList<>();
 		bucketResponse.add(new BucketDto.Response(
