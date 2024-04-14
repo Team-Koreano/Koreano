@@ -1,10 +1,10 @@
 package org.ecommerce.bucketapi.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +15,7 @@ import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.ecommerce.common.error.CustomException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,83 +31,98 @@ public class BucketServiceTest {
 
 	private static final LocalDate CREATE_DATE = LocalDate.now();
 
-	private static final Bucket BUCKET = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
-
-	private static final List<Bucket> BUCKETS = List.of(
-			new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
-			new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE),
-			new Bucket(3L, 1, "seller3", 103, 1, CREATE_DATE)
-	);
-
-	private List<BucketDto.Response> getDefaultBucketsResponse() {
-		List<BucketDto.Response> bucketResponse = new ArrayList<>();
-		bucketResponse.add(new BucketDto.Response(1L, 1, "seller1", 101, 3, CREATE_DATE));
-		bucketResponse.add(new BucketDto.Response(2L, 1, "seller2", 102, 2, CREATE_DATE));
-		bucketResponse.add(new BucketDto.Response(3L, 1, "seller3", 103, 1, CREATE_DATE));
-
-		return bucketResponse;
-	}
-
-	private BucketDto.Response getDefaultBucketResponse() {
-		return new BucketDto.Response(1L, 1, "seller", 101, 3, CREATE_DATE);
-	}
-
 	@Test
 	void 장바구니_조회() {
 		// given
+		List<Bucket> buckets = List.of(
+				new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
+				new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE)
+		);
 		given(bucketRepository.findAllByUserId(anyInt()))
-				.willReturn(BUCKETS);
+				.willReturn(buckets);
 
 		// when
-		final List<BucketDto.Response> actual = bucketService.getAllBuckets(1);
+		final List<BucketDto> bucketDtos = bucketService.getAllBuckets(1);
 
 		// then
-		assertThat(actual).usingRecursiveComparison()
-				.isEqualTo(getDefaultBucketsResponse());
+		assertEquals(2, bucketDtos.size());
+		assertEquals(1L, bucketDtos.get(0).getId());
+		assertEquals("seller1", bucketDtos.get(0).getSeller());
+		assertEquals(101, bucketDtos.get(0).getProductId());
+		assertEquals(3, bucketDtos.get(0).getQuantity());
+		assertEquals(2L, bucketDtos.get(1).getId());
+		assertEquals("seller2", bucketDtos.get(1).getSeller());
+		assertEquals(102, bucketDtos.get(1).getProductId());
+		assertEquals(2, bucketDtos.get(1).getQuantity());
 	}
 
 	@Test
 	void 장바구니에_담기() {
 		// given
-		final BucketDto.Request.Add bucketAddRequest = new BucketDto.Request.Add(
-				"seller",
-				101,
-				3
-		);
 		given(bucketRepository.save(any(Bucket.class)))
-				.willReturn(BUCKET);
+				.willReturn(
+						new Bucket(
+								1L,
+								1,
+								"returnSellerName",
+								101,
+								3,
+								CREATE_DATE
+						)
+				);
+		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
 
 		// when
-		final BucketDto.Response actual = bucketService.addBucket(1, bucketAddRequest);
+		final BucketDto bucketDto = bucketService.addBucket(
+				1,
+				new BucketDto.Request.Add(
+						"inputSellerName",
+						103,
+						1
+				)
+		);
 
 		// then
-		assertThat(actual).isEqualTo(getDefaultBucketResponse());
+		verify(bucketRepository, times(1)).save(captor.capture());
+		assertEquals("inputSellerName", captor.getValue().getSeller());
+		assertEquals(103, captor.getValue().getProductId());
+		assertEquals(1, captor.getValue().getQuantity());
+		assertEquals("returnSellerName", bucketDto.getSeller());
+		assertEquals(101, bucketDto.getProductId());
+		assertEquals(3, bucketDto.getQuantity());
 	}
 
 	@Test
 	void 장바구니_수정() {
 		// given
 		final Integer newQuantity = 777;
-		final Bucket bucket = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
-		final BucketDto.Request.Update bucketUpdateRequest =
-				new BucketDto.Request.Update(newQuantity);
-
 		given(bucketRepository.findById(anyLong()))
-				.willReturn(Optional.of(bucket));
+				.willReturn(Optional.of(
+								new Bucket(
+										1L,
+										1,
+										"seller",
+										101,
+										3,
+										CREATE_DATE)
+						)
+				);
 
 		// when
-		final BucketDto.Response actual =
-				bucketService.updateBucket(1L, bucketUpdateRequest);
+		final BucketDto bucketDto = bucketService.updateBucket(
+				1L,
+				new BucketDto.Request.Update(newQuantity)
+		);
 
 		// then
-		assertThat(actual.quantity()).isEqualTo(newQuantity);
+		assertEquals(newQuantity, bucketDto.getQuantity());
 	}
 
 	@Test
 	void 장바구니가_존재하지_않을_때() {
 		// given
-		final BucketDto.Request.Update bucketUpdateRequest = new BucketDto.Request.Update(
-				777);
+		final BucketDto.Request.Update bucketUpdateRequest =
+				new BucketDto.Request.Update(777);
 		given(bucketRepository.findById(anyLong()))
 				.willReturn(Optional.empty());
 
