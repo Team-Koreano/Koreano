@@ -29,10 +29,12 @@ public class BucketController {
 
 	@GetMapping
 	public Response<List<BucketDto.Response>> getBuckets() {
-		final List<BucketDto> bucketDto = bucketService.getAllBuckets(USER_ID);
-		return new Response<>(HttpStatus.OK.value(), bucketDto.stream()
-			.map(BucketDto.Response::of)
-			.toList()
+
+		return new Response<>(HttpStatus.OK.value(),
+				bucketService.getAllBuckets(USER_ID)
+						.stream()
+						.map(BucketDto.Response::of)
+						.toList()
 		);
 	}
 
@@ -40,10 +42,13 @@ public class BucketController {
 	public Response<BucketDto.Response> addBucket(
 			@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
-		final BucketDto bucketDto = bucketService.addBucket(USER_ID, addRequest);
-		return new Response<>(HttpStatus.OK.value(), BucketDto.Response.of(bucketDto));
+
 		return new Response<>(
-				HttpStatus.OK.value(), bucketService.addBucket(USER_ID, addRequest));
+				HttpStatus.OK.value(),
+				BucketDto.Response.of(
+						bucketService.addBucket(USER_ID, addRequest)
+				)
+		);
 	}
 
 	@PutMapping("/{bucketId}")
@@ -51,9 +56,13 @@ public class BucketController {
 			@PathVariable("bucketId") final Long bucketId,
 			@RequestBody @Valid final BucketDto.Request.Update updateRequest
 	) {
+
 		bucketService.validateBucketByUser(USER_ID, bucketId);
 		return new Response<>(
 				HttpStatus.OK.value(),
-				bucketService.updateBucket(bucketId, updateRequest));
+				BucketDto.Response.of(
+						bucketService.updateBucket(bucketId, updateRequest)
+				)
+		);
 	}
 }

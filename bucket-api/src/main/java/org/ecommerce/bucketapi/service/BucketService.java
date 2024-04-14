@@ -32,31 +32,39 @@ public class BucketService {
 	}
 
 	public List<BucketDto> getAllBuckets(final Integer userId) {
-		final List<Bucket> buckets = bucketRepository.findAllByUserId(userId);
-		return buckets.stream()
-			.map(BucketMapper.INSTANCE::toDto)
-			.toList();
+
+		return bucketRepository.findAllByUserId(userId)
+				.stream()
+				.map(BucketMapper.INSTANCE::toDto)
+				.toList();
 	}
 
-	public BucketDto addBucket(final Integer userId, final BucketDto.Request.Add addRequest) {
-		final Bucket newBucket = Bucket.ofAdd(
-				userId,
-				addRequest.seller(),
-				addRequest.productId(),
-				addRequest.quantity()
+	public BucketDto addBucket(
+			final Integer userId,
+			final BucketDto.Request.Add addRequest
+	) {
+
+		return BucketMapper.INSTANCE.toDto(
+				bucketRepository.save(
+						Bucket.ofAdd(
+								userId,
+								addRequest.seller(),
+								addRequest.productId(),
+								addRequest.quantity()
+						)
+				)
 		);
-		final Bucket bucket = bucketRepository.save(newBucket);
-		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 
-	public BucketDto.Response updateBucket(
+	public BucketDto updateBucket(
 			final Long bucketId,
 			final BucketDto.Request.Update updateRequest
 	) {
+
 		final Bucket bucket = bucketRepository.findById(bucketId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
 
 		bucket.update(updateRequest.quantity());
-		return BucketDto.Response.of(bucket);
+		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 }
