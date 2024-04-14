@@ -63,13 +63,16 @@ public class UserService {
 			authDetails.getAuthorities().toString().replace("[","").replace("]",""));
 		redisUtils.deleteData(accessTokenKey);
 	}
-	private void checkDuplicateEmail(String email) {
+
+	@Transactional(readOnly = true)
+	public void checkDuplicateEmail(String email) {
 		if (userRepository.existsByEmail(email)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
 		}
 	}
 
-	private void checkDuplicatePhoneNumber(String phoneNumber) {
+	@Transactional(readOnly = true)
+	public void checkDuplicatePhoneNumber(String phoneNumber) {
 		if (userRepository.existsByPhoneNumber(phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
