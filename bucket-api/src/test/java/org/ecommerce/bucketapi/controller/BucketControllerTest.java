@@ -38,6 +38,8 @@ public class BucketControllerTest {
 	@MockBean
 	private BucketService bucketService;
 
+	private final String URL = "/api/buckets/v1";
+
 	private List<BucketDto.Response> getDefaultBucketsResponse() {
 		List<BucketDto.Response> bucketResponse = new ArrayList<>();
 		bucketResponse.add(new BucketDto.Response(
@@ -67,7 +69,7 @@ public class BucketControllerTest {
 				.thenReturn(getDefaultBucketsResponse());
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(get("/buckets"));
+		final ResultActions resultActions = mockMvc.perform(get("/api/buckets/v1"));
 
 		// then
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
@@ -97,7 +99,7 @@ public class BucketControllerTest {
 		);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/buckets")
+		final ResultActions resultActions = mockMvc.perform(post("/api/buckets/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(bucketAddRequest)));
 
@@ -123,7 +125,7 @@ public class BucketControllerTest {
 		);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/buckets")
+		final ResultActions resultActions = mockMvc.perform(post("/api/buckets/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(bucketAddRequest)));
 
@@ -143,7 +145,7 @@ public class BucketControllerTest {
 		);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/buckets")
+		final ResultActions resultActions = mockMvc.perform(post("/api/buckets/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(bucketAddRequest)));
 
@@ -163,7 +165,7 @@ public class BucketControllerTest {
 				777);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(put("/buckets/2")
+		final ResultActions resultActions = mockMvc.perform(put("/api/buckets/v1/2")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(bucketUpdateRequest)));
 
@@ -187,7 +189,7 @@ public class BucketControllerTest {
 				null);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(put("/buckets/2")
+		final ResultActions resultActions = mockMvc.perform(put("/api/buckets/v1/2")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(bucketUpdateRequest)));
 
