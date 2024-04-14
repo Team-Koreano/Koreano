@@ -2,13 +2,20 @@ package org.ecommerce.bucketapi.dto;
 
 import java.time.LocalDate;
 
-import org.ecommerce.bucketapi.entity.Bucket;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class BucketDto {
+
+	private Long id;
+	private Integer userId;
+	private String seller;
+	private Integer productId;
+	private Integer quantity;
+	private LocalDate createDate;
 
 	public static class Request {
 
@@ -36,14 +43,14 @@ public class BucketDto {
 		Integer quantity,
 		LocalDate createDate
 	) {
-		public static Response of(final Bucket bucket) {
+		public static Response of(final BucketDto bucketDto) {
 			return new Response(
-				bucket.getId(),
-				bucket.getUserId(),
-				bucket.getSeller(),
-				bucket.getProductId(),
-				bucket.getQuantity(),
-				bucket.getCreateDate()
+				bucketDto.id,
+				bucketDto.userId,
+				bucketDto.seller,
+				bucketDto.productId,
+				bucketDto.quantity,
+				bucketDto.createDate
 			);
 		}
 	}
