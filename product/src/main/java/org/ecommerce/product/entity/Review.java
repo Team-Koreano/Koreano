@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.entity;
+package org.ecommerce.product.entity;
 
 import java.time.LocalDateTime;
 
@@ -48,8 +48,7 @@ public class Review {
 	private LocalDateTime createDatetime;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime", insertable = false)
+	@Column(name = "update_datetime")
 	private LocalDateTime updateDatetime;
-
 
 }

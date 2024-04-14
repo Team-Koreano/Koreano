@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.entity;
+package org.ecommerce.product.entity;
 
 import java.time.LocalDateTime;
 
@@ -35,11 +35,14 @@ public class Image {
 	@Column(name = "is_thumbnail")
 	private Boolean isThumbnail;
 
+	@Column(name = "sequence_number")
+	private Short sequenceNumber;
+
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
 
-	@Column(name = "update_date", insertable = false)
+	@Column(name = "update_datetime")
 	private LocalDateTime updateDatetime;
 
 }

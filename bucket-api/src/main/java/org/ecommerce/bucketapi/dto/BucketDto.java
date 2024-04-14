@@ -26,6 +26,16 @@ public class BucketDto {
 		) {
 
 		}
+
+		// TODO : 상품 상세옵션 추가
+		public record Update(
+
+			@NotNull(message = "상품 수량을 입력해 주세요.")
+			@Min(value = 1, message = "상품 수량을 1개 이상으로 입력해 주세요.")
+			Integer quantity
+		) {
+
+		}
 	}
 
 	public record Response(

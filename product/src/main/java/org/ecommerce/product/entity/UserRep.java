@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.entity;
+package org.ecommerce.product.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
