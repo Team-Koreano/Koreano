@@ -11,5 +11,5 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	List<Bucket> findAllByUserId(final Integer userId);
 
-	boolean existsByUserIdAndProductId(final Integer userId, final Integer productId);
+	boolean existsByUserIdAndId(final Integer userId, final Long bucketId);
 }

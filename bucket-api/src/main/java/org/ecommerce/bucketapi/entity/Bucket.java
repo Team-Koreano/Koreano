@@ -2,6 +2,7 @@ package org.ecommerce.bucketapi.entity;
 
 import java.time.LocalDate;
 
+import org.ecommerce.bucketapi.dto.BucketDto;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -25,16 +26,16 @@ public class Bucket {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column
+	@Column(nullable = false)
 	private Integer userId;
 
-	@Column
+	@Column(nullable = false)
 	private String seller;
 
-	@Column
+	@Column(nullable = false)
 	private Integer productId;
 
-	@Column
+	@Column(nullable = false)
 	private Integer quantity;
 
 	@CreationTimestamp
@@ -53,5 +54,10 @@ public class Bucket {
 		bucket.productId = productId;
 		bucket.quantity = quantity;
 		return bucket;
+	}
+
+	// TODO : 상품 상세옵션 변경 로직 추가
+	public void update(final Integer quantity) {
+		this.quantity = quantity;
 	}
 }
