@@ -2,11 +2,16 @@ package org.ecommerce.userapi.service;
 
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerRepository;
+import org.ecommerce.userapi.security.JwtUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +31,19 @@ class SellerServiceTest {
 	@Mock
 	private SellerRepository sellerRepository;
 
+	@Mock
+	private JwtUtils jwtUtils;
+	@BeforeEach
+	public void 기초_셋팅() {
+		Seller seller = Seller.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			"어쩌구_저쩌구",
+			"010-0000-0000"
+		);
+		sellerRepository.save(seller);
+	}
 	@Test
 	void 셀러_등록() {
 		//given
@@ -84,4 +102,44 @@ class SellerServiceTest {
 		Assertions.assertThatThrownBy(() -> sellerService.registerRequest(duplicatedPhoneRequest))
 			.isInstanceOf(CustomException.class);
 	}
+
+	@Test
+	void 셀러_로그인() {
+		// given
+		String email = "user1@example.com";
+		String password = "password1";
+
+		SellerDto.Request.Login loginRequest = new SellerDto.Request.Login(email, password);
+		Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
+		when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
+		when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
+
+		//when
+		when(jwtUtils.createTokens(any(), any())).thenReturn("fake_token");
+
+		//then
+		SellerDto.Response.Login response = sellerService.loginRequest(loginRequest);
+		Assertions.assertThat(response.accessToken()).isEqualTo("Bearer fake_token");
+
+		//이메일이 틀릴 경우
+		String incorrectEmail = "incorrect@example.com";
+		SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
+
+		//then
+		Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL.getMessage());
+
+		//비밀번호 틀릴 경우
+		String incorrectPassword = "incorrect";
+
+		//then
+		SellerDto.Request.Login inCorrectPasswordRequest = new SellerDto.Request.Login(email, incorrectPassword);
+		Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+
+	}
 }
+//TODO : 레디스로 인해 로그아웃 테스트 추후 구현
+
