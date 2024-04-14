@@ -29,14 +29,19 @@ public class BucketController {
 
 	@GetMapping
 	public Response<List<BucketDto.Response>> getBuckets() {
-		return new Response<>(
-				HttpStatus.OK.value(), bucketService.getAllBuckets(USER_ID));
+		final List<BucketDto> bucketDto = bucketService.getAllBuckets(USER_ID);
+		return new Response<>(HttpStatus.OK.value(), bucketDto.stream()
+			.map(BucketDto.Response::of)
+			.toList()
+		);
 	}
 
 	@PostMapping
 	public Response<BucketDto.Response> addBucket(
 			@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
+		final BucketDto bucketDto = bucketService.addBucket(USER_ID, addRequest);
+		return new Response<>(HttpStatus.OK.value(), BucketDto.Response.of(bucketDto));
 		return new Response<>(
 				HttpStatus.OK.value(), bucketService.addBucket(USER_ID, addRequest));
 	}

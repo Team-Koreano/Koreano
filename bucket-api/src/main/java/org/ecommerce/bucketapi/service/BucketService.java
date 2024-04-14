@@ -5,6 +5,7 @@ import static org.ecommerce.bucketapi.exception.BucketErrorCode.*;
 import java.util.List;
 
 import org.ecommerce.bucketapi.dto.BucketDto;
+import org.ecommerce.bucketapi.dto.BucketMapper;
 import org.ecommerce.bucketapi.entity.Bucket;
 import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.ecommerce.common.error.CustomException;
@@ -30,27 +31,22 @@ public class BucketService {
 		}
 	}
 
-	@Transactional(readOnly = true)
-	public List<BucketDto.Response> getAllBuckets(final Integer userId) {
-		return bucketRepository.findAllByUserId(userId)
-				.stream()
-				.map(BucketDto.Response::of)
-				.toList();
+	public List<BucketDto> getAllBuckets(final Integer userId) {
+		final List<Bucket> buckets = bucketRepository.findAllByUserId(userId);
+		return buckets.stream()
+			.map(BucketMapper.INSTANCE::toDto)
+			.toList();
 	}
 
-	public BucketDto.Response addBucket(
-			final Integer userId,
-			final BucketDto.Request.Add addRequest
-	) {
+	public BucketDto addBucket(final Integer userId, final BucketDto.Request.Add addRequest) {
 		final Bucket newBucket = Bucket.ofAdd(
 				userId,
 				addRequest.seller(),
 				addRequest.productId(),
 				addRequest.quantity()
 		);
-
 		final Bucket bucket = bucketRepository.save(newBucket);
-		return BucketDto.Response.of(bucket);
+		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 
 	public BucketDto.Response updateBucket(
