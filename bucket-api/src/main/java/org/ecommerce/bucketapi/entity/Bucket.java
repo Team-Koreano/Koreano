@@ -26,16 +26,16 @@ public class Bucket {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column
+	@Column(nullable = false)
 	private Integer userId;
 
-	@Column
+	@Column(nullable = false)
 	private String seller;
 
-	@Column
+	@Column(nullable = false)
 	private Integer productId;
 
-	@Column
+	@Column(nullable = false)
 	private Integer quantity;
 
 	@CreationTimestamp
@@ -57,7 +57,7 @@ public class Bucket {
 	}
 
 	// TODO : 상품 상세옵션 변경 로직 추가
-	public void update(final BucketDto.Request.Update updateRequest) {
-		this.quantity = updateRequest.quantity();
+	public void update(final Integer quantity) {
+		this.quantity = quantity;
 	}
 }
