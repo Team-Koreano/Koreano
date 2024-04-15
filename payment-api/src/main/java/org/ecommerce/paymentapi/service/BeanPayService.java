@@ -47,9 +47,11 @@ public class BeanPayService {
 			throw e;
 		}
 		try {
+			//TODO: 유저 beanPay 추가 로직 작성
 			return processApproval(findBeanPay, request);
 		} catch (CustomException e) {
 			handleException(findBeanPay, e);
+			//TODO: 유저 beanPay 롤백 로직 작성
 			throw e;
 		}
 	}
