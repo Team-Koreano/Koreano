@@ -25,7 +25,7 @@ public class TossKey {
 		authorizationKey = createAuthorizationKey();
 	}
 
-	public String createAuthorizationKey(){
+	private String createAuthorizationKey(){
 		final String encode = Base64.getEncoder().encodeToString((properties.getSecretKey() + ":").getBytes());
 		final String finalKey = "Basic " + encode;
 		return finalKey;
