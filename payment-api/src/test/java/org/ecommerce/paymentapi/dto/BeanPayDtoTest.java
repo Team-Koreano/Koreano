@@ -34,7 +34,6 @@ class BeanPayDtoTest {
 		//given
 		Integer userId = 1;
 		Integer amount = 10000;
-		Long orderId = 123456L;
 
 		//when
 		BeanPayDto.Request.PreCharge preCharge = new BeanPayDto.Request.PreCharge(userId, amount);

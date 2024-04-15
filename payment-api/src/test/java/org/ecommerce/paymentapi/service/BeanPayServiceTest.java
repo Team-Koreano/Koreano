@@ -129,12 +129,15 @@ class BeanPayServiceTest {
 
 			//when
 			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
 				beanPayService.validTossCharge(request);
 			});
 			assertEquals(returnException.getErrorCode(), VERIFICATION_FAIL);
+			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 
 		@Test
@@ -161,12 +164,15 @@ class BeanPayServiceTest {
 			//when
 			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossFailResponse);
+			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
 				beanPayService.validTossCharge(request);
 			});
 			assertEquals(returnException.getErrorCode(), TOSS_RESPONSE_FAIL);
+			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 
 	}

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import org.ecommerce.common.error.ErrorCode;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
@@ -96,8 +97,8 @@ public class BeanPay {
 		this.approveDateTime = stringToDateTime(response.approveDateTime());
 	}
 
-	public void fail() {
-		this.cancelOrFailReason = TOSS_RESPONSE_FAIL.getMessage();
+	public void fail(ErrorCode errorCode) {
+		this.cancelOrFailReason = errorCode.getMessage();
 		this.processStatus = ProcessStatus.CANCELLED;
 	}
 }

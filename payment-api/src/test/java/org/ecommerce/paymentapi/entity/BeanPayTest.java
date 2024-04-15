@@ -109,7 +109,7 @@ class BeanPayTest {
 			final BeanPay actual = getBeanPay(orderId, paymentKey, userId, amount, paymentType);
 
 			//when
-			actual.fail();
+			actual.fail(TOSS_RESPONSE_FAIL);
 
 			//then
 			assertEquals(actual.getProcessStatus(), ProcessStatus.CANCELLED);
