@@ -5,6 +5,7 @@ import static org.ecommerce.bucketapi.exception.BucketErrorCode.*;
 import java.util.List;
 
 import org.ecommerce.bucketapi.dto.BucketDto;
+import org.ecommerce.bucketapi.dto.BucketMapper;
 import org.ecommerce.bucketapi.entity.Bucket;
 import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.ecommerce.common.error.CustomException;
@@ -30,37 +31,40 @@ public class BucketService {
 		}
 	}
 
-	@Transactional(readOnly = true)
-	public List<BucketDto.Response> getAllBuckets(final Integer userId) {
+	public List<BucketDto> getAllBuckets(final Integer userId) {
+
 		return bucketRepository.findAllByUserId(userId)
 				.stream()
-				.map(BucketDto.Response::of)
+				.map(BucketMapper.INSTANCE::toDto)
 				.toList();
 	}
 
-	public BucketDto.Response addBucket(
+	public BucketDto addBucket(
 			final Integer userId,
 			final BucketDto.Request.Add addRequest
 	) {
-		final Bucket newBucket = Bucket.ofAdd(
-				userId,
-				addRequest.seller(),
-				addRequest.productId(),
-				addRequest.quantity()
-		);
 
-		final Bucket bucket = bucketRepository.save(newBucket);
-		return BucketDto.Response.of(bucket);
+		return BucketMapper.INSTANCE.toDto(
+				bucketRepository.save(
+						Bucket.ofAdd(
+								userId,
+								addRequest.seller(),
+								addRequest.productId(),
+								addRequest.quantity()
+						)
+				)
+		);
 	}
 
-	public BucketDto.Response updateBucket(
+	public BucketDto updateBucket(
 			final Long bucketId,
 			final BucketDto.Request.Update updateRequest
 	) {
+
 		final Bucket bucket = bucketRepository.findById(bucketId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
 
 		bucket.update(updateRequest.quantity());
-		return BucketDto.Response.of(bucket);
+		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 }
