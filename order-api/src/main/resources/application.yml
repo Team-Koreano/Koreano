@@ -2,7 +2,7 @@ server:
   port: 8081
 spring:
   application:
-    name: order-api
+    name: bucket-api
   h2:
     console:
       enabled: true
