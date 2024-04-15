@@ -86,9 +86,9 @@ public class BeanPay {
 		this.processStatus = ProcessStatus.IN_PROGRESS;
 	}
 
-	public boolean validBeanPay(BeanPayDto.Request.TossPayment request) {
-		return this.getId().equals(request.orderId()) &&
-			this.getAmount().equals(request.amount());
+	public boolean validBeanPay(UUID orderId, Integer amount) {
+		return this.getId().equals(orderId) &&
+			this.getAmount().equals(amount);
 	}
 
 	public void complete(BeanPayDto.Response.TossPayment response) {

@@ -60,7 +60,7 @@ class BeanPayTest {
 				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
 
 			//when
-			boolean flag = actual.validBeanPay(request);
+			boolean flag = actual.validBeanPay(request.orderId(), request.amount());
 
 			//then
 			assertTrue(flag);

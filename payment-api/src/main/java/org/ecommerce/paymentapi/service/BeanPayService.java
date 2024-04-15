@@ -43,7 +43,7 @@ public class BeanPayService {
 			findBeanPay.inProgress();
 
 			// 빈페이 값 검증하기
-			if (!findBeanPay.validBeanPay(request)) {
+			if (!findBeanPay.validBeanPay(request.orderId(), request.amount())) {
 				throw new CustomException(BeanPayErrorCode.VERIFICATION_FAIL);
 			}
 		}catch (CustomException e) {
