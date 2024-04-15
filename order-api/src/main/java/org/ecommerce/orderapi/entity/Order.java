@@ -21,46 +21,31 @@ public class Order {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "userId", nullable = false)
+	@Column(nullable = false)
 	private Integer userId;
 
-	@Column(name = "receive_name", nullable = false)
+	@Column(nullable = false)
 	private String receiveName;
 
-	@Column(name = "phone_number", nullable = false)
+	@Column(nullable = false)
 	private String phoneNumber;
 
-	@Column(name = "address1", nullable = false)
+	@Column(nullable = false)
 	private String address1;
 
-	@Column(name = "address2", nullable = false)
+	@Column(nullable = false)
 	private String address2;
 
-	@Column(name = "delivery_comment")
+	@Column
 	private String deliveryComment;
 
-	@Column(name = "cash")
-	private Integer cash;
-
-	@Column(name = "beanpay")
+	@Column
 	private Integer beanpay;
 
-	@Column(name = "installment")
-	private Short installment;
-
-	@Column(name = "card_number")
-	private String cardNumber;
-
-	@Column(name = "card_type")
-	private String cardType;
-
-	@Column(name = "pay_method")
-	private String payMethod;
-
-	@Column(name = "payment_datetime")
+	@Column
 	private LocalDateTime paymentDatetime;
 
 	@CreationTimestamp
-	@Column(name = "order_datetime", nullable = false, updatable = false)
+	@Column
 	private LocalDateTime orderDatetime;
 }
