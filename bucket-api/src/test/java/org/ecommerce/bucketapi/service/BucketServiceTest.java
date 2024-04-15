@@ -104,7 +104,8 @@ public class BucketServiceTest {
 										"seller",
 										101,
 										3,
-										CREATE_DATE)
+										CREATE_DATE
+								)
 						)
 				);
 
@@ -127,13 +128,11 @@ public class BucketServiceTest {
 				.willReturn(Optional.empty());
 
 		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> bucketService.updateBucket(1L, bucketUpdateRequest));
+
 		// then
-		assertThatThrownBy(() -> bucketService.updateBucket(1L, bucketUpdateRequest))
-				.isInstanceOf(CustomException.class)
-				.extracting("errorCode")
-				.isEqualTo(BucketErrorCode.NOT_FOUND_BUCKET_ID)
-				.extracting("message")
-				.isEqualTo("존재하지 않는 장바구니 번호 입니다.");
+		assertEquals(BucketErrorCode.NOT_FOUND_BUCKET_ID, exception.getErrorCode());
 	}
 
 	@Test
@@ -143,12 +142,10 @@ public class BucketServiceTest {
 				.willReturn(false);
 
 		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> bucketService.validateBucketByUser(1, 1L));
+
 		// then
-		assertThatThrownBy(() -> bucketService.validateBucketByUser(1, 1L))
-				.isInstanceOf(CustomException.class)
-				.extracting("errorCode")
-				.isEqualTo(BucketErrorCode.INVALID_BUCKET_WITH_USER)
-				.extracting("message")
-				.isEqualTo("요청한 유저와 ID에 해당하는 장바구니가 존재하지 않습니다.");
+		assertEquals(BucketErrorCode.INVALID_BUCKET_WITH_USER, exception.getErrorCode());
 	}
 }
