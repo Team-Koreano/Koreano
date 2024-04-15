@@ -26,7 +26,7 @@ public class OrderDto {
 		public record Create(
 
 				@NotNull(message = "주문할 장바구니를 입력해 주세요.")
-				List<Long> buckets,
+				List<Long> bucketIds,
 
 				@NotBlank(message = "수신자 이름을 입력해 주세요.")
 				String receiveName,
