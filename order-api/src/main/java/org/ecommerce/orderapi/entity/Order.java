@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @Getter
 public class Order {
 
