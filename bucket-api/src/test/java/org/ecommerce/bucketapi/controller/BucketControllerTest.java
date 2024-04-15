@@ -37,7 +37,7 @@ public class BucketControllerTest {
 	@Test
 	void 장바구니_조회() throws Exception {
 		// given
-		List<BucketDto> bucketDtos =
+		final List<BucketDto> bucketDtos =
 				Arrays.asList(
 						new BucketDto(
 								1L,
@@ -62,14 +62,20 @@ public class BucketControllerTest {
 		// when
 		// then
 		mockMvc.perform(get("/api/buckets/v1"))
-				.andExpect(jsonPath("$.result[0].userId").value(1))
-				.andExpect(jsonPath("$.result[0].seller").value("seller1"))
-				.andExpect(jsonPath("$.result[0].productId").value(101))
-				.andExpect(jsonPath("$.result[0].quantity").value(3))
-				.andExpect(jsonPath("$.result[1].id").value(2))
-				.andExpect(jsonPath("$.result[1].seller").value("seller2"))
-				.andExpect(jsonPath("$.result[1].productId").value(102))
-				.andExpect(jsonPath("$.result[1].quantity").value(2))
+				.andExpect(jsonPath("$.result[0].id").value(bucketDtos.get(0).getId()))
+				.andExpect(jsonPath("$.result[0].seller").value(
+						bucketDtos.get(0).getSeller()))
+				.andExpect(jsonPath("$.result[0].productId").value(
+						bucketDtos.get(0).getProductId()))
+				.andExpect(jsonPath("$.result[0].quantity").value(
+						bucketDtos.get(0).getQuantity()))
+				.andExpect(jsonPath("$.result[1].id").value(bucketDtos.get(1).getId()))
+				.andExpect(jsonPath("$.result[1].seller").value(
+						bucketDtos.get(1).getSeller()))
+				.andExpect(jsonPath("$.result[1].productId").value(
+						bucketDtos.get(1).getProductId()))
+				.andExpect(jsonPath("$.result[1].quantity").value(
+						bucketDtos.get(1).getQuantity()))
 				.andExpect(status().isOk())
 				.andDo(print());
 	}
@@ -77,7 +83,7 @@ public class BucketControllerTest {
 	@Test
 	void 장바구니_담기() throws Exception {
 		// given
-		BucketDto bucketDto = new BucketDto(
+		final BucketDto bucketDto = new BucketDto(
 				1L, 1, "seller1", 101, 3, LocalDate.of(2024, 4, 14));
 		when(bucketService.addBucket(anyInt(), any(BucketDto.Request.Add.class)))
 				.thenReturn(bucketDto);
@@ -94,10 +100,10 @@ public class BucketControllerTest {
 								)
 						)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.userId").value(1))
-				.andExpect(jsonPath("$.result.seller").value("seller1"))
-				.andExpect(jsonPath("$.result.productId").value(101))
-				.andExpect(jsonPath("$.result.quantity").value(3))
+				.andExpect(jsonPath("$.result.userId").value(bucketDto.getUserId()))
+				.andExpect(jsonPath("$.result.seller").value(bucketDto.getSeller()))
+				.andExpect(jsonPath("$.result.productId").value(bucketDto.getProductId()))
+				.andExpect(jsonPath("$.result.quantity").value(bucketDto.getQuantity()))
 				.andDo(print());
 	}
 
@@ -143,7 +149,8 @@ public class BucketControllerTest {
 	@Test
 	void 장바구니_상품_수정() throws Exception {
 		// given
-		BucketDto bucketDto = new BucketDto(
+		final Integer newQuantity = 777;
+		final BucketDto bucketDto = new BucketDto(
 				1L,
 				1,
 				"seller1",
@@ -160,13 +167,13 @@ public class BucketControllerTest {
 		mockMvc.perform(put("/api/buckets/v1/2")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
-								new BucketDto.Request.Update(777)
+								new BucketDto.Request.Update(newQuantity)
 						)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.userId").value(1))
-				.andExpect(jsonPath("$.result.seller").value("seller1"))
-				.andExpect(jsonPath("$.result.productId").value(101))
-				.andExpect(jsonPath("$.result.quantity").value(3))
+				.andExpect(jsonPath("$.result.userId").value(bucketDto.getUserId()))
+				.andExpect(jsonPath("$.result.seller").value(bucketDto.getSeller()))
+				.andExpect(jsonPath("$.result.productId").value(bucketDto.getProductId()))
+				.andExpect(jsonPath("$.result.quantity").value(bucketDto.getQuantity()))
 				.andDo(print());
 	}
 
