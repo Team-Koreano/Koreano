@@ -1,19 +1,9 @@
 package org.ecommerce.userapi.dto;
 
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.security.JwtUtils;
 
 public class SellerDto {
-	public static class Request {
-		public record Register(
-			String email,
-			String name,
-			String password,
-			String address,
-			String phoneNumber
-		) {
-		}
-	}
-
 	public static class Response {
 		public record Register(
 			String email,
@@ -30,6 +20,29 @@ public class SellerDto {
 				);
 			}
 
+		}
+
+		public record Login(
+			String accessToken
+		) {
+			public static Login of(final String accessToken) {	return new Login(JwtUtils.prefix(accessToken));}
+		}
+	}
+
+	public static class Request {
+		public record Register(
+			String email,
+			String name,
+			String password,
+			String address,
+			String phoneNumber
+		) {
+		}
+
+		public record Login(
+			String email,
+			String password
+		) {
 		}
 	}
 }

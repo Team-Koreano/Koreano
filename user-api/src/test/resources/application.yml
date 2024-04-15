@@ -1,0 +1,13 @@
+SECRET_KEY_SOURCE : test
+spring:
+  profiles:
+    active: test
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6370
+jwt :
+  secret : test
+jasypt:
+  encryptor:
+    password: test

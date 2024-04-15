@@ -12,3 +12,13 @@ spring:
     url: jdbc:h2:mem:testdb
     username: sa
     password:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+jwt :
+  secret : ${SECRET_KEY_SOURCE}
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor

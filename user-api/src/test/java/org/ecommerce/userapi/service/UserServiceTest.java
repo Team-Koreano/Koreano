@@ -2,12 +2,16 @@ package org.ecommerce.userapi.service;
 
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.type.Gender;
+import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +32,15 @@ class UserServiceTest {
 	@Mock
 	private UserRepository userRepository;
 
+	@Mock
+	private JwtUtils jwtUtils;
+
 	@BeforeEach
 	public void 기초_셋팅() {
 		Users user1 = Users.ofRegister(
 			"user1@example.com",
 			"John Doe",
-			"password1",
+			bCryptPasswordEncoder.encode( "password1"),
 			Gender.MALE,
 			(short)25,
 			"01012345678"
@@ -122,4 +129,43 @@ class UserServiceTest {
 		Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
 			.isInstanceOf(CustomException.class);
 	}
+
+	@Test
+	void 회원_로그인() {
+		// given
+		String email = "user1@example.com";
+		String password = "password1";
+
+		UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
+		Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
+		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+		when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
+
+		//when
+		when(jwtUtils.createTokens(any(), any())).thenReturn("fake_token");
+
+		//then
+		UserDto.Response.Login response = userService.loginRequest(loginRequest);
+		Assertions.assertThat(response.accessToken()).isEqualTo("Bearer fake_token");
+
+		//이메일이 틀릴 경우
+		String incorrectEmail = "incorrect@example.com";
+		UserDto.Request.Login inCorrectEmailRequest = new UserDto.Request.Login(incorrectEmail, password);
+
+		//then
+		Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL.getMessage());
+
+		//비밀번호 틀릴 경우
+		String incorrectPassword = "incorrect";
+
+		//then
+		UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
+		Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+
+	}
 }
+//TODO : 레디스로 인해 로그아웃 테스트 추후 구현
