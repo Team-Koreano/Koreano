@@ -28,5 +28,11 @@ public class BeanPayController {
 		return new Response<>(200, preCharge);
 	}
 
+	@GetMapping("/success")
+	public Response<BeanPayDto.Response.TossPayment> validCharge(@Valid final BeanPayDto.Request.TossPayment request) {
+		final BeanPayDto.Response.TossPayment response = beanPayService.validTossCharge(request);
+		return new Response<>(200, response);
+	}
+
 
 }
