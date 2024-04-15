@@ -3,8 +3,10 @@ package org.ecommerce.orderapi.entity.type;
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public enum OrderStatusReason implements EnumMapperType {
 
 	REFUND("환불"),
@@ -18,10 +20,5 @@ public enum OrderStatusReason implements EnumMapperType {
 	@Override
 	public String getCode() {
 		return name();
-	}
-
-	@Override
-	public String getTitle() {
-		return title;
 	}
 }
