@@ -19,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -137,10 +136,16 @@ class SellerControllerTest {
 		final ResultActions resultActions = performLoginRequest(content);
 
 		// then
-		resultActions.andExpect(status().isOk())
-			.andExpect(header().exists(HttpHeaders.AUTHORIZATION))
-			.andExpect(header().string(HttpHeaders.AUTHORIZATION, expectedResponse.accessToken()))
-			.andExpect(content().string("로그인 되었습니다"));
+
+		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
+			.andReturn();
+
+		SellerDto.Response.Login result = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<Response<SellerDto.Response.Login>>() {
+			}
+		).result();
+		Assertions.assertThat(result).isEqualTo(expectedResponse);
 	}
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현

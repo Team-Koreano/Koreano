@@ -4,9 +4,7 @@ import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.service.SellerService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,11 +27,9 @@ public class SellerController {
 		return new Response<>(HttpStatus.OK.value(), responseSeller);
 	}
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody SellerDto.Request.Login login) {
+	public Response<SellerDto.Response.Login> login(@RequestBody SellerDto.Request.Login login) {
 		SellerDto.Response.Login responseLogin = sellerService.loginRequest(login);
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add(HttpHeaders.AUTHORIZATION,  responseLogin.accessToken());
-		return ResponseEntity.ok().headers(httpHeaders).body("로그인 되었습니다");
+		return new Response<>(HttpStatus.OK.value(),responseLogin);
 	}
 	@PostMapping("/logout")
 	public Response<?> logout(@AuthenticationPrincipal AuthDetails authDetails){
