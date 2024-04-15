@@ -28,14 +28,14 @@ public class OrderStatusHistory {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "oder_detail_id", nullable = false)
+	@JoinColumn(nullable = false)
 	private OrderDetail orderDetail;
 
-	@Column(name = "change_status", nullable = false)
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private OrderStatus changeStatus;
 
 	@CreationTimestamp
-	@Column(name = "status_change_datetime", nullable = false, updatable = false)
+	@Column
 	private LocalDateTime statusChangeDatetime;
 }

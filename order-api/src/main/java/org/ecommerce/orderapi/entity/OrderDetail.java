@@ -26,35 +26,35 @@ public class OrderDetail {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false)
+	@JoinColumn(nullable = false)
 	private Order order;
 
-	@Column(name = "product_id", nullable = false)
+	@Column(nullable = false)
 	private Integer productId;
 
-	@Column(name = "price", nullable = false)
+	@Column(nullable = false)
 	private Integer price;
 
-	@Column(name = "quantity", nullable = false)
+	@Column(nullable = false)
 	private Short quantity;
 
-	@Column(name = "total_price", nullable = false)
+	@Column(nullable = false)
 	private Integer totalPrice;
 
-	@Column(name = "delivery_fee", nullable = false)
+	@Column(nullable = false)
 	private Integer deliveryFee;
 
-	@Column(name = "payment_amount", nullable = false)
+	@Column(nullable = false)
 	private Integer paymentAmount;
 
-	@Column(name = "seller", nullable = false)
+	@Column(nullable = false)
 	private String seller;
 
-	@Column(name = "status", nullable = false)
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
 
-	@Column(name = "status_reason")
+	@Column
 	@Enumerated(EnumType.STRING)
 	private OrderStatusReason statusReason;
 }
