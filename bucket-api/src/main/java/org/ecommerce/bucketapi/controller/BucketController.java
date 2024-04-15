@@ -7,7 +7,9 @@ import org.ecommerce.bucketapi.service.BucketService;
 import org.ecommerce.common.vo.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/buckets")
+@RequestMapping("api/buckets/v1")
 public class BucketController {
 
 	private final BucketService bucketService;
@@ -27,15 +29,26 @@ public class BucketController {
 
 	@GetMapping
 	public Response<List<BucketDto.Response>> getBuckets() {
-		final List<BucketDto.Response> bucketResponse = bucketService.getAllBuckets(USER_ID);
-		return new Response<>(HttpStatus.OK.value(), bucketResponse);
+		return new Response<>(
+				HttpStatus.OK.value(), bucketService.getAllBuckets(USER_ID));
 	}
 
 	@PostMapping
 	public Response<BucketDto.Response> addBucket(
-		@RequestBody @Valid final BucketDto.Request.Add addRequest
+			@RequestBody @Valid final BucketDto.Request.Add addRequest
 	) {
-		final BucketDto.Response bucketResponse = bucketService.addBucket(USER_ID, addRequest);
-		return new Response<>(HttpStatus.OK.value(), bucketResponse);
+		return new Response<>(
+				HttpStatus.OK.value(), bucketService.addBucket(USER_ID, addRequest));
+	}
+
+	@PutMapping("/{bucketId}")
+	public Response<BucketDto.Response> updateBucket(
+			@PathVariable("bucketId") final Long bucketId,
+			@RequestBody @Valid final BucketDto.Request.Update updateRequest
+	) {
+		bucketService.validateBucketByUser(USER_ID, bucketId);
+		return new Response<>(
+				HttpStatus.OK.value(),
+				bucketService.updateBucket(bucketId, updateRequest));
 	}
 }
