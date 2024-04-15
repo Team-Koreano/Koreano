@@ -1,10 +1,16 @@
 package org.ecommerce.userapi.service;
 
+import java.util.Set;
+
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.entity.type.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.security.AuthDetails;
+import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.utils.RedisUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +28,12 @@ public class UserService {
 
 	private final BCryptPasswordEncoder passwordEncoder;
 
+
+	private final JwtUtils jwtUtils;
+
+	private final RedisUtils redisUtils;
+
+	//TODO : 다음 이슈 Refactoring 하기
 	public UserDto.Response.Register registerRequest(UserDto.Request.Register createUser) {
 
 		checkDuplicateEmail(createUser.email());
@@ -33,13 +45,34 @@ public class UserService {
 		return UserDto.Response.Register.of(users);
 	}
 
-	private void checkDuplicateEmail(String email) {
+	public UserDto.Response.Login loginRequest(UserDto.Request.Login login) {
+		Users users = userRepository.findByEmail(login.email()).orElseThrow(()-> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+		if (!passwordEncoder.matches(login.password(), users.getPassword())){
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_PASSWORD);
+		}
+
+		Set<String> authorization = Set.of(Role.USER.getCode());
+		String accessToken = jwtUtils.createTokens(users, authorization);
+
+		return UserDto.Response.Login.of(accessToken);
+
+	}
+
+	public void logoutRequest(AuthDetails authDetails) {
+		String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(),
+			authDetails.getAuthorities().toString().replace("[","").replace("]",""));
+		redisUtils.deleteData(accessTokenKey);
+	}
+
+	@Transactional(readOnly = true)
+	public void checkDuplicateEmail(String email) {
 		if (userRepository.existsByEmail(email)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
 		}
 	}
 
-	private void checkDuplicatePhoneNumber(String phoneNumber) {
+	@Transactional(readOnly = true)
+	public void checkDuplicatePhoneNumber(String phoneNumber) {
 		if (userRepository.existsByPhoneNumber(phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
