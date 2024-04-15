@@ -19,7 +19,7 @@ public class BeanPayDto {
 
 	}
 
-	public record Response(Long beanPayId,
+	public record Response(UUID beanPayId,
 						   Integer userId,
 						   Integer amount,
 						   BeanPayStatus beanPayStatus,
