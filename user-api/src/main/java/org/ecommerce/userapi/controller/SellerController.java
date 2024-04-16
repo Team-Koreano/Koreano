@@ -3,6 +3,7 @@ package org.ecommerce.userapi.controller;
 import java.util.Set;
 
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.service.SellerService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +46,16 @@ public class SellerController {
 		sellerService.logoutRequest(authDetails);
 		return new Response<>(HttpStatus.OK.value(), "로그아웃에 성공하였습니다");
 	}
+
+	@PostMapping("/account")
+	public Response<AccountDto.Response.Register> account(
+		@AuthenticationPrincipal final AuthDetails authDetails,
+		@RequestBody @Valid final AccountDto.Request.Register register){
+		AccountDto accountDto = sellerService.registerAccount(authDetails, register);
+		return new Response<>(HttpStatus.OK.value(),AccountDto.Response.Register.of(accountDto));
+
+	}
+
 
 	/**
 	 * 인증 인가 테스트 코드입니다.

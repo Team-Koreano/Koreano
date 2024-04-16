@@ -3,11 +3,15 @@ package org.ecommerce.userapi.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.type.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
@@ -32,6 +36,8 @@ public class SellerService {
 	private final JwtUtils jwtUtils;
 
 	private final RedisUtils redisUtils;
+
+	private final SellerAccountRepository sellerAccountRepository;
 
 	/**
 	 * 회원가입 요청
@@ -87,6 +93,16 @@ public class SellerService {
 		redisUtils.deleteData(accessTokenKey);
 	}
 
+	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+		final Seller seller = sellerRepository.findByEmail(authDetails.getEmail())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+
+		final SellerAccount account = SellerAccount.ofRegister(seller,register.number(),register.bankName());
+
+		sellerAccountRepository.save(account);
+
+		return AccountMapper.INSTANCE.toDto(account);
+	}
 	@Transactional(readOnly = true)
 	public void checkDuplicateEmail(final String email) {
 		if (sellerRepository.existsByEmail(email)) {
@@ -100,4 +116,6 @@ public class SellerService {
 			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
 	}
+
+
 }
