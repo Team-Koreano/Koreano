@@ -1,3 +1,4 @@
+
 package org.ecommerce.paymentapi.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,9 +11,13 @@ import java.util.UUID;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.ecommerce.paymentapi.service.BeanPayService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,15 +54,13 @@ class BeanPayControllerTest {
 	@Autowired
 	private WebApplicationContext wac;
 
-	final LocalDateTime now = LocalDateTime.now();
-	final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
-	// final BeanPay entity = new BeanPay(1L, "paymentKey", 1, 10_000, BeanPayStatus.DEPOSIT, ProcessStatus.PENDING, now);
-	final BeanPay entity = BeanPay.ofCreate(1, 10000);
-	final BeanPayDto.Response response = BeanPayDto.Response.ofCreate(entity);
+
+
+
 
 
 	@BeforeEach
-	void setup(){
+	void setup() {
 		this.mvc = MockMvcBuilders.webAppContextSetup(wac)
 			.addFilter(new CharacterEncodingFilter("UTF-8", true))
 			.build();
@@ -66,15 +69,18 @@ class BeanPayControllerTest {
 	@Test
 	void 사전결제객체_생성() throws Exception {
 		//given
-		when(beanPayService.preChargeBeanPay(request))
-			.thenReturn(response);
-		final Response<BeanPayDto.Response> response = new Response<>(200, this.response);
+		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
+		final BeanPay entity = BeanPay.ofCreate(1, 10_000);
+		final BeanPayDto dto = BeanPayMapper.INSTANCE.toDto(entity);
+
+		when(beanPayService.preChargeBeanPay(request)).thenReturn(dto);
+		final Response<BeanPayDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1/payments")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsBytes(request)))
-			.andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1/payments").contentType(MediaType.APPLICATION_JSON)
+			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
+
+
 
 		//then
 		String actual = mvcResult.getResponse().getContentAsString();
@@ -89,31 +95,32 @@ class BeanPayControllerTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final String paymentKey = "paymentKey";
-			final String orderName = "orderName";
+			final Integer userId = 1;
 			final String paymentType = "카드";
-			final String method = "카드";
+
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request =
-				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
-			final BeanPayDto.Response.TossPayment response =
-				new BeanPayDto.Response.TossPayment(paymentType, orderName, method, amount, approveDateTime);
-			final Response<BeanPayDto.Response.TossPayment> result = new Response<>(200, response);
+			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+				orderId, amount);
+			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId, amount, paymentType, null,
+				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
+				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
+			final Response<BeanPayDto> result = new Response<>(200, response);
 
 
-			when(beanPayService.validTossCharge(request))
-				.thenReturn(response);
 
+
+			when(beanPayService.validTossCharge(request)).thenReturn(response);
 
 			//when
-			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success")
-					.contentType(MediaType.APPLICATION_JSON)
-					.param("orderId", String.valueOf(request.orderId()))
-					.param("paymentKey", request.paymentKey())
-					.param("paymentType", request.paymentType())
-					.param("amount", String.valueOf(request.amount())))
-					.andExpect(status().isOk()).andReturn();
+			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success").contentType(MediaType.APPLICATION_JSON)
+				.param("orderId", String.valueOf(request.orderId()))
+				.param("paymentKey", request.paymentKey())
+				.param("paymentType", request.paymentType())
+				.param("amount", String.valueOf(request.amount()))).andExpect(status().isOk()).andReturn();
+
+
 
 			//then
 			String actual = mvcResult.getResponse().getContentAsString();
