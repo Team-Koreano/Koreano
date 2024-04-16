@@ -3,12 +3,20 @@ package org.ecommerce.userapi.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.AddressDto;
+import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.type.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
 import org.ecommerce.userapi.utils.RedisUtils;
@@ -33,6 +41,10 @@ public class UserService {
 	private final JwtUtils jwtUtils;
 
 	private final RedisUtils redisUtils;
+
+	private final AddressRepository addressRepository;
+
+	private final UsersAccountRepository usersAccountRepository;
 
 
 	/**
@@ -88,6 +100,33 @@ public class UserService {
 		redisUtils.deleteData(accessTokenKey);
 	}
 
+	/**
+	 * 주소 등록
+	 */
+
+	public AddressDto registerAddress(final AuthDetails authDetails,final AddressDto.Request.Register register){
+
+		final Users users = userRepository.findByEmail(authDetails.getEmail())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+
+		final Address address = Address.ofRegister(users,register.name(), register.postAddress(), register.detail());
+
+		addressRepository.save(address);
+
+		return AddressMapper.INSTANCE.toDto(address);
+
+	}
+
+	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+		final Users users = userRepository.findByEmail(authDetails.getEmail())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+
+		final UsersAccount account = UsersAccount.ofRegister(users,register.number(),register.bankName());
+
+		usersAccountRepository.save(account);
+
+		return AccountMapper.INSTANCE.toDto(account);
+	}
 	@Transactional(readOnly = true)
 	public void checkDuplicateEmail(String email) {
 		if (userRepository.existsByEmail(email)) {
@@ -101,4 +140,6 @@ public class UserService {
 			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
 	}
+
+
 }

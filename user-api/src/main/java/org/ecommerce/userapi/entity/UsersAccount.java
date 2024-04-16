@@ -30,7 +30,7 @@ public class UsersAccount {
 	private Users users;
 
 	@Column(nullable = false)
-	private Short number;
+	private String number;
 
 	@Column(nullable = false)
 	private String bankName;
@@ -45,4 +45,13 @@ public class UsersAccount {
 	@UpdateTimestamp
 	@Column()
 	private LocalDateTime updateDatetime;
+
+	public static UsersAccount ofRegister(Users users, String number, String bankName){
+		UsersAccount usersAccount = new UsersAccount();
+		usersAccount.users = users;
+		usersAccount.bankName = bankName;
+		usersAccount.number = number;
+		usersAccount.isDeleted = false;
+		return usersAccount;
+	}
 }
