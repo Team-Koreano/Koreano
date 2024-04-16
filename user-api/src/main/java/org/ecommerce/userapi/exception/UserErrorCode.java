@@ -15,7 +15,9 @@ public enum UserErrorCode implements ErrorCode {
 	INVALID_SIGNATURE_JWT(HttpStatus.BAD_REQUEST, "토큰의 형식을 만족하지 않습니다."),
 	EMPTY_JWT(HttpStatus.BAD_REQUEST, "토큰이 존재하지 않습니다."),
 	UNRELIABLE_JWT(HttpStatus.BAD_REQUEST, "신뢰할 수 없는 토큰입니다."),
-	RELOGIN(HttpStatus.BAD_REQUEST, "다시 로그인 해주세요")
+	RELOGIN(HttpStatus.BAD_REQUEST, "다시 로그인 해주세요"),
+	INVALID_AUTHENTICATION(HttpStatus.BAD_REQUEST,"권한이 없습니다"),
+	AUTHENTICATION_FAILED(HttpStatus.BAD_REQUEST,"인증에 실패하였습니다")
 	;
 
 	UserErrorCode(HttpStatus status, String message) {
