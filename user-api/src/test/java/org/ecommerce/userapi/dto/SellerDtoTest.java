@@ -30,8 +30,9 @@ class SellerDtoTest {
 	@Test
 	void 셀러_응답() {
 		//given
+		final  SellerDto sellerDto = SellerMapper.INSTANCE.toDto(SELLER);
 		//when
-		final SellerDto.Response.Register register = SellerDto.Response.Register.of(SELLER);
+		final SellerDto.Response.Register register = SellerDto.Response.Register.of(sellerDto);
 		//then
 		assertThat(register.email()).isEqualTo(SELLER.getEmail());
 		assertThat(register.name()).isEqualTo(SELLER.getName());
