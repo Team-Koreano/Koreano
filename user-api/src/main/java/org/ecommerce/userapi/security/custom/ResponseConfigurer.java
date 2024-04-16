@@ -17,7 +17,7 @@ public interface ResponseConfigurer {
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-		Response responseBody = new Response<>(
+		Response<String> responseBody = new Response<>(
 			errorCode.getCode(), errorCode.getMessage()
 		);
 
