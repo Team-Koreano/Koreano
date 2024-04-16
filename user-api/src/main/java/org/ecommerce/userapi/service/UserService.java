@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.UserDto;
+import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.type.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
@@ -33,33 +34,56 @@ public class UserService {
 
 	private final RedisUtils redisUtils;
 
-	//TODO : 다음 이슈 Refactoring 하기
-	public UserDto.Response.Register registerRequest(UserDto.Request.Register createUser) {
 
-		checkDuplicateEmail(createUser.email());
-		checkDuplicatePhoneNumber(createUser.phoneNumber());
+	/**
+	 * 회원가입 요청
+	 * @author 홍종민
+	 * @return SellerDto
+	 */
+	public UserDto registerRequest(final UserDto.Request.Register register) {
 
-		Users users = Users.ofRegister(createUser.email(), createUser.name(), passwordEncoder.encode(createUser.password()),
-			createUser.gender(), createUser.age(), createUser.phoneNumber());
+		checkDuplicateEmail(register.email());
+		checkDuplicatePhoneNumber(register.phoneNumber());
+
+		final Users users = Users.ofRegister(register.email(), register.name(), passwordEncoder.encode(register.password()),
+			register.gender(), register.age(), register.phoneNumber());
 		userRepository.save(users);
-		return UserDto.Response.Register.of(users);
+		return UserMapper.INSTANCE.toDto(users);
 	}
 
-	public UserDto.Response.Login loginRequest(UserDto.Request.Login login) {
-		Users users = userRepository.findByEmail(login.email()).orElseThrow(()-> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+
+	/**
+	 * 로그인 요청
+	 *
+	 * 로그인 요청을 보낸 유저의 고유한 상태값(역할 + 식별값 + 이메일)을 통해
+	 * UniqueKey 를 만든 후  key:value(access,refresh)를 Redis에 저장
+	 *
+	 * @author 홍종민
+	 * @return SellerDto
+	 */
+	public UserDto loginRequest(final UserDto.Request.Login login) {
+		final Users users = userRepository.findByEmail(login.email()).orElseThrow(()-> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 		if (!passwordEncoder.matches(login.password(), users.getPassword())){
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_PASSWORD);
 		}
 
-		Set<String> authorization = Set.of(Role.USER.getCode());
-		String accessToken = jwtUtils.createTokens(users, authorization);
+		final Set<String> authorization = Set.of(Role.USER.getCode());
+		final String accessToken = jwtUtils.createTokens(users, authorization);
 
-		return UserDto.Response.Login.of(accessToken);
+		return UserMapper.INSTANCE.fromAccessToken(accessToken);
 
 	}
 
-	public void logoutRequest(AuthDetails authDetails) {
-		String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(),
+	/**
+	 * 로그아웃 요청
+	 *
+	 * 로그아웃시 요청을 보낸 유저의 UniqueKey를 통해  Redis 에서 삭제
+	 * 이로 인해 만약 로그아웃시 이전의 발급한 AccessToken은 유효하지않음 재발급의 대상이 됌
+	 *
+	 * @author 홍종민
+	 */
+	public void logoutRequest(final AuthDetails authDetails) {
+		final String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(),
 			authDetails.getAuthorities().toString().replace("[","").replace("]",""));
 		redisUtils.deleteData(accessTokenKey);
 	}
