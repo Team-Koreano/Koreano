@@ -2,8 +2,10 @@ package org.ecommerce.paymentapi.exception;
 
 import org.ecommerce.common.error.ErrorCode;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum BeanPayErrorCode implements ErrorCode {
 	NOT_EXIST(400, "빈페이 ID가 존재하지 않습니다."),
@@ -13,13 +15,4 @@ public enum BeanPayErrorCode implements ErrorCode {
 	private final int code;
 	private final String message;
 
-	@Override
-	public int getCode() {
-		return code;
-	}
-
-	@Override
-	public String getMessage() {
-		return message;
-	}
 }
