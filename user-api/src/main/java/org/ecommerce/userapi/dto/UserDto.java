@@ -1,10 +1,31 @@
 package org.ecommerce.userapi.dto;
 
-import org.ecommerce.userapi.entity.Users;
+import java.time.LocalDateTime;
+
 import org.ecommerce.userapi.entity.type.Gender;
+import org.ecommerce.userapi.entity.type.UserStatus;
 import org.ecommerce.userapi.security.JwtUtils;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public class UserDto {
+
+	private Integer id;
+	private String email;
+	private String name;
+	private String password;
+	private Gender gender;
+	private Short age;
+	private String phoneNumber;
+	private LocalDateTime createDatetime;
+	private boolean isDeleted;
+	private LocalDateTime updateDatetime;
+	private Integer beanPay;
+	private UserStatus userStatus;
+	private String accessToken;
 
 	public static class Request {
 		public record Register(
@@ -32,7 +53,7 @@ public class UserDto {
 			Short age,
 			String phoneNumber
 		) {
-			public static Register of(final Users users) {
+			public static Register of(final UserDto users) {
 				return new Register(
 					users.getEmail(),
 					users.getName(),
@@ -42,11 +63,12 @@ public class UserDto {
 				);
 			}
 		}
+
 		public record Login(
 			String accessToken
-		){
-			public static Login of(final String accessToken){
-				return new Login(JwtUtils.prefix(accessToken));
+		) {
+			public static Login of(final UserDto userDto) {
+				return new Login(JwtUtils.prefix(userDto.accessToken));
 			}
 		}
 	}
