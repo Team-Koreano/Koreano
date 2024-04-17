@@ -1,7 +1,6 @@
 package org.ecommerce.paymentapi.repository;
 
 
-import java.util.Optional;
 
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.junit.jupiter.api.Assertions;

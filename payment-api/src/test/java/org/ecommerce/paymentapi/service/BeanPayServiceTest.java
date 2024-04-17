@@ -1,3 +1,4 @@
+
 package org.ecommerce.paymentapi.service;
 
 import static org.assertj.core.api.Assertions.*;
@@ -12,10 +13,10 @@ import java.util.UUID;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
-import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
 import org.junit.jupiter.api.Nested;
@@ -47,12 +48,12 @@ class BeanPayServiceTest {
 		//given
 		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
 		final BeanPay entity = BeanPay.ofCreate(1, 10000);
-		final BeanPayDto.Response response = BeanPayDto.Response.ofCreate(entity);
+		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
 
 		given(beanPayRepository.save(any())).willReturn(entity);
 
 		//when
-		final BeanPayDto.Response actual = beanPayService.preChargeBeanPay(request);
+		final BeanPayDto actual = beanPayService.preChargeBeanPay(request);
 
 		//then
 		assertThat(actual).usingRecursiveComparison().isEqualTo(response);

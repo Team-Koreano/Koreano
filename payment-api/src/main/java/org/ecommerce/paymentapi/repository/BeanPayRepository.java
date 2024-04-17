@@ -1,6 +1,5 @@
 package org.ecommerce.paymentapi.repository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.ecommerce.paymentapi.entity.BeanPay;
