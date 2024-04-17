@@ -1,6 +1,5 @@
 package org.ecommerce.orderapi.dto;
 
-import org.ecommerce.orderapi.vo.ResponseBucket;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -10,5 +9,5 @@ public interface BucketMapper {
 
 	BucketMapper INSTANCE = Mappers.getMapper(BucketMapper.class);
 
-	BucketDto toDto(ResponseBucket responseBucket);
+	BucketDto toDto(BucketDto.Response response);
 }

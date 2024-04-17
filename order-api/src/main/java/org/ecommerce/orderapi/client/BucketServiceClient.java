@@ -2,7 +2,7 @@ package org.ecommerce.orderapi.client;
 
 import java.util.List;
 
-import org.ecommerce.orderapi.vo.ResponseBucket;
+import org.ecommerce.orderapi.dto.BucketDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +13,8 @@ public interface BucketServiceClient {
 
 	// 장바구니에 담겨있는 상품 정보를 가져옴, 검증
 	@GetMapping("/{userId}")
-	List<ResponseBucket> getBuckets(
+	List<BucketDto.Response> getBuckets(
 			@PathVariable("userId") final Integer userId,
-			@RequestParam final List<Long> bucketIds
+			@RequestParam("bucketIds") final List<Long> bucketIds
 	);
 }
