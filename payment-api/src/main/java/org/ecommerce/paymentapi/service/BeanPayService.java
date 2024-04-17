@@ -1,3 +1,4 @@
+
 package org.ecommerce.paymentapi.service;
 
 import java.util.UUID;
@@ -5,6 +6,7 @@ import java.util.UUID;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
@@ -26,15 +29,30 @@ public class BeanPayService {
 	private final BeanPayRepository beanPayRepository;
 	private final TossServiceClient tossServiceClient;
 
-	public BeanPayDto.Response preChargeBeanPay(final BeanPayDto.Request.PreCharge request) {
+	/**
+	 * 충전하기 전 사전 객체 생성
+	 * @author 이우진
+	 *
+	 * @return - BeanPayDto
+	 */
+	public BeanPayDto preChargeBeanPay(final BeanPayDto.Request.PreCharge request) {
 
 		final BeanPay beanPay = BeanPay.ofCreate(request.userId(), request.amount());
 		final BeanPay createBeanPay = beanPayRepository.save(beanPay);
+		return BeanPayMapper.INSTANCE.toDto(createBeanPay);
 
-		return BeanPayDto.Response.ofCreate(createBeanPay);
 	}
+
+	/**
+	 * 토스에서 전달한 검증객체 검증 메소드
+	 * @author 이우진
+	 *
+	 * @param - BeanPayDto.Request.TossPayment request
+	 * @return - BeanPayDto response
+	 */
+
 	@Transactional(readOnly = true)
-	public BeanPayDto.Response.TossPayment validTossCharge(BeanPayDto.Request.TossPayment request) {
+	public BeanPayDto validTossCharge(final BeanPayDto.Request.TossPayment request) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(), request.amount());
 
 		BeanPay findBeanPay = findBeanPayById(request.orderId());
@@ -48,7 +66,8 @@ public class BeanPayService {
 		}
 		try {
 			//TODO: 유저 beanPay 추가 로직 작성
-			return processApproval(findBeanPay, request);
+			processApproval(findBeanPay, request);
+			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
 		} catch (CustomException e) {
 			handleException(findBeanPay, e);
 			//TODO: 유저 beanPay 롤백 로직 작성
@@ -56,22 +75,50 @@ public class BeanPayService {
 		}
 	}
 
-	private BeanPay findBeanPayById(UUID orderId) throws CustomException {
+	/**
+	 *	userId를 기반 찾기
+	 * @author 이우진
+	 *
+	 * @param - UUID orderId
+	 * @return - BeanPay
+	 */
+	private BeanPay findBeanPayById(final UUID orderId) throws CustomException {
 		return beanPayRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(BeanPayErrorCode.NOT_EXIST));
 	}
 
-	private void processInProgress(BeanPay findBeanPay) {
+	/**
+	 *	빈페이 검증 진행중으로 상태 변경
+	 * @author 이우진
+	 *
+	 * @param - BeanPay findBeanPay
+	 * @return - void
+	 */
+	private void processInProgress(final BeanPay findBeanPay) {
 		findBeanPay.inProgress();
 	}
 
-	private void validateBeanPay(BeanPay findBeanPay, BeanPayDto.Request.TossPayment request) throws CustomException {
+	/**
+	 *	토스 객체와 DB 값 비교
+	 * @author 이우진
+	 *
+	 * @param - BeanPay findBeanPay, BeanPayDto.Request.TossPayment request
+	 * @return - void
+	 */
+	private void validateBeanPay(final BeanPay findBeanPay, final BeanPayDto.Request.TossPayment request) throws CustomException {
 		if (!findBeanPay.validBeanPay(request.orderId(), request.amount())) {
 			throw new CustomException(BeanPayErrorCode.VERIFICATION_FAIL);
 		}
 	}
 
-	private BeanPayDto.Response.TossPayment processApproval(BeanPay findBeanPay, BeanPayDto.Request.TossPayment request) throws CustomException {
+	/**
+	 * 토스 외부 API 검증 승인 호출
+	 * @author 이우진
+	 *
+	 * @param - final BeanPay findBeanPay, final BeanPayDto.Request.TossPayment request
+	 * @return - void
+	 */
+	private void processApproval(final BeanPay findBeanPay, final BeanPayDto.Request.TossPayment request) throws CustomException {
 		ResponseEntity<BeanPayDto.Response.TossPayment> response = tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
@@ -81,10 +128,17 @@ public class BeanPayService {
 
 		findBeanPay.complete(response.getBody());
 		log.info("토스 결제 승인 서비스 로직 종료");
-		return response.getBody();
+
 	}
 
-	private void handleException(BeanPay findBeanPay, CustomException e) {
+	/**
+	 * 예외 발생 시 상태 빈페이 상태 변경
+	 * @author 이우진
+	 *
+	 * @param - BeanPay findBeanPay, CustomException e
+	 * @return - void
+	 * */
+	private void handleException(final BeanPay findBeanPay, final CustomException e) {
 		findBeanPay.fail(e.getErrorCode());
 	}
 }

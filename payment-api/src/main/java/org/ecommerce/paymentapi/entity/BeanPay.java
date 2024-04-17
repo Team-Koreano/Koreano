@@ -1,18 +1,14 @@
 package org.ecommerce.paymentapi.entity;
 
-import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
 import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import org.ecommerce.common.error.ErrorCode;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
-import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
-import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;

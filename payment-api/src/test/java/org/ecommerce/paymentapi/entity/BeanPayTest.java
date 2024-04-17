@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
-import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

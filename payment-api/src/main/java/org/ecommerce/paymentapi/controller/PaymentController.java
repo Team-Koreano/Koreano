@@ -1,13 +1,7 @@
 package org.ecommerce.paymentapi.controller;
 
-import org.ecommerce.common.vo.Response;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.service.BeanPayService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

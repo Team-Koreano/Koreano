@@ -1,17 +1,13 @@
 package org.ecommerce.paymentapi.dto;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.internal.configuration.GlobalConfiguration.*;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

@@ -4,6 +4,7 @@ import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.service.BeanPayService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,15 +24,15 @@ public class BeanPayController {
 	private final BeanPayService beanPayService;
 
 	@PostMapping("/payments")
-	public Response<BeanPayDto.Response> preCharge(@RequestBody final BeanPayDto.Request.PreCharge request) {
-		final BeanPayDto.Response preCharge = beanPayService.preChargeBeanPay(request);
-		return new Response<>(200, preCharge);
+	public Response<BeanPayDto> preCharge(@RequestBody final BeanPayDto.Request.PreCharge request) {
+		final BeanPayDto response = beanPayService.preChargeBeanPay(request);
+		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/success")
-	public Response<BeanPayDto.Response.TossPayment> validCharge(@Valid final BeanPayDto.Request.TossPayment request) {
-		final BeanPayDto.Response.TossPayment response = beanPayService.validTossCharge(request);
-		return new Response<>(200, response);
+	public Response<BeanPayDto> validCharge(@Valid final BeanPayDto.Request.TossPayment request) {
+		final BeanPayDto response = beanPayService.validTossCharge(request);
+		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 
