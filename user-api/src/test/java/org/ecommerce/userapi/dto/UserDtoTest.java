@@ -32,8 +32,9 @@ class UserDtoTest {
 	@Test
 	void 회원_응답() {
 		//given
+		final UserDto userDto = UserMapper.INSTANCE.toDto(USERS);
 		//when
-		final UserDto.Response.Register register = UserDto.Response.Register.of(USERS);
+		final UserDto.Response.Register register = UserDto.Response.Register.of(userDto);
 		//then
 		assertThat(register.age()).isEqualTo(USERS.getAge());
 		assertThat(register.email()).isEqualTo(USERS.getEmail());

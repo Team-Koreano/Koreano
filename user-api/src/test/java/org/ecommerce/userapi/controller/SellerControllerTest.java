@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.service.SellerService;
@@ -99,9 +100,19 @@ class SellerControllerTest {
 			registerRequest.address(),
 			registerRequest.phoneNumber());
 
-		String content = objectMapper.writeValueAsString(registerRequest);
+		Seller seller = Seller.ofRegister(
+			registerRequest.email(),
+			registerRequest.name(),
+			registerRequest.password(),
+			registerRequest.address(),
+			registerRequest.phoneNumber()
+		);
 
-		when(sellerService.registerRequest(registerRequest)).thenReturn(expectedResponse);
+		SellerDto responseDto = SellerMapper.INSTANCE.toDto(seller);
+
+		String content = objectMapper.writeValueAsString(responseDto);
+
+		when(sellerService.registerRequest(registerRequest)).thenReturn(responseDto);
 
 		//when
 		final ResultActions resultActions = performPostRequest(content);
@@ -126,17 +137,20 @@ class SellerControllerTest {
 		final String email = "test@example.com";
 		final String password = "test";
 		final SellerDto.Request.Login login = new SellerDto.Request.Login(email, password);
+
 		final String content = objectMapper.writeValueAsString(login);
 
-		// mock service response
-		final SellerDto.Response.Login expectedResponse = SellerDto.Response.Login.of("access_token");
-		when(sellerService.loginRequest(login)).thenReturn(expectedResponse);
+		final SellerDto sellerDto = SellerMapper.INSTANCE.fromAccessToken("access_token");
+
+		final SellerDto.Response.Login expectedResponse = SellerDto.Response.Login.of(sellerDto);
+
+
+		when(sellerService.loginRequest(login)).thenReturn(sellerDto);
 
 		// when
 		final ResultActions resultActions = performLoginRequest(content);
 
 		// then
-
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
 			.andReturn();
 

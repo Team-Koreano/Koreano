@@ -1,5 +1,7 @@
 package org.ecommerce.userapi.security;
 
+import org.ecommerce.userapi.security.custom.CustomAuthenticationEntryPoint;
+import org.ecommerce.userapi.security.custom.CustomerAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,11 +26,16 @@ public class WebSecurity {
 
 		http.csrf(AbstractHttpConfigurer::disable);
 
-		http.authorizeHttpRequests((authz) -> authz
+		http.authorizeHttpRequests((authz) ->
+				authz.requestMatchers("/api/sellers/v1/test").hasAnyAuthority("SELLER"))
+			.authorizeHttpRequests((authz) ->
+				authz.requestMatchers("/api/users/v1/test").hasAnyAuthority("USER"))
+			.authorizeHttpRequests((authz) -> authz
 				.requestMatchers("/**").permitAll()
-			)
-			.sessionManagement((session) -> session
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+			).sessionManagement((session) -> session
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.exceptionHandling((handle) -> handle.accessDeniedHandler(new CustomerAccessDeniedHandler()))
+			.exceptionHandling((handle) -> handle.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		http.headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

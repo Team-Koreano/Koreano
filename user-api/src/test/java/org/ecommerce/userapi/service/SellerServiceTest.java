@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerRepository;
@@ -58,7 +59,7 @@ class SellerServiceTest {
 		when(sellerRepository.existsByEmail(newSellerReqeust.email())).thenReturn(false);
 		when(sellerRepository.existsByPhoneNumber(newSellerReqeust.phoneNumber())).thenReturn(false);
 
-		SellerDto.Response.Register response = sellerService.registerRequest(newSellerReqeust);
+		SellerDto result = sellerService.registerRequest(newSellerReqeust);
 
 		Seller savedSeller = Seller.ofRegister(
 			newSellerReqeust.email(),
@@ -68,8 +69,10 @@ class SellerServiceTest {
 			newSellerReqeust.phoneNumber()
 		);
 
+		SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
+
 		//then
-		Assertions.assertThat(response).isEqualTo(SellerDto.Response.Register.of(savedSeller));
+		Assertions.assertThat(SellerDto.Response.Register.of(expectedResult)).isEqualTo(SellerDto.Response.Register.of(result));
 
 		// given
 		// 중복 이메일 케이스
@@ -115,11 +118,11 @@ class SellerServiceTest {
 		when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 
 		//when
-		when(jwtUtils.createTokens(any(), any())).thenReturn("fake_token");
+		when(jwtUtils.createTokens(any(), any())).thenReturn("Bearer fake_token");
 
 		//then
-		SellerDto.Response.Login response = sellerService.loginRequest(loginRequest);
-		Assertions.assertThat(response.accessToken()).isEqualTo("Bearer fake_token");
+		SellerDto response  = sellerService.loginRequest(loginRequest);
+		Assertions.assertThat(response.getAccessToken()).isEqualTo("Bearer fake_token");
 
 		//이메일이 틀릴 경우
 		String incorrectEmail = "incorrect@example.com";

@@ -53,13 +53,14 @@ public class JwtUtils {
 		return jwt.substring(PREFIX.length());
 	}
 
-	public String createToken(Integer userId, String email, long lifeCycle, SecretKey secretKey,
+	public String createToken(Member member, long lifeCycle, SecretKey secretKey,
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
-			.claim("userId", userId)
-			.claim("email", email)
+			.claim("id", member.getId())
+			.claim("email", member.getEmail())
 			.claim("authorization", authorization)
+			.claim("status",member.getUserStatus())
 			.setIssuedAt(now)
 			.setExpiration(new Date(now.getTime() + lifeCycle * 1000))
 			.signWith(SignatureAlgorithm.HS256, secretKey)
@@ -68,8 +69,7 @@ public class JwtUtils {
 
 	public Integer getUserId(String jwt) {
 		String cuttedJwt = cutPreFix(jwt);
-		Claims claims = parseClaims(cuttedJwt);
-		return claims.get("userId", Integer.class);
+		return parseClaims(cuttedJwt).get("id",Integer.class);
 	}
 
 	public String createTokens(Member member, Set<String> authorization) {
@@ -77,8 +77,8 @@ public class JwtUtils {
 		final long oneHour = 3_600;
 		final long twoWeeks = oneHour * 24 * 14;
 
-		final String accessToken = createToken(member.getId(), member.getEmail(), oneHour, secretKey, authorization);
-		final String refreshToken = createToken(member.getId(), member.getEmail(), twoWeeks, secretKey, authorization);
+		final String accessToken = createToken(member, oneHour, secretKey, authorization);
+		final String refreshToken = createToken(member, twoWeeks, secretKey, authorization);
 
 		String accessTokenKey = getAccessTokenKey(member.getId(),getAuthority(accessToken));
 		redisUtils.setData(accessTokenKey, accessToken, oneHour, TimeUnit.SECONDS);
@@ -91,15 +91,12 @@ public class JwtUtils {
 	}
 
 	//TODO : 유효성 검증,
-	public Claims parseClaims(String jwt) {
+	public Claims parseClaims(String jwt) throws CustomException{
 		try {
 			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwt).getBody();
-		} catch (ExpiredJwtException e) {
-			throw new CustomException(UserErrorCode.EXPIRED_JWT);
-		} catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-			throw new CustomException(UserErrorCode.INVALID_SIGNATURE_JWT);
-		} catch (IllegalArgumentException e) {
-			throw new CustomException(UserErrorCode.EMPTY_JWT);
+		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
+				 IllegalArgumentException e) {
+			throw e;
 		}
 	}
 
@@ -112,16 +109,18 @@ public class JwtUtils {
 	}
 
 	public UsernamePasswordAuthenticationToken parseAuthentication(String jwt) {
-		String cutPreFix = cutPreFix(jwt);
-		Claims claims = parseClaims(cutPreFix);
+		Claims claims = parseClaims(cutPreFix(jwt));
 		String email = claims.get("email", String.class);
 		List<?> authorities = claims.get("authorization", List.class);
+
 		if (authorities == null)
 			throw new CustomException(UserErrorCode.INVALID_SIGNATURE_JWT);
+
 		Set<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
 			.map(String::valueOf)
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toSet());
+
 		return new UsernamePasswordAuthenticationToken(email, jwt, grantedAuthorities);
 	}
 
