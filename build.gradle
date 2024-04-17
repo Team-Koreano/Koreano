@@ -119,6 +119,11 @@ project(':order-api'){
         runtimeOnly 'com.h2database:h2'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
+        }
+    }
 }
 
 project(':payment-api') {
