@@ -37,6 +37,10 @@ public class BeanPayController {
 		if(response.getProcessStatus() == CANCELLED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
+
+	@GetMapping("/fail")
+	public Response<BeanPayDto> failCharge(@Valid final BeanPayDto.Request.TossFail request) {
+		final BeanPayDto response = beanPayService.failTossCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
