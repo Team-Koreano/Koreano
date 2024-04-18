@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.Users;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,11 +22,11 @@ public class AddressDto {
 
 	public static class Request {
 		public record Register(
-			@NotEmpty(message = "주소지 별명을 입력해주세요")
+			@NotBlank(message = "주소지 별명을 입력해주세요")
 			String name,
-			@NotEmpty(message = "주소지를 입력해주세요")
+			@NotBlank(message = "주소지를 입력해주세요")
 			String postAddress,
-			@NotEmpty(message = "상세 주소를 입력해주세요")
+			@NotBlank(message = "상세 주소를 입력해주세요")
 			String detail
 		) {
 		}
