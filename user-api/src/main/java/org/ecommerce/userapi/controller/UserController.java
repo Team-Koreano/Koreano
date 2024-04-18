@@ -27,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/users/v1")
 public class UserController {
 
-	// TODO : 계좌, 주소 테이블 생성 로직 구현
-	//  AccessToken 만료시 RefreshToken 을 통해 Reissue 로직 구현
 
 	private final UserService userService;
 
