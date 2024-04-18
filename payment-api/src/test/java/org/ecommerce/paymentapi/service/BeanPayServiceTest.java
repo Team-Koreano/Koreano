@@ -92,6 +92,7 @@ class BeanPayServiceTest {
 
 		@Test
 		void 빈페이_존재_안함_예외발생() {
+		void 빈페이_존재안함_예외발생() {
 
 			//given
 			final UUID orderId = UUID.randomUUID();
@@ -137,12 +138,15 @@ class BeanPayServiceTest {
 				beanPayService.validTossCharge(request);
 			});
 			assertEquals(returnException.getErrorCode(), VERIFICATION_FAIL);
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), VERIFICATION_FAIL.getMessage());
 			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 
 		@Test
 		void 토스_검증_승인_예외발생() {
+		void 토스검증승인_예외발생() {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
@@ -172,7 +176,9 @@ class BeanPayServiceTest {
 				beanPayService.validTossCharge(request);
 			});
 			assertEquals(returnException.getErrorCode(), TOSS_RESPONSE_FAIL);
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), TOSS_RESPONSE_FAIL.getMessage());
 			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 

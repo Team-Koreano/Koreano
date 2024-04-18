@@ -63,6 +63,8 @@ public class BeanPayService {
 		} catch (CustomException e) {
 			handleException(findBeanPay, e);
 			throw e;
+			handleException(findBeanPay, e.getErrorMessage());
+			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
 		}
 		try {
 			//TODO: 유저 beanPay 추가 로직 작성
@@ -70,8 +72,10 @@ public class BeanPayService {
 			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
 		} catch (CustomException e) {
 			handleException(findBeanPay, e);
+			handleException(findBeanPay, e.getErrorMessage());
 			//TODO: 유저 beanPay 롤백 로직 작성
 			throw e;
+			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
 		}
 	}
 
