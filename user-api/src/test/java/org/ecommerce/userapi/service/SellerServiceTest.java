@@ -13,6 +13,7 @@ import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
@@ -35,6 +36,9 @@ class SellerServiceTest {
 
 	@Mock
 	private SellerRepository sellerRepository;
+
+	@Mock
+	private SellerAccountRepository sellerAccountRepository;
 
 	@Mock
 	private JwtUtils jwtUtils;
@@ -167,7 +171,7 @@ class SellerServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
+		when(sellerRepository.findByEmail(email)).thenReturn(java.util.Optional.of(seller));
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
