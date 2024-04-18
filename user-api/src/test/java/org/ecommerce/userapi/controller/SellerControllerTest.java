@@ -6,12 +6,19 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.charset.StandardCharsets;
+
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.repository.SellerRepository;
+import org.ecommerce.userapi.security.AuthDetails;
+import org.ecommerce.userapi.security.AuthDetailsService;
 import org.ecommerce.userapi.service.SellerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +28,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +60,9 @@ class SellerControllerTest {
 	@MockBean
 	private SellerRepository sellerRepository;
 
+	@MockBean
+	private AuthDetailsService authDetailsService;
+
 	@BeforeEach
 	public void 기초_셋팅() {
 		Seller seller = Seller.ofRegister(
@@ -63,6 +76,7 @@ class SellerControllerTest {
 
 		this.mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
+			.addFilters(new CharacterEncodingFilter(StandardCharsets.UTF_8.name(), true))  // 필터 추가
 			.apply(springSecurity())
 			.build();
 
@@ -159,6 +173,51 @@ class SellerControllerTest {
 			new TypeReference<Response<SellerDto.Response.Login>>() {
 			}
 		).result();
+		Assertions.assertThat(result).isEqualTo(expectedResponse);
+	}
+	@Test
+	@WithMockUser(username = "test@example.com", roles = "SELLER")
+	void 셀러_계좌_등록() throws Exception {
+		// given
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+			"213124124123", "부산은행");
+
+		final Seller seller = Seller.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			"부산시 사하구",
+			"01087654321"
+		);
+
+		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(), registerRequest.number());
+
+		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+
+		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
+
+		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(sellerService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
+
+		// when
+		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/account")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.with(SecurityMockMvcRequestPostProcessors.user(authDetails))
+			.content(objectMapper.writeValueAsString(registerRequest)));
+
+		//then
+
+		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
+
+		final AccountDto.Response.Register result = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<Response<AccountDto.Response.Register>>() {
+			}
+		).result();
+
 		Assertions.assertThat(result).isEqualTo(expectedResponse);
 	}
 }

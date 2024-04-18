@@ -6,12 +6,21 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.AddressDto;
+import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.type.Gender;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.repository.UsersAccountRepository;
+import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +41,12 @@ class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private UsersAccountRepository usersAccountRepository;
+
+	@Mock
+	private AddressRepository addressRepository;
 
 	@Mock
 	private JwtUtils jwtUtils;
@@ -168,6 +183,62 @@ class UserServiceTest {
 		Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest))
 			.isInstanceOf(CustomException.class)
 			.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+	}
+	@Test
+	void 회원_계좌_등록(){
+		// given
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+			"213124124123", "부산은행");
+
+		final Users users = Users.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			Gender.FEMALE,
+			(short)30,
+			"01087654321"
+		);
+
+		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.bankName());
+
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+
+		when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(users));
+		// when
+		final AccountDto result = userService.registerAccount(authDetails, registerRequest);
+		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+
+	}
+	@Test
+	void 회원_주소_등록(){
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
+			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
+
+		final Users users = Users.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			Gender.FEMALE,
+			(short)30,
+			"01087654321"
+		);
+
+		final Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
+			registerRequest.detail());
+
+		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
+
+		when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(users));
+
+		// when
+		final AddressDto result = userService.registerAddress(authDetails, registerRequest);
+
+		//then
+		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 }

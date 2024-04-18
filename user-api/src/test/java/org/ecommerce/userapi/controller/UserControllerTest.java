@@ -6,13 +6,23 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.charset.StandardCharsets;
+
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.AddressDto;
+import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.type.Gender;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.security.AuthDetails;
+import org.ecommerce.userapi.security.AuthDetailsService;
 import org.ecommerce.userapi.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +32,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +47,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc
 public class UserControllerTest {
+
+	private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
+	private static final String AUTHORIZATION_HEADER_VALUE = "Bearer aaaaaaaa.bbbbbbbb.cccccccc";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -50,6 +66,9 @@ public class UserControllerTest {
 	@MockBean
 	private UserRepository userRepository;
 
+	@MockBean
+	private AuthDetailsService authDetailsService;
+
 	@BeforeEach
 	public void 기초_셋팅() {
 		Users users = Users.ofRegister(
@@ -64,6 +83,7 @@ public class UserControllerTest {
 
 		this.mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
+			.addFilters(new CharacterEncodingFilter(StandardCharsets.UTF_8.name(), true))  // 필터 추가
 			.apply(springSecurity())
 			.build();
 	}
@@ -71,7 +91,6 @@ public class UserControllerTest {
 	@AfterEach
 	public void 초기화() {
 	}
-
 
 	private ResultActions performLoginRequest(String content) throws Exception {
 		return mockMvc.perform(post("/api/users/v1/login")
@@ -113,7 +132,6 @@ public class UserControllerTest {
 
 		when(userService.registerRequest(registerRequest)).thenReturn(responseDto);
 
-
 		final String content = objectMapper.writeValueAsString(registerRequest);
 
 		//when
@@ -122,7 +140,6 @@ public class UserControllerTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
 			.with(user("test")));
-
 
 		resultActions.andReturn().getResponse();
 		//then
@@ -151,7 +168,6 @@ public class UserControllerTest {
 
 		final UserDto.Response.Login expectedResponse = UserDto.Response.Login.of(userDto);
 
-
 		when(userService.loginRequest(login)).thenReturn(userDto);
 
 		// when
@@ -167,6 +183,101 @@ public class UserControllerTest {
 			new TypeReference<Response<UserDto.Response.Login>>() {
 			}
 		).result();
+		Assertions.assertThat(result).isEqualTo(expectedResponse);
+	}
+
+	@Test
+	@WithMockUser(username = "test@example.com")
+	void 회원_주소_등록() throws Exception {
+		// given
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
+			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
+
+		Users users = Users.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			Gender.FEMALE,
+			(short)30,
+			"01087654321"
+		);
+
+		Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
+			registerRequest.detail());
+
+		AddressDto dto = AddressMapper.INSTANCE.toDto(address);
+
+		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
+
+		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(userService.registerAddress(authDetails, registerRequest)).thenReturn(dto);
+
+		// when
+		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/address")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.with(SecurityMockMvcRequestPostProcessors.user(authDetails))
+			.content(objectMapper.writeValueAsString(registerRequest)));
+
+		//then
+
+		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
+
+		AddressDto.Response.Register result = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<Response<AddressDto.Response.Register>>() {
+			}
+		).result();
+
+		Assertions.assertThat(result).isEqualTo(expectedResponse);
+	}
+
+	@Test
+	@WithMockUser(username = "test@example.com")
+	void 회원_계좌_등록() throws Exception {
+		// given
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+			"213124124123", "부산은행");
+
+		final Users users = Users.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			Gender.FEMALE,
+			(short)30,
+			"01087654321"
+		);
+
+		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.number());
+
+		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+
+		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
+
+		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(userService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
+
+		// when
+		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/account")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.with(SecurityMockMvcRequestPostProcessors.user(authDetails))
+			.content(objectMapper.writeValueAsString(registerRequest)));
+
+		//then
+
+		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
+
+		final AccountDto.Response.Register result = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<Response<AccountDto.Response.Register>>() {
+			}
+		).result();
+
 		Assertions.assertThat(result).isEqualTo(expectedResponse);
 	}
 }

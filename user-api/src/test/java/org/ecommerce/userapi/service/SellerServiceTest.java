@@ -6,11 +6,15 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
+import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerRepository;
+import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -141,6 +145,32 @@ class SellerServiceTest {
 		Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest))
 			.isInstanceOf(CustomException.class)
 			.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+
+	}
+	@Test
+	void 회원_계좌_등록(){
+		// given
+		final String email = "test@example.com";
+		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+			"213124124123", "부산은행");
+
+		final Seller seller = Seller.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			"부산시 북구",
+			"01087654321"
+		);
+
+		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(), registerRequest.bankName());
+
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+
+		when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
+		// when
+		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
+		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 }
