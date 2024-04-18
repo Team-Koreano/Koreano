@@ -6,6 +6,8 @@ import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -41,17 +43,46 @@ public class OrderService {
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
+
 		return bucketServiceClient.getBuckets(userId, bucketIds)
 				.stream()
 				.map(BucketMapper.INSTANCE::toDto)
 				.toList();
 	}
 
+	// TODO : 재고 확인 과정에서 상품 정보를 받아와 총 계산하여 Beanpay 값을 넣어줘야 함
+	/**
+	 * 주문 생성 메소드 입니다.
+	 * <p>
+	 * 해당 메소드가 실행되기 전 아래의 과정을 거쳐야 합니다.
+	 * 1. 회원 유효성 검사
+	 * 2. 장바구니 유효성 검사
+	 * 3. 상품 재고 확인 및 유효성 검사
+	 *
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param createRequest- Client가 입력한 주문서 내용
+	 * @return - 생성된 주문 Data가 들어간 OrderDto를 반환합니다.
+	*/
 	public OrderDto createOrder(
 			final Integer userId,
-			final OrderDto.Request.Create createRequest,
-			final List<BucketDto> bucketDtos
+			final OrderDto.Request.Create createRequest
 	) {
-		return null;
+
+		return OrderMapper.INSTANCE.toDto(
+				orderRepository.save(
+						Order.ofCreate(
+								userId,
+								createRequest.receiveName(),
+								createRequest.phoneNumber(),
+								createRequest.address1(),
+								createRequest.address2(),
+								createRequest.deliveryComment(),
+								null
+						)
+				)
+		);
 	}
 }

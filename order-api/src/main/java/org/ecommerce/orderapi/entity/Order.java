@@ -48,4 +48,24 @@ public class Order {
 	@CreationTimestamp
 	@Column
 	private LocalDateTime orderDatetime;
+
+	public static Order ofCreate(
+			final Integer userId,
+			final String receiveName,
+			final String phoneNumber,
+			final String address1,
+			final String address2,
+			final String deliveryComment,
+			final Integer beanpay
+	) {
+		final Order order = new Order();
+		order.userId = userId;
+		order.receiveName = receiveName;
+		order.phoneNumber = phoneNumber;
+		order.address1 = address1;
+		order.address2 = address2;
+		order.deliveryComment = deliveryComment;
+		order.beanpay = beanpay;
+		return order;
+	}
 }
