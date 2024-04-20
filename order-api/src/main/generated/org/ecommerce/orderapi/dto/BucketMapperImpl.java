@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-04-17T03:43:15+0900",
+    date = "2024-04-20T19:57:18+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
 public class BucketMapperImpl implements BucketMapper {
 
     @Override
-    public BucketDto toDto(BucketDto.Response response) {
+    public BucketDto responseToDto(BucketDto.Response response) {
         if ( response == null ) {
             return null;
         }
