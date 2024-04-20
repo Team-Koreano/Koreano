@@ -10,4 +10,5 @@ public interface OrderMapper {
 	OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
 	OrderDto toDto(Order order);
+	OrderDto.Response toResponse(OrderDto orderDto);
 }

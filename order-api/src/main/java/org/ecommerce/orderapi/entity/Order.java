@@ -40,7 +40,7 @@ public class Order {
 	private String deliveryComment;
 
 	@Column
-	private Integer beanpay;
+	private Integer totalPaymentAmount;
 
 	@Column
 	private LocalDateTime paymentDatetime;
@@ -49,14 +49,13 @@ public class Order {
 	@Column
 	private LocalDateTime orderDatetime;
 
-	public static Order ofCreate(
+	public static Order ofPlace(
 			final Integer userId,
 			final String receiveName,
 			final String phoneNumber,
 			final String address1,
 			final String address2,
-			final String deliveryComment,
-			final Integer beanpay
+			final String deliveryComment
 	) {
 		final Order order = new Order();
 		order.userId = userId;
@@ -65,7 +64,6 @@ public class Order {
 		order.address1 = address1;
 		order.address2 = address2;
 		order.deliveryComment = deliveryComment;
-		order.beanpay = beanpay;
 		return order;
 	}
 }
