@@ -2,6 +2,8 @@ server:
   port: 8081
 bucket-service:
   url: http://localhost:8080/api/buckets/v1
+product-search-service:
+  url: http://localhost:8082/api/product-search/v1
 spring:
   application:
     name: order-api
