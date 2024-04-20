@@ -47,4 +47,15 @@ public class Address {
 	@UpdateTimestamp
 	@Column()
 	private LocalDateTime updateDatetime;
+
+	public static Address ofRegister(Users users, String name, String postAddress, String detail) {
+		Address address = new Address();
+		address.users = users;
+		address.name = name;
+		address.postAddress = postAddress;
+		address.detail = detail;
+		address.isDeleted = false;
+
+		return address;
+	}
 }

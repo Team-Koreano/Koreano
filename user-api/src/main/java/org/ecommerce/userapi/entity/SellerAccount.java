@@ -29,7 +29,7 @@ public class SellerAccount {
 	private Seller seller;
 
 	@Column(nullable = false)
-	private Short number;
+	private String number;
 
 	@Column(nullable = false)
 	private String bankName;
@@ -44,4 +44,13 @@ public class SellerAccount {
 	@UpdateTimestamp
 	@Column()
 	private LocalDateTime updateDatetime;
+
+	public static SellerAccount ofRegister(Seller seller, String number, String bankName) {
+		SellerAccount sellerAccount = new SellerAccount();
+		sellerAccount.seller = seller;
+		sellerAccount.bankName = bankName;
+		sellerAccount.number = number;
+		sellerAccount.isDeleted = false;
+		return sellerAccount;
+	}
 }
