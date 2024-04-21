@@ -7,7 +7,6 @@ import java.util.List;
 import org.ecommerce.bucketapi.dto.BucketDto;
 import org.ecommerce.bucketapi.dto.BucketMapper;
 import org.ecommerce.bucketapi.entity.Bucket;
-import org.ecommerce.bucketapi.exception.BucketErrorCode;
 import org.ecommerce.bucketapi.repository.BucketRepository;
 import org.ecommerce.common.error.CustomException;
 import org.springframework.stereotype.Service;
@@ -71,9 +70,8 @@ public class BucketService {
 
 	public List<BucketDto> getBuckets(final List<Long> bucketIds) {
 
-		return bucketIds.stream()
-				.map(id -> bucketRepository.findById(id)
-						.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID)))
+		return bucketRepository.findAllById(bucketIds)
+				.stream()
 				.map(BucketMapper.INSTANCE::toDto)
 				.toList();
 	}

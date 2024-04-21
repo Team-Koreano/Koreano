@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class TestErrorCode implements ErrorCode{
+public class FeignErrorCode implements ErrorCode{
 	private int code;
 	private String message;
 }
