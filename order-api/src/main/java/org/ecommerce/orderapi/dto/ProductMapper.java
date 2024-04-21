@@ -5,9 +5,9 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface BucketMapper {
+public interface ProductMapper {
 
-	BucketMapper INSTANCE = Mappers.getMapper(BucketMapper.class);
+	ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
-	BucketDto responseToDto(BucketDto.Response response);
+	ProductDto responseToDto(ProductDto.Response response);
 }

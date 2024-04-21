@@ -1,21 +1,20 @@
-package org.ecommerce.bucketapi.dto;
+package org.ecommerce.orderapi.dto;
 
 import java.time.LocalDate;
 import javax.annotation.processing.Generated;
-import org.ecommerce.bucketapi.entity.Bucket;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-04-17T02:33:40+0900",
+    date = "2024-04-20T19:57:18+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
 public class BucketMapperImpl implements BucketMapper {
 
     @Override
-    public BucketDto toDto(Bucket bucket) {
-        if ( bucket == null ) {
+    public BucketDto responseToDto(BucketDto.Response response) {
+        if ( response == null ) {
             return null;
         }
 
@@ -26,12 +25,12 @@ public class BucketMapperImpl implements BucketMapper {
         Integer quantity = null;
         LocalDate createDate = null;
 
-        id = bucket.getId();
-        userId = bucket.getUserId();
-        seller = bucket.getSeller();
-        productId = bucket.getProductId();
-        quantity = bucket.getQuantity();
-        createDate = bucket.getCreateDate();
+        id = response.id();
+        userId = response.userId();
+        seller = response.seller();
+        productId = response.productId();
+        quantity = response.quantity();
+        createDate = response.createDate();
 
         BucketDto bucketDto = new BucketDto( id, userId, seller, productId, quantity, createDate );
 
