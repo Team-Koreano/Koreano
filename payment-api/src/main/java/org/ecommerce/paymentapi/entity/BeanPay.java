@@ -5,8 +5,7 @@ import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.ecommerce.common.error.ErrorCode;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.hibernate.annotations.ColumnDefault;
@@ -78,23 +77,30 @@ public class BeanPay {
 		return beanPay;
 	}
 
-	public void inProgress() {
-		this.processStatus = ProcessStatus.IN_PROGRESS;
-	}
+
 
 	public boolean validBeanPay(UUID orderId, Integer amount) {
+		beginValidProcess();
 		return this.getId().equals(orderId) &&
 			this.getAmount().equals(amount);
 	}
 
-	public void complete(BeanPayDto.Response.TossPayment response) {
-		this.processStatus = ProcessStatus.COMPLETED;
+	public void chargeComplete(TossDto.Response.TossPayment response) {
 		this.paymentKey = response.paymentKey();
 		this.approveDateTime = stringToDateTime(response.approveDateTime());
+		changeProcessStatus(ProcessStatus.COMPLETED);
 	}
 
-	public void fail(String message) {
+	public void chargeFail(String message) {
 		this.cancelOrFailReason = message;
-		this.processStatus = ProcessStatus.CANCELLED;
+		changeProcessStatus(ProcessStatus.CANCELLED);
+	}
+
+	private void beginValidProcess() {
+		this.processStatus = ProcessStatus.IN_PROGRESS;
+	}
+
+	private void changeProcessStatus(ProcessStatus status) {
+		this.processStatus = status;
 	}
 }
