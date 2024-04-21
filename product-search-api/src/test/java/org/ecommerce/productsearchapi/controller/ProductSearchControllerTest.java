@@ -15,7 +15,6 @@ import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
 import org.ecommerce.productsearchapi.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(value = ProductSearchController.class)
