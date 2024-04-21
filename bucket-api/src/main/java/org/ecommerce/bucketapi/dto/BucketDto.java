@@ -1,5 +1,7 @@
 package org.ecommerce.bucketapi.dto;
 
+import static org.ecommerce.bucketapi.exception.ErrorMessage.*;
+
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.Min;
@@ -23,47 +25,38 @@ public class BucketDto {
 
 		public record Add(
 
-			@NotBlank(message = "판매자를 입력해 주세요.")
-			String seller,
+				@NotBlank(message = ERROR_SELLER_REQUIRED)
+				String seller,
 
-			@NotNull(message = "상품 번호를 입력해 주세요.")
-			Integer productId,
+				@NotNull(message = ERROR_PRODUCT_ID_REQUIRED)
+				Integer productId,
 
-			@NotNull(message = "상품 수량을 입력해 주세요.")
-			@Min(value = 1, message = "상품 수량을 1개 이상으로 입력해 주세요.")
-			Integer quantity
+				@NotNull(message = ERROR_QUANTITY_REQUIRED)
+				@Min(value = 1, message = ERROR_QUANTITY_MIN)
+				Integer quantity
 		) {
 
 		}
 
 		// TODO : 상품 상세옵션 추가
-		public record Update(
+		public record Modify(
 
-			@NotNull(message = "상품 수량을 입력해 주세요.")
-			@Min(value = 1, message = "상품 수량을 1개 이상으로 입력해 주세요.")
-			Integer quantity
+				@NotNull(message = ERROR_QUANTITY_REQUIRED)
+				@Min(value = 1, message = ERROR_QUANTITY_MIN)
+				Integer quantity
 		) {
 
 		}
 	}
 
 	public record Response(
-		Long id,
-		Integer userId,
-		String seller,
-		Integer productId,
-		Integer quantity,
-		LocalDate createDate
+			Long id,
+			Integer userId,
+			String seller,
+			Integer productId,
+			Integer quantity,
+			LocalDate createDate
 	) {
-		public static Response of(final BucketDto bucketDto) {
-			return new Response(
-				bucketDto.id,
-				bucketDto.userId,
-				bucketDto.seller,
-				bucketDto.productId,
-				bucketDto.quantity,
-				bucketDto.createDate
-			);
-		}
+
 	}
 }
