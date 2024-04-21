@@ -39,7 +39,7 @@ public class BucketTest {
 		);
 
 		// when
-		bucket.update(newQuantity);
+		bucket.modifyQuantity(newQuantity);
 
 		// then
 		assertThat(bucket.getQuantity()).isEqualTo(newQuantity);

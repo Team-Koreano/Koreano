@@ -1,5 +1,6 @@
 package org.ecommerce.bucketapi.controller;
 
+import static org.ecommerce.bucketapi.exception.ErrorMessage.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -16,14 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(BucketController.class)
+@WebMvcTest(ExternalBucketController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class BucketControllerTest {
+public class ExternalBucketControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -61,21 +63,21 @@ public class BucketControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(get("/api/buckets/v1"))
+		mockMvc.perform(get("/api/external/buckets/v1"))
 				.andExpect(jsonPath("$.result[0].id").value(bucketDtos.get(0).getId()))
-				.andExpect(jsonPath("$.result[0].seller").value(
-						bucketDtos.get(0).getSeller()))
-				.andExpect(jsonPath("$.result[0].productId").value(
-						bucketDtos.get(0).getProductId()))
-				.andExpect(jsonPath("$.result[0].quantity").value(
-						bucketDtos.get(0).getQuantity()))
+				.andExpect(jsonPath("$.result[0].seller")
+						.value(bucketDtos.get(0).getSeller()))
+				.andExpect(jsonPath("$.result[0].productId")
+						.value(bucketDtos.get(0).getProductId()))
+				.andExpect(jsonPath("$.result[0].quantity")
+						.value(bucketDtos.get(0).getQuantity()))
 				.andExpect(jsonPath("$.result[1].id").value(bucketDtos.get(1).getId()))
-				.andExpect(jsonPath("$.result[1].seller").value(
-						bucketDtos.get(1).getSeller()))
-				.andExpect(jsonPath("$.result[1].productId").value(
-						bucketDtos.get(1).getProductId()))
-				.andExpect(jsonPath("$.result[1].quantity").value(
-						bucketDtos.get(1).getQuantity()))
+				.andExpect(jsonPath("$.result[1].seller")
+						.value(bucketDtos.get(1).getSeller()))
+				.andExpect(jsonPath("$.result[1].productId")
+						.value(bucketDtos.get(1).getProductId()))
+				.andExpect(jsonPath("$.result[1].quantity")
+						.value(bucketDtos.get(1).getQuantity()))
 				.andExpect(status().isOk())
 				.andDo(print());
 	}
@@ -90,7 +92,7 @@ public class BucketControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(post("/api/buckets/v1")
+		mockMvc.perform(post("/api/external/buckets/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
 								new BucketDto.Request.Add(
@@ -112,7 +114,7 @@ public class BucketControllerTest {
 		// given
 		// when
 		// then
-		mockMvc.perform(post("/api/buckets/v1")
+		mockMvc.perform(post("/api/external/buckets/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
 								new BucketDto.Request.Add(
@@ -122,8 +124,8 @@ public class BucketControllerTest {
 								)
 						)))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.status").value("400"))
-				.andExpect(jsonPath("$.result").value("판매자를 입력해 주세요."))
+				.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+				.andExpect(jsonPath("$.result").value(ERROR_SELLER_REQUIRED))
 				.andDo(print());
 	}
 
@@ -132,7 +134,7 @@ public class BucketControllerTest {
 		// given
 		// when
 		// then
-		mockMvc.perform(post("/api/buckets/v1")
+		mockMvc.perform(post("/api/external/buckets/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
 								new BucketDto.Request.Add(
@@ -142,8 +144,8 @@ public class BucketControllerTest {
 								)
 						)))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.status").value("400"))
-				.andExpect(jsonPath("$.result").value("상품 수량을 입력해 주세요."));
+				.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+				.andExpect(jsonPath("$.result").value(ERROR_QUANTITY_REQUIRED));
 	}
 
 	@Test
@@ -158,16 +160,16 @@ public class BucketControllerTest {
 				3,
 				LocalDate.of(2024, 4, 14)
 		);
-		given(bucketService.updateBucket(anyLong(), any(BucketDto.Request.Update.class)))
+		given(bucketService.modifyBucket(anyInt(), anyLong(),
+				any(BucketDto.Request.Modify.class)))
 				.willReturn(bucketDto);
-		doNothing().when(bucketService).validateBucketByUser(anyInt(), anyLong());
 
 		// when
 		// then
-		mockMvc.perform(put("/api/buckets/v1/2")
+		mockMvc.perform(put("/api/external/buckets/v1/2")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
-								new BucketDto.Request.Update(newQuantity)
+								new BucketDto.Request.Modify(newQuantity)
 						)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.result.userId").value(bucketDto.getUserId()))
@@ -182,13 +184,13 @@ public class BucketControllerTest {
 		// given
 		// when
 		// then
-		mockMvc.perform(put("/api/buckets/v1/2")
+		mockMvc.perform(put("/api/external/buckets/v1/2")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
-								new BucketDto.Request.Update(null)
+								new BucketDto.Request.Modify(null)
 						)))
-				.andExpect(jsonPath("$.status").value("400"))
-				.andExpect(jsonPath("$.result").value("상품 수량을 입력해 주세요."))
+				.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+				.andExpect(jsonPath("$.result").value(ERROR_QUANTITY_REQUIRED))
 				.andDo(print());
 	}
 }
