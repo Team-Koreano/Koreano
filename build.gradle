@@ -47,6 +47,10 @@ subprojects {
     }
 
     test {
+        tasks.named('test') {
+            useJUnitPlatform()
+            systemProperty "jasypt.encryptor.password", project.getProperties().get("jasypt.encryptor.password")
+        }
         useJUnitPlatform()
         finalizedBy 'jacocoTestReport'
     }
