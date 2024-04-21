@@ -47,6 +47,10 @@ subprojects {
     }
 
     test {
+        tasks.named('test') {
+            useJUnitPlatform()
+            systemProperty "jasypt.encryptor.password", project.getProperties().get("jasypt.encryptor.password")
+        }
         useJUnitPlatform()
         finalizedBy 'jacocoTestReport'
     }
@@ -83,6 +87,7 @@ subprojects {
 project(':common'){
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
     }
 }
 
@@ -91,7 +96,6 @@ project(':user-api'){
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
