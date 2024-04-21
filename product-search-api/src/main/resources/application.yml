@@ -10,3 +10,8 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+  # es 계정정보는 여러 테스트 후 세팅 안정되면 변경 예정
+  elasticsearch:
+    username: elastic
+    password: changeme
+    uris: http://localhost:9200
