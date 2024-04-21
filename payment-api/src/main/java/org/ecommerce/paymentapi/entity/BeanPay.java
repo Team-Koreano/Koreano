@@ -93,8 +93,8 @@ public class BeanPay {
 		this.approveDateTime = stringToDateTime(response.approveDateTime());
 	}
 
-	public void fail(ErrorCode errorCode) {
-		this.cancelOrFailReason = errorCode.getMessage();
+	public void fail(String message) {
+		this.cancelOrFailReason = message;
 		this.processStatus = ProcessStatus.CANCELLED;
 	}
 }
