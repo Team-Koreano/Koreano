@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.config;
+package org.ecommerce.product.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
