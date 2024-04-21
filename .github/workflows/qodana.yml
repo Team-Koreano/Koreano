@@ -46,7 +46,7 @@ jobs:
         working-directory: ./
 
       - name: Run Tests
-        run: ./gradlew test java -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
+        run: ./gradlew test -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
         working-directory: ./    
 
       - name: Archive coverage data
