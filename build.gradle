@@ -171,13 +171,36 @@ project(':product-management-api'){
 }
 
 project(':product-search-api'){
+
     dependencies {
         implementation(project(':product'))
         implementation(project(':common'))
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
         runtimeOnly 'com.mysql:mysql-connector-j'
+
+        // querydsl
+        implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+        annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+        annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+        annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     }
+
+    def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+
+    sourceSets {
+        main.java.srcDirs += [ querydslDir ]
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.generatedSourceOutputDirectory = file(querydslDir)
+    }
+
+    clean.doLast {
+        file(querydslDir).deleteDir()
+    }
+
+
 }
 
 project(':statistic-api'){
