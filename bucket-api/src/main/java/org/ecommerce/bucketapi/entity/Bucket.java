@@ -2,7 +2,6 @@ package org.ecommerce.bucketapi.entity;
 
 import java.time.LocalDate;
 
-import org.ecommerce.bucketapi.dto.BucketDto;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -57,7 +56,7 @@ public class Bucket {
 	}
 
 	// TODO : 상품 상세옵션 변경 로직 추가
-	public void update(final Integer quantity) {
+	public void modifyQuantity(final Integer quantity) {
 		this.quantity = quantity;
 	}
 }
