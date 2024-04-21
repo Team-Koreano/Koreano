@@ -40,7 +40,7 @@ public class ProductSearchDto {
 	public static class Response {
 		public record Detail(
 			Integer id,
-			Boolean is_decaf,
+			Boolean isDecaf,
 			Integer price,
 			Integer sellerId,
 			String sellerName,
@@ -52,6 +52,7 @@ public class ProductSearchDto {
 			String name,
 			String status,
 			Boolean isCrush,
+			Integer favoriteCount,
 			LocalDateTime createDateTime,
 			List<ImageDto> imageDtoList
 		){
@@ -70,6 +71,7 @@ public class ProductSearchDto {
 					productSearchDto.getName(),
 					productSearchDto.getStatus().getTitle(),
 					productSearchDto.getIsCrush(),
+					productSearchDto.getFavoriteCount(),
 					productSearchDto.getCreateDateTime(),
 					productSearchDto.getImageDtoList()
 				);
