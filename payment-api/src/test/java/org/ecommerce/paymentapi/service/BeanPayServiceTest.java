@@ -14,6 +14,7 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
@@ -73,13 +74,13 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossResponse = ResponseEntity.of(
+			final ResponseEntity<TossDto.Response.TossPayment> tossResponse = ResponseEntity.of(
 				Optional.of(response));
 
 			//when
@@ -99,7 +100,7 @@ class BeanPayServiceTest {
 			final String paymentType = "카드";
 			final Integer amount = 1000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 
 			//when
@@ -123,7 +124,7 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final Integer difAmount = 10000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, difAmount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
@@ -151,13 +152,13 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
+			final ResponseEntity<TossDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
 				.body(response);
 
 			//when
