@@ -24,13 +24,13 @@ public class BucketService {
 	// TODO : 회원 검증 로직 추가 (crud)
 	// TODO : 상품 검증 로직 추가 (cu)
 
-	@Transactional(readOnly = true)
-	public void validateBucketByUser(final Integer userId, final Long bucketId) {
-		if (!bucketRepository.existsByUserIdAndId(userId, bucketId)) {
+	private void validateBucketWithUserId(final Integer userId, final Bucket bucket) {
+		if (!bucket.getUserId().equals(userId)) {
 			throw new CustomException(INVALID_BUCKET_WITH_USER);
 		}
 	}
 
+	@Transactional(readOnly = true)
 	public List<BucketDto> getAllBuckets(final Integer userId) {
 
 		return bucketRepository.findAllByUserId(userId)
@@ -56,22 +56,32 @@ public class BucketService {
 		);
 	}
 
-	public BucketDto updateBucket(
+	public BucketDto modifyBucket(
+			final Integer userId,
 			final Long bucketId,
-			final BucketDto.Request.Update updateRequest
+			final BucketDto.Request.Modify modifyRequest
 	) {
-
 		final Bucket bucket = bucketRepository.findById(bucketId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
+		validateBucketWithUserId(userId, bucket);
 
-		bucket.update(updateRequest.quantity());
+		bucket.modifyQuantity(modifyRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 
-	public List<BucketDto> getBuckets(final List<Long> bucketIds) {
+	@Transactional(readOnly = true)
+	public List<BucketDto> getBuckets(final Integer userId, final List<Long> bucketIds) {
 
-		return bucketRepository.findAllById(bucketIds)
+		List<Bucket> buckets = bucketRepository.findAllById(bucketIds)
 				.stream()
+				.peek(bucket -> validateBucketWithUserId(userId, bucket))
+				.toList();
+
+		if (bucketIds.size() != buckets.size()) {
+			throw new CustomException(NOT_FOUND_BUCKET_ID);
+		}
+
+		return buckets.stream()
 				.map(BucketMapper.INSTANCE::toDto)
 				.toList();
 	}

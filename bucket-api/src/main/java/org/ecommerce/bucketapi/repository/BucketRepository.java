@@ -10,6 +10,4 @@ import org.springframework.stereotype.Repository;
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	List<Bucket> findAllByUserId(final Integer userId);
-
-	boolean existsByUserIdAndId(final Integer userId, final Long bucketId);
 }
