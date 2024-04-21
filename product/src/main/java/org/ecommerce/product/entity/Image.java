@@ -45,4 +45,12 @@ public class Image {
 	@Column(name = "update_datetime")
 	private LocalDateTime updateDatetime;
 
+	public static Image ofCreate(String imageUrl, Boolean isThumbnail, Short sequenceNumber, Product product){
+		Image image = new Image();
+		image.imageUrl = imageUrl;
+		image.isThumbnail = isThumbnail;
+		image.sequenceNumber = sequenceNumber;
+		image.product = product;
+		return image;
+	}
 }
