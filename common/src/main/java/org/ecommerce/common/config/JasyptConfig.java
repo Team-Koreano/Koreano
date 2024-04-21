@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.config;
+package org.ecommerce.common.config;
 
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
