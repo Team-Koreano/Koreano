@@ -1,6 +1,7 @@
 package org.ecommerce.productsearchapi.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.type.Acidity;
@@ -30,6 +31,7 @@ public class ProductSearchDto {
 	private Boolean isCrush;
 	private LocalDateTime createDateTime;
 	private LocalDateTime updateDateTime;
+	private List<ImageDto> imageDtoList;
 
 
 	public static class Request {
@@ -50,7 +52,8 @@ public class ProductSearchDto {
 			String name,
 			String status,
 			Boolean isCrush,
-			LocalDateTime createDateTime
+			LocalDateTime createDateTime,
+			List<ImageDto> imageDtoList
 		){
 			public static Detail of(final ProductSearchDto productSearchDto) {
 				return new Detail(
@@ -67,7 +70,8 @@ public class ProductSearchDto {
 					productSearchDto.getName(),
 					productSearchDto.getStatus().getTitle(),
 					productSearchDto.getIsCrush(),
-					productSearchDto.getCreateDateTime()
+					productSearchDto.getCreateDateTime(),
+					productSearchDto.getImageDtoList()
 				);
 			}
 		}
