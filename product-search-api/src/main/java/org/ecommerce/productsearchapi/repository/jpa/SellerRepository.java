@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.repository;
+package org.ecommerce.productsearchapi.repository.jpa;
 
 import org.ecommerce.product.entity.SellerRep;
 import org.springframework.data.jpa.repository.JpaRepository;
