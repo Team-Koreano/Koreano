@@ -20,7 +20,7 @@ public class TossDto {
 			String paymentType,
 
 			@NotBlank(message = paymentKeyBlank)
-			@Size(min = 6, message = paymentKeyBlank)
+			@Size(min = 6, message = paymentKeySize)
 			String paymentKey,
 
 			@NotNull(message = orderIdBlank)
