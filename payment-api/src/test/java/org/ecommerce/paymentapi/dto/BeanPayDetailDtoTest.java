@@ -14,7 +14,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-class BeanPayDtoTest {
+class BeanPayDetailDtoTest {
 
 	private static ValidatorFactory factory;
 	private static Validator validator;
