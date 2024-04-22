@@ -25,13 +25,13 @@ public class OrderController {
 
 	@PostMapping
 	public Response<OrderDto.Response> createOrder(
-			@RequestBody @Valid final OrderDto.Request.Create createRequest
+			@RequestBody @Valid final OrderDto.Request.Place placeRequest
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toResponse(
-						orderService.placeOrder(USER_ID, createRequest)
+						orderService.placeOrder(USER_ID, placeRequest)
 				)
 		);
 	}

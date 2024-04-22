@@ -6,7 +6,9 @@ import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class OrderDto {
 
@@ -23,7 +25,7 @@ public class OrderDto {
 
 	public static class Request {
 
-		public record Create(
+		public record Place(
 
 				@NotNull(message = "주문할 장바구니를 입력해 주세요.")
 				List<Long> bucketIds,

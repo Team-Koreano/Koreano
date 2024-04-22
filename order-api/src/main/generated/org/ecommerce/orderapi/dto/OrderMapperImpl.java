@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-04-20T20:00:50+0900",
+    date = "2024-04-22T20:23:34+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
@@ -62,6 +62,17 @@ public class OrderMapperImpl implements OrderMapper {
         Integer totalPaymentAmount = null;
         LocalDateTime paymentDatetime = null;
         LocalDateTime orderDatetime = null;
+
+        id = orderDto.getId();
+        userId = orderDto.getUserId();
+        receiveName = orderDto.getReceiveName();
+        phoneNumber = orderDto.getPhoneNumber();
+        address1 = orderDto.getAddress1();
+        address2 = orderDto.getAddress2();
+        deliveryComment = orderDto.getDeliveryComment();
+        totalPaymentAmount = orderDto.getTotalPaymentAmount();
+        paymentDatetime = orderDto.getPaymentDatetime();
+        orderDatetime = orderDto.getOrderDatetime();
 
         OrderDto.Response response = new OrderDto.Response( id, userId, receiveName, phoneNumber, address1, address2, deliveryComment, totalPaymentAmount, paymentDatetime, orderDatetime );
 

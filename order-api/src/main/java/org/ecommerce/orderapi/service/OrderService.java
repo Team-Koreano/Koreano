@@ -97,19 +97,19 @@ public class OrderService {
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
-	 * @param createRequest- 주문 내용
+	 * @param placeRequest- 주문 내용
 	 *
 	 * @return - 생성된 주문을 반환합니다.
 	 */
 	@Transactional
 	public OrderDto placeOrder(
 			final Integer userId,
-			final OrderDto.Request.Create createRequest
+			final OrderDto.Request.Place placeRequest
 	) {
 
 		final List<BucketDto> bucketDtos = validateBucket(
 				userId,
-				createRequest.bucketIds()
+				placeRequest.bucketIds()
 		);
 		final List<ProductDto> productDtos = checkStock(
 				bucketDtos.stream()
@@ -123,11 +123,11 @@ public class OrderService {
 		Order order = orderRepository.save(
 				Order.ofPlace(
 						userId,
-						createRequest.receiveName(),
-						createRequest.phoneNumber(),
-						createRequest.address1(),
-						createRequest.address2(),
-						createRequest.deliveryComment()
+						placeRequest.receiveName(),
+						placeRequest.phoneNumber(),
+						placeRequest.address1(),
+						placeRequest.address2(),
+						placeRequest.deliveryComment()
 				)
 		);
 
