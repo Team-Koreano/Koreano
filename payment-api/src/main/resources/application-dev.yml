@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    activation:
+      on-profile: dev
+  application:
+    name : "payment-api"
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  datasource:
+    url: ENC(Fq3XI5xdxDMyXAMlMy3dyVEbepH4574caJpgxV8AAyg1i7gxyqAdppsei5hOsKY8dSCi5pE6cq+pcPoLptdxrGt/RCDmaTTT3EONf1aLmyoOxXdGzHL9bmYoLUv4qzJw)
+    username: ENC(+p5Ip/ROTDnL5u2jcp/F9w==)
+    password: ENC(TGQE//4tXoVvi1wuygHhMNcRZ8tIQXsn)
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.format_sql: true
+    show-sql: true
+toss:
+  secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)
