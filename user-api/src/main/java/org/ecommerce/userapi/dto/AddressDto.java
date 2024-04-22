@@ -3,6 +3,7 @@ package org.ecommerce.userapi.dto;
 import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.exception.UserErrorMessages;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,11 @@ public class AddressDto {
 
 	public static class Request {
 		public record Register(
-			@NotBlank(message = "주소지 별명을 입력해주세요")
+			@NotBlank(message = UserErrorMessages.addressNameNotBlank)
 			String name,
-			@NotBlank(message = "주소지를 입력해주세요")
+			@NotBlank(message = UserErrorMessages.postAddressNotBlank)
 			String postAddress,
-			@NotBlank(message = "상세 주소를 입력해주세요")
+			@NotBlank(message = UserErrorMessages.addressDetailNotBlank)
 			String detail
 		) {
 		}

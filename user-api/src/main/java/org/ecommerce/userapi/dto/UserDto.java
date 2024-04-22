@@ -4,8 +4,12 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.type.Gender;
 import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.exception.UserErrorMessages;
 import org.ecommerce.userapi.security.JwtUtils;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -29,17 +33,28 @@ public class UserDto {
 
 	public static class Request {
 		public record Register(
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			@Email
 			String email,
+			@NotBlank(message = UserErrorMessages.nameNotBlank)
 			String name,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
 			String password,
+			@NotBlank(message = UserErrorMessages.addressNotBlank)
+			String address,
 			Gender gender,
+			@NotNull(message = UserErrorMessages.ageNotNull)
 			Short age,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
 			String phoneNumber
 		) {
 		}
 
 		public record Login(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
 			String email,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
 			String password
 		) {
 		}
