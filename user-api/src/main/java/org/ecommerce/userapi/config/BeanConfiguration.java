@@ -1,7 +1,10 @@
 package org.ecommerce.userapi.config;
 
+import java.util.Collections;
+
 import javax.crypto.SecretKey;
 
+import org.ecommerce.userapi.security.AuthDetailsService;
 import org.ecommerce.userapi.security.JwtFilter;
 import org.ecommerce.userapi.security.JwtProvider;
 import org.ecommerce.userapi.security.JwtUtils;
@@ -19,7 +22,6 @@ public class BeanConfiguration {
 
 	private final RedisUtils redisUtils;
 	private final SecretKey secretKey;
-	private final JwtProvider jwtProvider;
 
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -28,15 +30,21 @@ public class BeanConfiguration {
 
 	@Bean
 	public JwtUtils jwtUtils() {
-		return new JwtUtils(redisUtils, secretKey);
+			return new JwtUtils(redisUtils, secretKey);
 	}
 
 	@Bean
-	public ProviderManager providerManager() {
-		return new ProviderManager(jwtProvider);
+	public JwtProvider jwtProvider(AuthDetailsService authDetailsService, JwtUtils jwtUtils) {
+		return new JwtProvider(authDetailsService, jwtUtils);
 	}
+
 	@Bean
-	public JwtFilter jwtFilter(){
-		return new JwtFilter(providerManager(),jwtUtils(),redisUtils);
+	public ProviderManager providerManager(JwtProvider jwtProvider) {
+		return new ProviderManager(Collections.singletonList(jwtProvider));
+	}
+
+	@Bean
+	public JwtFilter jwtFilter(ProviderManager providerManager, JwtUtils jwtUtils, RedisUtils redisUtils) {
+		return new JwtFilter(providerManager, jwtUtils, redisUtils);
 	}
 }
