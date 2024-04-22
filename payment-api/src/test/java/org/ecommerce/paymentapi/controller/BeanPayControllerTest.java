@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
@@ -71,7 +72,7 @@ class BeanPayControllerTest {
 		final Response<BeanPayDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1/payments").contentType(MediaType.APPLICATION_JSON)
+		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
 			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
 
 		//then
@@ -93,7 +94,7 @@ class BeanPayControllerTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId, amount, paymentType, null,
 				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
