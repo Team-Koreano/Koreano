@@ -153,7 +153,6 @@ public class UserControllerTest {
 		).result();
 
 		Assertions.assertThat(result).isEqualTo(expectedResponse);
-
 	}
 
 	@Test
@@ -211,7 +210,7 @@ public class UserControllerTest {
 
 		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
 
-		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(email)).thenReturn(authDetails);
 		when(userService.registerAddress(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
@@ -258,7 +257,7 @@ public class UserControllerTest {
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(email)).thenReturn(authDetails);
 		when(userService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
