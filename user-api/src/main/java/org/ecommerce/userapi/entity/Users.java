@@ -57,7 +57,7 @@ public class Users implements Member {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
@@ -80,7 +80,6 @@ public class Users implements Member {
 		users.age = age;
 		users.beanPay = 0;
 		users.gender = gender;
-		users.isDeleted = false;
 		users.phoneNumber = phoneNumber;
 		users.userStatus = UserStatus.GENERAL;
 		return users;

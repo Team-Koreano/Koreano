@@ -48,7 +48,7 @@ public class Seller implements Member {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private Boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
@@ -69,7 +69,6 @@ public class Seller implements Member {
 		seller.address = address;
 		seller.password = password;
 		seller.beanPay = 0;
-		seller.isDeleted = false;
 		seller.phoneNumber = phoneNumber;
 		seller.userStatus = UserStatus.GENERAL;
 		return seller;

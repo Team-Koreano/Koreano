@@ -40,7 +40,7 @@ public class UsersAccount {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
@@ -51,7 +51,6 @@ public class UsersAccount {
 		usersAccount.users = users;
 		usersAccount.bankName = bankName;
 		usersAccount.number = number;
-		usersAccount.isDeleted = false;
 		return usersAccount;
 	}
 }
