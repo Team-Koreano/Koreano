@@ -98,7 +98,8 @@ class BeanPayDetailControllerTest {
 
 			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId, amount, paymentType, null,
+			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId,
+				amount, paymentType, null, null,
 				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
 				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
 			final Response<BeanPayDto> result = new Response<>(200, response);
@@ -135,8 +136,8 @@ class BeanPayDetailControllerTest {
 		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 		final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
-			amount,	null, errorMessage,
-			BeanPayStatus.DEPOSIT, ProcessStatus.CANCELLED, LocalDateTime.now(), null);
+			amount, null,	null, errorMessage,
+			BeanPayStatus.DEPOSIT, ProcessStatus.FAILED, LocalDateTime.now(), null);
 
 		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
 

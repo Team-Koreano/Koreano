@@ -98,8 +98,8 @@ class BeanPayDetailTest {
 			actual.chargeFail(TOSS_RESPONSE_FAIL.getMessage());
 
 			//then
-			assertEquals(actual.getProcessStatus(), ProcessStatus.CANCELLED);
-			assertEquals(actual.getCancelOrFailReason(), TOSS_RESPONSE_FAIL.getMessage());
+			assertEquals(actual.getProcessStatus(), ProcessStatus.FAILED);
+			assertEquals(actual.getFailReason(), TOSS_RESPONSE_FAIL.getMessage());
 		}
 	}
 
@@ -119,6 +119,7 @@ class BeanPayDetailTest {
 			userId,
 			amount,
 			payType,
+			null,
 			null,
 			BeanPayStatus.DEPOSIT,
 			ProcessStatus.PENDING,

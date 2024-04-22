@@ -57,19 +57,22 @@ public class BeanPayDetail {
 	private String payType;
 
 	@Column
-	private String cancelOrFailReason;
+	private String cancelReason;
+
+	@Column
+	private String failReason;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private BeanPayStatus beanPayStatus;
+	private BeanPayStatus beanPayStatus = BeanPayStatus.DEPOSIT;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private ProcessStatus processStatus;
+	private ProcessStatus processStatus = ProcessStatus.PENDING;
 
 	@CreationTimestamp
 	@Column(updatable = false)
-	private LocalDateTime createDateTime;
+	private LocalDateTime createDateTime = LocalDateTime.now();
 
 	@Column(updatable = false)
 	private LocalDateTime approveDateTime;
@@ -80,9 +83,6 @@ public class BeanPayDetail {
 		beanPayDetail.beanPay = beanPay;
 		beanPayDetail.userId = userId;
 		beanPayDetail.amount = amount;
-		beanPayDetail.beanPayStatus = BeanPayStatus.DEPOSIT;
-		beanPayDetail.processStatus = ProcessStatus.PENDING;
-		beanPayDetail.createDateTime = LocalDateTime.now();
 		return beanPayDetail;
 	}
 
@@ -102,7 +102,12 @@ public class BeanPayDetail {
 	}
 
 	public void chargeFail(String message) {
-		this.cancelOrFailReason = message;
+		this.failReason = message;
+		changeProcessStatus(ProcessStatus.FAILED);
+	}
+
+	public void chargeCancel(String message) {
+		this.cancelReason = message;
 		changeProcessStatus(ProcessStatus.CANCELLED);
 	}
 
