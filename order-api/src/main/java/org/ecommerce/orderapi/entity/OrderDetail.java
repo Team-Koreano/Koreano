@@ -36,7 +36,7 @@ public class OrderDetail {
 	private Integer price;
 
 	@Column(nullable = false)
-	private Short quantity;
+	private Integer quantity;
 
 	@Column(nullable = false)
 	private Integer totalPrice;
@@ -57,4 +57,25 @@ public class OrderDetail {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private OrderStatusReason statusReason;
+
+	public static OrderDetail ofPlace(
+			final Order order,
+			final Integer productId,
+			final Integer price,
+			final Integer quantity,
+			final Integer deliveryFee,
+			final String seller
+	) {
+		final OrderDetail orderDetail = new OrderDetail();
+		orderDetail.order = order;
+		orderDetail.productId = productId;
+		orderDetail.price = price;
+		orderDetail.quantity = quantity;
+		orderDetail.totalPrice = price * quantity;
+		orderDetail.deliveryFee = deliveryFee;
+		orderDetail.paymentAmount = price * quantity + deliveryFee;
+		orderDetail.seller = seller;
+		orderDetail.status = OrderStatus.OPEN;
+		return orderDetail;
+	}
 }

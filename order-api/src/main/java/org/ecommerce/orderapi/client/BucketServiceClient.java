@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface BucketServiceClient {
 
 	// 장바구니에 담겨있는 상품 정보를 가져옴, 검증
+	// jwt 도입 이후 userId 삭제
 	@GetMapping("/{userId}")
-	List<BucketDto.Response> getBuckets(
+	List<BucketDto.Response> validateBuckets(
 			@PathVariable("userId") final Integer userId,
 			@RequestParam("bucketIds") final List<Long> bucketIds
 	);

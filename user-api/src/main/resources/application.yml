@@ -19,6 +19,4 @@ spring:
 jwt :
   secret : ${SECRET_KEY_SOURCE}
 
-jasypt:
-  encryptor:
-    bean: jasyptStringEncryptor
+

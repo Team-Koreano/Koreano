@@ -33,53 +33,72 @@ public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
+	@Column(nullable = false)
 	private Integer id;
 
 	@Column(name = "category", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ProductCategory category;
 
-	@Column(name = "price", nullable = false)
+	@Column(nullable = false)
 	private Integer price;
 
-	@Column(name = "stock", nullable = false)
+	@Column(nullable = false)
 	private Integer stock;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller_id", nullable = false)
 	private SellerRep sellerRep;
 
-	@Column(name = "favorite_count")
-	private Integer favoriteCount;
+	@Column()
+	private Integer favoriteCount = 0;
 
-	@Column(name = "is_decaf", nullable = false)
+	@Column(nullable = false)
 	private Boolean isDecaf;
 
-	@Column(name = "name", nullable = false)
+	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "bean_type")
+	@Column()
 	@Enumerated(EnumType.STRING)
 	private Bean bean;
 
-	@Column(name = "acidity")
+	@Column()
 	@Enumerated(EnumType.STRING)
 	private Acidity acidity;
 
-	@Column(name = "information")
+	@Column()
 	private String information;
+
+	@Column(nullable = false)
+	private Boolean isCrush;
 
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ProductStatus status;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime", nullable = false, updatable = false)
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
 
 	@UpdateTimestamp
-	@Column(name = "update_datetime")
+	@Column()
 	private LocalDateTime updateDatetime;
 
+	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
+		, Acidity acidity, String information,Boolean isCrush, Boolean isDecaf,SellerRep test) {
+		Product product = new Product();
+		product.category = category;
+		product.price = price;
+		product.stock = stock;
+		product.name = name;
+		product.bean = bean;
+		product.acidity = acidity;
+		product.information =information;
+		product.isCrush = isCrush;
+		product.status = ProductStatus.AVAILABLE;
+		product.isDecaf = isDecaf;
+		product.sellerRep = test;
+		return product;
+	}
 }
