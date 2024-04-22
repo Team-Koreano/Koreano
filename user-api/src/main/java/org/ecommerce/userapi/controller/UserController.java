@@ -1,7 +1,5 @@
 package org.ecommerce.userapi.controller;
 
-import java.util.Set;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AddressDto;
@@ -10,8 +8,6 @@ import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +27,8 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping()
-	public Response<UserDto.Response.Register> register(@RequestBody final UserDto.Request.Register register) {
-		final UserDto userDto = userService.registerRequest(register);
+	public Response<UserDto.Response.Register> register(@RequestBody final UserDto.Request.Register user) {
+		final UserDto userDto = userService.registerRequest(user);
 		return new Response<>(HttpStatus.OK.value(), UserDto.Response.Register.of(userDto));
 	}
 
@@ -51,24 +47,16 @@ public class UserController {
 	@PostMapping("/address")
 	public Response<AddressDto.Response.Register> address(
 		@AuthenticationPrincipal final AuthDetails authDetails,
-		@RequestBody @Valid final AddressDto.Request.Register register) {
-		final AddressDto addressDto = userService.registerAddress(authDetails, register);
+		@RequestBody @Valid final AddressDto.Request.Register address) {
+		final AddressDto addressDto = userService.registerAddress(authDetails, address);
 		return new Response<>(HttpStatus.OK.value(), AddressDto.Response.Register.of(addressDto));
 	}
 
 	@PostMapping("/account")
 	public Response<AccountDto.Response.Register> account(
 		@AuthenticationPrincipal final AuthDetails authDetails,
-		@RequestBody @Valid final AccountDto.Request.Register register){
-		AccountDto accountDto = userService.registerAccount(authDetails, register);
-		return new Response<>(HttpStatus.OK.value(),AccountDto.Response.Register.of(accountDto));
-
-	}
-
-	@GetMapping("/test")
-	public Response<?> test(@AuthenticationPrincipal final AuthDetails authDetails) {
-		Set<SimpleGrantedAuthority> authoritySet = authDetails.getAuthoritySet();
-		System.out.println("authoritySet = " + authoritySet);
-		return new Response<>(200, "성공");
+		@RequestBody @Valid final AccountDto.Request.Register account) {
+		AccountDto accountDto = userService.registerAccount(authDetails, account);
+		return new Response<>(HttpStatus.OK.value(), AccountDto.Response.Register.of(accountDto));
 	}
 }
