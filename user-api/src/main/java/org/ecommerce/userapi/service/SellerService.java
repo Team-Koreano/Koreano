@@ -16,8 +16,10 @@ import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
 import org.ecommerce.userapi.utils.RedisUtils;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -45,17 +47,16 @@ public class SellerService {
 	/**
 	 * 회원가입 요청
 	 * @author 홍종민
-	 * @param register 사용자의 생성 정보가 들어간 dto 입니다.
+	 * @param requestSeller 사용자의 생성 정보가 들어간 dto 입니다.
 	 * @return SellerDto
 	 */
-	public SellerDto registerRequest(SellerDto.Request.Register register) {
+	public SellerDto registerRequest(SellerDto.Request.Register requestSeller) {
 
-		checkDuplicateEmail(register.email());
-		checkDuplicatePhoneNumber(register.phoneNumber());
+		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(),requestSeller.phoneNumber());
 
-		final Seller seller = Seller.ofRegister(register.email(), register.name(),
-			passwordEncoder.encode(register.password()),
-			register.address(), register.phoneNumber());
+		final Seller seller = Seller.ofRegister(requestSeller.email(), requestSeller.name(),
+			passwordEncoder.encode(requestSeller.password()),
+			requestSeller.address(), requestSeller.phoneNumber());
 		sellerRepository.save(seller);
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
@@ -94,9 +95,17 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		final String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(),
-			authDetails.getAuthorities().toString().replace("[", "").replace("]", ""));
+
+		final String[] authoritiesArray = authDetails.getAuthorities().stream()
+			.map(GrantedAuthority::getAuthority)
+			.toArray(String[]::new);
+
+		final String roll = authoritiesArray[0];
+
+		final String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(), roll);
+
 		redisUtils.deleteData(accessTokenKey);
+
 	}
 
 	/**
@@ -116,17 +125,10 @@ public class SellerService {
 		return AccountMapper.INSTANCE.toDto(account);
 	}
 
-	@Transactional(readOnly = true)
-	public void checkDuplicateEmail(final String email) {
-		if (sellerRepository.existsByEmail(email)) {
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
+		if (sellerRepository.existsByEmailOrPhoneNumber(email,phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
-		}
-	}
-
-	@Transactional(readOnly = true)
-	public void checkDuplicatePhoneNumber(final String phoneNumber) {
-		if (sellerRepository.existsByPhoneNumber(phoneNumber)) {
-			throw new CustomException(UserErrorCode.DUPLICATED_PHONENUMBER);
 		}
 	}
 }
