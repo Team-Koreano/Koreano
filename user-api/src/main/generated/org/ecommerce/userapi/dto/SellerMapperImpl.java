@@ -27,6 +27,7 @@ public class SellerMapperImpl implements SellerMapper {
         String address = null;
         String phoneNumber = null;
         LocalDateTime createDatetime = null;
+        Boolean isDeleted = null;
         LocalDateTime updateDatetime = null;
         Integer beanPay = null;
         UserStatus userStatus = null;
@@ -38,10 +39,10 @@ public class SellerMapperImpl implements SellerMapper {
         address = users.getAddress();
         phoneNumber = users.getPhoneNumber();
         createDatetime = users.getCreateDatetime();
+        isDeleted = users.getIsDeleted();
         updateDatetime = users.getUpdateDatetime();
         beanPay = users.getBeanPay();
         userStatus = users.getUserStatus();
-
         Boolean isDeleted = null;
         String accessToken = null;
 

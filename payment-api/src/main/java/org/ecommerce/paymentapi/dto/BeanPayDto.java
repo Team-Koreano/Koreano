@@ -62,11 +62,7 @@ public class BeanPayDto {
 		}
 
 		public record TossFail(
-			@NotNull(message = "충전ID를 입력해주세요")
-			UUID orderId,
-			@NotBlank(message = "에러코드를 입력해주세요")
 			String errorCode,
-			@NotBlank(message = "에러메시지를 입력해주세요")
 			String errorMessage
 		) {
 		}

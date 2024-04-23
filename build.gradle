@@ -31,6 +31,8 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+
 
         implementation 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
@@ -47,10 +49,6 @@ subprojects {
     }
 
     test {
-        tasks.named('test') {
-            useJUnitPlatform()
-            systemProperty "jasypt.encryptor.password", project.getProperties().get("jasypt.encryptor.password")
-        }
         useJUnitPlatform()
         finalizedBy 'jacocoTestReport'
     }
@@ -104,6 +102,8 @@ project(':user-api'){
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
         runtimeOnly 'com.h2database:h2'
+        implementation 'com.mysql:mysql-connector-j:8.0.33'
+
     }
     dependencyManagement {
         imports {
@@ -112,7 +112,7 @@ project(':user-api'){
     }
 }
 
-project(':bucket-api'){
+project(':bucket-api') {
     dependencies {
         implementation(project(':common'))
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -128,12 +128,6 @@ project(':order-api'){
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         runtimeOnly 'com.h2database:h2'
-        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
-        }
     }
 }
 
@@ -158,7 +152,6 @@ project(':payment-api') {
 project(':product'){
     dependencies {
         implementation(project(':common'))
-        runtimeOnly 'com.h2database:h2'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     }
 }
@@ -167,6 +160,18 @@ project(':product-management-api'){
     dependencies {
         implementation(project(':common'))
         implementation(project(':product'))
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        implementation 'com.mysql:mysql-connector-j:8.0.33'
+        runtimeOnly 'com.h2database:h2'
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
+        }
     }
 }
 

@@ -50,6 +50,8 @@ public class BeanPayService {
 	 * @param - BeanPayDto.Request.TossPayment request
 	 * @return - BeanPayDto response
 	 */
+
+	@Transactional(readOnly = true)
 	public BeanPayDto validTossCharge(final BeanPayDto.Request.TossPayment request) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(), request.amount());
 
@@ -59,17 +61,17 @@ public class BeanPayService {
 			processInProgress(findBeanPay);
 			validateBeanPay(findBeanPay, request);
 		} catch (CustomException e) {
-			handleException(findBeanPay, e.getErrorMessage());
-			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
+			handleException(findBeanPay, e);
+			throw e;
 		}
 		try {
 			//TODO: 유저 beanPay 추가 로직 작성
 			processApproval(findBeanPay, request);
 			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
 		} catch (CustomException e) {
-			handleException(findBeanPay, e.getErrorMessage());
+			handleException(findBeanPay, e);
 			//TODO: 유저 beanPay 롤백 로직 작성
-			return BeanPayMapper.INSTANCE.toDto(findBeanPay);
+			throw e;
 		}
 	}
 
@@ -136,22 +138,7 @@ public class BeanPayService {
 	 * @param - BeanPay findBeanPay, CustomException e
 	 * @return - void
 	 * */
-	private void handleException(final BeanPay findBeanPay, final String message) {
-		findBeanPay.fail(message);
-	}
-
-	/**
-	 * 사전결제 실패 시
-	 * @author 이우진
-	 *
-	 * @param - BeanPayDto.Request.TossFail request
-	 * @return - BeanPayDto
-	 */
-	public BeanPayDto failTossCharge(BeanPayDto.Request.TossFail request) {
-
-		BeanPay findBeanPay = findBeanPayById(request.orderId());
-		handleException(findBeanPay, request.errorMessage());
-
-		return BeanPayMapper.INSTANCE.toDto(findBeanPay);
+	private void handleException(final BeanPay findBeanPay, final CustomException e) {
+		findBeanPay.fail(e.getErrorCode());
 	}
 }
