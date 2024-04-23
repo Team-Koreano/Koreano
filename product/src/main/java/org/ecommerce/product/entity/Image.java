@@ -38,6 +38,9 @@ public class Image {
 	@Column(name = "sequence_number")
 	private Short sequenceNumber;
 
+	@Column(name = "is_deleted")
+	private Boolean isDeleted = false;
+
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)
 	private LocalDateTime createDatetime;
