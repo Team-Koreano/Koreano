@@ -48,12 +48,13 @@ public class ProductManagementService {
 			test
 		);
 
-		Product savedproduct = productRepository.save(createProduct);
+		Product savedProduct = productRepository.save(createProduct);
 
-		saveImages(product.image(),savedproduct);
+		saveImages(product.images(),savedProduct);
 
-		return ProductManagementMapper.INSTANCE.toDto(savedproduct);
+		return ProductManagementMapper.INSTANCE.toDto(savedProduct);
 	}
+
 	private void saveImages(List<ProductManagementDto.Request.Register.ImageDto> imageDtos, Product savedProduct ) {
 		List<Image> images = imageDtos.stream()
 			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(),
@@ -61,4 +62,5 @@ public class ProductManagementService {
 			.toList();
 		imageRepository.saveAll(images);
 	}
+
 }

@@ -39,8 +39,6 @@ public class ProductManagementDto {
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
 			Integer price,
-			@NotBlank(message = ProductManagementErrorMessages.bizNameNotBlank)
-			String bizName,
 			@NotNull(message = ProductManagementErrorMessages.stockNotNull)
 			Integer stock,
 			Acidity acidity,
@@ -52,7 +50,7 @@ public class ProductManagementDto {
 			String name,
 			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
 			Boolean isCrush,
-			List<ImageDto> image
+			List<ImageDto> images
 		){
 			public record ImageDto(
 				String imageUrl,

@@ -3,7 +3,7 @@ spring :
     name : product-management-api
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     database: mysql
     show-sql: true
   datasource:
