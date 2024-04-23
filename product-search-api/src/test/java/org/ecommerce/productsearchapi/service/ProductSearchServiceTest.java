@@ -8,15 +8,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.product.entity.Image;
+import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
-import org.ecommerce.productsearchapi.repository.impl.ProductRepositoryImpl;
+import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,70 +31,88 @@ public class ProductSearchServiceTest {
 	@InjectMocks
 	private ProductSearchService productSearchService;
 	@Mock
-	private ProductRepositoryImpl productCustomRepository;
+	private ProductRepository productRepository;
 
 	@Test
 	void 단일_상품_조회() {
+		
 		// given
-		final List<ImageDto> imageDtoList = List.of(
-			new ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com"),
-			new ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com")
-		);
+		final Product product = getProduct();
 
-		final ProductSearchDto productSearchDto =
-			new ProductSearchDto(
-				1,
-				ProductCategory.BEAN,
-				30000,
-				100,
-				new SellerRep(1, "커피천국"),
-				10,
-				false,
-				"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
-				Bean.ARABICA,
-				Acidity.MEDIUM,
-				"커피천국에서만 만나볼 수 있는 특별한 커피",
-				ProductStatus.AVAILABLE,
-				false,
-				TEST_DATE_TIME,
-				TEST_DATE_TIME,
-				imageDtoList
-			);
-		given(productCustomRepository.findProductById(anyInt())).willReturn(Optional.of(productSearchDto));
+		given(productRepository.findProductById(anyInt())).willReturn(Optional.of(product));
 
 		// when
-		final ProductSearchDto product = productSearchService.getProductById(1);
+		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
 
 		// then
-		assertEquals(1, product.getId());
-		assertEquals(ProductCategory.BEAN, product.getCategory());
-		assertEquals(30000, product.getPrice());
-		assertEquals(100, product.getStock());
-		assertEquals(1, product.getSellerRep().getId());
-		assertEquals("커피천국", product.getSellerRep().getBizName());
-		assertEquals(10, product.getFavoriteCount());
-		assertEquals(false, product.getIsDecaf());
-		assertEquals("[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피", product.getName());
-		assertEquals(Bean.ARABICA, product.getBean());
-		assertEquals(Acidity.MEDIUM, product.getAcidity());
-		assertEquals("커피천국에서만 만나볼 수 있는 특별한 커피", product.getInformation());
-		assertEquals(ProductStatus.AVAILABLE, product.getStatus());
-		assertEquals(false, product.getIsCrush());
-		assertEquals(TEST_DATE_TIME, product.getCreateDateTime());
-		assertEquals(TEST_DATE_TIME, product.getUpdateDateTime());
-		assertEquals(imageDtoList, product.getImageDtoList());
+		assertEquals(1, productSearchDto.getId());
+		assertEquals(ProductCategory.BEAN, productSearchDto.getCategory());
+		assertEquals(30000, productSearchDto.getPrice());
+		assertEquals(100, productSearchDto.getStock());
+		assertEquals(1, productSearchDto.getSellerRep().getId());
+		assertEquals("커피천국", productSearchDto.getSellerRep().getBizName());
+		assertEquals(10, productSearchDto.getFavoriteCount());
+		assertEquals(false, productSearchDto.getIsDecaf());
+		assertEquals("[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피", productSearchDto.getName());
+		assertEquals(Bean.ARABICA, productSearchDto.getBean());
+		assertEquals(Acidity.MEDIUM, productSearchDto.getAcidity());
+		assertEquals("커피천국에서만 만나볼 수 있는 특별한 커피", productSearchDto.getInformation());
+		assertEquals(ProductStatus.AVAILABLE, productSearchDto.getStatus());
+		assertEquals(false, productSearchDto.getIsCrush());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getCreateDatetime());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getUpdateDatetime());
+		assertEquals(1, productSearchDto.getImageDtoList().get(0).getId());
+		assertEquals("http://image1.com", productSearchDto.getImageDtoList().get(0).getImageUrl());
+		assertEquals(true, productSearchDto.getImageDtoList().get(0).getIsThumbnail());
+		assertEquals((short)1, productSearchDto.getImageDtoList().get(0).getSequenceNumber());
+		assertEquals(false, productSearchDto.getImageDtoList().get(0).getIsDeleted());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(0).getCreateDatetime());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
+		assertEquals(2, productSearchDto.getImageDtoList().get(1).getId());
+		assertEquals("http://image2.com", productSearchDto.getImageDtoList().get(1).getImageUrl());
+		assertEquals(false, productSearchDto.getImageDtoList().get(1).getIsThumbnail());
+		assertEquals((short)2, productSearchDto.getImageDtoList().get(1).getSequenceNumber());
+		assertEquals(false, productSearchDto.getImageDtoList().get(1).getIsDeleted());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(1).getCreateDatetime());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
 	}
 
 	@Test
 	void 없는_상품_조회() {
 		// given
-		given(productCustomRepository.findProductById(anyInt())).willReturn(Optional.empty());
+		given(productRepository.findProductById(anyInt())).willReturn(Optional.empty());
 
 		// when
 		CustomException exception = assertThrows(CustomException.class, () -> productSearchService.getProductById(1));
 
 		//then
 		assertEquals(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID, exception.getErrorCode());
+	}
+
+	private Product getProduct() {
+		final List<Image> images = List.of(
+			new Image(1, null, "http://image1.com", true, (short)1, false, TEST_DATE_TIME, TEST_DATE_TIME),
+			new Image(2, null, "http://image2.com", false, (short)2, false, TEST_DATE_TIME, TEST_DATE_TIME)
+			);
+
+		return new Product(
+			1,
+			ProductCategory.BEAN,
+			30000,
+			100,
+			new SellerRep(1, "커피천국"),
+			10,
+			false,
+			"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
+			Bean.ARABICA,
+			Acidity.MEDIUM,
+			"커피천국에서만 만나볼 수 있는 특별한 커피",
+			false,
+			ProductStatus.AVAILABLE,
+			TEST_DATE_TIME,
+			TEST_DATE_TIME,
+			images
+		);
 	}
 
 }
