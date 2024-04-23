@@ -39,6 +39,14 @@ subprojects {
         testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
         implementation("org.mapstruct:mapstruct:1.5.3.Final")
         implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
+        }
     }
 
     jacoco {
