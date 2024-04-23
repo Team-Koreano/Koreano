@@ -24,7 +24,8 @@ public class BeanPayDto {
 	private Integer userId;
 	private Integer amount;
 	private String payType;
-	private String cancelOrFailReason;
+	private String cancelReason;
+	private String failReason;
 	private BeanPayStatus beanPayStatus;
 	private ProcessStatus processStatus;
 	private LocalDateTime createDateTime;

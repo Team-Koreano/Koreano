@@ -1,6 +1,7 @@
 
 package org.ecommerce.paymentapi.controller;
 
+import static org.ecommerce.userapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -14,6 +15,7 @@ import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.ecommerce.paymentapi.service.BeanPayService;
@@ -37,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayControllerTest {
+class BeanPayDetailControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
@@ -65,7 +67,7 @@ class BeanPayControllerTest {
 	void 사전결제객체_생성() throws Exception {
 		//given
 		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
-		final BeanPay entity = BeanPay.ofCreate(1, 10_000);
+		final BeanPayDetail entity = BeanPayDetail.ofCreate(getBeanPay(), 1, 10_000);
 		final BeanPayDto dto = BeanPayMapper.INSTANCE.toDto(entity);
 
 		when(beanPayService.preChargeBeanPay(request)).thenReturn(dto);
@@ -96,7 +98,8 @@ class BeanPayControllerTest {
 
 			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId, amount, paymentType, null,
+			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId,
+				amount, paymentType, null, null,
 				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
 				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
 			final Response<BeanPayDto> result = new Response<>(200, response);
@@ -132,8 +135,9 @@ class BeanPayControllerTest {
 
 		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
 
-		final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, errorMessage,
-			BeanPayStatus.DEPOSIT, ProcessStatus.CANCELLED, LocalDateTime.now(), null);
+		final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
+			amount, null,	null, errorMessage,
+			BeanPayStatus.DEPOSIT, ProcessStatus.FAILED, LocalDateTime.now(), null);
 
 		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
 
@@ -155,6 +159,10 @@ class BeanPayControllerTest {
 		String expect = mapper.writeValueAsString(result);
 
 		assertEquals(expect, actual);
+	}
+
+	private BeanPay getBeanPay() {
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
 	}
 
 }
