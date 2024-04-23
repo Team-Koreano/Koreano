@@ -14,4 +14,5 @@ public class ImageDto {
 	private LocalDateTime createDateTime;
 	private LocalDateTime updateDateTime;
 	private String imageUrl;
+	private boolean isDeleted;
 }
