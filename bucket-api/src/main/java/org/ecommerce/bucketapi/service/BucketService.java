@@ -24,13 +24,29 @@ public class BucketService {
 	// TODO : 회원 검증 로직 추가 (crud)
 	// TODO : 상품 검증 로직 추가 (cu)
 
-	@Transactional(readOnly = true)
-	public void validateBucketByUser(final Integer userId, final Long bucketId) {
-		if (!bucketRepository.existsByUserIdAndId(userId, bucketId)) {
+	/**
+	 * 장바구니가 회원에게 유효한지 검증하는 메소드입니다.
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param bucket- 장바구니
+	*/
+	private void validateBucketWithUserId(final Integer userId, final Bucket bucket) {
+		if (!bucket.getUserId().equals(userId)) {
 			throw new CustomException(INVALID_BUCKET_WITH_USER);
 		}
 	}
 
+	/**
+	 * 회원의 장바구니 목록을 조회하는 메소드입니다.
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @return List<BucketDto>- 장바구니 정보가 담긴 리스트
+	*/
+	@Transactional(readOnly = true)
 	public List<BucketDto> getAllBuckets(final Integer userId) {
 
 		return bucketRepository.findAllByUserId(userId)
@@ -39,6 +55,17 @@ public class BucketService {
 				.toList();
 	}
 
+	/**
+	 * 장바구니에 상품을 담는 메소드입니다.
+	 * <p>
+	 * 상품 유효성 검사 개발 예정
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param addRequest- 장바구니에 담을 상품 정보
+	 * @return BucketDto- 장바구니 정보
+	*/
 	public BucketDto addBucket(
 			final Integer userId,
 			final BucketDto.Request.Add addRequest
@@ -56,22 +83,61 @@ public class BucketService {
 		);
 	}
 
-	public BucketDto updateBucket(
+	/**
+	 * 장바구니를 수정하는 메소드입니다.
+	 * <p>
+	 * 1. 수정할 장바구니가 존재하는지 검증합니다.
+	 * 2. 장바구니가 회원에게 유효한지 검증합니다.
+	 * 3. 상품 수량을 수정합니다.
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param bucketId- 수정할 장바구니 번호
+	 * @param modifyRequest- 수량, 옵션 둥 수정 정보
+	 * @return BucketDto- 수정된 장바구니 정보
+	*/
+	public BucketDto modifyBucket(
+			final Integer userId,
 			final Long bucketId,
-			final BucketDto.Request.Update updateRequest
+			final BucketDto.Request.Modify modifyRequest
 	) {
-
 		final Bucket bucket = bucketRepository.findById(bucketId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
+		validateBucketWithUserId(userId, bucket);
 
-		bucket.update(updateRequest.quantity());
+		bucket.modifyQuantity(modifyRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 
-	public List<BucketDto> getBuckets(final List<Long> bucketIds) {
+	/**
+	 * 장바구니에 대한 정보를 반환하는 메소드입니다.
+	 * <p>
+	 * 단일 혹은 여러 장바구니에 대한 정보를 반환합니다.
+	 * MS간 회원의 장바구니 정보가 필요할 때 사용됩니다.
+	 *
+	 * 1. 회원에게 유효한 장바구니인지 검증합니다.
+	 * 2. 요청한 장바구니가 누락되지 않았는지 검증합니다.
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param bucketIds- 정보를 조회할 장바구니 번호 리스트
+	 * @return BucketDto- 장바구니 정보가 담긴 리스트
+	*/
+	@Transactional(readOnly = true)
+	public List<BucketDto> getBuckets(final Integer userId, final List<Long> bucketIds) {
 
-		return bucketRepository.findAllById(bucketIds)
+		List<Bucket> buckets = bucketRepository.findAllById(bucketIds)
 				.stream()
+				.peek(bucket -> validateBucketWithUserId(userId, bucket))
+				.toList();
+
+		if (bucketIds.size() != buckets.size()) {
+			throw new CustomException(NOT_FOUND_BUCKET_ID);
+		}
+
+		return buckets.stream()
 				.map(BucketMapper.INSTANCE::toDto)
 				.toList();
 	}

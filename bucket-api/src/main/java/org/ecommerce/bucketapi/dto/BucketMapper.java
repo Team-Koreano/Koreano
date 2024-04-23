@@ -10,4 +10,5 @@ public interface BucketMapper {
 
 	BucketMapper INSTANCE = Mappers.getMapper(BucketMapper.class);
 	BucketDto toDto(Bucket bucket);
+	BucketDto.Response toResponse(BucketDto bucketDto);
 }

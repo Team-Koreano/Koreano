@@ -1,6 +1,5 @@
 package org.ecommerce.bucketapi.service;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -45,51 +44,52 @@ public class BucketServiceTest {
 		final List<BucketDto> bucketDtos = bucketService.getAllBuckets(1);
 
 		// then
-		assertEquals(2, bucketDtos.size());
-		assertEquals(1L, bucketDtos.get(0).getId());
-		assertEquals("seller1", bucketDtos.get(0).getSeller());
-		assertEquals(101, bucketDtos.get(0).getProductId());
-		assertEquals(3, bucketDtos.get(0).getQuantity());
-		assertEquals(2L, bucketDtos.get(1).getId());
-		assertEquals("seller2", bucketDtos.get(1).getSeller());
-		assertEquals(102, bucketDtos.get(1).getProductId());
-		assertEquals(2, bucketDtos.get(1).getQuantity());
+		assertEquals(buckets.size(), bucketDtos.size());
+		assertEquals(buckets.get(0).getId(), bucketDtos.get(0).getId());
+		assertEquals(buckets.get(0).getSeller(), bucketDtos.get(0).getSeller());
+		assertEquals(buckets.get(0).getProductId(), bucketDtos.get(0).getProductId());
+		assertEquals(buckets.get(0).getQuantity(), bucketDtos.get(0).getQuantity());
+		assertEquals(buckets.get(1).getId(), bucketDtos.get(1).getId());
+		assertEquals(buckets.get(1).getSeller(), bucketDtos.get(1).getSeller());
+		assertEquals(buckets.get(1).getProductId(), bucketDtos.get(1).getProductId());
+		assertEquals(buckets.get(1).getQuantity(), bucketDtos.get(1).getQuantity());
 	}
 
 	@Test
 	void 장바구니에_담기() {
 		// given
-		given(bucketRepository.save(any(Bucket.class)))
-				.willReturn(
-						new Bucket(
-								1L,
-								1,
-								"returnSellerName",
-								101,
-								3,
-								CREATE_DATE
-						)
-				);
-		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
-
-		// when
-		final BucketDto bucketDto = bucketService.addBucket(
-				1,
+		BucketDto.Request.Add bucketAddRequest =
 				new BucketDto.Request.Add(
 						"inputSellerName",
 						103,
 						1
-				)
+				);
+		Bucket savedBucket = new Bucket(
+				1L,
+				1,
+				"returnSellerName",
+				101,
+				3,
+				CREATE_DATE
+		);
+		given(bucketRepository.save(any(Bucket.class)))
+				.willReturn(savedBucket);
+		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
+
+		// when
+		final BucketDto bucketDto = bucketService.addBucket(
+				anyInt(),
+				bucketAddRequest
 		);
 
 		// then
 		verify(bucketRepository, times(1)).save(captor.capture());
-		assertEquals("inputSellerName", captor.getValue().getSeller());
-		assertEquals(103, captor.getValue().getProductId());
-		assertEquals(1, captor.getValue().getQuantity());
-		assertEquals("returnSellerName", bucketDto.getSeller());
-		assertEquals(101, bucketDto.getProductId());
-		assertEquals(3, bucketDto.getQuantity());
+		assertEquals(bucketAddRequest.seller(), captor.getValue().getSeller());
+		assertEquals(bucketAddRequest.productId(), captor.getValue().getProductId());
+		assertEquals(bucketAddRequest.quantity(), captor.getValue().getQuantity());
+		assertEquals(savedBucket.getSeller(), bucketDto.getSeller());
+		assertEquals(savedBucket.getProductId(), bucketDto.getProductId());
+		assertEquals(savedBucket.getQuantity(), bucketDto.getQuantity());
 	}
 
 	@Test
@@ -110,9 +110,10 @@ public class BucketServiceTest {
 				);
 
 		// when
-		final BucketDto bucketDto = bucketService.updateBucket(
+		final BucketDto bucketDto = bucketService.modifyBucket(
+				1,
 				1L,
-				new BucketDto.Request.Update(newQuantity)
+				new BucketDto.Request.Modify(newQuantity)
 		);
 
 		// then
@@ -120,32 +121,88 @@ public class BucketServiceTest {
 	}
 
 	@Test
-	void 장바구니가_존재하지_않을_때() {
+	void 존재하지_않는_장바구니를_수정할_때() {
 		// given
-		final BucketDto.Request.Update bucketUpdateRequest =
-				new BucketDto.Request.Update(777);
+		final BucketDto.Request.Modify bucketModifyRequest =
+				new BucketDto.Request.Modify(777);
 		given(bucketRepository.findById(anyLong()))
 				.willReturn(Optional.empty());
 
 		// when
 		CustomException exception = assertThrows(CustomException.class,
-				() -> bucketService.updateBucket(1L, bucketUpdateRequest));
+				() -> bucketService.modifyBucket(1, 1L, bucketModifyRequest));
 
 		// then
 		assertEquals(BucketErrorCode.NOT_FOUND_BUCKET_ID, exception.getErrorCode());
 	}
 
 	@Test
-	void 회원_번호에_대한_장바구니_번호가_유효하지_않을_때() {
+	void 회원에게_유효하지_않은_장바구니를_수정할_때() {
 		// given
-		given(bucketRepository.existsByUserIdAndId(anyInt(), anyLong()))
-				.willReturn(false);
+		final BucketDto.Request.Modify bucketModifyRequest =
+				new BucketDto.Request.Modify(777);
+		Bucket bucket = new Bucket(
+				2L,
+				2,
+				"seller2",
+				102,
+				3,
+				CREATE_DATE
+		);
+		given(bucketRepository.findById(anyLong()))
+				.willReturn(Optional.of(bucket));
 
 		// when
 		CustomException exception = assertThrows(CustomException.class,
-				() -> bucketService.validateBucketByUser(1, 1L));
+				() -> bucketService.modifyBucket(1, 1L, bucketModifyRequest));
 
 		// then
 		assertEquals(BucketErrorCode.INVALID_BUCKET_WITH_USER, exception.getErrorCode());
+	}
+
+	@Test
+	void 회원이_선택한_장바구니_조회() {
+		// given
+		final Integer userId = 1;
+		final List<Long> bucketIds = List.of(1L, 2L);
+		final List<Bucket> buckets = List.of(
+				new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
+				new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE)
+		);
+		given(bucketRepository.findAllById(bucketIds))
+				.willReturn(buckets);
+
+		// when
+		final List<BucketDto> bucketDtos = bucketService.getBuckets(userId, bucketIds);
+
+		// then
+		assertEquals(bucketIds.size(), bucketDtos.size());
+		assertEquals(buckets.get(0).getId(), bucketDtos.get(0).getId());
+		assertEquals(buckets.get(0).getSeller(), bucketDtos.get(0).getSeller());
+		assertEquals(buckets.get(0).getProductId(), bucketDtos.get(0).getProductId());
+		assertEquals(buckets.get(0).getQuantity(), bucketDtos.get(0).getQuantity());
+		assertEquals(buckets.get(1).getId(), bucketDtos.get(1).getId());
+		assertEquals(buckets.get(1).getSeller(), bucketDtos.get(1).getSeller());
+		assertEquals(buckets.get(1).getProductId(), bucketDtos.get(1).getProductId());
+		assertEquals(buckets.get(1).getQuantity(), bucketDtos.get(1).getQuantity());
+	}
+
+	@Test
+	void 회원이_선택한_장바구니_누락_조회() {
+	    // given
+		final Integer userId = 1;
+		final List<Long> bucketIds = List.of(1L, 2L, 3L);
+		final List<Bucket> buckets = List.of(
+				new Bucket(1L, 1, "seller1", 101, 3, CREATE_DATE),
+				new Bucket(2L, 1, "seller2", 102, 2, CREATE_DATE)
+		);
+		given(bucketRepository.findAllById(bucketIds))
+				.willReturn(buckets);
+	    // when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> bucketService.getBuckets(userId, bucketIds));
+
+	    // then
+		assertEquals(BucketErrorCode.NOT_FOUND_BUCKET_ID, exception.getErrorCode());
 	}
 }
