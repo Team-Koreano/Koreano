@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
@@ -82,21 +83,6 @@ class SellerControllerTest {
 
 	}
 
-	private ResultActions performLoginRequest(String content) throws Exception {
-		return mockMvc.perform(post("/api/sellers/v1/login")
-			.with(csrf())
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(content)
-			.with(user("test")));
-	}
-
-	private ResultActions performPostRequest(String content) throws Exception {
-		return mockMvc.perform(post("/api/sellers/v1")
-			.with(csrf())
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(content)
-			.with(user("test")));
-	}
 
 	@Test
 	void 셀러_등록() throws Exception {
@@ -122,26 +108,27 @@ class SellerControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		SellerDto responseDto = SellerMapper.INSTANCE.toDto(seller);
+		final SellerDto responseDto = SellerMapper.INSTANCE.toDto(seller);
 
-		String content = objectMapper.writeValueAsString(responseDto);
-
+		final String content = objectMapper.writeValueAsString(responseDto);
+		//when
 		when(sellerService.registerRequest(registerRequest)).thenReturn(responseDto);
 
-		//when
-		final ResultActions resultActions = performPostRequest(content);
-
+		final ResultActions perform = mockMvc.perform(post("/api/sellers/v1")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(content)
+			.with(user("test")));
 		//then
-		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
-			.andReturn();
+		perform.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.email").value(expectedResponse.email()))
+			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
+			.andExpect(jsonPath("$.result.address").value(expectedResponse.address()))
+			.andExpect(jsonPath("$.result.phoneNumber").value(expectedResponse.phoneNumber()))
+			.andDo(print());
 
-		SellerDto.Response.Register result = objectMapper.readValue(
-			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<SellerDto.Response.Register>>() {
-			}
-		).result();
 
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
+
 
 	}
 
@@ -162,7 +149,11 @@ class SellerControllerTest {
 		when(sellerService.loginRequest(login)).thenReturn(sellerDto);
 
 		// when
-		final ResultActions resultActions = performLoginRequest(content);
+		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/login")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(content)
+			.with(user("test")));
 
 		// then
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
@@ -198,7 +189,7 @@ class SellerControllerTest {
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(authDetailsService.getSellerAuth(email)).thenReturn(authDetails);
 		when(sellerService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
@@ -210,15 +201,12 @@ class SellerControllerTest {
 
 		//then
 
-		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.number").value(expectedResponse.number()))
+			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()))
+			.andReturn();
 
-		final AccountDto.Response.Register result = objectMapper.readValue(
-			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<AccountDto.Response.Register>>() {
-			}
-		).result();
 
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
 	}
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현
