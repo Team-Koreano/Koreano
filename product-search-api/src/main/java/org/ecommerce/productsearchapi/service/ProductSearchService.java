@@ -1,10 +1,11 @@
 package org.ecommerce.productsearchapi.service;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.product.entity.Product;
+import org.ecommerce.productsearchapi.dto.ProductMapper;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
-import org.ecommerce.productsearchapi.repository.impl.ProductRepositoryImpl;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,11 @@ public class ProductSearchService {
 	 * @return ProductSearchDto
 	 */
 	public ProductSearchDto getProductById(final Integer productId) {
-		return productRepository.findProductById(productId)
+
+		final Product product = productRepository.findProductById(productId)
 			.orElseThrow(() -> new CustomException(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID));
+
+		return ProductMapper.INSTANCE.toDto(product);
 	}
 
 }
