@@ -5,6 +5,7 @@ import static org.ecommerce.product.entity.QProduct.*;
 import java.util.Optional;
 
 import org.ecommerce.product.entity.Product;
+import org.ecommerce.productsearchapi.repository.ProductCustomRepository;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
