@@ -16,7 +16,7 @@ import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
-import org.ecommerce.productsearchapi.repository.querydsl.ProductCustomRepositoryImpl;
+import org.ecommerce.productsearchapi.repository.impl.ProductRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +30,7 @@ public class ProductSearchServiceTest {
 	@InjectMocks
 	private ProductSearchService productSearchService;
 	@Mock
-	private ProductCustomRepositoryImpl productCustomRepository;
+	private ProductRepositoryImpl productCustomRepository;
 
 	@Test
 	void 단일_상품_조회() {

@@ -1,8 +1,7 @@
-package org.ecommerce.productsearchapi.repository.querydsl;
+package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.repository.ProductCustomRepository;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
 @RequiredArgsConstructor
-public class ProductCustomRepositoryImpl implements ProductCustomRepository {
+public class ProductRepositoryImpl implements ProductCustomRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 

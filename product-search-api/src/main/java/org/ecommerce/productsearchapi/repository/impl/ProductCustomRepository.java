@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.repository;
+package org.ecommerce.productsearchapi.repository.impl;
 
 import java.util.Optional;
 
