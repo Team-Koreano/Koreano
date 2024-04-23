@@ -14,6 +14,7 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
@@ -73,13 +74,13 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossResponse = ResponseEntity.of(
+			final ResponseEntity<TossDto.Response.TossPayment> tossResponse = ResponseEntity.of(
 				Optional.of(response));
 
 			//when
@@ -91,7 +92,7 @@ class BeanPayServiceTest {
 		}
 
 		@Test
-		void 빈페이_존재_안함_예외발생() {
+		void 빈페이_존재안함_예외발생() {
 
 			//given
 			final UUID orderId = UUID.randomUUID();
@@ -99,7 +100,7 @@ class BeanPayServiceTest {
 			final String paymentType = "카드";
 			final Integer amount = 1000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 
 			//when
@@ -123,7 +124,7 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final Integer difAmount = 10000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, difAmount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
@@ -133,16 +134,14 @@ class BeanPayServiceTest {
 			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
 
 			//then
-			CustomException returnException = assertThrows(CustomException.class, () -> {
-				beanPayService.validTossCharge(request);
-			});
-			assertEquals(returnException.getErrorCode(), VERIFICATION_FAIL);
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), VERIFICATION_FAIL.getMessage());
 			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 
 		@Test
-		void 토스_검증_승인_예외발생() {
+		void 토스검증승인_예외발생() {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
@@ -153,13 +152,13 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
+			final ResponseEntity<TossDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
 				.body(response);
 
 			//when
@@ -168,14 +167,60 @@ class BeanPayServiceTest {
 			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
 
 			//then
-			CustomException returnException = assertThrows(CustomException.class, () -> {
-				beanPayService.validTossCharge(request);
-			});
-			assertEquals(returnException.getErrorCode(), TOSS_RESPONSE_FAIL);
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), TOSS_RESPONSE_FAIL.getMessage());
 			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
 		}
 
 	}
+
+	@Nested
+	class 토스사전결제_실패 {
+		@Test
+		void 성공() {
+			//given
+			final UUID orderId = UUID.randomUUID();
+			final Integer userId = 1;
+			final Integer amount = 1000;
+			final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
+			final String errorCode = "PAY_PROCESS_CANCELED";
+
+			final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+
+			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, errorMessage,
+				BeanPayStatus.DEPOSIT, ProcessStatus.CANCELLED, LocalDateTime.now(), null);
+
+			//when
+			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
+
+			//then
+			assertDoesNotThrow(() -> beanPayService.failTossCharge(request));
+			assertTrue(optionalBeanPay.isPresent());
+			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), errorMessage);
+			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
+		}	
+	}
+	@Test
+	void 빈페이_존재안함_예외발생() {
+		//given
+		final UUID orderId = UUID.randomUUID();
+		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
+		final String errorCode = "PAY_PROCESS_CANCELED";
+
+		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+
+		//when
+		when(beanPayRepository.findById(request.orderId())).thenThrow(
+			new CustomException(NOT_EXIST));
+
+		//then
+		CustomException returnException = assertThrows(CustomException.class, () -> {
+			beanPayService.failTossCharge(request);
+		});
+		assertEquals(returnException.getErrorCode(), NOT_EXIST);
+	}
+	
 
 }

@@ -17,7 +17,7 @@ public class OrderDto {
 	private String address1;
 	private String address2;
 	private String deliveryComment;
-	private Integer beanpay;
+	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
 
@@ -26,7 +26,7 @@ public class OrderDto {
 		public record Create(
 
 				@NotNull(message = "주문할 장바구니를 입력해 주세요.")
-				List<Long> buckets,
+				List<Long> bucketIds,
 
 				@NotBlank(message = "수신자 이름을 입력해 주세요.")
 				String receiveName,
@@ -42,12 +42,10 @@ public class OrderDto {
 
 				String deliveryComment
 		) {
-
 		}
 	}
 
 	public record Response(
-
 			Long id,
 			Integer userId,
 			String receiveName,
@@ -55,23 +53,9 @@ public class OrderDto {
 			String address1,
 			String address2,
 			String deliveryComment,
-			Integer beanpay,
+			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
 			LocalDateTime orderDatetime
 	) {
-		public static Response of(final OrderDto orderDto) {
-			return new Response(
-					orderDto.id,
-					orderDto.userId,
-					orderDto.receiveName,
-					orderDto.phoneNumber,
-					orderDto.address1,
-					orderDto.address2,
-					orderDto.deliveryComment,
-					orderDto.beanpay,
-					orderDto.paymentDatetime,
-					orderDto.orderDatetime
-			);
-		}
 	}
 }
