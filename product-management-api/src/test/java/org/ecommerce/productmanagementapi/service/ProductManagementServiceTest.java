@@ -47,7 +47,6 @@ public class ProductManagementServiceTest {
 			new ProductManagementDto.Request.Register(
 				true,
 				1000,
-				"testBiz",
 				50,
 				Acidity.CINNAMON,
 				Bean.ARABICA,

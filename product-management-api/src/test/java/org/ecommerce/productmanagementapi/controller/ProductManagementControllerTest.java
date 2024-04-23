@@ -1,5 +1,6 @@
 package org.ecommerce.productmanagementapi.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -7,7 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.type.Acidity;
@@ -15,10 +18,12 @@ import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.service.ProductManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
@@ -51,6 +57,9 @@ class ProductManagementControllerTest {
 	@MockBean
 	private ProductManagementService productManagementService;
 
+	@MockBean
+	private ImageRepository imageRepository;
+
 	private static final SellerRep test = new SellerRep(2, "TEST");
 
 	@BeforeEach
@@ -74,7 +83,6 @@ class ProductManagementControllerTest {
 			new ProductManagementDto.Request.Register(
 				true,
 				1000,
-				"testBiz",
 				50,
 				Acidity.CINNAMON,
 				Bean.ARABICA,
@@ -101,19 +109,24 @@ class ProductManagementControllerTest {
 		final ProductManagementDto productConvertToDto = ProductManagementMapper.INSTANCE.toDto(product);
 
 		final ProductManagementDto.Response expectedResponse = ProductManagementDto.Response.of(productConvertToDto);
-
-
+		saveImages(imageDtos,product);
 		when(productManagementService.productRegister(productDtos)).thenReturn(productConvertToDto);
 		//when
 		//then
-		mockMvc.perform(post("/api/productmanagement/v1")
+		final ArgumentCaptor<List<Image>> imageListCaptor = ArgumentCaptor.forClass(List.class);
+		verify(imageRepository, times(1)).saveAll(imageListCaptor.capture());
+		final List<Image> savedImages = imageListCaptor.getValue();
+
+		verifyImages(savedImages, 0, imageDtos);
+
+		ResultActions resultActions = mockMvc.perform(post("/api/productmanagement/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(productDtos))
 			)
-			.andExpect(status().isOk())
+			.andExpect(status().isOk());
+		resultActions
 			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
 			.andExpect(jsonPath("$.result.price").value(expectedResponse.price()))
-			.andExpect(jsonPath("$.result.bizName").value(expectedResponse.bizName()))
 			.andExpect(jsonPath("$.result.stock").value(expectedResponse.stock()))
 			.andExpect(jsonPath("$.result.acidity").value(expectedResponse.acidity()))
 			.andExpect(jsonPath("$.result.bean").value(expectedResponse.bean()))
@@ -121,6 +134,28 @@ class ProductManagementControllerTest {
 			.andExpect(jsonPath("$.result.information").value(expectedResponse.information()))
 			.andExpect(jsonPath("$.result.status").value(expectedResponse.status()))
 			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.isCrush()))
+			.andExpect(jsonPath("$.result.bizName").value(expectedResponse.bizName()))
 			.andDo(print());
+	}
+	private void verifyImages(List<Image> images, int index, List<ProductManagementDto.Request.Register.ImageDto> imageDtos) {
+		if (index >= images.size()) {
+			return;
+		}
+
+		Image image = images.get(index);
+		ProductManagementDto.Request.Register.ImageDto imageDto = imageDtos.get(index);
+
+		// 이미지 속성 검증 로직 추가
+		assertThat(image.getImageUrl()).isEqualTo(imageDto.imageUrl());
+		assertThat(image.getIsThumbnail()).isEqualTo(imageDto.isThumbnail());
+		assertThat(image.getSequenceNumber()).isEqualTo(imageDto.sequenceNumber());
+
+		verifyImages(images, index + 1, imageDtos);
+	}
+	private void saveImages(List<ProductManagementDto.Request.Register.ImageDto> imageDtos, Product savedProduct) {
+		List<Image> images = imageDtos.stream()
+			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(), savedProduct))
+			.collect(Collectors.toList());
+		imageRepository.saveAll(images);
 	}
 }
