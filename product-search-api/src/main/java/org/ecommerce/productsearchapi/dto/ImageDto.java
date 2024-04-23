@@ -11,8 +11,9 @@ public class ImageDto {
 	private Integer id;
 	private Boolean isThumbnail;
 	private Short sequenceNumber;
-	private LocalDateTime createDateTime;
-	private LocalDateTime updateDateTime;
+	private LocalDateTime createDatetime;
+	private LocalDateTime updateDatetime;
 	private String imageUrl;
-	private boolean isDeleted;
+	private Boolean isDeleted;
+
 }
