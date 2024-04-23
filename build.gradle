@@ -41,6 +41,11 @@ subprojects {
         implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+        // @VisibleForTesting 의존성
+        implementation 'com.google.auto:auto-common:0.13'
+        implementation 'com.google.auto.value:auto-value-annotations:1.8'
+        implementation 'com.google.guava:guava:30.1-jre'
     }
 
     dependencyManagement {
@@ -138,6 +143,13 @@ project(':order-api'){
         runtimeOnly 'com.h2database:h2'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+        // redis client
+        implementation 'org.redisson:redisson-spring-boot-starter:3.29.0'
+        // embedded redis
+//        implementation('it.ozimov:embedded-redis:0.7.3') {
+//            exclude group: "org.slf4j", module: "slf4j-simple"
+//        }
     }
     dependencyManagement {
         imports {
