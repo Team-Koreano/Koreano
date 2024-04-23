@@ -14,7 +14,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-class BeanPayDtoTest {
+class BeanPayDetailDtoTest {
 
 	private static ValidatorFactory factory;
 	private static Validator validator;
@@ -40,45 +40,7 @@ class BeanPayDtoTest {
 
 	}
 
-	@Nested
-	class 토스결제승인_검증_DTO {
-		@Test
-		void 성공() {
-			//given
-			final UUID orderId = UUID.randomUUID();
-			final String paymentKey = "paymentKey";
-			final String paymentType = "카드";
-			final Integer amount = 1000;
 
-			//when
-			final BeanPayDto.Request.TossPayment request =
-				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
-
-			//then
-			assertEquals(orderId, request.orderId());
-			assertEquals(paymentKey, request.paymentKey());
-			assertEquals(amount, request.amount());
-			assertEquals(paymentType, request.paymentType());
-		}
-		@Test
-		void 실패() {
-			//given
-			final UUID orderId = null;
-			final String paymentKey = "";
-			final String paymentType = "";
-			final Integer amount = -1;
-
-			//when
-			final BeanPayDto.Request.TossPayment request =
-				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
-
-			//then
-			Set<ConstraintViolation<BeanPayDto.Request.TossPayment>> violations =
-				validator.validate(request);
-
-			assertEquals(5, violations.size());
-		}
-	}
 
 	@Nested
 	class 토스사전결제_실패_DTO {

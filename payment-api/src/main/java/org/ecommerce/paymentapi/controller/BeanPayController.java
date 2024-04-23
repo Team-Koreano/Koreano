@@ -4,6 +4,7 @@ import static org.ecommerce.paymentapi.entity.type.ProcessStatus.*;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.service.BeanPayService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -25,16 +26,16 @@ public class BeanPayController {
 	private final PaymentServiceImpl paymentService;
 	private final BeanPayService beanPayService;
 
-	@PostMapping("/payments")
+	@PostMapping
 	public Response<BeanPayDto> preCharge(@RequestBody final BeanPayDto.Request.PreCharge request) {
 		final BeanPayDto response = beanPayService.preChargeBeanPay(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/success")
-	public Response<BeanPayDto> validCharge(@Valid final BeanPayDto.Request.TossPayment request) {
+	public Response<BeanPayDto> validCharge(@Valid final TossDto.Request.TossPayment request) {
 		final BeanPayDto response = beanPayService.validTossCharge(request);
-		if(response.getProcessStatus() == CANCELLED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
+		if(response.getProcessStatus() == FAILED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 

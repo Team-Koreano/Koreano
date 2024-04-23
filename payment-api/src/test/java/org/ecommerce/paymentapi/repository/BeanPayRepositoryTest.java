@@ -1,29 +1,72 @@
 package org.ecommerce.paymentapi.repository;
 
+import static org.ecommerce.userapi.entity.type.Role.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.ecommerce.paymentapi.entity.BeanPay;
-import org.junit.jupiter.api.Assertions;
+import org.ecommerce.userapi.entity.type.Role;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @DataJpaTest
 public class BeanPayRepositoryTest {
-
-	final BeanPay beanPay = BeanPay.ofCreate(1, 10000);
 	@Autowired
 	private BeanPayRepository beanPayRepository;
+	@Nested
+	class findBeanPayByUserIdAndRole {
+		@Test
+		void 성공() {
+			//given
+			BeanPay beanPay = getBeanPay();
+			Role role = beanPay.getRole();
+			Integer userId = beanPay.getUserId();
+			Integer beanId = beanPay.getId();
+			Integer amount = beanPay.getAmount();
 
-	@Test
-	public void 충전객체_저장() {
-		//given
+			beanPayRepository.save(beanPay);
 
-		//when
-		beanPayRepository.save(beanPay);
-		BeanPay findBeanPay = beanPayRepository.findById(beanPay.getId()).get();
+			//when
+			Optional<BeanPay> optionalFindBeanPay =
+				beanPayRepository.findBeanPayByUserIdAndRole(
+					userId, role
+				);
 
-		//then
-		Assertions.assertEquals( beanPay.getId(), findBeanPay.getId());
+			//then
+			assertTrue(optionalFindBeanPay.isPresent());
+			BeanPay findBeanPay = optionalFindBeanPay.get();
+			assertEquals(beanId, findBeanPay.getId());
+			assertEquals(findBeanPay.getUserId(), userId);
+			assertEquals(findBeanPay.getRole(), role);
+			assertEquals(findBeanPay.getAmount(), amount);
+		}
+
+		@Test
+		void 유저ID다름_실패() {
+			//given
+			BeanPay beanPay = getBeanPay();
+			Role role = beanPay.getRole();
+			Integer difUserId = 10_000;
+
+			beanPayRepository.save(beanPay);
+
+			//when
+			Optional<BeanPay> optionalFindBeanPay =
+				beanPayRepository.findBeanPayByUserIdAndRole(
+					difUserId, role
+				);
+
+			//then
+			assertTrue(optionalFindBeanPay.isEmpty());
+		}
+	}
+	
+
+	public BeanPay getBeanPay() {
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
 	}
 }

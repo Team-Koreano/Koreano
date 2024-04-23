@@ -2,7 +2,8 @@
 package org.ecommerce.paymentapi.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
+import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode.*;
+import static org.ecommerce.userapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -14,11 +15,15 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
+import org.ecommerce.userapi.entity.type.Role;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +33,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class BeanPayServiceTest {
+class BeanPayDetailServiceTest {
 
 	@InjectMocks
 	private BeanPayService beanPayService;
 
 	@Mock
 	private BeanPayRepository beanPayRepository;
+
+	@Mock
+	private BeanPayDetailRepository beanPayDetailRepository;
 
 	@Mock
 	private TossServiceClient tossServiceClient;
@@ -47,10 +55,13 @@ class BeanPayServiceTest {
 
 		//given
 		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
-		final BeanPay entity = BeanPay.ofCreate(1, 10000);
+		final BeanPay beanPay = getBeanPay();
+		final BeanPayDetail entity = BeanPayDetail.ofCreate(beanPay, 1, 10000);
 		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
 
-		given(beanPayRepository.save(any())).willReturn(entity);
+		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
+		given(beanPayDetailRepository.save(any())).willReturn(entity);
+
 
 		//when
 		final BeanPayDto actual = beanPayService.preChargeBeanPay(request);
@@ -73,17 +84,18 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
+			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
+				amount, null, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossResponse = ResponseEntity.of(
+			final ResponseEntity<TossDto.Response.TossPayment> tossResponse = ResponseEntity.of(
 				Optional.of(response));
 
 			//when
-			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			when(beanPayDetailRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossResponse);
 
 			//then
@@ -99,11 +111,11 @@ class BeanPayServiceTest {
 			final String paymentType = "카드";
 			final Integer amount = 1000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 
 			//when
-			when(beanPayRepository.findById(request.orderId())).thenThrow(
+			when(beanPayDetailRepository.findById(request.orderId())).thenThrow(
 				new CustomException(NOT_EXIST));
 
 			//then
@@ -123,20 +135,21 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final Integer difAmount = 10000;
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPay entity = new BeanPay(orderId, null, userId, difAmount, null, null, BeanPayStatus.DEPOSIT,
+			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
+				difAmount, null, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
 
 			//when
-			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
-			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
+			when(beanPayDetailRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
-			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), VERIFICATION_FAIL.getMessage());
-			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
+			assertEquals(optionalBeanPay.get().getFailReason(), VERIFICATION_FAIL.getMessage());
+			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
 		}
 
 		@Test
@@ -151,25 +164,26 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
+			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, null, BeanPayStatus.DEPOSIT,
+			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
+				amount, null, null, null, BeanPayStatus.DEPOSIT,
 				ProcessStatus.PENDING, LocalDateTime.now(), null);
-			final BeanPayDto.Response.TossPayment response = new BeanPayDto.Response.TossPayment(paymentType, orderName,
+			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentType, orderName,
 				method, amount, approveDateTime);
-			final ResponseEntity<BeanPayDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
+			final ResponseEntity<TossDto.Response.TossPayment> tossFailResponse = ResponseEntity.status(400)
 				.body(response);
 
 			//when
-			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			when(beanPayDetailRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossFailResponse);
-			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
+			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
-			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), TOSS_RESPONSE_FAIL.getMessage());
-			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
+			assertEquals(optionalBeanPay.get().getFailReason(), TOSS_RESPONSE_FAIL.getMessage());
+			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
 		}
 
 	}
@@ -187,18 +201,19 @@ class BeanPayServiceTest {
 
 			final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
 
-			final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, errorMessage,
-				BeanPayStatus.DEPOSIT, ProcessStatus.CANCELLED, LocalDateTime.now(), null);
+			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
+				amount, null, null, errorMessage,
+				BeanPayStatus.DEPOSIT, ProcessStatus.FAILED, LocalDateTime.now(), null);
 
 			//when
-			when(beanPayRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
-			Optional<BeanPay> optionalBeanPay = beanPayRepository.findById(request.orderId());
+			when(beanPayDetailRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.failTossCharge(request));
 			assertTrue(optionalBeanPay.isPresent());
-			assertEquals(optionalBeanPay.get().getCancelOrFailReason(), errorMessage);
-			assertEquals(ProcessStatus.CANCELLED, optionalBeanPay.get().getProcessStatus());
+			assertEquals(optionalBeanPay.get().getFailReason(), errorMessage);
+			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
 		}	
 	}
 	@Test
@@ -211,7 +226,7 @@ class BeanPayServiceTest {
 		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 		//when
-		when(beanPayRepository.findById(request.orderId())).thenThrow(
+		when(beanPayDetailRepository.findById(request.orderId())).thenThrow(
 			new CustomException(NOT_EXIST));
 
 		//then
@@ -220,6 +235,8 @@ class BeanPayServiceTest {
 		});
 		assertEquals(returnException.getErrorCode(), NOT_EXIST);
 	}
-	
 
+	private BeanPay getBeanPay() {
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
+	}
 }
