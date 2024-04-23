@@ -149,11 +149,10 @@ public class UserService {
 		return AccountMapper.INSTANCE.toDto(account);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 	public void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
 		}
 	}
-
 }
