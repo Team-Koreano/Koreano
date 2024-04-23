@@ -8,7 +8,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication(scanBasePackages = {
 	"org.ecommerce.common",
 	"org.ecommerce.paymentapi",
-	"org.ecommerce.common.config",
 	"org.ecommerce.userapi.entity.type"
 })
 public class PaymentApiApplication {
