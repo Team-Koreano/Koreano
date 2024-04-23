@@ -1,34 +1,42 @@
 package org.ecommerce.orderapi.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.client.ProductSearchServiceClient;
+import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.ProductDto;
-import org.ecommerce.orderapi.dto.ProductMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
 	private final ProductSearchServiceClient productManagementServiceClient;
 	private final OrderRepository orderRepository;
 	private final OrderDetailRepository orderDetailRepository;
+
+	private final RedisClient redisClient;
 
 	private final static Integer DELIVERY_FEE = 0;
 
@@ -50,7 +58,8 @@ public class OrderService {
 	 *
 	 * @return - 장바구니 정보가 들어있는 BucketDto 입니다.
 	 */
-	private List<BucketDto> validateBucket(
+	@VisibleForTesting
+	public List<BucketDto> validateBucket(
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
@@ -73,18 +82,17 @@ public class OrderService {
 	 * @param quantities- 회원이 주문한 상품의 수량
 	 * @return - 주문한 상품의 정보
 	 */
-	private List<ProductDto> checkStock(
+	@VisibleForTesting
+	public boolean checkStock(
 			final List<Integer> productIds,
 			final List<Integer> quantities
 	) {
 
-		return productManagementServiceClient.checkStocks(productIds, quantities)
-				.stream()
-				.map(ProductMapper.INSTANCE::responseToDto)
-				.toList();
+		return true;
 	}
 
 	// TODO : 회원 유효성 검사
+
 	/**
 	 * 주문을 생성하는 메소드 입니다.
 	 * <p>
@@ -111,14 +119,14 @@ public class OrderService {
 				userId,
 				placeRequest.bucketIds()
 		);
-		final List<ProductDto> productDtos = checkStock(
-				bucketDtos.stream()
-						.map(BucketDto::getProductId)
-						.toList(),
-				bucketDtos.stream()
-						.map(BucketDto::getQuantity)
-						.toList()
-		);
+		// final List<ProductDto> productDtos = checkStock(
+		// 		bucketDtos.stream()
+		// 				.map(BucketDto::getProductId)
+		// 				.toList(),
+		// 		bucketDtos.stream()
+		// 				.map(BucketDto::getQuantity)
+		// 				.toList()
+		// );
 
 		Order order = orderRepository.save(
 				Order.ofPlace(
@@ -131,12 +139,13 @@ public class OrderService {
 				)
 		);
 
-		placeOrderDetails(order, bucketDtos, productDtos);
+		// placeOrderDetails(order, bucketDtos, productDtos);
 
 		return OrderMapper.INSTANCE.toDto(order);
 	}
 
 	// TODO : 배송비 우선 무료로 고정, 추후 seller에서 정책 설정
+
 	/**
 	 * 주문 상세를 생성하는 메소드 입니다.
 	 * <p>
@@ -154,7 +163,8 @@ public class OrderService {
 	 * @param productDtos- 상품 정보
 	 * @return - 반환 값 설명 텍스트
 	 */
-	private void placeOrderDetails(
+	@VisibleForTesting
+	public void placeOrderDetails(
 			final Order order,
 			final List<BucketDto> bucketDtos,
 			final List<ProductDto> productDtos
@@ -178,5 +188,27 @@ public class OrderService {
 						))
 						.toList()
 		);
+	}
+
+	@VisibleForTesting
+	public void saveMockData() {
+		List<Stock> mockStocks = Arrays.asList(
+				new Stock(101, 10, 5),
+				new Stock(102, 20, 10),
+				new Stock(103, 15, 8)
+		);
+
+		for (Stock stock : mockStocks) {
+			redisClient.put(stock.getProductId(), stock);
+		}
+	}
+
+	@VisibleForTesting
+	public Stock getMockData(Integer productId) {
+		Stock stock = redisClient.get(productId, Stock.class);
+		log.info("productId : {}", productId);
+		log.info("totalStock : {}", stock.getTotalStock());
+		log.info("processingStock : {}", stock.getProcessingStock());
+		return stock;
 	}
 }
