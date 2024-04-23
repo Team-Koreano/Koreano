@@ -7,6 +7,7 @@ import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class ProductSearchService {
 	 * @param  productId 상품 ID
 	 * @return ProductSearchDto
 	 */
+	@Transactional(readOnly = true)
 	public ProductSearchDto getProductById(final Integer productId) {
 
 		final Product product = productRepository.findProductById(productId)
