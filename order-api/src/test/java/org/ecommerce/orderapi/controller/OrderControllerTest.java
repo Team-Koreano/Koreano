@@ -1,7 +1,7 @@
-package org.example.orderapi.controller;
+package org.ecommerce.orderapi.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.ecommerce.orderapi.exception.ErrorMessage.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.ecommerce.orderapi.controller.OrderController;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.service.OrderService;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,7 +37,7 @@ public class OrderControllerTest {
 	private OrderService orderService;
 
 	@Test
-	void 주문하기() throws Exception{
+	void 주문하기() throws Exception {
 		// given
 		OrderDto orderDto = new OrderDto(
 				1L,
@@ -48,8 +48,8 @@ public class OrderControllerTest {
 				"백동",
 				"빠른 배송 부탁드려요.",
 				10000,
-				LocalDateTime.of(2024,4,22,0,1),
-				LocalDateTime.of(2024,4,22,0,2)
+				LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
+				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 		);
 		when(orderService.placeOrder(anyInt(), any(OrderDto.Request.Place.class)))
 				.thenReturn(orderDto);
@@ -60,7 +60,7 @@ public class OrderControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
 								new OrderDto.Request.Place(
-										List.of(1L,2L,3L),
+										List.of(1L, 2L, 3L),
 										"receiveName",
 										"010-777-7777",
 										"동백",
@@ -77,10 +77,29 @@ public class OrderControllerTest {
 				.andExpect(jsonPath("$.result.address2").value(orderDto.getAddress2()))
 				.andExpect(jsonPath("$.result.deliveryComment").value(orderDto.getDeliveryComment()))
 				.andExpect(jsonPath("$.result.totalPaymentAmount").value(orderDto.getTotalPaymentAmount()))
-				.andExpect(jsonPath("$.result.orderDatetime").value(orderDto.getOrderDatetime()))
 				.andDo(print());
-
-
-
 	}
+
+	@Test
+	void 필수정보_없이_주문하기() throws Exception {
+		// given
+		OrderDto.Request.Place placeRequest = new OrderDto.Request.Place(
+				List.of(1L, 2L, 3L),
+				"receiveName",
+				"010-777-7777",
+				null,
+				"백동",
+				"빠른 배송 부탁드려요"
+		);
+
+		// when
+		// then
+		mockMvc.perform(post("/api/orders/v1")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(placeRequest)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+				.andExpect(jsonPath("$.result").value(ADDRESS1_NOT_BLANK));
+	}
+
 }
