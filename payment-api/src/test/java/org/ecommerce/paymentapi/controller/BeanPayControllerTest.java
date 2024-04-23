@@ -12,7 +12,6 @@ import java.util.UUID;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
-import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
@@ -54,6 +53,11 @@ class BeanPayControllerTest {
 	@Autowired
 	private WebApplicationContext wac;
 
+
+
+
+
+
 	@BeforeEach
 	void setup() {
 		this.mvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -72,8 +76,10 @@ class BeanPayControllerTest {
 		final Response<BeanPayDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
+		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1/payments").contentType(MediaType.APPLICATION_JSON)
 			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
+
+
 
 		//then
 		String actual = mvcResult.getResponse().getContentAsString();
@@ -94,24 +100,26 @@ class BeanPayControllerTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 
-			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
+			final BeanPayDto.Request.TossPayment request = new BeanPayDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
 			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId, amount, paymentType, null,
 				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
 				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
 			final Response<BeanPayDto> result = new Response<>(200, response);
 
+
+
+
 			when(beanPayService.validTossCharge(request)).thenReturn(response);
 
 			//when
-			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success")
-					.contentType(MediaType.APPLICATION_JSON)
-					.param("orderId", String.valueOf(request.orderId()))
-					.param("paymentKey", request.paymentKey())
-					.param("paymentType", request.paymentType())
-					.param("amount", String.valueOf(request.amount())))
-				.andExpect(status().isOk())
-				.andReturn();
+			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success").contentType(MediaType.APPLICATION_JSON)
+				.param("orderId", String.valueOf(request.orderId()))
+				.param("paymentKey", request.paymentKey())
+				.param("paymentType", request.paymentType())
+				.param("amount", String.valueOf(request.amount()))).andExpect(status().isOk()).andReturn();
+
+
 
 			//then
 			String actual = mvcResult.getResponse().getContentAsString();
@@ -119,42 +127,6 @@ class BeanPayControllerTest {
 
 			assertEquals(expect, actual);
 		}
-	}
-
-	@Test
-	void 토스사전충전_실패() throws Exception {
-		//given
-		final UUID orderId = UUID.randomUUID();
-		final Integer userId = 1;
-		final Integer amount = 1000;
-		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
-		final String errorCode = "PAY_PROCESS_CANCELED";
-
-		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
-
-		final BeanPay entity = new BeanPay(orderId, null, userId, amount, null, errorMessage,
-			BeanPayStatus.DEPOSIT, ProcessStatus.CANCELLED, LocalDateTime.now(), null);
-
-		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
-
-		final Response<BeanPayDto> result = new Response<>(200, response);
-
-		when(beanPayService.failTossCharge(request)).thenReturn(response);
-
-		//when
-		MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/fail")
-				.contentType(MediaType.APPLICATION_JSON)
-				.param("orderId", String.valueOf(request.orderId()))
-				.param("errorCode", request.errorCode())
-				.param("errorMessage", request.errorMessage()))
-			.andExpect(status().isOk())
-			.andReturn();
-
-		//then
-		String actual = mvcResult.getResponse().getContentAsString();
-		String expect = mapper.writeValueAsString(result);
-
-		assertEquals(expect, actual);
 	}
 
 }

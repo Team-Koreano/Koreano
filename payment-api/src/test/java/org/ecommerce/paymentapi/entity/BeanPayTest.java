@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import org.ecommerce.paymentapi.dto.TossDto;
+import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.junit.jupiter.api.Nested;
@@ -32,6 +32,20 @@ class BeanPayTest {
 	@Nested
 	class 충전로직 {
 		@Test
+		void 충전로직_진행중() {
+			//given
+			final Integer userId = 1;
+			final Integer amount = 10000;
+			final BeanPay actual = BeanPay.ofCreate(userId, amount);
+
+			//when
+			actual.inProgress();
+
+			//then
+			assertEquals(actual.getProcessStatus(), ProcessStatus.IN_PROGRESS);
+		}
+
+		@Test
 		void 충전로직_검증() {
 			//given
 			final Integer userId = 1;
@@ -41,8 +55,8 @@ class BeanPayTest {
 			final String paymentType = "카드";
 			final BeanPay actual = getBeanPay(orderId, paymentKey, userId, amount, paymentType);
 
-			final TossDto.Request.TossPayment request =
-				new TossDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
+			final BeanPayDto.Request.TossPayment request =
+				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
 
 			//when
 			boolean flag = actual.validBeanPay(request.orderId(), request.amount());
@@ -67,12 +81,12 @@ class BeanPayTest {
 			LocalDateTime formatApproveTime = LocalDateTime.parse(approveDateTime, formatter);
 			final BeanPay actual = getBeanPay(orderId, paymentKey, userId, amount, paymentType);
 
-			final TossDto.Request.TossPayment request =
-				new TossDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
-			final TossDto.Response.TossPayment response =
-				new TossDto.Response.TossPayment(paymentType, orderName, method, amount, approveDateTime);
+			final BeanPayDto.Request.TossPayment request =
+				new BeanPayDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
+			final BeanPayDto.Response.TossPayment response =
+				new BeanPayDto.Response.TossPayment(paymentType, orderName, method, amount, approveDateTime);
 			//when
-			actual.chargeComplete(response);
+			actual.complete(response);
 
 			//then
 			assertEquals(actual.getProcessStatus(), ProcessStatus.COMPLETED);
@@ -94,7 +108,7 @@ class BeanPayTest {
 			final BeanPay actual = getBeanPay(orderId, paymentKey, userId, amount, paymentType);
 
 			//when
-			actual.chargeFail(TOSS_RESPONSE_FAIL.getMessage());
+			actual.fail(TOSS_RESPONSE_FAIL);
 
 			//then
 			assertEquals(actual.getProcessStatus(), ProcessStatus.CANCELLED);

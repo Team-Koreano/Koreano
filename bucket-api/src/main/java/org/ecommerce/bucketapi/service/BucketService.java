@@ -67,12 +67,4 @@ public class BucketService {
 		bucket.update(updateRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
-
-	public List<BucketDto> getBuckets(final List<Long> bucketIds) {
-
-		return bucketRepository.findAllById(bucketIds)
-				.stream()
-				.map(BucketMapper.INSTANCE::toDto)
-				.toList();
-	}
 }

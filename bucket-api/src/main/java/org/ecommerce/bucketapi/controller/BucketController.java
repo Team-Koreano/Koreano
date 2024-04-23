@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -65,19 +64,5 @@ public class BucketController {
 						bucketService.updateBucket(bucketId, updateRequest)
 				)
 		);
-	}
-
-	// TODO : 회원 검증 로직 추가
-	// TODO : Circuit Breaker 적용 후 장바구니 검증 로직 추가
-	@GetMapping("/{userId}")
-	public List<BucketDto.Response> getBuckets(
-			@PathVariable("userId") final Integer userId,
-			@RequestParam("bucketIds") final List<Long> bucketIds
-	) {
-
-		return bucketService.getBuckets(bucketIds)
-				.stream()
-				.map(BucketDto.Response::of)
-				.toList();
 	}
 }
