@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.Users;
+import org.ecommerce.userapi.exception.UserErrorMessages;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -23,9 +24,9 @@ public class AccountDto {
 
 	public static class Request {
 		public record Register(
-			@NotBlank(message = "계좌번호를 입력해주세요")
+			@NotBlank(message = UserErrorMessages.bankNumberNotBlank)
 			String number,
-			@NotBlank(message = "은행명을 입력해주세요")
+			@NotBlank(message = UserErrorMessages.bankNameNotEmpty)
 			String bankName
 		) {
 		}

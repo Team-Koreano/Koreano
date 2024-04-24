@@ -9,10 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Configuration
-@Slf4j
 @EnableRedisRepositories
 public class RedisConfig {
 

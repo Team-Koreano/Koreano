@@ -42,7 +42,7 @@ public class Address {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
@@ -54,7 +54,6 @@ public class Address {
 		address.name = name;
 		address.postAddress = postAddress;
 		address.detail = detail;
-		address.isDeleted = false;
 
 		return address;
 	}

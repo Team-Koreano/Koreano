@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.type.Gender;
 import org.ecommerce.userapi.entity.type.UserStatus;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",indexes = @Index(name = "idx_users_email", columnList = "email",unique = true))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +32,7 @@ public class Users implements Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 
 	@Column(nullable = false)
@@ -48,7 +48,7 @@ public class Users implements Member {
 	@Column(nullable = false)
 	private Short age;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String phoneNumber;
 
 	@CreationTimestamp
@@ -56,19 +56,17 @@ public class Users implements Member {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
 	private LocalDateTime updateDatetime;
 
-	@ColumnDefault("0")
 	@Column()
-	private Integer beanPay;
+	private Integer beanPay = 0;
 
-	@ColumnDefault("0")
 	@Column(name = "status")
-	private UserStatus userStatus;
+	private UserStatus userStatus= UserStatus.GENERAL;
 
 	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
 		String phoneNumber) {
@@ -77,11 +75,8 @@ public class Users implements Member {
 		users.name = name;
 		users.password = password;
 		users.age = age;
-		users.beanPay = 0;
 		users.gender = gender;
-		users.isDeleted = false;
 		users.phoneNumber = phoneNumber;
-		users.userStatus = UserStatus.GENERAL;
 		return users;
 	}
 }

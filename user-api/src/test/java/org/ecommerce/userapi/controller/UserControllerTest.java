@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
@@ -29,8 +30,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -43,9 +45,9 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-@WebMvcTest(UserController.class)
+@MockBean(JpaMetamodelMappingContext.class)
 @AutoConfigureMockMvc
+@SpringBootTest
 public class UserControllerTest {
 
 	private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
@@ -141,18 +143,14 @@ public class UserControllerTest {
 			.content(content)
 			.with(user("test")));
 
-		resultActions.andReturn().getResponse();
 		//then
-		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
-			.andReturn();
-
-		UserDto.Response.Register result = objectMapper.readValue(
-			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<UserDto.Response.Register>>() {
-			}
-		).result();
-
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.email").value(expectedResponse.email()))
+			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
+			.andExpect(jsonPath("$.result.age").value(expectedResponse.age().intValue()))
+			.andExpect(jsonPath("$.result.gender").value(expectedResponse.gender().getCode()))
+			.andExpect(jsonPath("$.result.phoneNumber").value(expectedResponse.phoneNumber()))
+			.andDo(print());
 
 	}
 
@@ -211,7 +209,7 @@ public class UserControllerTest {
 
 		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
 
-		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(authDetails.getUserId())).thenReturn(authDetails);
 		when(userService.registerAddress(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
@@ -222,16 +220,11 @@ public class UserControllerTest {
 			.content(objectMapper.writeValueAsString(registerRequest)));
 
 		//then
-
-		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-
-		AddressDto.Response.Register result = objectMapper.readValue(
-			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<AddressDto.Response.Register>>() {
-			}
-		).result();
-
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
+			.andExpect(jsonPath("$.result.postAddress").value(expectedResponse.postAddress()))
+			.andExpect(jsonPath("$.result.detail").value(expectedResponse.detail()))
+			.andReturn();
 	}
 
 	@Test
@@ -258,7 +251,7 @@ public class UserControllerTest {
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.loadUserByUsername(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(authDetails.getUserId())).thenReturn(authDetails);
 		when(userService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
@@ -269,16 +262,10 @@ public class UserControllerTest {
 			.content(objectMapper.writeValueAsString(registerRequest)));
 
 		//then
-
-		final MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-
-		final AccountDto.Response.Register result = objectMapper.readValue(
-			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<AccountDto.Response.Register>>() {
-			}
-		).result();
-
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.number").value(expectedResponse.number()))
+			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()))
+			.andReturn();
 	}
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현

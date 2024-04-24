@@ -39,7 +39,7 @@ public class SellerAccount {
 	private LocalDateTime createDatetime;
 
 	@Column()
-	private boolean isDeleted;
+	private boolean isDeleted = false;
 
 	@UpdateTimestamp
 	@Column()
@@ -50,7 +50,6 @@ public class SellerAccount {
 		sellerAccount.seller = seller;
 		sellerAccount.bankName = bankName;
 		sellerAccount.number = number;
-		sellerAccount.isDeleted = false;
 		return sellerAccount;
 	}
 }

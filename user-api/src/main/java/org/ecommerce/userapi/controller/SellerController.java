@@ -1,7 +1,5 @@
 package org.ecommerce.userapi.controller;
 
-import java.util.Set;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.SellerDto;
@@ -9,8 +7,6 @@ import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.service.SellerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,8 +28,8 @@ public class SellerController {
 	private final SellerService sellerService;
 
 	@PostMapping()
-	public Response<SellerDto.Response.Register> register(@RequestBody final SellerDto.Request.Register register) {
-		final SellerDto responseSeller =  sellerService.registerRequest(register);
+	public Response<SellerDto.Response.Register> register(@RequestBody final SellerDto.Request.Register seller) {
+		final SellerDto responseSeller =  sellerService.registerRequest(seller);
 		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Register.of(responseSeller));
 	}
 	@PostMapping("/login")
@@ -50,20 +46,9 @@ public class SellerController {
 	@PostMapping("/account")
 	public Response<AccountDto.Response.Register> account(
 		@AuthenticationPrincipal final AuthDetails authDetails,
-		@RequestBody @Valid final AccountDto.Request.Register register){
-		AccountDto accountDto = sellerService.registerAccount(authDetails, register);
+		@RequestBody @Valid final AccountDto.Request.Register account){
+		AccountDto accountDto = sellerService.registerAccount(authDetails, account);
 		return new Response<>(HttpStatus.OK.value(),AccountDto.Response.Register.of(accountDto));
 
-	}
-
-
-	/**
-	 * 인증 인가 테스트 코드입니다.
-	 */
-	@GetMapping("/test")
-	public Response<String> test(@AuthenticationPrincipal AuthDetails authDetails){
-		Set<SimpleGrantedAuthority> authoritySet = authDetails.getAuthoritySet();
-		System.out.println("authoritySet = " + authoritySet);
-		return new Response<>(HttpStatus.OK.value(), "성공");
 	}
 }

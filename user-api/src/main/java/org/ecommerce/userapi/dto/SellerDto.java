@@ -3,8 +3,11 @@ package org.ecommerce.userapi.dto;
 import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.exception.UserErrorMessages;
 import org.ecommerce.userapi.security.JwtUtils;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -23,7 +26,35 @@ public class SellerDto {
 	private Integer beanPay;
 	private UserStatus userStatus;
 	private String accessToken;
+
+	public static class Request {
+		public record Register(
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			@Email
+			String email,
+			@NotBlank(message = UserErrorMessages.nameNotBlank)
+			String name,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
+			String password,
+			@NotBlank(message = UserErrorMessages.addressNotBlank)
+			String address,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String phoneNumber
+		) {
+		}
+
+		public record Login(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			String email,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String password
+		) {
+		}
+	}
+
 	public static class Response {
+
 		public record Register(
 			String email,
 			String name,
@@ -44,24 +75,9 @@ public class SellerDto {
 		public record Login(
 			String accessToken
 		) {
-			public static Login of(final SellerDto sellerDto) {	return new Login(JwtUtils.prefix(sellerDto.getAccessToken()));}
-		}
-	}
-
-	public static class Request {
-		public record Register(
-			String email,
-			String name,
-			String password,
-			String address,
-			String phoneNumber
-		) {
-		}
-
-		public record Login(
-			String email,
-			String password
-		) {
+			public static Login of(final SellerDto sellerDto) {
+				return new Login(JwtUtils.prefix(sellerDto.getAccessToken()));
+			}
 		}
 	}
 }
