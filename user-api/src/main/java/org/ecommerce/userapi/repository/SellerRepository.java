@@ -11,4 +11,6 @@ public interface SellerRepository extends JpaRepository<Seller, Integer> {
 	boolean existsByEmailOrPhoneNumber(String email,String phoneNumber);
 
 	Optional<Seller> findByEmail(String email);
+
+	Optional<Seller> findById(Integer id);
 }
