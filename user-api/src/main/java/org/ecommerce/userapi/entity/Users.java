@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.type.Gender;
 import org.ecommerce.userapi.entity.type.UserStatus;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -33,7 +32,7 @@ public class Users implements Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 
 	@Column(nullable = false)
@@ -49,7 +48,7 @@ public class Users implements Member {
 	@Column(nullable = false)
 	private Short age;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String phoneNumber;
 
 	@CreationTimestamp
@@ -63,13 +62,11 @@ public class Users implements Member {
 	@Column()
 	private LocalDateTime updateDatetime;
 
-	@ColumnDefault("0")
 	@Column()
-	private Integer beanPay;
+	private Integer beanPay = 0;
 
-	@ColumnDefault("0")
 	@Column(name = "status")
-	private UserStatus userStatus;
+	private UserStatus userStatus= UserStatus.GENERAL;
 
 	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
 		String phoneNumber) {
@@ -78,10 +75,8 @@ public class Users implements Member {
 		users.name = name;
 		users.password = password;
 		users.age = age;
-		users.beanPay = 0;
 		users.gender = gender;
 		users.phoneNumber = phoneNumber;
-		users.userStatus = UserStatus.GENERAL;
 		return users;
 	}
 }
