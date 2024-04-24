@@ -189,7 +189,7 @@ class SellerControllerTest {
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.getSellerAuth(email)).thenReturn(authDetails);
+		when(authDetailsService.getSellerAuth(authDetails.getUserId())).thenReturn(authDetails);
 		when(sellerService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
