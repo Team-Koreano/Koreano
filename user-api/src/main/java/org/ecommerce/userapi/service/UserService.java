@@ -79,7 +79,7 @@ public class UserService {
 	 @return SellerDto
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login) {
-		final Users users = userRepository.findByEmail(login.email())
+		final Users users = userRepository.findUsersByEmail(login.email())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 		if (!passwordEncoder.matches(login.password(), users.getPassword())) {
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_PASSWORD);
@@ -121,7 +121,7 @@ public class UserService {
 
 	public AddressDto registerAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
 
-		final Users users = userRepository.findById(authDetails.getUserId())
+		final Users users = userRepository.findUsersById(authDetails.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final Address address = Address.ofRegister(users, register.name(), register.postAddress(), register.detail());
@@ -139,7 +139,7 @@ public class UserService {
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
 	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Users users = userRepository.findById(authDetails.getUserId())
+		final Users users = userRepository.findUsersById(authDetails.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final UsersAccount account = UsersAccount.ofRegister(users, register.number(), register.bankName());

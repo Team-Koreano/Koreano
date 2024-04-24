@@ -105,7 +105,7 @@ class UserServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(userRepository.findById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.registerAccount(authDetails, registerRequest);
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
@@ -133,7 +133,7 @@ class UserServiceTest {
 
 		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
 
-		when(userRepository.findById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
 
 		// when
 		final AddressDto result = userService.registerAddress(authDetails, registerRequest);
@@ -230,7 +230,7 @@ class UserServiceTest {
 
 			UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
@@ -265,7 +265,7 @@ class UserServiceTest {
 			String incorrectPassword = "incorrect";
 
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
 
 			//then
 			UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);

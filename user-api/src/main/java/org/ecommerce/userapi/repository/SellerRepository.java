@@ -12,5 +12,5 @@ public interface SellerRepository extends JpaRepository<Seller, Integer> {
 
 	Optional<Seller> findByEmail(String email);
 
-	Optional<Seller> findById(Integer id);
+	Optional<Seller> findSellerById(Integer id);
 }
