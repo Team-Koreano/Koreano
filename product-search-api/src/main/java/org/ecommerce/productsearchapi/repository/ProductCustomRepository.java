@@ -2,10 +2,10 @@ package org.ecommerce.productsearchapi.repository;
 
 import java.util.Optional;
 
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.product.entity.Product;
 
 public interface ProductCustomRepository {
 
-	Optional<ProductSearchDto> findProductById(final Integer id);
+	Optional<Product> findProductById(final Integer id);
 
 }

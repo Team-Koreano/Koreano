@@ -13,10 +13,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "image")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class Image {
 
@@ -37,6 +41,9 @@ public class Image {
 
 	@Column(name = "sequence_number")
 	private Short sequenceNumber;
+
+	@Column(name = "is_deleted")
+	private Boolean isDeleted = false;
 
 	@CreationTimestamp
 	@Column(name = "create_datetime", nullable = false, updatable = false)

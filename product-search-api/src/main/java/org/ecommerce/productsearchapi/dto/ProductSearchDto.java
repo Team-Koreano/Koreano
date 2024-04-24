@@ -29,8 +29,8 @@ public class ProductSearchDto {
 	private String information;
 	private ProductStatus status;
 	private Boolean isCrush;
-	private LocalDateTime createDateTime;
-	private LocalDateTime updateDateTime;
+	private LocalDateTime createDatetime;
+	private LocalDateTime updateDatetime;
 	private List<ImageDto> imageDtoList;
 
 
@@ -53,7 +53,7 @@ public class ProductSearchDto {
 			String status,
 			Boolean isCrush,
 			Integer favoriteCount,
-			LocalDateTime createDateTime,
+			LocalDateTime createDatetime,
 			List<ImageDto> imageDtoList
 		){
 			public static Detail of(final ProductSearchDto productSearchDto) {
@@ -72,7 +72,7 @@ public class ProductSearchDto {
 					productSearchDto.getStatus().getTitle(),
 					productSearchDto.getIsCrush(),
 					productSearchDto.getFavoriteCount(),
-					productSearchDto.getCreateDateTime(),
+					productSearchDto.getCreateDatetime(),
 					productSearchDto.getImageDtoList()
 				);
 			}

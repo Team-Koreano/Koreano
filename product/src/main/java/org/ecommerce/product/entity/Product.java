@@ -1,6 +1,8 @@
 package org.ecommerce.product.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
@@ -9,6 +11,7 @@ import org.ecommerce.product.entity.type.ProductStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -84,6 +88,9 @@ public class Product {
 	@UpdateTimestamp
 	@Column()
 	private LocalDateTime updateDatetime;
+
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Image> images = new ArrayList<>();
 
 	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
 		, Acidity acidity, String information,Boolean isCrush, Boolean isDecaf,SellerRep test) {
