@@ -25,19 +25,20 @@ public class JwtProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		// 이메일 불러오기
+
 		String email = (String) authentication.getPrincipal();
-		// accessToken 불러오기
 		String accessToken = (String) authentication.getCredentials();
+		Integer id = jwtUtils.getUserId(accessToken);
+
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
 		AuthDetails authDetails;
 
 		String roll = jwtUtils.getAuthority(accessToken);
 		if (roll.equals(Role.USER.getCode())){
-			authDetails = authDetailsService.getUserAuth(email);
+			authDetails = authDetailsService.getUserAuth(id);
 		}else {
-			authDetails	= authDetailsService.getSellerAuth(email);
+			authDetails	= authDetailsService.getSellerAuth(id);
 		}
 
 
@@ -45,6 +46,7 @@ public class JwtProvider implements AuthenticationProvider {
 			authorities.add(new SimpleGrantedAuthority(authority.getAuthority()));
 		}
 		if (!authDetails.getEmail().equals(email) ||
+			!authDetails.getUserId().equals(id) ||
 			!authDetails.getAuthorities().containsAll(authorities)
 		){
 			throw new CustomException(UserErrorCode.AUTHENTICATION_FAILED);
