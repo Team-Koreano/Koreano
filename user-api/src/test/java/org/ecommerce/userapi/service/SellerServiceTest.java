@@ -79,7 +79,7 @@ class SellerServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(sellerRepository.findByEmail(email)).thenReturn(java.util.Optional.of(seller));
+		when(sellerRepository.findById(authDetails.getUserId())).thenReturn(java.util.Optional.of(seller));
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then

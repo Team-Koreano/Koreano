@@ -209,7 +209,7 @@ public class UserControllerTest {
 
 		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
 
-		when(authDetailsService.getUserAuth(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(authDetails.getUserId())).thenReturn(authDetails);
 		when(userService.registerAddress(authDetails, registerRequest)).thenReturn(dto);
 
 		// when
@@ -251,7 +251,7 @@ public class UserControllerTest {
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.getUserAuth(email)).thenReturn(authDetails);
+		when(authDetailsService.getUserAuth(authDetails.getUserId())).thenReturn(authDetails);
 		when(userService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
 
 		// when

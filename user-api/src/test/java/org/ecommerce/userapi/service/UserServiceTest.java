@@ -105,7 +105,7 @@ class UserServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.registerAccount(authDetails, registerRequest);
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
@@ -133,7 +133,7 @@ class UserServiceTest {
 
 		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
 
-		when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
 
 		// when
 		final AddressDto result = userService.registerAddress(authDetails, registerRequest);
