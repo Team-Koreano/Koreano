@@ -3,7 +3,7 @@ package org.ecommerce.productsearchapi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"org.ecommerce.product","org.ecommerce.productsearchapi"})
+@SpringBootApplication(scanBasePackages = {"org.ecommerce.product","org.ecommerce.productsearchapi", "org.ecommerce.common"})
 public class ProductSearchApiApplication {
 
   public static void main(String[] args) {
