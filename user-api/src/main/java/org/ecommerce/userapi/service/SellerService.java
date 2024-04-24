@@ -115,7 +115,7 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Seller seller = sellerRepository.findByEmail(authDetails.getEmail())
+		final Seller seller = sellerRepository.findById(authDetails.getUserId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final SellerAccount account = SellerAccount.ofRegister(seller, register.number(), register.bankName());
