@@ -9,7 +9,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import redis.embedded.RedisServer;
 
-@Profile("dev")
+@Profile({"dev", "test"})
 @Slf4j
 @Configuration
 public class LocalRedisConfig {
