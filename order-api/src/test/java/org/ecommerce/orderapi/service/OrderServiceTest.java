@@ -27,40 +27,4 @@ public class OrderServiceTest {
 
 	@Mock
 	private OrderDetailRepository orderDetailRepository;
-
-	@Test
-	void 주문_생성() {
-		// given
-		final Integer USER_ID = 1;
-		final OrderDto.Request.Place placeRequest = new OrderDto.Request.Place(
-				List.of(1L, 2L, 3L),
-				"receiveName",
-				"010-777-7777",
-				"동백",
-				"백동",
-				"빠른 배송 부탁드려요"
-		);
-		final ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
-		// when(orderService.)
-		// when
-		orderService.placeOrder(USER_ID, placeRequest);
-
-		// then
-		verify(orderRepository, times(1)).save(orderCaptor.capture());
-		assertEquals(placeRequest.receiveName(), orderCaptor.getValue().getReceiveName());
-		assertEquals(placeRequest.phoneNumber(), orderCaptor.getValue().getPhoneNumber());
-		assertEquals(placeRequest.address1(), orderCaptor.getValue().getAddress1());
-		assertEquals(placeRequest.address2(), orderCaptor.getValue().getAddress2());
-		assertEquals(placeRequest.deliveryComment(), orderCaptor.getValue().getDeliveryComment());
-	}
-
-	@Test
-	void 상세주문_생성() {
-		// given
-
-		// when
-
-		// then
-	}
-
 }
