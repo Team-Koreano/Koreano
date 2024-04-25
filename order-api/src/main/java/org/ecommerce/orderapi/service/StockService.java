@@ -37,19 +37,34 @@ public class StockService {
 			if (!validateStock(stock)) {
 				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 			}
-			if (!validateSoldOut(stock.getAvailableStock(), quantities.get(stock.getProductId()))) {
+			if (!validateQuantity(stock.getAvailableStock(), quantities.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
 		}
 	}
 
+	/**
+	 * 재고를 검증하는 메소드입니다.
+	 * @author ${juwon}
+	 *
+	 * @param stock- 재고
+	 * @return - 검증 결과
+	*/
 	@VisibleForTesting
 	public boolean validateStock(final Stock stock) {
 		return stock.getTotal() != null && stock.getProcessingCnt() != null;
 	}
 
+	/**
+	 * 가용한 상품 수량인지 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param availableStock- 가용한 재고
+	 * @param quantity- 주문 상품 수량
+	 * @return - 검증 결과
+	*/
 	@VisibleForTesting
-	public boolean validateSoldOut(final Integer availableStock, final Integer quantity) {
+	public boolean validateQuantity(final Integer availableStock, final Integer quantity) {
 		return availableStock >= quantity;
 	}
 }

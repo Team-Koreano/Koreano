@@ -62,6 +62,13 @@ public class ProductService {
 				product.getSeller());
 	}
 
+	/**
+	 * Products 정보를 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productIds- 상품 번호 리스트
+	 * @return - 반환 값 설명 텍스트
+	*/
 	public List<Product> getProducts(final List<Integer> productIds) {
 		List<Product> products = redisClient.getProducts(productIds);
 		for (Product product : products) {

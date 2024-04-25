@@ -42,7 +42,7 @@ public class OrderService {
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 
 	/**
-	 * 장바구니 유효성검사를 하는 internal API를 호출하는 메소드입니다.
+	 * 장바구니 유효성검사 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param userId-    주문을 생성하는 회원 번호
@@ -117,7 +117,7 @@ public class OrderService {
 	 * @param order- 주문 정보
 	 * @param productIdToQuantityMap- Map, key:productId, value:quantity
 	 * @param products- 상품 정보
-	 * @return - 반환 값 설명 텍스트
+	 * @return List<OrderDetail>- 주문 상세 리스트
 	 */
 	@VisibleForTesting
 	public List<OrderDetail> placeOrderDetails(
