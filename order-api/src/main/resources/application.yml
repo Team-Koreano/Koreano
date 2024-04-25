@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: dev
 
 bucket-service:
   url: http://localhost:8080/api/internal/buckets/v1
