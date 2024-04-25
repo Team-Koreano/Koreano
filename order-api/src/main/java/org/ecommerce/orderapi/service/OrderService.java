@@ -1,21 +1,18 @@
 package org.ecommerce.orderapi.service;
 
-import java.util.Arrays;
+import static org.ecommerce.orderapi.dto.BucketDto.*;
+
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.ecommerce.orderapi.client.BucketServiceClient;
-import org.ecommerce.orderapi.client.ProductSearchServiceClient;
-import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
-import org.ecommerce.orderapi.dto.ProductDto;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
-import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -32,11 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
-	private final ProductSearchServiceClient productManagementServiceClient;
 	private final OrderRepository orderRepository;
 	private final OrderDetailRepository orderDetailRepository;
-
-	private final RedisClient redisClient;
+	private final StockService stockService;
+	private final ProductService productService;
 
 	private final static Integer DELIVERY_FEE = 0;
 
@@ -46,11 +42,7 @@ public class OrderService {
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 
 	/**
-	 * 장바구니 유효성검사를 하는 internal API를 호출하는 메소드 입니다.
-	 * <p>
-	 * Bucket-Service 유저정보와, 장바구니 번호들을 보내서
-	 * 검증 후 주문 생성에 필요한 상품 정보를 반환 받습니다.
-	 * <p>
+	 * 장바구니 유효성검사를 하는 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param userId-    주문을 생성하는 회원 번호
@@ -70,145 +62,81 @@ public class OrderService {
 				.toList();
 	}
 
-	/**
-	 * 주문하는 상품의 재고를 확인하는 internal API를 호출하는 메소드 입니다.
-	 * <p>
-	 * product-management-service에게 상품 번호 리스트를 보내서 해당 상품의
-	 * 유효성 및 주문 수량보다 많은지 비교하고 상품 정보를 반환 받습니다.
-	 * <p>
-	 * @author ${Juwon}
-	 *
-	 * @param productIds- 재고를 확인할 상품 번호 리스트
-	 * @param quantities- 회원이 주문한 상품의 수량
-	 * @return - 주문한 상품의 정보
-	 */
-	@VisibleForTesting
-	public boolean checkStock(
-			final List<Integer> productIds,
-			final List<Integer> quantities
-	) {
-
-		return true;
-	}
-
 	// TODO : 회원 유효성 검사
 
 	/**
-	 * 주문을 생성하는 메소드 입니다.
-	 * <p>
-	 * 해당 메소드는 아래의 과정을 따릅니다.
-	 * 1. 장바구니 유효성 검사
-	 * 2. 상품 재고 확인 및 유효성 검사
-	 * 3. 주문 생성
-	 * 4. 주문 상세 생성
-	 * <p>
+	 * 주문을 생성하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
-	 * @param placeRequest- 주문 내용
+	 * @param request- 주문 내용
 	 *
 	 * @return - 생성된 주문을 반환합니다.
 	 */
 	@Transactional
 	public OrderDto placeOrder(
 			final Integer userId,
-			final OrderDto.Request.Place placeRequest
+			final OrderDto.Request.Place request
 	) {
 
-		final List<BucketDto> bucketDtos = validateBucket(
+		final List<BucketDto> bucketDtos = validateBucket(userId, request.bucketIds());
+
+		final List<Integer> productIds = toProductIds(bucketDtos);
+		final Map<Integer, Integer> productIdToQuantityMap
+				= toProductIdToQuantityMap(bucketDtos);
+
+		stockService.checkStock(productIds, productIdToQuantityMap);
+		final List<Product> products = productService.getProducts(productIds);
+
+		Order order = Order.ofPlace(
 				userId,
-				placeRequest.bucketIds()
-		);
-		// final List<ProductDto> productDtos = checkStock(
-		// 		bucketDtos.stream()
-		// 				.map(BucketDto::getProductId)
-		// 				.toList(),
-		// 		bucketDtos.stream()
-		// 				.map(BucketDto::getQuantity)
-		// 				.toList()
-		// );
-
-		Order order = orderRepository.save(
-				Order.ofPlace(
-						userId,
-						placeRequest.receiveName(),
-						placeRequest.phoneNumber(),
-						placeRequest.address1(),
-						placeRequest.address2(),
-						placeRequest.deliveryComment()
-				)
+				request.receiveName(),
+				request.phoneNumber(),
+				request.address1(),
+				request.address2(),
+				request.deliveryComment()
 		);
 
-		// placeOrderDetails(order, bucketDtos, productDtos);
+		List<OrderDetail> orderDetails = placeOrderDetails(
+				order,
+				productIdToQuantityMap,
+				products
+		);
+		order.attachOrderDetails(orderDetails);
 
+		orderRepository.save(order);
 		return OrderMapper.INSTANCE.toDto(order);
 	}
 
 	// TODO : 배송비 우선 무료로 고정, 추후 seller에서 정책 설정
 
 	/**
-	 * 주문 상세를 생성하는 메소드 입니다.
-	 * <p>
-	 * 1. 상품 정보 매핑
-	 * productDtos 리스트를 사용하여 상품의 ID와 가격을 매핑하는
-	 * productIdToPriceMap을 생성합니다. 이 맵은 상품의 ID를 키로,
-	 * 상품의 가격을 값으로 가집니다.
-	 *
-	 * 2. 주문 상세 생성
-	 * <p>
+	 * 주문 상세를 생성하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param order- 주문 정보
-	 * @param bucketDtos- 검증된 장바구니 정보
-	 * @param productDtos- 상품 정보
+	 * @param productIdToQuantityMap- Map, key:productId, value:quantity
+	 * @param products- 상품 정보
 	 * @return - 반환 값 설명 텍스트
 	 */
 	@VisibleForTesting
-	public void placeOrderDetails(
+	public List<OrderDetail> placeOrderDetails(
 			final Order order,
-			final List<BucketDto> bucketDtos,
-			final List<ProductDto> productDtos
+			final Map<Integer, Integer> productIdToQuantityMap,
+			final List<Product> products
 	) {
-
-		final Map<Integer, Integer> productIdToPriceMap = productDtos.stream()
-				.collect(Collectors.toMap(
-						ProductDto::getId,
-						ProductDto::getPrice
-				));
-
-		orderDetailRepository.saveAll(
-				bucketDtos.stream()
-						.map(bucketDto -> OrderDetail.ofPlace(
-								order,
-								bucketDto.getProductId(),
-								productIdToPriceMap.get(bucketDto.getProductId()),
-								bucketDto.getQuantity(),
-								DELIVERY_FEE,
-								bucketDto.getSeller()
-						))
-						.toList()
-		);
-	}
-
-	@VisibleForTesting
-	public void saveMockData() {
-		List<Stock> mockStocks = Arrays.asList(
-				new Stock(101, 10, 5),
-				new Stock(102, 20, 10),
-				new Stock(103, 15, 8)
-		);
-
-		for (Stock stock : mockStocks) {
-			redisClient.put(stock.getProductId(), stock);
-		}
-	}
-
-	@VisibleForTesting
-	public Stock getMockData(Integer productId) {
-		Stock stock = redisClient.get(productId, Stock.class);
-		log.info("productId : {}", productId);
-		log.info("totalStock : {}", stock.getTotalStock());
-		log.info("processingStock : {}", stock.getProcessingStock());
-		return stock;
+		return products.stream()
+				.map(product -> {
+					Integer productId = product.getId();
+					return OrderDetail.ofPlace(
+							order,
+							product.getId(),
+							product.getPrice(),
+							productIdToQuantityMap.get(productId),
+							DELIVERY_FEE,
+							product.getSeller()
+					);
+				})
+				.toList();
 	}
 }

@@ -33,6 +33,7 @@ public class OrderController {
 			@RequestBody @Valid final OrderDto.Request.Place placeRequest
 	) {
 
+
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toResponse(
@@ -40,23 +41,4 @@ public class OrderController {
 				)
 		);
 	}
-
-	@VisibleForTesting
-	@GetMapping("/getMock/{productId}")
-	public Response<Stock> getMock(@PathVariable("productId") final Integer productId) {
-
-
-		return new Response<>(
-				HttpStatus.OK.value(),
-				orderService.getMockData(productId)
-		);
-	}
-
-	@VisibleForTesting
-	@GetMapping("/saveMock")
-	public void saveMockData() {
-		orderService.saveMockData();
-	}
-
-
 }
