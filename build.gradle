@@ -145,10 +145,8 @@ project(':order-api'){
 
         // redis client
         implementation 'org.redisson:redisson-spring-boot-starter:3.29.0'
-        // embedded redis
-//        implementation('it.ozimov:embedded-redis:0.7.3') {
-//            exclude group: "org.slf4j", module: "slf4j-simple"
-//        }
+//         embedded redis
+        implementation 'it.ozimov:embedded-redis:0.7.2'
     }
     dependencyManagement {
         imports {
