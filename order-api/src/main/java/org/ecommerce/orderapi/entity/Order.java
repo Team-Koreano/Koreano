@@ -1,6 +1,8 @@
 package org.ecommerce.orderapi.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -9,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -49,6 +52,9 @@ public class Order {
 	@Column
 	private LocalDateTime orderDatetime;
 
+	@OneToMany(mappedBy = "order")
+	private List<OrderDetail> orderDetails = new ArrayList<>();
+
 	public static Order ofPlace(
 			final Integer userId,
 			final String receiveName,
@@ -65,5 +71,12 @@ public class Order {
 		order.address2 = address2;
 		order.deliveryComment = deliveryComment;
 		return order;
+	}
+
+	public void attachOrderDetails(List<OrderDetail> orderDetails) {
+		this.orderDetails.addAll(orderDetails);
+		this.totalPaymentAmount = orderDetails.stream()
+				.mapToInt(OrderDetail::getPaymentAmount)
+				.sum();
 	}
 }
