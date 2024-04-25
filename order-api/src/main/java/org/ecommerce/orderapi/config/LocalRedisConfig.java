@@ -9,7 +9,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import redis.embedded.RedisServer;
 
-@Profile({"dev", "test"})
+@Profile({"dev"})
 @Slf4j
 @Configuration
 public class LocalRedisConfig {
@@ -22,11 +22,14 @@ public class LocalRedisConfig {
     @PostConstruct
     public void startRedis() {
         try {
-            redisServer = new RedisServer(redisPort);
+            redisServer = RedisServer.builder()
+                    .setting("maxheap 200m")
+                    .port(redisPort)
+                    .setting("bind localhost")
+                    .build();
             redisServer.start();
         } catch (Exception e) {
-            // 예외 처리
-            log.info("빌드 FAILED 해결을 위한 Embedded Redis");
+            log.error(e.getMessage());
         }
     }
 
