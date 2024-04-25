@@ -5,13 +5,14 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-@Profile({"local"})
+import org.springframework.context.annotation.DependsOn;
+
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class RedisRepositoryConfig {
 
 	@Value("${spring.data.redis.host}")
@@ -21,10 +22,12 @@ public class RedisRepositoryConfig {
 	private int redisPort;
 
 	@Bean
+	@DependsOn("embeddedRedisConfig")
+	@Conditional(DevProfileCondition.class)
 	public RedissonClient redissonClient() {
 		Config config = new Config();
 		config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort);
-
+		log.info("Redisson client started");
 		return Redisson.create(config);
 	}
 }

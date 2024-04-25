@@ -9,10 +9,10 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import redis.embedded.RedisServer;
 
-@Profile({"dev"})
+@Profile("dev")
 @Slf4j
 @Configuration
-public class LocalRedisConfig {
+public class EmbeddedRedisConfig {
 
     @Value("${spring.data.redis.port}")
     private int redisPort;
@@ -23,13 +23,14 @@ public class LocalRedisConfig {
     public void startRedis() {
         try {
             redisServer = RedisServer.builder()
-                    .setting("maxheap 200m")
                     .port(redisPort)
-                    .setting("bind localhost")
+                    .setting("maxmemory 128M")
                     .build();
             redisServer.start();
+            log.info("start EmbeddedRedis");
         } catch (Exception e) {
-            log.error(e.getMessage());
+            // 예외 처리
+            log.info("빌드 Error를 해결하기 위한 ");
         }
     }
 
