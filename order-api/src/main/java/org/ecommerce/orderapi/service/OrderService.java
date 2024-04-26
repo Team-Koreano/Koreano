@@ -147,18 +147,8 @@ public class OrderService {
 				products
 		);
 
-		List<OrderStatusHistory> orderStatusHistories = orderDetails.stream()
-				.map(orderDetail -> OrderStatusHistory.ofRecord(
-						orderDetail,
-						OrderStatus.OPEN
-				))
-				.toList();
-
-		IntStream.range(0, orderDetails.size())
-				.forEach(i -> orderDetails.get(i)
-						.recordOrderStatusHistory(orderStatusHistories.get(i)));
+		recordOrderStatusHistory(orderDetails);
 		order.attachOrderDetails(orderDetails);
-
 		orderRepository.save(order);
 		return OrderMapper.INSTANCE.toDto(order);
 	}
@@ -193,5 +183,25 @@ public class OrderService {
 					);
 				})
 				.toList();
+	}
+
+	/**
+	 * 주문 상세에 대한 상태 이력을 기록하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetails - 주문 상세 리스트
+	*/
+	@VisibleForTesting
+	public void recordOrderStatusHistory(final List<OrderDetail> orderDetails) {
+		List<OrderStatusHistory> orderStatusHistories = orderDetails.stream()
+				.map(orderDetail -> OrderStatusHistory.ofRecord(
+						orderDetail,
+						OrderStatus.OPEN
+				))
+				.toList();
+
+		IntStream.range(0, orderDetails.size())
+				.forEach(i -> orderDetails.get(i)
+						.recordOrderStatusHistory(orderStatusHistories.get(i)));
 	}
 }
