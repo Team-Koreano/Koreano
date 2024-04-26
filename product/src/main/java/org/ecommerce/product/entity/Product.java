@@ -93,7 +93,7 @@ public class Product {
 	private List<Image> images = new ArrayList<>();
 
 	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
-		, Acidity acidity, String information,Boolean isCrush, Boolean isDecaf,SellerRep test) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep test) {
 		Product product = new Product();
 		product.category = category;
 		product.price = price;
@@ -101,11 +101,46 @@ public class Product {
 		product.name = name;
 		product.bean = bean;
 		product.acidity = acidity;
-		product.information =information;
+		product.information = information;
 		product.isCrush = isCrush;
 		product.status = ProductStatus.AVAILABLE;
 		product.isDecaf = isDecaf;
 		product.sellerRep = test;
 		return product;
+	}
+
+	public void toModify(ProductCategory category, Integer price, String name, Bean bean
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf) {
+		this.category = category;
+		this.price = price;
+		this.name = name;
+		this.bean = bean;
+		this.acidity = acidity;
+		this.information = information;
+		this.isCrush = isCrush;
+		this.isDecaf = isDecaf;
+	}
+
+	public void toModifyStatus(ProductStatus productStatus) {
+		this.status = productStatus;
+	}
+
+	public boolean handleStockChange(int quantity) {
+		if (quantity > 0) {
+			adjustStock(quantity);
+			return true;
+		} else if (hasEnoughStock(-quantity)) {
+			adjustStock(quantity);
+			return true;
+		}
+		return false;
+	}
+
+	private void adjustStock(int quantity) {
+		this.stock += quantity;
+	}
+
+	private boolean hasEnoughStock(int requiredQuantity) {
+		return this.stock >= requiredQuantity;
 	}
 }
