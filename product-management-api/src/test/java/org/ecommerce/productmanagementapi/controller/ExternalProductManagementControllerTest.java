@@ -121,7 +121,7 @@ class ExternalProductManagementControllerTest {
 
 		verifyImages(savedImages, 0, imageDtos);
 
-		ResultActions resultActions = mockMvc.perform(post("/api/productmanagement/v1")
+		ResultActions resultActions = mockMvc.perform(post("/api/external/productmanagement/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(productDtos))
 			)
@@ -158,7 +158,7 @@ class ExternalProductManagementControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(put("/api/productmanagement/v1/status/{productId}/{status}", productId, status)
+		mockMvc.perform(put("/api/external/productmanagement/v1/status/{productId}/{status}", productId, status)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result.id").value(productId))
@@ -191,7 +191,7 @@ class ExternalProductManagementControllerTest {
 			.thenReturn(expectedResponse);
 
 		// when & then
-		mockMvc.perform(put("/api/productmanagement/v1/stock")
+		mockMvc.perform(put("/api/external/productmanagement/v1/stock")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto)))
 			.andExpect(status().isOk())
@@ -218,7 +218,7 @@ class ExternalProductManagementControllerTest {
 			eq(dto))).thenReturn(expectedResponse);
 
 		// when & then
-		mockMvc.perform(put("/api/productmanagement/v1/{productId}", productId)
+		mockMvc.perform(put("/api/external/productmanagement/v1/{productId}", productId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto)))
 			.andExpect(status().isOk())
