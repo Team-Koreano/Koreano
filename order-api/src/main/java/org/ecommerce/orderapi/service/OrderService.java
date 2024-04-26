@@ -1,19 +1,26 @@
 package org.ecommerce.orderapi.service;
 
 import static org.ecommerce.orderapi.dto.BucketDto.*;
+import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
+import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.entity.Product;
-import org.ecommerce.orderapi.repository.OrderDetailRepository;
+import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.type.OrderStatus;
+import org.ecommerce.orderapi.entity.type.ProductStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +37,7 @@ public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
 	private final OrderRepository orderRepository;
-	private final OrderDetailRepository orderDetailRepository;
-	private final StockService stockService;
-	private final ProductService productService;
+	private final RedisClient redisClient;
 
 	private final static Integer DELIVERY_FEE = 0;
 
@@ -51,15 +56,56 @@ public class OrderService {
 	 * @return - 장바구니 정보가 들어있는 BucketDto 입니다.
 	 */
 	@VisibleForTesting
-	public List<BucketDto> validateBucket(
+	public List<BucketDto> getBuckets(
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
-
-		return bucketServiceClient.validateBuckets(userId, bucketIds)
+		return bucketServiceClient.getBuckets(userId, bucketIds)
 				.stream()
 				.map(BucketMapper.INSTANCE::responseToDto)
 				.toList();
+	}
+
+	/**
+	 * 주문 생성 전 재고를 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productIds- 재고를 확인할 상품 번호
+	 * @param quantities- 회원이 주문한 상품의 수량
+	 */
+	@VisibleForTesting
+	public void validateStock(
+			final List<Integer> productIds,
+			final Map<Integer, Integer> quantities
+	) {
+		List<Stock> stocks = redisClient.getStocks(productIds);
+
+		for (Stock stock : stocks) {
+			if (stock.getTotal() == null || stock.getProcessingCnt() == null) {
+				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
+			}
+			if (stock.getAvailableStock() < quantities.get(stock.getProductId())) {
+				throw new CustomException(INSUFFICIENT_STOCK);
+			}
+		}
+	}
+
+	/**
+	 * 주문 생성 전 상품을 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param products - 상품 리스트
+	 */
+	@VisibleForTesting
+	public void validateProduct(final List<Product> products) {
+		for (Product product : products) {
+			if (product == null) {
+				throw new CustomException(NOT_FOUND_PRODUCT_ID);
+			}
+			if (product.getStatus() != ProductStatus.AVAILABLE) {
+				throw new CustomException(NOT_AVAILABLE_PRODUCT);
+			}
+		}
 	}
 
 	// TODO : 회원 유효성 검사
@@ -78,15 +124,13 @@ public class OrderService {
 			final Integer userId,
 			final OrderDto.Request.Place request
 	) {
-
-		final List<BucketDto> bucketDtos = validateBucket(userId, request.bucketIds());
-
+		final List<BucketDto> bucketDtos = getBuckets(userId, request.bucketIds());
 		final List<Integer> productIds = toProductIds(bucketDtos);
-		final Map<Integer, Integer> productIdToQuantityMap
-				= toProductIdToQuantityMap(bucketDtos);
+		final Map<Integer, Integer> productIdToQuantityMap = toProductIdToQuantityMap(bucketDtos);
+		final List<Product> products = redisClient.getProducts(productIds);
 
-		stockService.checkStock(productIds, productIdToQuantityMap);
-		final List<Product> products = productService.getProducts(productIds);
+		validateStock(productIds, productIdToQuantityMap);
+		validateProduct(products);
 
 		Order order = Order.ofPlace(
 				userId,
@@ -102,6 +146,17 @@ public class OrderService {
 				productIdToQuantityMap,
 				products
 		);
+
+		List<OrderStatusHistory> orderStatusHistories = orderDetails.stream()
+				.map(orderDetail -> OrderStatusHistory.ofRecord(
+						orderDetail,
+						OrderStatus.OPEN
+				))
+				.toList();
+
+		IntStream.range(0, orderDetails.size())
+				.forEach(i -> orderDetails.get(i)
+						.recordOrderStatusHistory(orderStatusHistories.get(i)));
 		order.attachOrderDetails(orderDetails);
 
 		orderRepository.save(order);

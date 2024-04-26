@@ -38,4 +38,14 @@ public class OrderStatusHistory {
 	@CreationTimestamp
 	@Column
 	private LocalDateTime statusChangeDatetime;
+
+	public static OrderStatusHistory ofRecord(
+			final OrderDetail orderDetail,
+			final OrderStatus changeStatus
+	) {
+		final OrderStatusHistory orderStatusHistory = new OrderStatusHistory();
+		orderStatusHistory.orderDetail = orderDetail;
+		orderStatusHistory.changeStatus = changeStatus;
+		return orderStatusHistory;
+	}
 }

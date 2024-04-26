@@ -17,8 +17,8 @@ public class RedisClient {
 
 	private final RedissonClient redissonClient;
 	private static final String STOCK_KEY = "stock:";
-	private static final String TOTAL_KEY = "total:%s:";
-	private static final String IN_PROCESSING_KEY = "inProcessing:%s:";
+	private static final String TOTAL_KEY = "total:";
+	private static final String IN_PROCESSING_KEY = "inProcessing:";
 	private static final String PRODUCT_KEY = "product:";
 
 	private void addStock(
@@ -91,10 +91,10 @@ public class RedisClient {
 	}
 
 	private String getStockTotalKey(final String key) {
-		return String.format(TOTAL_KEY, key);
+		return TOTAL_KEY + key;
 	}
 
 	private String getInProcessingStockKey(final String key) {
-		return String.format(IN_PROCESSING_KEY, key);
+		return IN_PROCESSING_KEY + key;
 	}
 }
