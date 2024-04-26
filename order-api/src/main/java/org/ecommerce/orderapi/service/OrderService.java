@@ -80,14 +80,14 @@ public class OrderService {
 	) {
 		List<Stock> stocks = redisClient.getStocks(productIds);
 
-		for (Stock stock : stocks) {
+		stocks.forEach(stock -> {
 			if (stock.getTotal() == null || stock.getProcessingCnt() == null) {
 				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 			}
 			if (stock.getAvailableStock() < quantities.get(stock.getProductId())) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
-		}
+		});
 	}
 
 	/**
