@@ -2,7 +2,6 @@ package org.ecommerce.productsearchapi.document;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -30,10 +29,10 @@ public class ProductDocument {
 	@Field(type = FieldType.Integer)
 	private Integer price;
 
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Integer, index = false)
 	private Integer stock;
 
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Integer, index = false)
 	private Integer sellerId;
 
 	@Field(type = FieldType.Text)
@@ -45,7 +44,7 @@ public class ProductDocument {
 	@Field(type = FieldType.Boolean)
 	private Boolean isDecaf;
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, analyzer = "nori")
 	private String name;
 
 	@Field(type = FieldType.Text)
@@ -54,11 +53,8 @@ public class ProductDocument {
 	@Field(type = FieldType.Text)
 	private String bean;
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, index = false)
 	private String information;
-
-	@Field(type = FieldType.Boolean)
-	private Boolean isCrush;
 
 	@Field(type = FieldType.Text)
 	private String thumbnailUrl;
@@ -66,10 +62,7 @@ public class ProductDocument {
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	private LocalDateTime createDatetime;
 
-	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
-	private LocalDateTime updateDatetime;
-
-	public static ProductDocument of(Product product, Image image) {
+	public static ProductDocument of(Product product) {
 		ProductDocument productDocument = new ProductDocument();
 		productDocument.id = product.getId();
 		productDocument.category = product.getCategory().name();
@@ -83,10 +76,8 @@ public class ProductDocument {
 		productDocument.acidity = product.getAcidity().name();
 		productDocument.bean = product.getBean().name();
 		productDocument.information = product.getInformation();
-		productDocument.isCrush = product.getIsCrush();
 		productDocument.createDatetime = product.getCreateDatetime();
-		productDocument.updateDatetime = product.getUpdateDatetime();
-		productDocument.thumbnailUrl = image.getImageUrl();
+		productDocument.thumbnailUrl = product.getThumbnailUrl();
 		return productDocument;
 	}
 
