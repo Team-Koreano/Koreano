@@ -77,5 +77,49 @@ public class ProductSearchDto {
 				);
 			}
 		}
+		public record SavedProduct(
+			Integer id,
+			String category,
+			Integer price,
+			Integer stock,
+			Integer sellerId,
+			String sellerName,
+			Integer favoriteCount,
+			Boolean isDecaf,
+			String name,
+			String acidity,
+			String bean,
+			String information,
+			String thumbnailUrl,
+			LocalDateTime createDatetime
+		){
+			private static String getThumbnailUrl(List<ImageDto> images) {
+				return images.stream()
+					.filter(ImageDto::getIsThumbnail)
+					.findFirst()
+					.map(ImageDto::getImageUrl)
+					.orElse(null);
+			}
+
+
+			public static SavedProduct of(final ProductSearchDto productSearchDto) {
+				return new SavedProduct(
+					productSearchDto.getId(),
+					productSearchDto.getName(),
+					productSearchDto.getPrice(),
+					productSearchDto.getStock(),
+					productSearchDto.getSellerRep().getId(),
+					productSearchDto.getSellerRep().getBizName(),
+					productSearchDto.getFavoriteCount(),
+					productSearchDto.getIsDecaf(),
+					productSearchDto.getCategory().getTitle(),
+					productSearchDto.getAcidity().getTitle(),
+					productSearchDto.getBean().getTitle(),
+					productSearchDto.getInformation(),
+					getThumbnailUrl(productSearchDto.getImageDtoList()),
+					productSearchDto.getCreateDatetime()
+				);
+			}
+		}
 	}
 }
