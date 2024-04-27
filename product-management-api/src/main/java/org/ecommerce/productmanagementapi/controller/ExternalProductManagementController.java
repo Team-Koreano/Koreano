@@ -41,11 +41,19 @@ public class ExternalProductManagementController {
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
-	@PutMapping("/stock")
-	public Response<ProductManagementDto.Response> modifyToStock(
+	@PutMapping("/stock/increase")
+	public Response<ProductManagementDto.Response> increaseToStock(
 		@RequestBody final ProductManagementDto.Request.Stock stock
 	) {
-		ProductManagementDto productManagementDto = productManagementService.modifyToStock(stock);
+		ProductManagementDto productManagementDto = productManagementService.increaseToStock(stock);
+		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
+	}
+
+	@PutMapping("/stock/decrease")
+	public Response<ProductManagementDto.Response> decreaseToStock(
+		@RequestBody final ProductManagementDto.Request.Stock stock
+	) {
+		ProductManagementDto productManagementDto = productManagementService.decreaseToStock(stock);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 

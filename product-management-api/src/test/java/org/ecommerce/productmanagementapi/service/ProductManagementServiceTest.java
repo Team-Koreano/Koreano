@@ -152,7 +152,7 @@ public class ProductManagementServiceTest {
 
 			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
-			ProductManagementDto result = productManagementService.modifyToStock(request);
+			ProductManagementDto result = productManagementService.increaseToStock(request);
 
 			assertThat(result.getStock()).isEqualTo(existStock + stock);
 		}
@@ -162,7 +162,7 @@ public class ProductManagementServiceTest {
 
 			final Integer productId = 1;
 
-			final Integer stock = -40;
+			final Integer stock = 40;
 
 			final Integer existStock = 30;
 
@@ -178,7 +178,7 @@ public class ProductManagementServiceTest {
 
 			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
-			assertThatThrownBy(() -> productManagementService.modifyToStock(request))
+			assertThatThrownBy(() -> productManagementService.decreaseToStock(request))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO.getMessage());
 		}

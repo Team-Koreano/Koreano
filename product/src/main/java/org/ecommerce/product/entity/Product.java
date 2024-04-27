@@ -125,18 +125,19 @@ public class Product {
 		this.status = productStatus;
 	}
 
-	public boolean handleStockChange(int quantity) {
-		if (quantity > 0) {
-			adjustStock(quantity);
-			return true;
-		} else if (hasEnoughStock(-quantity)) {
-			adjustStock(quantity);
+	public boolean checkStock(int quantity) {
+		if (hasEnoughStock(quantity)) {
+			decreaseStock(quantity);
 			return true;
 		}
 		return false;
 	}
 
-	private void adjustStock(int quantity) {
+	private void decreaseStock(int quantity) {
+		this.stock -= quantity;
+	}
+
+	public void increaseStock(int quantity) {
 		this.stock += quantity;
 	}
 

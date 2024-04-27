@@ -78,20 +78,38 @@ public class ProductManagementService {
 
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
+
 	/**
 	 * 상품 재고 변경
 	 * <p>
-	 * 상품의 재고를 수정하는 메서드입니다 
+	 * 상품의 재고를 증가시키는 메서드입니다 
 	 * <p>
 	 * @author Hong
 	 *
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto modifyToStock(ProductManagementDto.Request.Stock stock) {
+	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
-		if (!product.handleStockChange(stock.requestStock())) {
+		product.increaseStock(stock.requestStock());
+		return ProductManagementMapper.INSTANCE.toDto(product);
+	}
+
+	/**
+	 * 상품 재고 변경
+	 * <p>
+	 * 상품의 재고를 감소시키는 메서드입니다
+	 * <p>
+	 * @author Hong
+	 *
+	 * @param stock - 상품의 재고값
+	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 */
+	public ProductManagementDto decreaseToStock(ProductManagementDto.Request.Stock stock) {
+		Product product = productRepository.findById(stock.productId())
+			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+		if (!product.checkStock(stock.requestStock())) {
 			throw new CustomException(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
 		}
 		return ProductManagementMapper.INSTANCE.toDto(product);
