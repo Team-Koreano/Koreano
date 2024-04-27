@@ -3,12 +3,17 @@ package org.ecommerce.orderapi.controller;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.service.OrderService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +30,14 @@ public class OrderController {
 
 	@PostMapping
 	public Response<OrderDto.Response> createOrder(
-			@RequestBody @Valid final OrderDto.Request.Create createRequest
+			@RequestBody @Valid final OrderDto.Request.Place placeRequest
 	) {
+
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toResponse(
-						orderService.placeOrder(USER_ID, createRequest)
+						orderService.placeOrder(USER_ID, placeRequest)
 				)
 		);
 	}

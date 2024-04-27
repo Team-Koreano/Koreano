@@ -1,6 +1,5 @@
-package org.example.orderapi;
+package org.ecommerce.orderapi;
 
-import org.ecommerce.orderapi.OrderApiApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

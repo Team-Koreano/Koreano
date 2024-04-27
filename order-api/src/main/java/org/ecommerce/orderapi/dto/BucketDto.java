@@ -1,6 +1,9 @@
 package org.ecommerce.orderapi.dto;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,5 +26,19 @@ public class BucketDto {
 			Integer quantity,
 			LocalDate createDate
 	) {
+	}
+
+	public static List<Integer> toProductIds(final List<BucketDto> bucketDtos) {
+		return bucketDtos.stream().map(BucketDto::getProductId).toList();
+	}
+
+	public static Map<Integer, Integer> toProductIdToQuantityMap(
+			final List<BucketDto> bucketDtos
+	) {
+		return bucketDtos.stream()
+				.collect(Collectors.toMap(
+						BucketDto::getProductId,
+						BucketDto::getQuantity
+				));
 	}
 }
