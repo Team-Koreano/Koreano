@@ -1,6 +1,7 @@
 package org.ecommerce.productsearchapi.dto;
 
 import org.ecommerce.product.entity.Product;
+import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -13,7 +14,9 @@ public interface ProductMapper {
 
 
 	@Mapping(target = "imageDtoList", source = "images")
-	ProductSearchDto toDto(Product product);
+	ProductSearchDto entityToDto(Product product);
+
+	ProductSearchDto documentToDto(ProductDocument productDocument);
 
 
 }
