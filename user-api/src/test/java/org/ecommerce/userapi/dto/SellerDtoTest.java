@@ -23,7 +23,7 @@ class SellerDtoTest {
 		CREATE_DATE,
 		false,
 		null,
-		0,
+		0L,
 		UserStatus.GENERAL
 	);
 

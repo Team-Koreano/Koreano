@@ -21,9 +21,9 @@ public class SellerDto {
 	private String address;
 	private String phoneNumber;
 	private LocalDateTime createDatetime;
-	private Boolean isDeleted;
+	private boolean isDeleted;
 	private LocalDateTime updateDatetime;
-	private Integer beanPay;
+	private Long beanPayId;
 	private UserStatus userStatus;
 	private String accessToken;
 
