@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/external/productmanagement/v1")
+@RequestMapping("api/external/product-management/v1")
 @RequiredArgsConstructor
 public class ExternalProductManagementController {
 
