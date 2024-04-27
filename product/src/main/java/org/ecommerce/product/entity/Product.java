@@ -92,6 +92,14 @@ public class Product {
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
+	public String getThumbnailUrl() {
+		return images.stream()
+			.filter(Image::getIsThumbnail)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
+	}
+
 	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
 		, Acidity acidity, String information,Boolean isCrush, Boolean isDecaf,SellerRep test) {
 		Product product = new Product();
