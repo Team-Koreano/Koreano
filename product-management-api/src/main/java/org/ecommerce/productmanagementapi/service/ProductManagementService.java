@@ -23,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductManagementService {
 
-	private static final SellerRep test = new SellerRep(1, "TEST");
+	// TODO : 향후 Replication 후 삭제
+	private static final SellerRep seller = new SellerRep(1, "TEST");
 	private final ProductRepository productRepository;
 	private final ImageRepository imageRepository;
 	private final SellerRepository sellerRepository;
@@ -48,7 +49,7 @@ public class ProductManagementService {
 			product.information(),
 			product.isCrush(),
 			product.isDecaf(),
-			test
+			seller
 		);
 
 		final Product savedProduct = productRepository.save(createProduct);
@@ -70,7 +71,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto modifyToStatus(final Integer productId, final ProductStatus status) {
-		Product product = productRepository.findProductById(productId)
+		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		product.toModifyStatus(status);
@@ -88,7 +89,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto modifyToStock(ProductManagementDto.Request.Stock stock) {
-		Product product = productRepository.findProductById(stock.productId())
+		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 		if (!product.handleStockChange(stock.requestStock())) {
 			throw new CustomException(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
@@ -107,7 +108,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto modifyToProduct(Integer productId, ProductManagementDto.Request.Modify modifyProduct) {
-		Product product = productRepository.findProductById(productId)
+		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		product.toModify(

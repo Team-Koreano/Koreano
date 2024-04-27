@@ -119,7 +119,7 @@ public class ProductManagementServiceTest {
 			);
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
 			entity.toModifyStatus(newStatus);
 
@@ -150,7 +150,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
 			ProductManagementDto result = productManagementService.modifyToStock(request);
 
@@ -176,7 +176,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
 			assertThatThrownBy(() -> productManagementService.modifyToStock(request))
 				.isInstanceOf(CustomException.class)
@@ -196,11 +196,11 @@ public class ProductManagementServiceTest {
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
 			true, ProductStatus.AVAILABLE, testTime, testTime, null
 		);
-		when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+		when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
 		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto);
 
-		verify(productRepository).findProductById(productId);
+		verify(productRepository).findById(productId);
 
 		assertThat(resultDto.getAcidity()).isEqualTo(dto.acidity());
 		assertThat(resultDto.getBean()).isEqualTo(dto.bean());
