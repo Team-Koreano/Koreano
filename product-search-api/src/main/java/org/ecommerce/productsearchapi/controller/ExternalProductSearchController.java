@@ -14,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/product-search/v1")
-public class ProductSearchController {
+@RequestMapping("/api/external/product-search/v1")
+public class ExternalProductSearchController {
 
 	private final ProductSearchService productSearchService;
 

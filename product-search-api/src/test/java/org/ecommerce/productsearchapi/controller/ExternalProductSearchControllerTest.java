@@ -15,7 +15,6 @@ import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
@@ -26,9 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(value = ProductSearchController.class)
+@WebMvcTest(value = ExternalProductSearchController.class)
 @ExtendWith(MockitoExtension.class)
-public class ProductSearchControllerTest {
+public class ExternalProductSearchControllerTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@Autowired
@@ -40,9 +39,9 @@ public class ProductSearchControllerTest {
 	void 단일_상품_조회() throws Exception {
 		// given
 
-		final List<ImageDto> imageDtoList = List.of(
-			new ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
-			new ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
+		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
+			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
+			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
 		);
 
 		final ProductSearchDto productSearchDto =
@@ -51,7 +50,7 @@ public class ProductSearchControllerTest {
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new SellerRep(1, "커피천국"),
+				new ProductSearchDto.SellerRep(1, "커피천국"),
 				10,
 				false,
 				"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
@@ -62,12 +61,13 @@ public class ProductSearchControllerTest {
 				false,
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
-				imageDtoList
+				imageDtoList,
+				null
 			);
 		// when
 		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
 		// then
-		mockMvc.perform(get("/api/product-search/v1/1"))
+		mockMvc.perform(get("/api/external/product-search/v1/1"))
 			.andExpect(jsonPath("$.result.id").value(productSearchDto.getId()))
 			.andExpect(jsonPath("$.result.category").value(productSearchDto.getCategory().getTitle()))
 			.andExpect(jsonPath("$.result.price").value(productSearchDto.getPrice()))
