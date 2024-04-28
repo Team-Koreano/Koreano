@@ -28,7 +28,6 @@ public class LockTestService {
 	private final BeanPayDetailRepository beanPayDetailRepository;
 	private final RedissonClient redissonClient;
 
-	// @TimeCheck
 	@DistributedLock(key = "#lockName.concat('-').concat(#userId)")
 	public void useDistributeLock(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
@@ -45,7 +44,6 @@ public class LockTestService {
 		beanPay.chargeBeanPayDetail(createBeanPayDetail.getAmount());
 	}
 
-	@TimeCheck
 	@Transactional
 	public void notUseLockTest(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
@@ -61,7 +59,6 @@ public class LockTestService {
 		beanPay.chargeBeanPayDetail(createBeanPayDetail.getAmount());
 	}
 
-	@TimeCheck
 	@Transactional
 	public void betaLockTest(String lockName, Integer userId) {
 		BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRoleUseBetaLock(1,
