@@ -10,12 +10,12 @@ import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
+import org.ecommerce.paymentapi.entity.type.Role;
 import org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
-import org.ecommerce.userapi.entity.type.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 @Service
+@Transactional
 public class BeanPayService {
 
 	private final TossKey tossKey;
