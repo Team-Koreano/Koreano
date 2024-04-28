@@ -19,6 +19,7 @@ import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.ecommerce.paymentapi.service.BeanPayService;
+import org.ecommerce.paymentapi.service.LockTestService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
 import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,15 +39,19 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@ActiveProfiles("local")
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayDetailControllerTest {
+class BeanPayControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
 
 	@MockBean
 	private PaymentServiceImpl paymentService;
+
+	@MockBean
+	private LockTestService lockTestService;
 
 	@Autowired
 	private MockMvc mvc;
