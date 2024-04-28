@@ -2,7 +2,8 @@ package org.ecommerce.paymentapi.repository;
 
 
 
-import static org.ecommerce.userapi.entity.type.Role.*;
+
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 
 import java.time.LocalDateTime;
 

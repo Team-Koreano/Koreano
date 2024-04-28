@@ -1,7 +1,7 @@
 package org.ecommerce.paymentapi.entity;
 
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode.*;
-import static org.ecommerce.userapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;

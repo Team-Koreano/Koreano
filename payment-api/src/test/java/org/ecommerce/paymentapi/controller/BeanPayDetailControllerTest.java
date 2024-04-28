@@ -1,7 +1,7 @@
 
 package org.ecommerce.paymentapi.controller;
 
-import static org.ecommerce.userapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

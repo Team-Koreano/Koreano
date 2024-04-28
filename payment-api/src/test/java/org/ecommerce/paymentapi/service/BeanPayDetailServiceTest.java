@@ -2,8 +2,8 @@
 package org.ecommerce.paymentapi.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode.*;
-import static org.ecommerce.userapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -20,10 +20,10 @@ import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.entity.type.Role;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
-import org.ecommerce.userapi.entity.type.Role;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
