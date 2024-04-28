@@ -3,11 +3,12 @@ package org.ecommerce.productsearchapi.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,26 @@ public class ProductSearchDto {
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
 	private List<ImageDto> imageDtoList;
+	private String thumbnailUrl;
+
+	@Getter
+	@AllArgsConstructor
+	public static class SellerRep {
+		private Integer id;
+		private String bizName;
+	}
+
+	@Getter
+	@AllArgsConstructor
+	public static class ImageDto {
+		private Integer id;
+		private Boolean isThumbnail;
+		private Short sequenceNumber;
+		private LocalDateTime createDatetime;
+		private LocalDateTime updateDatetime;
+		private String imageUrl;
+		private Boolean isDeleted;
+	}
 
 
 	public static class Request {
@@ -93,7 +114,8 @@ public class ProductSearchDto {
 			String thumbnailUrl,
 			LocalDateTime createDatetime
 		){
-			private static String getThumbnailUrl(List<ImageDto> images) {
+			@VisibleForTesting
+			public static String getThumbnailUrl(List<ImageDto> images) {
 				return images.stream()
 					.filter(ImageDto::getIsThumbnail)
 					.findFirst()
@@ -105,18 +127,18 @@ public class ProductSearchDto {
 			public static SavedProduct of(final ProductSearchDto productSearchDto) {
 				return new SavedProduct(
 					productSearchDto.getId(),
-					productSearchDto.getName(),
+					productSearchDto.getCategory().getTitle(),
 					productSearchDto.getPrice(),
 					productSearchDto.getStock(),
 					productSearchDto.getSellerRep().getId(),
 					productSearchDto.getSellerRep().getBizName(),
 					productSearchDto.getFavoriteCount(),
 					productSearchDto.getIsDecaf(),
-					productSearchDto.getCategory().getTitle(),
+					productSearchDto.getName(),
 					productSearchDto.getAcidity().getTitle(),
 					productSearchDto.getBean().getTitle(),
 					productSearchDto.getInformation(),
-					getThumbnailUrl(productSearchDto.getImageDtoList()),
+					productSearchDto.getThumbnailUrl(),
 					productSearchDto.getCreateDatetime()
 				);
 			}
