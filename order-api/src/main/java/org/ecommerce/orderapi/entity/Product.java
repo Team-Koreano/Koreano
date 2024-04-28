@@ -19,4 +19,8 @@ public class Product {
 	private Integer price;
 	private String seller;
 	private ProductStatus status;
+
+	public void changeStatus(ProductStatus newStatus) {
+		this.status = newStatus;
+	}
 }

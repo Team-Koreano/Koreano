@@ -38,6 +38,7 @@ public class OrderService {
 	private final BucketServiceClient bucketServiceClient;
 	private final OrderRepository orderRepository;
 	private final RedisClient redisClient;
+	private final StockService stockService;
 
 	private final static Integer DELIVERY_FEE = 0;
 
@@ -98,14 +99,14 @@ public class OrderService {
 	 */
 	@VisibleForTesting
 	public void validateProduct(final List<Product> products) {
-		for (Product product : products) {
+		products.forEach(product -> {
 			if (product == null) {
 				throw new CustomException(NOT_FOUND_PRODUCT_ID);
 			}
 			if (product.getStatus() != ProductStatus.AVAILABLE) {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
-		}
+		});
 	}
 
 	// TODO : 회원 유효성 검사
@@ -150,6 +151,7 @@ public class OrderService {
 		recordOrderStatusHistory(orderDetails);
 		order.attachOrderDetails(orderDetails);
 		orderRepository.save(order);
+		stockService.increaseInProcessingStocks(orderDetails);
 		return OrderMapper.INSTANCE.toDto(order);
 	}
 

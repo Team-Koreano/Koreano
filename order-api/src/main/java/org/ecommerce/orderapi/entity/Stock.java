@@ -15,4 +15,8 @@ public class Stock {
 	public Integer getAvailableStock() {
 		return this.total - this.processingCnt;
 	}
+
+	public void increaseProcessingCnt(final Integer quantity) {
+		this.processingCnt += quantity;
+	}
 }
