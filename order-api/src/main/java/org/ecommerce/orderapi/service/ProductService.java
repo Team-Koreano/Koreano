@@ -25,7 +25,7 @@ public class ProductService {
 	/**
 	 * MockData 만드는 메소드입니다.
 	 * @author ${Juwon}
-	*/
+	 */
 	public void saveMock() {
 
 		List<Product> mockProducts = Arrays.asList(
@@ -41,10 +41,10 @@ public class ProductService {
 		);
 
 		IntStream.range(0, mockStocks.size())
-				.forEach(i -> redisClient.registerProduct(
-						mockProducts.get(i),
-						mockStocks.get(i)
-				));
+				.forEach(i -> {
+					redisClient.setProduct(mockProducts.get(i));
+					redisClient.putStock(mockStocks.get(i));
+				});
 	}
 
 	/**
