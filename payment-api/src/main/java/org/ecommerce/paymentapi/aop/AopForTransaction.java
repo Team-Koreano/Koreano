@@ -16,4 +16,9 @@ public class AopForTransaction {
 	public Object proceed(final ProceedingJoinPoint joinPoint) throws Throwable {
 		return joinPoint.proceed();
 	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public <T> void proceed(final Runnable runnable) throws Throwable {
+		runnable.run();
+	}
 }

@@ -3,8 +3,8 @@ package org.ecommerce.paymentapi.service;
 import java.util.concurrent.TimeUnit;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.paymentapi.aop.AopForTransaction;
 import org.ecommerce.paymentapi.aop.DistributedLock;
-import org.ecommerce.paymentapi.aop.TimeCheck;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.Role;
@@ -27,6 +27,7 @@ public class LockTestService {
 	private final BeanPayRepository beanPayRepository;
 	private final BeanPayDetailRepository beanPayDetailRepository;
 	private final RedissonClient redissonClient;
+	private final AopForTransaction aopForTransaction;
 
 	@DistributedLock(key = "#lockName.concat('-').concat(#userId)")
 	public void useDistributeLock(String lockName, Integer userId) {
@@ -78,28 +79,35 @@ public class LockTestService {
 
 	@Transactional
 	public void notUseAopTest(String lockName, Integer userId) {
-		RLock lock = redissonClient.getLock("LOCK: BEANPAY-1");
+		final String key = "LOCK: BEANPAY-1";
+		final RLock lock = redissonClient.getLock(key);
 		try{
-			boolean available = lock.tryLock(5L, 1L, TimeUnit.SECONDS);
+			final boolean available = lock.tryLock(5L, 3L, TimeUnit.SECONDS);
 			if(!available){
 				throw new RuntimeException();
 			}
-			BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRoleUseBetaLock(1,
-				Role.USER);
+			log.info("락 획득 key: {}", key);
+			aopForTransaction.proceed(() -> {
+				final BeanPay beanPay = getBeanPay(1,Role.USER);
 
-			final BeanPayDetail beanPayDetail = BeanPayDetail.ofCreate(
-				beanPay,
-				1,
-				5000
-			);
-			final BeanPayDetail createBeanPayDetail = beanPayDetailRepository.save(
-				beanPayDetail
-			);
-			beanPay.chargeBeanPayDetail(createBeanPayDetail.getAmount());
+				final BeanPayDetail beanPayDetail = BeanPayDetail.ofCreate(
+					beanPay,
+					1,
+					5000
+				);
+				final BeanPayDetail createBeanPayDetail = beanPayDetailRepository.save(
+					beanPayDetail
+				);
+				beanPay.chargeBeanPayDetail(createBeanPayDetail.getAmount());
+				log.info("빈페이 총액: {}", beanPay.getAmount());
+			});
 		} catch (InterruptedException e) {
 
-		}finally {
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		} finally {
 			try{
+				log.info("락 해제 key: {}", key);
 				lock.unlock();
 			}catch (IllegalStateException e){
 

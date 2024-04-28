@@ -6,7 +6,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.ecommerce.paymentapi.aop.TimeCheck;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.type.Role;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
@@ -56,7 +55,7 @@ public class LockTestServiceTest {
 	}
 
 	@Test
-	void 트랜잭션사용_LostUpdate_발생_실패() throws InterruptedException {
+	void 트랜잭션사용_LostUpdate_발생() throws InterruptedException {
 		//given
 		Long startTime = System.currentTimeMillis();
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
@@ -120,7 +119,6 @@ public class LockTestServiceTest {
 		assertEquals(totalAmount, beanPay.getAmount());
 	}
 
-	@TimeCheck
 	@Test
 	void 베타락사용_성공() throws InterruptedException {
 		//given
@@ -137,6 +135,39 @@ public class LockTestServiceTest {
 				// 분산락 적용 메소드 호출
 				try {
 					lockTestService.betaLockTest(lockName, userId);
+				}finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+		//then
+		Long endTime = System.currentTimeMillis();
+		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
+		log.info("Actual total amount : {}", beanPay.getAmount());
+		log.info("expect total amount : {}", totalAmount);
+		log.info("total Time : {}", (endTime - startTime) + "ms");
+		assertEquals(totalAmount, beanPay.getAmount());
+
+	}
+
+	@Test
+	void 분산락_AOP미적용_성공() throws InterruptedException {
+		//given
+		Long startTime = System.currentTimeMillis();
+		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+		String lockName = "BEANPAY";
+		Integer userId = 1;
+		Integer totalAmount = threadCount * 5000;
+
+		//when
+		for(int i = 0; i < threadCount; i++) {
+			executorService.submit(() -> {
+				// 분산락 적용 메소드 호출
+				try {
+					lockTestService.notUseAopTest(lockName, userId);
 				}finally {
 					latch.countDown();
 				}
