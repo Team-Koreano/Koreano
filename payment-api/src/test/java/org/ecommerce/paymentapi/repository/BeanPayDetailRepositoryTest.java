@@ -2,7 +2,8 @@ package org.ecommerce.paymentapi.repository;
 
 
 
-import static org.ecommerce.userapi.entity.type.Role.*;
+
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @DataJpaTest
 public class BeanPayDetailRepositoryTest {
 

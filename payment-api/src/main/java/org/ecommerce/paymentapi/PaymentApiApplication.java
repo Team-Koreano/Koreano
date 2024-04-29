@@ -2,15 +2,13 @@ package org.ecommerce.paymentapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients
 @SpringBootApplication(scanBasePackages = {
 	"org.ecommerce.common",
-	"org.ecommerce.paymentapi",
-	"org.ecommerce.userapi.entity.type"
-}, exclude = SecurityAutoConfiguration.class)
+	"org.ecommerce.paymentapi"
+})
 public class PaymentApiApplication {
 
 	public static void main(String[] args) {

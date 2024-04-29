@@ -1,7 +1,7 @@
 
 package org.ecommerce.paymentapi.controller;
 
-import static org.ecommerce.userapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -19,6 +19,7 @@ import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.type.ProcessStatus;
 import org.ecommerce.paymentapi.service.BeanPayService;
+import org.ecommerce.paymentapi.service.LockTestService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
 import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,13 +40,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayDetailControllerTest {
+class BeanPayControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
 
 	@MockBean
 	private PaymentServiceImpl paymentService;
+
+	@MockBean
+	private LockTestService lockTestService;
 
 	@Autowired
 	private MockMvc mvc;
