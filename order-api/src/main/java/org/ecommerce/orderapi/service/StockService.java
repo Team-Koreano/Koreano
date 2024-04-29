@@ -40,6 +40,7 @@ public class StockService {
 		orderDetails.forEach(orderDetail -> {
 			final Integer productId = orderDetail.getProductId();
 			final Integer quantity = orderDetail.getQuantity();
+			RLock lock = redisClient.getLock(productId);
 			final Stock stock = redisClient.getStock(productId)
 					.orElseThrow(
 							() -> new CustomException(INSUFFICIENT_STOCK_INFORMATION));
@@ -47,7 +48,6 @@ public class StockService {
 			if (!validateQuantity(stock, quantity)) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
-			RLock lock = redisClient.getLock(productId);
 			RTransaction transaction = redisClient.beginTransaction();
 			try {
 				increaseInProcessingStock(transaction, stock, quantity);
