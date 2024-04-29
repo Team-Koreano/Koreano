@@ -2,13 +2,11 @@ package org.ecommerce.paymentapi.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import redis.embedded.RedisServer;
 
-@Profile("local")
 @Configuration
 public class LocalRedisConfig{
 

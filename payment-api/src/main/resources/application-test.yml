@@ -1,7 +1,7 @@
 spring:
   profiles:
     activation:
-      on-profile: local
+      on-profile: test
   application:
     name : "payment-api"
   h2:
@@ -30,7 +30,7 @@ spring:
   data:
     redis:
       host: 127.0.0.1
-      port: 6379
+      port: 16379
       redisson-prefix: "redis://"
 toss:
   secretKey: test

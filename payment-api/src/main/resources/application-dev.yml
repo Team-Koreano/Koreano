@@ -15,11 +15,11 @@ spring:
     username: ENC(+p5Ip/ROTDnL5u2jcp/F9w==)
     password: ENC(TGQE//4tXoVvi1wuygHhMNcRZ8tIQXsn)
     hikari:
-      maximum-pool-size: 100 #최대 pool 크기
+      maximum-pool-size: 50 #최대 pool 크기
       minimum-idle: 10 #최소 pool 크기
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate.format_sql: true
     show-sql: true
@@ -32,5 +32,8 @@ spring:
       host: 127.0.0.1
       port: 6379
       redisson-prefix: "redis://"
+
+
+
 toss:
   secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)

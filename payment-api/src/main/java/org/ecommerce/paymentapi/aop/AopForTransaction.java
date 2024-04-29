@@ -18,7 +18,7 @@ public class AopForTransaction {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public <T> void proceed(final Runnable runnable) throws Throwable {
+	public void proceed(final Runnable runnable) throws Throwable {
 		runnable.run();
 	}
 }
