@@ -1,0 +1,39 @@
+spring:
+  profiles:
+    activation:
+      on-profile: test
+  application:
+    name : "payment-api"
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 100 #최대 pool 크기
+      minimum-idle: 10 #최소 pool 크기
+      idle-timeout: 600000 #연결위한 최대 유후 시간
+      max-lifetime: 1800000 #반납된 커넥션의 최대 수명
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 16379
+      redisson-prefix: "redis://"
+toss:
+  secretKey: test
+jasypt:
+  encryptor:
+    password: test

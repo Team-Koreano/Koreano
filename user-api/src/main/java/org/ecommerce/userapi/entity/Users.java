@@ -63,7 +63,7 @@ public class Users implements Member {
 	private LocalDateTime updateDatetime;
 
 	@Column()
-	private Integer beanPay = 0;
+	private Long beanPayId;
 
 	@Column(name = "status")
 	private UserStatus userStatus= UserStatus.GENERAL;

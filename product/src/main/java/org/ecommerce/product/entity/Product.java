@@ -79,7 +79,7 @@ public class Product {
 
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
-	private ProductStatus status;
+	private ProductStatus status = ProductStatus.AVAILABLE;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
@@ -103,11 +103,11 @@ public class Product {
 		product.acidity = acidity;
 		product.information = information;
 		product.isCrush = isCrush;
-		product.status = ProductStatus.AVAILABLE;
 		product.isDecaf = isDecaf;
 		product.sellerRep = test;
 		return product;
 	}
+
 
 	public void toModify(ProductCategory category, Integer price, String name, Bean bean
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf) {
@@ -143,5 +143,13 @@ public class Product {
 
 	private boolean hasEnoughStock(int requiredQuantity) {
 		return this.stock >= requiredQuantity;
+	}
+
+  public String getThumbnailUrl() {
+		return images.stream()
+			.filter(Image::getIsThumbnail)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
 	}
 }

@@ -1,18 +1,20 @@
 package org.ecommerce.paymentapi.repository;
 
-import static org.ecommerce.userapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.type.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.ecommerce.paymentapi.entity.BeanPay;
-import org.ecommerce.userapi.entity.type.Role;
+import org.ecommerce.paymentapi.entity.type.Role;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @DataJpaTest
 public class BeanPayRepositoryTest {
 	@Autowired

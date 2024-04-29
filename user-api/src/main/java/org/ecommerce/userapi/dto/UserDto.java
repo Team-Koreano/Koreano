@@ -27,7 +27,7 @@ public class UserDto {
 	private LocalDateTime createDatetime;
 	private boolean isDeleted;
 	private LocalDateTime updateDatetime;
-	private Integer beanPay;
+	private Integer beanPayId;
 	private UserStatus userStatus;
 	private String accessToken;
 

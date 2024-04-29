@@ -15,8 +15,10 @@ import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
+import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,8 @@ public class ProductSearchServiceTest {
 	private ProductSearchService productSearchService;
 	@Mock
 	private ProductRepository productRepository;
+	@Mock
+	private ProductElasticsearchRepository productElasticsearchRepository;
 
 	@Test
 	void 단일_상품_조회() {
@@ -87,6 +91,30 @@ public class ProductSearchServiceTest {
 
 		//then
 		assertEquals(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID, exception.getErrorCode());
+	}
+
+	@Test
+	void 엘라스틱서치에_상품_정보_저장() {
+		// given
+
+		// when
+		final ProductSearchDto productSearchDto = productSearchService.saveProduct(getProduct());
+
+		// then
+		assertEquals(1, productSearchDto.getId());
+		assertEquals(ProductCategory.BEAN, productSearchDto.getCategory());
+		assertEquals(30000, productSearchDto.getPrice());
+		assertEquals(100, productSearchDto.getStock());
+		assertEquals(1, productSearchDto.getSellerRep().getId());
+		assertEquals("커피천국", productSearchDto.getSellerRep().getBizName());
+		assertEquals(10, productSearchDto.getFavoriteCount());
+		assertEquals(false, productSearchDto.getIsDecaf());
+		assertEquals("[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피", productSearchDto.getName());
+		assertEquals(Bean.ARABICA, productSearchDto.getBean());
+		assertEquals(Acidity.MEDIUM, productSearchDto.getAcidity());
+		assertEquals("커피천국에서만 만나볼 수 있는 특별한 커피", productSearchDto.getInformation());
+		assertEquals("http://image1.com", productSearchDto.getThumbnailUrl());
+		assertEquals(TEST_DATE_TIME, productSearchDto.getCreateDatetime());
 	}
 
 	private Product getProduct() {

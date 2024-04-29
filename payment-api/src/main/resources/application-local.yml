@@ -15,12 +15,23 @@ spring:
     url: jdbc:h2:mem:test
     username: sa
     password:
+    hikari:
+      maximum-pool-size: 100 #최대 pool 크기
+      minimum-idle: 10 #최소 pool 크기
+      idle-timeout: 600000 #연결위한 최대 유후 시간
+      max-lifetime: 1800000 #반납된 커넥션의 최대 수명
   jpa:
     hibernate:
       ddl-auto: create-drop
-    properties:
-      hibernate.format_sql: true
-    show-sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      redisson-prefix: "redis://"
 toss:
   secretKey: test
 jasypt:

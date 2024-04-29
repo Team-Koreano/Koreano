@@ -52,7 +52,7 @@ public class OrderDetail {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private OrderStatus status;
+	private OrderStatus status = OrderStatus.OPEN;
 
 	@Column
 	@Enumerated(EnumType.STRING)
@@ -75,7 +75,6 @@ public class OrderDetail {
 		orderDetail.deliveryFee = deliveryFee;
 		orderDetail.paymentAmount = price * quantity + deliveryFee;
 		orderDetail.seller = seller;
-		orderDetail.status = OrderStatus.OPEN;
 		return orderDetail;
 	}
 }

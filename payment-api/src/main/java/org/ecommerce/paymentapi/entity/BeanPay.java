@@ -2,8 +2,7 @@ package org.ecommerce.paymentapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.type.Role;
-import org.hibernate.annotations.ColumnDefault;
+import org.ecommerce.paymentapi.entity.type.Role;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -42,8 +41,7 @@ public class BeanPay {
 	@Column(nullable = false)
 	private Role role;
 
-	@ColumnDefault(value = "0")
-	private Integer amount;
+	private Integer amount = 0;
 
 	@CreationTimestamp
 	@Column(updatable = false)
