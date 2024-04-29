@@ -108,7 +108,44 @@ public class Product {
 		return product;
 	}
 
-	public String getThumbnailUrl() {
+
+	public void toModify(ProductCategory category, Integer price, String name, Bean bean
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf) {
+		this.category = category;
+		this.price = price;
+		this.name = name;
+		this.bean = bean;
+		this.acidity = acidity;
+		this.information = information;
+		this.isCrush = isCrush;
+		this.isDecaf = isDecaf;
+	}
+
+	public void toModifyStatus(ProductStatus productStatus) {
+		this.status = productStatus;
+	}
+
+	public boolean checkStock(int quantity) {
+		if (hasEnoughStock(quantity)) {
+			decreaseStock(quantity);
+			return true;
+		}
+		return false;
+	}
+
+	private void decreaseStock(int quantity) {
+		this.stock -= quantity;
+	}
+
+	public void increaseStock(int quantity) {
+		this.stock += quantity;
+	}
+
+	private boolean hasEnoughStock(int requiredQuantity) {
+		return this.stock >= requiredQuantity;
+	}
+
+  public String getThumbnailUrl() {
 		return images.stream()
 			.filter(Image::getIsThumbnail)
 			.findFirst()

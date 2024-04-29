@@ -33,7 +33,8 @@ public class ProductManagementDto {
 	private ProductStatus status;
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
-	public static class Request{
+
+	public static class Request {
 		public record Register(
 			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
@@ -51,15 +52,38 @@ public class ProductManagementDto {
 			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
 			Boolean isCrush,
 			List<ImageDto> images
-		){
+		) {
 			public record ImageDto(
 				String imageUrl,
 				Boolean isThumbnail,
 				Short sequenceNumber
-			){
+			) {
 			}
 		}
+
+		public record Stock(
+			Integer productId,
+			@NotNull(message = ProductManagementErrorMessages.stockNotNull)
+			Integer requestStock
+		) {
+		} public record Modify(
+			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
+			Boolean isDecaf,
+			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
+			Integer price,
+			Acidity acidity,
+			Bean bean,
+			ProductCategory category,
+			@NotBlank(message = ProductManagementErrorMessages.informationNotBlank)
+			String information,
+			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
+			String name,
+			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
+			Boolean isCrush
+		){
+		}
 	}
+
 	public record Response(
 		Integer id,
 		Boolean isDecaf,
@@ -76,23 +100,5 @@ public class ProductManagementDto {
 		LocalDateTime createDatetime,
 		Boolean isCrush
 	) {
-		public static Response of(final ProductManagementDto productManagementDto) {
-			return new Response(
-				productManagementDto.getId(),
-				productManagementDto.getIsDecaf(),
-				productManagementDto.getPrice(),
-				productManagementDto.getSellerRep().getBizName(),
-				productManagementDto.getStock(),
-				productManagementDto.getFavoriteCount(),
-				productManagementDto.getAcidity().getTitle(),
-				productManagementDto.getBean().getTitle(),
-				productManagementDto.getCategory().getTitle(),
-				productManagementDto.getInformation(),
-				productManagementDto.getName(),
-				productManagementDto.getStatus().getTitle(),
-				productManagementDto.getCreateDatetime(),
-				productManagementDto.getIsCrush()
-			);
-		}
 	}
 }

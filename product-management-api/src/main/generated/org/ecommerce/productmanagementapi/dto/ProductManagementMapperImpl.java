@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-04-23T18:14:12+0900",
+    date = "2024-04-26T20:52:40+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
@@ -59,5 +59,54 @@ public class ProductManagementMapperImpl implements ProductManagementMapper {
         ProductManagementDto productManagementDto = new ProductManagementDto( id, category, price, stock, sellerRep, favoriteCount, isDecaf, name, bean, acidity, information, isCrush, status, createDatetime, updateDatetime );
 
         return productManagementDto;
+    }
+
+    @Override
+    public ProductManagementDto.Response toResponse(ProductManagementDto productManagementDto) {
+        if ( productManagementDto == null ) {
+            return null;
+        }
+
+        Integer id = null;
+        Boolean isDecaf = null;
+        Integer price = null;
+        Integer stock = null;
+        Integer favoriteCount = null;
+        String acidity = null;
+        String bean = null;
+        String category = null;
+        String information = null;
+        String name = null;
+        String status = null;
+        LocalDateTime createDatetime = null;
+        Boolean isCrush = null;
+
+        id = productManagementDto.getId();
+        isDecaf = productManagementDto.getIsDecaf();
+        price = productManagementDto.getPrice();
+        stock = productManagementDto.getStock();
+        favoriteCount = productManagementDto.getFavoriteCount();
+        if ( productManagementDto.getAcidity() != null ) {
+            acidity = productManagementDto.getAcidity().name();
+        }
+        if ( productManagementDto.getBean() != null ) {
+            bean = productManagementDto.getBean().name();
+        }
+        if ( productManagementDto.getCategory() != null ) {
+            category = productManagementDto.getCategory().name();
+        }
+        information = productManagementDto.getInformation();
+        name = productManagementDto.getName();
+        if ( productManagementDto.getStatus() != null ) {
+            status = productManagementDto.getStatus().name();
+        }
+        createDatetime = productManagementDto.getCreateDatetime();
+        isCrush = productManagementDto.getIsCrush();
+
+        String bizName = null;
+
+        ProductManagementDto.Response response = new ProductManagementDto.Response( id, isDecaf, price, bizName, stock, favoriteCount, acidity, bean, category, information, name, status, createDatetime, isCrush );
+
+        return response;
     }
 }

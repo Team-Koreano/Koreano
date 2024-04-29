@@ -9,4 +9,6 @@ import org.mapstruct.factory.Mappers;
 public interface ProductManagementMapper {
 	ProductManagementMapper INSTANCE = Mappers.getMapper(ProductManagementMapper.class);
 	ProductManagementDto toDto(Product product);
+
+	ProductManagementDto.Response toResponse(ProductManagementDto productManagementDto);
 }

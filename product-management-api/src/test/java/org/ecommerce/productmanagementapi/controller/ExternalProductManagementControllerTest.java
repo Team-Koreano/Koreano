@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.type.Acidity;
 import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
+import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
@@ -43,24 +46,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-class ProductManagementControllerTest {
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private WebApplicationContext context;
-
-	@MockBean
-	private ProductManagementService productManagementService;
-
-	@MockBean
-	private ImageRepository imageRepository;
+class ExternalProductManagementControllerTest {
 
 	private static final SellerRep test = new SellerRep(2, "TEST");
+	private static final LocalDateTime testTime = LocalDateTime.
+		parse("2024-04-14T17:41:52+09:00",
+		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@Autowired
+	private WebApplicationContext context;
+	@MockBean
+	private ProductManagementService productManagementService;
+	@MockBean
+	private ImageRepository imageRepository;
 
 	@BeforeEach
 	void 초기_셋팅() {
@@ -74,9 +75,9 @@ class ProductManagementControllerTest {
 	void 상품_등록() throws Exception {
 		//given
 		final List<ProductManagementDto.Request.Register.ImageDto> imageDtos = List.of(
-			new ProductManagementDto.Request.Register.ImageDto("image1.jpg", true, (short) 1),
-			new ProductManagementDto.Request.Register.ImageDto("image2.jpg", false, (short) 2),
-			new ProductManagementDto.Request.Register.ImageDto("image3.jpg", false, (short) 3)
+			new ProductManagementDto.Request.Register.ImageDto("image1.jpg", true, (short)1),
+			new ProductManagementDto.Request.Register.ImageDto("image2.jpg", false, (short)2),
+			new ProductManagementDto.Request.Register.ImageDto("image3.jpg", false, (short)3)
 		);
 
 		final ProductManagementDto.Request.Register productDtos =
@@ -108,8 +109,9 @@ class ProductManagementControllerTest {
 
 		final ProductManagementDto productConvertToDto = ProductManagementMapper.INSTANCE.toDto(product);
 
-		final ProductManagementDto.Response expectedResponse = ProductManagementDto.Response.of(productConvertToDto);
-		saveImages(imageDtos,product);
+		final ProductManagementDto.Response expectedResponse = ProductManagementMapper.INSTANCE.toResponse(
+			productConvertToDto);
+		saveImages(imageDtos, product);
 		when(productManagementService.productRegister(productDtos)).thenReturn(productConvertToDto);
 		//when
 		//then
@@ -119,7 +121,7 @@ class ProductManagementControllerTest {
 
 		verifyImages(savedImages, 0, imageDtos);
 
-		ResultActions resultActions = mockMvc.perform(post("/api/productmanagement/v1")
+		ResultActions resultActions = mockMvc.perform(post("/api/external/product-management/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(productDtos))
 			)
@@ -137,7 +139,100 @@ class ProductManagementControllerTest {
 			.andExpect(jsonPath("$.result.bizName").value(expectedResponse.bizName()))
 			.andDo(print());
 	}
-	private void verifyImages(List<Image> images, int index, List<ProductManagementDto.Request.Register.ImageDto> imageDtos) {
+
+	@Test
+	void 상품_상태_변경() throws Exception {
+		// Given
+		final int productId = 1;
+		final ProductStatus status = ProductStatus.DISCONTINUED;
+		final Product entity = new Product(
+			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, status, testTime, testTime, null
+		);
+
+		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
+
+		when(productManagementService.modifyToStatus(eq(productId), eq(status)))
+			.thenReturn((expectedResponse));
+
+		// when
+		// then
+		mockMvc.perform(put("/api/external/product-management/v1/status/{productId}/{status}", productId, status)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.id").value(productId))
+			.andExpect(jsonPath("$.result.status").value(status.getCode()));
+	}
+
+	@Test
+	void 상품_재고_변경() throws Exception {
+		// Given
+		final Integer productId = 1;
+		final Integer changedStock = 10;
+
+		final ProductManagementDto.Request.Stock dto = new ProductManagementDto.Request.Stock(productId, changedStock);
+
+		final Product originalEntity = new Product(
+			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, ProductStatus.AVAILABLE, testTime, testTime, null
+		);
+
+		final Product expectedEntity = new Product(
+			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, ProductStatus.AVAILABLE, testTime, testTime, null
+		);
+
+		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+
+		when(productManagementService.increaseToStock(dto))
+			.thenReturn(expectedResponse);
+
+		// when & then
+		mockMvc.perform(put("/api/external/product-management/v1/stock/increase")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(dto)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.id").value(productId))
+			.andExpect(jsonPath("$.result.stock").value(originalEntity.getStock() + changedStock));
+	}
+
+	@Test
+	void 상품_수정() throws Exception {
+		final Integer productId = 1;
+		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
+			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
+			"수정된", "커피", true);
+
+		final Product expectedEntity = new Product(
+			productId, dto.category(), dto.price(), null, null, null, dto.isDecaf(),
+			dto.name(), dto.bean(), dto.acidity(), dto.information(),
+			dto.isCrush(), null, null, null, null
+		);
+
+		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+
+		when(productManagementService.modifyToProduct(eq(productId),
+			eq(dto))).thenReturn(expectedResponse);
+
+		// when & then
+		mockMvc.perform(put("/api/external/product-management/v1/{productId}", productId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(dto)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result.id").value(expectedResponse.getId()))
+			.andExpect(jsonPath("$.result.category").value(expectedResponse.getCategory().name()))
+			.andExpect(jsonPath("$.result.price").value(expectedResponse.getPrice()))
+			.andExpect(jsonPath("$.result.name").value(expectedResponse.getName()))
+			.andExpect(jsonPath("$.result.information").value(expectedResponse.getInformation()))
+			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.getIsCrush()))
+			.andExpect(jsonPath("$.result.isDecaf").value(expectedResponse.getIsDecaf()));
+	}
+
+	private void verifyImages(List<Image> images, int index,
+		List<ProductManagementDto.Request.Register.ImageDto> imageDtos) {
 		if (index >= images.size()) {
 			return;
 		}
@@ -145,16 +240,17 @@ class ProductManagementControllerTest {
 		Image image = images.get(index);
 		ProductManagementDto.Request.Register.ImageDto imageDto = imageDtos.get(index);
 
-		// 이미지 속성 검증 로직 추가
 		assertThat(image.getImageUrl()).isEqualTo(imageDto.imageUrl());
 		assertThat(image.getIsThumbnail()).isEqualTo(imageDto.isThumbnail());
 		assertThat(image.getSequenceNumber()).isEqualTo(imageDto.sequenceNumber());
 
 		verifyImages(images, index + 1, imageDtos);
 	}
+
 	private void saveImages(List<ProductManagementDto.Request.Register.ImageDto> imageDtos, Product savedProduct) {
 		List<Image> images = imageDtos.stream()
-			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(), savedProduct))
+			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(),
+				savedProduct))
 			.collect(Collectors.toList());
 		imageRepository.saveAll(images);
 	}
