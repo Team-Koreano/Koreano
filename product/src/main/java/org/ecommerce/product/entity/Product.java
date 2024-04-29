@@ -79,7 +79,7 @@ public class Product {
 
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
-	private ProductStatus status;
+	private ProductStatus status = ProductStatus.AVAILABLE;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
@@ -93,7 +93,7 @@ public class Product {
 	private List<Image> images = new ArrayList<>();
 
 	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
-		, Acidity acidity, String information,Boolean isCrush, Boolean isDecaf,SellerRep test) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep test) {
 		Product product = new Product();
 		product.category = category;
 		product.price = price;
@@ -101,11 +101,18 @@ public class Product {
 		product.name = name;
 		product.bean = bean;
 		product.acidity = acidity;
-		product.information =information;
+		product.information = information;
 		product.isCrush = isCrush;
-		product.status = ProductStatus.AVAILABLE;
 		product.isDecaf = isDecaf;
 		product.sellerRep = test;
 		return product;
+	}
+
+	public String getThumbnailUrl() {
+		return images.stream()
+			.filter(Image::getIsThumbnail)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
 	}
 }

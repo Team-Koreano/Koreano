@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EntityScan(basePackages = {"org.ecommerce.product"})
-@EnableJpaRepositories(basePackages = {"org.ecommerce.productsearchapi"})
+@EnableJpaRepositories(basePackages = {"org.ecommerce.productsearchapi.repository"})
 public class ScanConfig {
 }
