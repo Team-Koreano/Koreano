@@ -5,3 +5,4 @@ spring :
 jasypt:
   encryptor:
     bean: jasyptStringEncryptor
+    password: test
