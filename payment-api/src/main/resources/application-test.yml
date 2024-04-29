@@ -26,7 +26,7 @@ spring:
     defer-datasource-initialization: true
   sql:
     init:
-      mode: always
+      mode: never
   data:
     redis:
       host: 127.0.0.1
