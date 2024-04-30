@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.controller;
+package org.ecommerce.productsearchapi.external.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,9 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(value = ExternalProductSearchController.class)
+@WebMvcTest(value = ProductSearchController.class)
 @ExtendWith(MockitoExtension.class)
-public class ExternalProductSearchControllerTest {
+public class ProductSearchControllerTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@Autowired
