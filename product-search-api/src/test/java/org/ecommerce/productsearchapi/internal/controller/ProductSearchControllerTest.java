@@ -79,7 +79,7 @@ public class ProductSearchControllerTest {
 
 		// then
 		mockMvc.perform(MockMvcRequestBuilders
-				.post("/api/internal/product-search/v1")
+				.post("/api/internal/product/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(productJsonBody))
 			.andExpect(jsonPath("$.id").value(productSearchDto.getId()))

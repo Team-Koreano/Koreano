@@ -13,9 +13,11 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +26,8 @@ public class ProductSearchServiceTest {
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@InjectMocks
 	private ProductSearchService productSearchService;
+	@Mock
+	private ProductElasticsearchRepository productElasticsearchRepository;
 
 	@Test
 	void 엘라스틱서치에_상품_정보_저장() {

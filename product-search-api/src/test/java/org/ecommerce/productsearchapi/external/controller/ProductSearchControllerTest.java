@@ -69,7 +69,7 @@ public class ProductSearchControllerTest {
 		// when
 		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
 		// then
-		mockMvc.perform(get("/api/external/product-search/v1/1"))
+		mockMvc.perform(get("/api/external/product/v1/1"))
 			.andExpect(jsonPath("$.result.id").value(productSearchDto.getId()))
 			.andExpect(jsonPath("$.result.category").value(productSearchDto.getCategory().getTitle()))
 			.andExpect(jsonPath("$.result.price").value(productSearchDto.getPrice()))
