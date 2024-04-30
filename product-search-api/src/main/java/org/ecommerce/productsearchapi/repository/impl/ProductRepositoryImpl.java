@@ -1,7 +1,6 @@
 package org.ecommerce.productsearchapi.repository.impl;
 
 import static org.ecommerce.product.entity.QProduct.*;
-import static org.ecommerce.product.entity.QImage.*;
 
 import java.util.Optional;
 
@@ -23,10 +22,9 @@ public class ProductRepositoryImpl implements ProductCustomRepository {
 	public Optional<Product> findProductById(final Integer id) {
 
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(product)
-			.leftJoin(product.images, image)
+			.leftJoin(product.images)
 			.fetchJoin()
 			.where(product.id.eq(id))
-			.orderBy(image.sequenceNumber.asc())
 			.fetchFirst())
 			;
 	}
