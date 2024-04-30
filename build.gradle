@@ -79,7 +79,7 @@ subprojects {
     sourceCompatibility = '17'
 }
 
-project(':common'){
+project(':common') {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -95,7 +95,7 @@ project(':common'){
     }
 }
 
-project(':user-api'){
+project(':user-api') {
     dependencies {
         implementation(project(':common'))
 
@@ -115,12 +115,12 @@ project(':user-api'){
         implementation 'com.google.auto.value:auto-value-annotations:1.8'
 
 
-
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'com.mysql:mysql-connector-j:8.0.33'
         testImplementation 'org.springframework.security:spring-security-test'
         implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -134,7 +134,7 @@ project(':user-api'){
     }
 }
 
-project(':bucket-api'){
+project(':bucket-api') {
     dependencies {
         implementation(project(':common'))
 
@@ -161,7 +161,7 @@ project(':bucket-api'){
     }
 }
 
-project(':order-api'){
+project(':order-api') {
     dependencies {
         implementation(project(':common'))
 
@@ -241,7 +241,7 @@ project(':payment-api') {
     }
 }
 
-project(':product'){
+project(':product') {
 
     test {
         enabled = false
@@ -272,7 +272,7 @@ project(':product'){
     def querydslDir = layout.buildDirectory.dir(generated).get().asFile
 
     sourceSets {
-        main.java.srcDirs += [ querydslDir ]
+        main.java.srcDirs += [querydslDir]
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -285,7 +285,7 @@ project(':product'){
 
 }
 
-project(':product-management-api'){
+project(':product-management-api') {
     dependencies {
         implementation(project(':common'))
         implementation(project(':product'))
@@ -319,7 +319,7 @@ project(':product-management-api'){
     }
 }
 
-project(':product-search-api'){
+project(':product-search-api') {
 
     dependencies {
         implementation(project(':product'))
@@ -357,7 +357,7 @@ project(':product-search-api'){
 
 }
 
-project(':statistic-api'){
+project(':statistic-api') {
     dependencies {
         implementation(project(':common'))
         //공통 모듈
