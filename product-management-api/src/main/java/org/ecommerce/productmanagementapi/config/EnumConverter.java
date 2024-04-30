@@ -1,6 +1,6 @@
 package org.ecommerce.productmanagementapi.config;
 
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.springframework.core.convert.converter.Converter;
 
 
