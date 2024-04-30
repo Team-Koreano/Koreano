@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.Seller;
-import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,7 +30,7 @@ class SellerDtoTest {
 	@Test
 	void 셀러_응답() {
 		//given
-		final  SellerDto sellerDto = SellerMapper.INSTANCE.toDto(SELLER);
+		final SellerDto sellerDto = SellerMapper.INSTANCE.toDto(SELLER);
 		//when
 		final SellerDto.Response.Register register = SellerDto.Response.Register.of(sellerDto);
 		//then

@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.Users;
-import org.ecommerce.userapi.entity.type.Gender;
-import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.entity.enumerated.Gender;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
