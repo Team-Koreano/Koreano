@@ -15,7 +15,7 @@ import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.service.ProductSearchService;
+import org.ecommerce.productsearchapi.internal.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,8 +45,10 @@ public class ProductSearchControllerTest {
 	void 엘라스틱서치에_상품_정보_저장() throws Exception {
 		// given
 		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
+			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+				false),
+			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+				false)
 		);
 
 		final ProductSearchDto productSearchDto =
@@ -72,7 +74,6 @@ public class ProductSearchControllerTest {
 
 		String productJsonBody = objectMapper.writeValueAsString(getProduct());
 
-
 		// when
 		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productSearchDto);
 
@@ -94,11 +95,11 @@ public class ProductSearchControllerTest {
 			.andExpect(jsonPath("$.acidity").value(productSearchDto.getAcidity().getTitle()))
 			.andExpect(jsonPath("$.information").value(productSearchDto.getInformation()))
 			.andExpect(jsonPath("$.createDatetime").value(productSearchDto.getCreateDatetime().toString()))
-			.andExpect(jsonPath("$.thumbnailUrl").value(ProductSearchDto.Response.SavedProduct.getThumbnailUrl(productSearchDto.getImageDtoList())))
+			.andExpect(jsonPath("$.thumbnailUrl").value(
+				ProductSearchDto.Response.SavedProduct.getThumbnailUrl(productSearchDto.getImageDtoList())))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
-
 
 	private Product getProduct() {
 		final List<Image> images = List.of(

@@ -16,7 +16,7 @@ import org.ecommerce.product.entity.type.Bean;
 import org.ecommerce.product.entity.type.ProductCategory;
 import org.ecommerce.product.entity.type.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.service.ProductSearchService;
+import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,8 +40,10 @@ public class ProductSearchControllerTest {
 		// given
 
 		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
+			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+				false),
+			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+				false)
 		);
 
 		final ProductSearchDto productSearchDto =
