@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.entity.type;
+package org.ecommerce.userapi.entity.enumerated;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
@@ -7,11 +7,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum UserStatus implements EnumMapperType {
+public enum Role implements EnumMapperType {
 
-	GENERAL("일반 회원"),
-	WITHDRAWAL("탈퇴 회원"),
-	SUSPEND("정지 회원");
+	USER("일반 유저"),
+	SELLER("판매 유저");
 
 	private final String title;
 
@@ -19,5 +18,4 @@ public enum UserStatus implements EnumMapperType {
 	public String getCode() {
 		return name();
 	}
-
 }
