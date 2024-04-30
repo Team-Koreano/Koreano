@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/internal/product-search/v1")
+@RequestMapping("/api/internal/product/v1")
 public class ProductSearchController {
 
 	private final ProductSearchService productSearchService;
