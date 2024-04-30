@@ -22,8 +22,8 @@ dependencies {
     implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 //    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 //    // @VisibleForTesting 의존성
-//    implementation 'com.google.guava:guava:32.1.2-jre'
-//    implementation 'com.google.auto.value:auto-value-annotations:1.8'
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'com.google.auto.value:auto-value-annotations:1.8'
 
     implementation(project(':product'))
     implementation(project(':common'))
