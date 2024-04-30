@@ -3,10 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation(project(':common'))
-    implementation(project(':product'))
 
     //공통 모듈
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
