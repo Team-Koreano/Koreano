@@ -1,6 +1,6 @@
 package org.ecommerce.userapi.controller;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -19,7 +19,6 @@ import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.AuthDetailsService;
 import org.ecommerce.userapi.service.SellerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,6 +38,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @AutoConfigureMockMvc
@@ -61,11 +61,9 @@ class SellerControllerTest {
 	@MockBean
 	private SellerRepository sellerRepository;
 
-	@MockBean
-	private AuthDetailsService authDetailsService;
-
 	@BeforeEach
 	public void 기초_셋팅() {
+
 		Seller seller = Seller.ofRegister(
 			"test@example.com",
 			"Jane Smith",
@@ -82,7 +80,6 @@ class SellerControllerTest {
 			.build();
 
 	}
-
 
 	@Test
 	void 셀러_등록() throws Exception {
@@ -127,9 +124,6 @@ class SellerControllerTest {
 			.andExpect(jsonPath("$.result.phoneNumber").value(expectedResponse.phoneNumber()))
 			.andDo(print());
 
-
-
-
 	}
 
 	@Test
@@ -141,19 +135,24 @@ class SellerControllerTest {
 
 		final String content = objectMapper.writeValueAsString(login);
 
-		final SellerDto sellerDto = SellerMapper.INSTANCE.fromAccessToken("access_token");
+		String mockAccessToken = "mocked_access_token";
 
-		final SellerDto.Response.Login expectedResponse = SellerDto.Response.Login.of(sellerDto);
+		SellerDto mocking = SellerMapper.INSTANCE.fromAccessToken(mockAccessToken);
 
+		when(sellerService.loginRequest(any(SellerDto.Request.Login.class), any(HttpServletResponse.class)))
+			.thenReturn(mocking);
 
-		when(sellerService.loginRequest(login)).thenReturn(sellerDto);
+		final SellerDto.Response.Login expectedResponse = SellerDto.Response.Login.of(mocking);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		when(sellerService.loginRequest(login, response)).thenReturn(mocking);
 
 		// when
 		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/login")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(content)
-			.with(user("test")));
+			.content(content));
 
 		// then
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
@@ -166,12 +165,10 @@ class SellerControllerTest {
 		).result();
 		Assertions.assertThat(result).isEqualTo(expectedResponse);
 	}
+
 	@Test
-	@WithMockUser(username = "test@example.com", roles = "SELLER")
 	void 셀러_계좌_등록() throws Exception {
 		// given
-		final String email = "test@example.com";
-		final AuthDetails authDetails = new AuthDetails(1, email, null);
 		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
 			"213124124123", "부산은행");
 
@@ -183,30 +180,26 @@ class SellerControllerTest {
 			"01087654321"
 		);
 
-		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(), registerRequest.number());
+		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
+			registerRequest.bankName());
 
 		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 
-		when(authDetailsService.getSellerAuth(authDetails.getUserId())).thenReturn(authDetails);
-		when(sellerService.registerAccount(authDetails, registerRequest)).thenReturn(dto);
+		when(sellerService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
 		// when
 		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/account")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
-			.with(SecurityMockMvcRequestPostProcessors.user(authDetails))
 			.content(objectMapper.writeValueAsString(registerRequest)));
 
-		//then
-
+		// then
 		resultActions.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result.number").value(expectedResponse.number()))
-			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()))
-			.andReturn();
-
-
+			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()));
 	}
+
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현

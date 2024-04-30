@@ -24,9 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-
 
 @ExtendWith(MockitoExtension.class)
 class SellerServiceTest {
@@ -79,13 +78,14 @@ class SellerServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(sellerRepository.findSellerById(authDetails.getUserId())).thenReturn(java.util.Optional.of(seller));
+		when(sellerRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(seller));
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
+
 	@Nested
 	class 셀러_등록_API {
 		@Test
@@ -163,6 +163,8 @@ class SellerServiceTest {
 		@Test
 		void 셀러_로그인_성공() {
 			// given
+			MockHttpServletResponse response = new MockHttpServletResponse();
+
 			String email = "user1@example.com";
 			String password = "password1";
 
@@ -170,13 +172,13 @@ class SellerServiceTest {
 			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
-			when(jwtUtils.createTokens(any(), any())).thenReturn("Bearer fake_token");
+			when(jwtUtils.createSellerTokens(any(), any(), any(), any())).thenReturn("Bearer fake_access_token");
 
 			// when
-			SellerDto response = sellerService.loginRequest(loginRequest);
+			SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
 
 			// then
-			Assertions.assertThat(response.getAccessToken()).isEqualTo("Bearer fake_token");
+			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_access_token");
 		}
 
 		@Test
@@ -184,11 +186,12 @@ class SellerServiceTest {
 			// given
 			String password = "password1";
 			String incorrectEmail = "incorrect@example.com";
+			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
 
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest))
+			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL.getMessage());
 		}
@@ -200,11 +203,13 @@ class SellerServiceTest {
 			String incorrectPassword = "incorrect";
 			String password = "password1";
 
+			MockHttpServletResponse response = new MockHttpServletResponse();
+
 			SellerDto.Request.Login inCorrectPasswordRequest = new SellerDto.Request.Login(email, incorrectPassword);
 			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest))
+			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
 		}
