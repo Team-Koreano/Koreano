@@ -4,13 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.entity.type.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -20,38 +18,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtProvider implements AuthenticationProvider {
 
-	private final AuthDetailsService authDetailsService;
 	private final JwtUtils jwtUtils;
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		String email = (String) authentication.getPrincipal();
-		String accessToken = (String) authentication.getCredentials();
-		Integer id = jwtUtils.getUserId(accessToken);
+		String email = (String)authentication.getPrincipal();
+		String bearerToken = (String)authentication.getCredentials();
+
+		String parseEmail = jwtUtils.getEmail(bearerToken);
+		String parseRole = jwtUtils.getRoll(bearerToken);
+		Integer parseId = jwtUtils.getId(bearerToken);
+
+		AuthDetails authDetails = new AuthDetails(parseId, parseEmail, parseRole);
+		
+		SimpleGrantedAuthority parsedGrant = new SimpleGrantedAuthority(parseRole);
 
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+		authorities.add(parsedGrant);
 
-		AuthDetails authDetails;
-
-		String roll = jwtUtils.getAuthority(accessToken);
-		if (roll.equals(Role.USER.getCode())){
-			authDetails = authDetailsService.getUserAuth(id);
-		}else {
-			authDetails	= authDetailsService.getSellerAuth(id);
-		}
-
-
-		for (GrantedAuthority authority : authentication.getAuthorities()){
-			authorities.add(new SimpleGrantedAuthority(authority.getAuthority()));
-		}
 		if (!authDetails.getEmail().equals(email) ||
-			!authDetails.getUserId().equals(id) ||
-			!authDetails.getAuthorities().containsAll(authorities)
-		){
+			!authentication.getAuthorities().contains(parsedGrant)) {
 			throw new CustomException(UserErrorCode.AUTHENTICATION_FAILED);
 		}
-		return new UsernamePasswordAuthenticationToken(authDetails,accessToken,authDetails.getAuthorities());
+		return new UsernamePasswordAuthenticationToken(authDetails, bearerToken, authorities);
 	}
 
 	@Override
