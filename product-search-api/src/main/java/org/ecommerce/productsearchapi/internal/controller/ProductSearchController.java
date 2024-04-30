@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController
+@RestController("internalProductSearchController")
 @RequiredArgsConstructor
 @RequestMapping("/api/internal/product/v1")
 public class ProductSearchController {
