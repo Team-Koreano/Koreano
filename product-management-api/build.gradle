@@ -19,6 +19,8 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'com.google.auto.value:auto-value-annotations:1.8'
 
+    implementation(project(':product'))
+    implementation(project(':common'))
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

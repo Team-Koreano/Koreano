@@ -241,21 +241,6 @@ project(':payment-api') {
     }
 }
 
-project(':product'){
-
-}
-
-project(':product-management-api'){
-
-}
-
-project(':product-search-api'){
-
-    dependencies {
-    }
-
-}
-
 project(':statistic-api'){
     dependencies {
         implementation(project(':common'))
