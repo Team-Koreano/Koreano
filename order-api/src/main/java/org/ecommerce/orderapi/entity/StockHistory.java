@@ -1,8 +1,8 @@
 package org.ecommerce.orderapi.entity;
 
-import static org.ecommerce.orderapi.entity.type.StockOperationType.*;
+import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
 
-import org.ecommerce.orderapi.entity.type.StockOperationType;
+import org.ecommerce.orderapi.entity.enumerated.StockOperationType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

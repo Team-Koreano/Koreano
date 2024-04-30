@@ -1,6 +1,6 @@
 package org.ecommerce.orderapi.service;
 
-import static org.ecommerce.orderapi.entity.type.ProductStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.ProductStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.Arrays;
