@@ -9,13 +9,10 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.entity.Member;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.utils.RedisUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -26,14 +23,18 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class JwtUtils {
 	private static final String ACCESS_TOKEN_HEADER = HttpHeaders.AUTHORIZATION;
 	private static final String PREFIX = "Bearer ";
+	private static final long ONE_HOUR = 3_600;
+	private static final long TWO_WEEKS = ONE_HOUR * 24 * 14;
 
 	private final RedisUtils redisUtils;
 
@@ -45,55 +46,58 @@ public class JwtUtils {
 		return PREFIX + jwt;
 	}
 
-	public String resolveToken(HttpServletRequest request) {
-		return request.getHeader(ACCESS_TOKEN_HEADER);
+	public String createSellerTokens(Integer sellerId, String email, Set<String> authorization,
+		HttpServletResponse response) {
+
+		final String accessToken = createToken(sellerId, email,
+			ONE_HOUR, secretKey, authorization);
+		final String refreshToken = createToken(sellerId, email,
+			TWO_WEEKS, secretKey, authorization);
+
+		String accessTokenKey = getAccessTokenKey(sellerId, getRoll(accessToken));
+		redisUtils.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
+
+		String refreshTokenKey = getRefreshTokenKey(sellerId, getRoll(refreshToken));
+		redisUtils.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
+
+		response.addCookie(createCookie(refreshToken));
+
+		return accessToken;
 	}
 
-	public String cutPreFix(String jwt) {
-		if (!jwt.startsWith(PREFIX))
-			return jwt;
-		return jwt.substring(PREFIX.length());
+	public String createUserToken(Integer userId, String email, Set<String> authorization,
+		HttpServletResponse response) {
+
+		final String accessToken = createToken(userId, email,
+			ONE_HOUR, secretKey, authorization);
+		final String refreshToken = createToken(userId, email,
+			TWO_WEEKS, secretKey, authorization);
+
+		String accessTokenKey = getAccessTokenKey(userId, getRoll(accessToken));
+		redisUtils.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
+
+		String refreshTokenKey = getRefreshTokenKey(userId, getRoll(refreshToken));
+		redisUtils.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
+
+		response.addCookie(createCookie(refreshToken));
+
+		return accessToken;
 	}
 
-	public String createToken(Member member, long lifeCycle, SecretKey secretKey,
+	private String createToken(Integer id, String email, long lifeCycle, SecretKey secretKey,
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
-			.claim("id", member.getId())
-			.claim("email", member.getEmail())
+			.claim("id", id)
+			.claim("email", email)
 			.claim("authorization", authorization)
-			.claim("status",member.getUserStatus())
 			.setIssuedAt(now)
 			.setExpiration(new Date(now.getTime() + lifeCycle * 1000))
 			.signWith(SignatureAlgorithm.HS256, secretKey)
 			.compact();
 	}
 
-	public Integer getUserId(String jwt) {
-		String cuttedJwt = cutPreFix(jwt);
-		return parseClaims(cuttedJwt).get("id",Integer.class);
-	}
-
-	public String createTokens(Member member, Set<String> authorization) {
-		// 1000 *60 *60
-		final long oneHour = 3_600;
-		final long twoWeeks = oneHour * 24 * 14;
-
-		final String accessToken = createToken(member, oneHour, secretKey, authorization);
-		final String refreshToken = createToken(member, twoWeeks, secretKey, authorization);
-
-		String accessTokenKey = getAccessTokenKey(member.getId(),getAuthority(accessToken));
-		redisUtils.setData(accessTokenKey, accessToken, oneHour, TimeUnit.SECONDS);
-
-
-		String refreshTokenKey = getRefreshTokenKey(member.getId(), getAuthority(refreshToken));
-		redisUtils.setData(refreshTokenKey, refreshToken, twoWeeks, TimeUnit.SECONDS);
-
-		return accessToken;
-	}
-
-	//TODO : 유효성 검증,
-	public Claims parseClaims(String jwt) throws CustomException{
+	public Claims parseClaims(String jwt) throws CustomException {
 		try {
 			return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwt).getBody();
 		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
@@ -102,16 +106,8 @@ public class JwtUtils {
 		}
 	}
 
-	public String getRefreshTokenKey(Integer id, String auth) {
-		return "refresh_token" + id + auth;
-	}
-
-	public String getAccessTokenKey(Integer id, String auth) {
-		return "access_token" + id + auth;
-	}
-
-	public UsernamePasswordAuthenticationToken parseAuthentication(String jwt) {
-		Claims claims = parseClaims(cutPreFix(jwt));
+	public UsernamePasswordAuthenticationToken parseAuthentication(String bearerToken) {
+		Claims claims = parseClaims(cutPreFix(bearerToken));
 		String email = claims.get("email", String.class);
 		List<?> authorities = claims.get("authorization", List.class);
 
@@ -123,13 +119,50 @@ public class JwtUtils {
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toSet());
 
-		return new UsernamePasswordAuthenticationToken(email, jwt, grantedAuthorities);
+		return new UsernamePasswordAuthenticationToken(email, bearerToken, grantedAuthorities);
 	}
 
-	public String getAuthority(String jwt) {
-		Authentication authentication = parseAuthentication(jwt);
-		return authentication.getAuthorities().stream()
-			.map(GrantedAuthority::getAuthority)
-			.collect(Collectors.joining(","));
+	public void removeTokens(String accessTokenKey, String refreshTokenKey) {
+		redisUtils.deleteData(accessTokenKey);
+		redisUtils.deleteData(refreshTokenKey);
+	}
+
+	public String getRoll(String bearerToken) {
+		return parseClaims(cutPreFix(bearerToken)).get("authorization", List.class).get(0).toString();
+	}
+
+	public String getEmail(String bearerToken) {
+		return parseClaims(cutPreFix(bearerToken)).get("email", String.class);
+	}
+
+	public Integer getId(String bearerToken) {
+		return parseClaims(cutPreFix(bearerToken)).get("id", Integer.class);
+	}
+
+	public String getRefreshTokenKey(Integer id, String auth) {
+		return "refresh_token" + id + auth;
+	}
+
+	public String getAccessTokenKey(Integer id, String auth) {
+		return "access_token" + id + auth;
+	}
+
+	public String cutPreFix(String bearerToken) {
+		if (!bearerToken.startsWith(PREFIX))
+			return bearerToken;
+		return bearerToken.substring(PREFIX.length());
+	}
+
+	public String resolveToken(HttpServletRequest request) {
+		return request.getHeader(ACCESS_TOKEN_HEADER);
+	}
+
+	private Cookie createCookie(String refreshToken) {
+		Cookie cookie = new Cookie("refreshToken", refreshToken);
+		cookie.setHttpOnly(true);
+		cookie.setSecure(true);
+		cookie.setPath("/");
+		cookie.setMaxAge((int)TWO_WEEKS);
+		return cookie;
 	}
 }
