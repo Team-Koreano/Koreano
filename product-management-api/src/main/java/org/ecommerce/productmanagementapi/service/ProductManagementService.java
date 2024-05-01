@@ -6,7 +6,7 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;

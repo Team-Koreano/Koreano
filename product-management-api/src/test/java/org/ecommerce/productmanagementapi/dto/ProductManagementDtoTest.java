@@ -2,9 +2,9 @@ package org.ecommerce.productmanagementapi.dto;
 
 import java.util.List;
 
-import org.ecommerce.product.entity.type.Acidity;
-import org.ecommerce.product.entity.type.Bean;
-import org.ecommerce.product.entity.type.ProductCategory;
+import org.ecommerce.product.entity.enumerated.Acidity;
+import org.ecommerce.product.entity.enumerated.Bean;
+import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

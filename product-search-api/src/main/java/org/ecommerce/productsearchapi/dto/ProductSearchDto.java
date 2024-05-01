@@ -1,12 +1,15 @@
 package org.ecommerce.productsearchapi.dto;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.ecommerce.product.entity.type.Acidity;
-import org.ecommerce.product.entity.type.Bean;
-import org.ecommerce.product.entity.type.ProductCategory;
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.Acidity;
+import org.ecommerce.product.entity.enumerated.Bean;
+import org.ecommerce.product.entity.enumerated.ProductCategory;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -75,7 +78,7 @@ public class ProductSearchDto {
 			Boolean isCrush,
 			Integer favoriteCount,
 			LocalDateTime createDatetime,
-			List<ImageDto> imageDtoList
+			LinkedList<ImageDto> imageDtoList
 		){
 			public static Detail of(final ProductSearchDto productSearchDto) {
 				return new Detail(
@@ -95,6 +98,9 @@ public class ProductSearchDto {
 					productSearchDto.getFavoriteCount(),
 					productSearchDto.getCreateDatetime(),
 					productSearchDto.getImageDtoList()
+						.stream()
+						.sorted(Comparator.comparingInt(ImageDto::getSequenceNumber))
+						.collect(Collectors.toCollection(LinkedList::new))
 				);
 			}
 		}

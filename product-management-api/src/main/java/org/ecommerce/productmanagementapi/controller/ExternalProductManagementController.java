@@ -1,7 +1,7 @@
 package org.ecommerce.productmanagementapi.controller;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
 import org.ecommerce.productmanagementapi.service.ProductManagementService;

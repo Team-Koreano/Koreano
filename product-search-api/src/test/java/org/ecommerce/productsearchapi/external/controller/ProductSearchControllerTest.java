@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.controller;
+package org.ecommerce.productsearchapi.external.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -11,12 +11,12 @@ import java.util.List;
 import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
-import org.ecommerce.product.entity.type.Acidity;
-import org.ecommerce.product.entity.type.Bean;
-import org.ecommerce.product.entity.type.ProductCategory;
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.Acidity;
+import org.ecommerce.product.entity.enumerated.Bean;
+import org.ecommerce.product.entity.enumerated.ProductCategory;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.service.ProductSearchService;
+import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,9 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(value = ExternalProductSearchController.class)
+@WebMvcTest(value = ProductSearchController.class)
 @ExtendWith(MockitoExtension.class)
-public class ExternalProductSearchControllerTest {
+public class ProductSearchControllerTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@Autowired
@@ -40,8 +40,10 @@ public class ExternalProductSearchControllerTest {
 		// given
 
 		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
+			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+				false),
+			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+				false)
 		);
 
 		final ProductSearchDto productSearchDto =
@@ -67,7 +69,7 @@ public class ExternalProductSearchControllerTest {
 		// when
 		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
 		// then
-		mockMvc.perform(get("/api/external/product-search/v1/1"))
+		mockMvc.perform(get("/api/external/product/v1/1"))
 			.andExpect(jsonPath("$.result.id").value(productSearchDto.getId()))
 			.andExpect(jsonPath("$.result.category").value(productSearchDto.getCategory().getTitle()))
 			.andExpect(jsonPath("$.result.price").value(productSearchDto.getPrice()))

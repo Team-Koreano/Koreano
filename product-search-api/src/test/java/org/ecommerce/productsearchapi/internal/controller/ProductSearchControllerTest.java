@@ -1,4 +1,4 @@
-package org.ecommerce.productsearchapi.controller;
+package org.ecommerce.productsearchapi.internal.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -10,12 +10,12 @@ import java.util.List;
 import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
-import org.ecommerce.product.entity.type.Acidity;
-import org.ecommerce.product.entity.type.Bean;
-import org.ecommerce.product.entity.type.ProductCategory;
-import org.ecommerce.product.entity.type.ProductStatus;
+import org.ecommerce.product.entity.enumerated.Acidity;
+import org.ecommerce.product.entity.enumerated.Bean;
+import org.ecommerce.product.entity.enumerated.ProductCategory;
+import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.service.ProductSearchService;
+import org.ecommerce.productsearchapi.internal.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,9 +28,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(value = InternalProductSearchController.class)
+@WebMvcTest(value = ProductSearchController.class)
 @ExtendWith(MockitoExtension.class)
-public class InternalExternalProductSearchControllerTest {
+public class ProductSearchControllerTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 
@@ -45,8 +45,10 @@ public class InternalExternalProductSearchControllerTest {
 	void 엘라스틱서치에_상품_정보_저장() throws Exception {
 		// given
 		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com", false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com", false)
+			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+				false),
+			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+				false)
 		);
 
 		final ProductSearchDto productSearchDto =
@@ -72,13 +74,12 @@ public class InternalExternalProductSearchControllerTest {
 
 		String productJsonBody = objectMapper.writeValueAsString(getProduct());
 
-
 		// when
 		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productSearchDto);
 
 		// then
 		mockMvc.perform(MockMvcRequestBuilders
-				.post("/api/internal/product-search/v1")
+				.post("/api/internal/product/v1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(productJsonBody))
 			.andExpect(jsonPath("$.id").value(productSearchDto.getId()))
@@ -94,11 +95,11 @@ public class InternalExternalProductSearchControllerTest {
 			.andExpect(jsonPath("$.acidity").value(productSearchDto.getAcidity().getTitle()))
 			.andExpect(jsonPath("$.information").value(productSearchDto.getInformation()))
 			.andExpect(jsonPath("$.createDatetime").value(productSearchDto.getCreateDatetime().toString()))
-			.andExpect(jsonPath("$.thumbnailUrl").value(ProductSearchDto.Response.SavedProduct.getThumbnailUrl(productSearchDto.getImageDtoList())))
+			.andExpect(jsonPath("$.thumbnailUrl").value(
+				ProductSearchDto.Response.SavedProduct.getThumbnailUrl(productSearchDto.getImageDtoList())))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
-
 
 	private Product getProduct() {
 		final List<Image> images = List.of(

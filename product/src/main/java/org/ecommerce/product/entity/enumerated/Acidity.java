@@ -1,4 +1,4 @@
-package org.ecommerce.product.entity.type;
+package org.ecommerce.product.entity.enumerated;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
