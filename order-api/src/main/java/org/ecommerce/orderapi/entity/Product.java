@@ -1,5 +1,6 @@
 package org.ecommerce.orderapi.entity;
 
+import org.ecommerce.orderapi.entity.type.ProductStatus;
 import org.springframework.data.redis.core.RedisHash;
 
 import jakarta.persistence.Id;
@@ -17,4 +18,9 @@ public class Product {
 	private String name;
 	private Integer price;
 	private String seller;
+	private ProductStatus status;
+
+	public void changeStatus(ProductStatus newStatus) {
+		this.status = newStatus;
+	}
 }

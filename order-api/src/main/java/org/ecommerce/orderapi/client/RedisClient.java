@@ -5,39 +5,38 @@ import java.util.Optional;
 
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
+import org.redisson.api.RLock;
 import org.redisson.api.RMap;
+import org.redisson.api.RTransaction;
 import org.redisson.api.RedissonClient;
-import org.springframework.stereotype.Service;
+import org.redisson.api.TransactionOptions;
+import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class RedisClient {
 
 	private final RedissonClient redissonClient;
 	private static final String STOCK_KEY = "stock:";
-	private static final String TOTAL_KEY = "total:%s:";
-	private static final String IN_PROCESSING_KEY = "inProcessing:%s:";
+	private static final String TOTAL_KEY = "total:";
+	private static final String IN_PROCESSING_KEY = "inProcessing:";
 	private static final String PRODUCT_KEY = "product:";
+	private static final String TRANSACTION_KEY = "transaction:";
 
-	private void addStock(
-			final Integer productId,
-			final Integer totalStock,
-			final Integer inProcessingStock
-	) {
-		String key = productId.toString();
-		RMap<String, Integer> stockMap = redissonClient.getMap(STOCK_KEY);
-		stockMap.put(getStockTotalKey(key), totalStock);
-		stockMap.put(getInProcessingStockKey(key), inProcessingStock);
+	public void putStock(final Stock stock) {
+		Integer key = stock.getProductId();
+		RMap<String, Integer> stockMap = redissonClient.getMap(getStockKey(key));
+		stockMap.put(getTotalKey(key), stock.getTotal());
+		stockMap.put(getInProcessingKey(key), stock.getProcessingCnt());
 	}
 
 	public Optional<Stock> getStock(final Integer productId) {
-		String key = productId.toString();
-		RMap<String, Integer> map = redissonClient.getMap(STOCK_KEY);
+		RMap<String, Integer> map = redissonClient.getMap(getStockKey(productId));
 
-		Integer totalStock = map.get(getStockTotalKey(key));
-		Integer inProcessingStock = map.get(getInProcessingStockKey(key));
+		Integer totalStock = map.get(getTotalKey(productId));
+		Integer inProcessingStock = map.get(getInProcessingKey(productId));
 
 		if (totalStock == null || inProcessingStock == null) {
 			return Optional.empty();
@@ -47,54 +46,73 @@ public class RedisClient {
 	}
 
 	public List<Stock> getStocks(final List<Integer> productIds) {
-		RMap<String, Integer> stockMap = redissonClient.getMap(STOCK_KEY);
 		return productIds.stream()
 				.map(productId -> {
-					String key = productId.toString();
+					RMap<String, Integer> map = redissonClient.getMap(
+							getStockKey(productId));
 					return new Stock(
 							productId,
-							stockMap.get(getStockTotalKey(key)),
-							stockMap.get(getInProcessingStockKey(key))
+							map.get(getTotalKey(productId)),
+							map.get(getInProcessingKey(productId))
 					);
-				})
-				.toList();
-	}
-
-	public void registerProduct(final Product product, final Stock stock) {
-		registerProduct(product.getId().toString(), product, stock);
-	}
-
-	private void registerProduct(
-			final String key,
-			final Product product,
-			final Stock stock
-	) {
-		RMap<String, Product> productMap = redissonClient.getMap(PRODUCT_KEY);
-		productMap.put(key, product);
-		addStock(stock.getProductId(), stock.getTotal(), stock.getProcessingCnt());
+				}).toList();
 	}
 
 	public Optional<Product> getProduct(final Integer productId) {
-		String key = productId.toString();
-		RMap<String, Product> productMap = redissonClient.getMap(PRODUCT_KEY);
-		return Optional.ofNullable(productMap.get(key));
+		return Optional.ofNullable(
+				(Product)redissonClient.getBucket(getProductKey(productId)).get());
 	}
 
 	public List<Product> getProducts(final List<Integer> productIds) {
-		RMap<String, Product> productMap = redissonClient.getMap(PRODUCT_KEY);
 		return productIds.stream()
-				.map(productId -> {
-					String key = productId.toString();
-					return productMap.get(key);
-				})
+				.map(productId -> (Product)redissonClient
+						.getBucket(getProductKey(productId)).get())
 				.toList();
 	}
 
-	private String getStockTotalKey(final String key) {
-		return String.format(TOTAL_KEY, key);
+	public void setProduct(final Product product) {
+		redissonClient.getBucket(getProductKey(product.getId())).set(product);
 	}
 
-	private String getInProcessingStockKey(final String key) {
-		return String.format(IN_PROCESSING_KEY, key);
+	public RTransaction beginTransaction() {
+		return redissonClient.createTransaction(TransactionOptions.defaults());
+	}
+
+	public void increaseInProcessingStock(final RTransaction transaction, final Stock stock) {
+		Integer key = stock.getProductId();
+		RMap<String, Integer> map = transaction.getMap(getStockKey(key));
+		map.put(getTotalKey(key), stock.getTotal());
+		map.put(getInProcessingKey(key), stock.getProcessingCnt());
+	}
+
+	public void soldOutProduct(final RTransaction transaction, final Product product) {
+		Integer key = product.getId();
+		transaction.getBucket(getProductKey(key)).set(product);
+	}
+
+	public RLock getLock(final Integer productId) {
+		RLock lock = redissonClient.getLock(getTransactionLock(productId));
+		lock.lock();
+		return lock;
+	}
+
+	private String getStockKey(final Integer key) {
+		return STOCK_KEY + key.toString();
+	}
+
+	private String getTotalKey(final Integer key) {
+		return TOTAL_KEY + key.toString();
+	}
+
+	private String getInProcessingKey(final Integer key) {
+		return IN_PROCESSING_KEY + key.toString();
+	}
+
+	private String getProductKey(final Integer key) {
+		return PRODUCT_KEY + key.toString();
+	}
+
+	private String getTransactionLock(final Integer key) {
+		return TRANSACTION_KEY + key.toString();
 	}
 }
