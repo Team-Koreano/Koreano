@@ -2,12 +2,14 @@ package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,11 +20,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "seller",indexes = @Index(name = "idx_seller_email", columnList = "email",unique = true))
+@Table(name = "seller", indexes = @Index(name = "idx_seller_email", columnList = "email", unique = true))
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Seller implements Member {
+public class Seller {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -57,6 +59,7 @@ public class Seller implements Member {
 	private Long beanPayId;
 
 	@Column(name = "status")
+	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;
 
 	public static Seller ofRegister(String email, String name, String password, String address, String phoneNumber) {

@@ -2,8 +2,8 @@ package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.type.Gender;
-import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.entity.enumerated.Gender;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users",indexes = @Index(name = "idx_users_email", columnList = "email",unique = true))
+@Table(name = "users", indexes = @Index(name = "idx_users_email", columnList = "email", unique = true))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Users implements Member {
+public class Users {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -66,7 +66,8 @@ public class Users implements Member {
 	private Long beanPayId;
 
 	@Column(name = "status")
-	private UserStatus userStatus= UserStatus.GENERAL;
+	@Enumerated(EnumType.STRING)
+	private UserStatus userStatus = UserStatus.GENERAL;
 
 	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
 		String phoneNumber) {

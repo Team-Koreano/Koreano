@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.service;
+package org.ecommerce.userapi.external.service;
 
 import java.util.Set;
 
@@ -9,19 +9,18 @@ import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
-import org.ecommerce.userapi.entity.type.Role;
+import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.JwtUtils;
 import org.ecommerce.userapi.utils.RedisUtils;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,12 +51,14 @@ public class SellerService {
 	 */
 	public SellerDto registerRequest(SellerDto.Request.Register requestSeller) {
 
-		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(),requestSeller.phoneNumber());
+		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(), requestSeller.phoneNumber());
 
 		final Seller seller = Seller.ofRegister(requestSeller.email(), requestSeller.name(),
 			passwordEncoder.encode(requestSeller.password()),
 			requestSeller.address(), requestSeller.phoneNumber());
+
 		sellerRepository.save(seller);
+
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
 
@@ -71,7 +72,7 @@ public class SellerService {
 	 * @param login - 사용자의 로그인 정보가 들어간 dto 입니다
 	 * @return SellerDto
 	 */
-	public SellerDto loginRequest(SellerDto.Request.Login login) {
+	public SellerDto loginRequest(SellerDto.Request.Login login, HttpServletResponse response) {
 		final Seller seller = sellerRepository.findByEmail(login.email())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
@@ -80,9 +81,10 @@ public class SellerService {
 		}
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
-		final String accessToken = jwtUtils.createTokens(seller, authorization);
 
-		return SellerMapper.INSTANCE.fromAccessToken(accessToken);
+		return SellerMapper.INSTANCE.fromAccessToken(
+			jwtUtils.createSellerTokens(seller.getId(), seller.getEmail(), authorization,
+				response));
 	}
 
 	/**
@@ -95,17 +97,8 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-
-		final String[] authoritiesArray = authDetails.getAuthorities().stream()
-			.map(GrantedAuthority::getAuthority)
-			.toArray(String[]::new);
-
-		final String roll = authoritiesArray[0];
-
-		final String accessTokenKey = jwtUtils.getAccessTokenKey(authDetails.getUserId(), roll);
-
-		redisUtils.deleteData(accessTokenKey);
-
+		jwtUtils.removeTokens(jwtUtils.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtUtils.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	/**
@@ -115,7 +108,7 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Seller seller = sellerRepository.findSellerById(authDetails.getUserId())
+		final Seller seller = sellerRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final SellerAccount account = SellerAccount.ofRegister(seller, register.number(), register.bankName());
@@ -125,10 +118,25 @@ public class SellerService {
 		return AccountMapper.INSTANCE.toDto(account);
 	}
 
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-	public void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
-		if (sellerRepository.existsByEmailOrPhoneNumber(email,phoneNumber)) {
-			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL);
+	public SellerDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
+
+		String refreshTokenKey = jwtUtils.getRefreshTokenKey(jwtUtils.getId(bearerToken),
+			jwtUtils.getRoll(bearerToken));
+
+		if (!redisUtils.hasKey(refreshTokenKey)) {
+			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
+		}
+
+		final String refreshToken = redisUtils.getData(refreshTokenKey);
+
+		return SellerMapper.INSTANCE.fromAccessToken(
+			jwtUtils.createSellerTokens(jwtUtils.getId(refreshToken), jwtUtils.getEmail(refreshToken),
+				Set.of(jwtUtils.getRoll(refreshToken)), response));
+	}
+
+	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
+		if (sellerRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
+			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
 		}
 	}
 }
