@@ -8,10 +8,14 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.dto.ProductDto;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.util.ProductOperation;
+import org.ecommerce.orderapi.util.StockOperation;
+import org.redisson.api.RTransaction;
+import org.redisson.api.RedissonClient;
+import org.redisson.api.TransactionOptions;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final RedisClient redisClient;
+	private final RedissonClient redissonClient;
 
 	/**
 	 * MockData 만드는 메소드입니다.
@@ -35,16 +39,18 @@ public class ProductService {
 		);
 
 		List<Stock> mockStocks = Arrays.asList(
-				new Stock(101, 10, 5),
-				new Stock(102, 20, 10),
-				new Stock(103, 15, 8)
+				new Stock(101, 10),
+				new Stock(102, 20),
+				new Stock(103, 15)
 		);
-
+		RTransaction transaction = redissonClient.createTransaction(
+				TransactionOptions.defaults());
 		IntStream.range(0, mockStocks.size())
 				.forEach(i -> {
-					redisClient.setProduct(mockProducts.get(i));
-					redisClient.putStock(mockStocks.get(i));
+					StockOperation.setStock(transaction, mockStocks.get(i));
+					ProductOperation.setProduct(transaction, mockProducts.get(i));
 				});
+		transaction.commit();
 	}
 
 	/**
@@ -52,14 +58,14 @@ public class ProductService {
 	 * @author ${Juwon}
 	 */
 	public ProductDto getMockData(Integer productId) {
-		Stock stock = redisClient.getStock(productId)
+		Stock stock = StockOperation.getStock(redissonClient, productId)
 				.orElseThrow(() -> new CustomException(INSUFFICIENT_STOCK_INFORMATION));
-		Product product = redisClient.getProduct(productId)
+		Product product = ProductOperation.getProduct(redissonClient, productId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_PRODUCT_ID));
 		return new ProductDto(
 				product.getId(),
 				product.getPrice(),
-				stock.getAvailableStock(),
+				stock.getTotal(),
 				product.getSeller());
 	}
 }

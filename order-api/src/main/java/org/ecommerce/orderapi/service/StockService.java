@@ -1,20 +1,22 @@
 package org.ecommerce.orderapi.service;
 
-import static org.ecommerce.orderapi.entity.type.ProductStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.ProductStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.StockHistory;
 import org.ecommerce.orderapi.repository.StockHistoryRepository;
+import org.ecommerce.orderapi.util.ProductOperation;
+import org.ecommerce.orderapi.util.StockOperation;
 import org.redisson.api.RLock;
 import org.redisson.api.RTransaction;
+import org.redisson.api.RedissonClient;
+import org.redisson.api.TransactionOptions;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -27,31 +29,34 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockService {
 
-	private final RedisClient redisClient;
+	private final RedissonClient redissonClient;
 	private final StockHistoryRepository stockHistoryRepository;
 
 	/**
-	 * 처리중인 재고를 증가시키는 메소드입니다.
+	 * 상세 주문들의 재고를 감소시키는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param orderDetails- 주문 상세 리스트
-	*/
-	public void increaseInProcessingStocks(final List<OrderDetail> orderDetails) {
+	 */
+	public void decreaseStocks(final List<OrderDetail> orderDetails) {
 		orderDetails.forEach(orderDetail -> {
 			final Integer productId = orderDetail.getProductId();
 			final Integer quantity = orderDetail.getQuantity();
-			RLock lock = redisClient.getLock(productId);
-			final Stock stock = redisClient.getStock(productId)
+
+			RLock lock = redissonClient.getLock("product-lock-" + productId);
+			RTransaction transaction = redissonClient.createTransaction(
+					TransactionOptions.defaults());
+
+			final Stock stock = StockOperation.getStock(redissonClient, productId)
 					.orElseThrow(
 							() -> new CustomException(INSUFFICIENT_STOCK_INFORMATION));
 
-			if (!validateQuantity(stock, quantity)) {
+			if (!stock.hasStock(quantity)) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
-			RTransaction transaction = redisClient.beginTransaction();
 			try {
-				increaseInProcessingStock(transaction, stock, quantity);
-				checkSoldOut(transaction, stock, quantity);
+				decreaseStock(transaction, stock, quantity);
+				checkSoldOut(transaction, stock);
 				saveStockHistory(orderDetail);
 				transaction.commit();
 				lock.unlock();
@@ -64,57 +69,42 @@ public class StockService {
 	}
 
 	/**
-	 * stock 객체의 ProcessingCnt를 증가시키고 트랜잭션으로 묶는 메소드입니다.
+	 * 재고를 감소시키는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param transaction- Redisson 트랜잭션
 	 * @param stock- 재고 객체
 	 * @param quantity- 주문 수량
 	 * @return - 반환 값 설명 텍스트
-	*/
+	 */
 	@VisibleForTesting
-	public void increaseInProcessingStock(
+	public void decreaseStock(
 			final RTransaction transaction,
 			final Stock stock,
 			final Integer quantity
 	) {
-		stock.increaseProcessingCnt(quantity);
-		redisClient.increaseInProcessingStock(transaction, stock);
+		stock.decreaseTotalStock(quantity);
+		StockOperation.setStock(transaction, stock);
 	}
 
 	/**
-	 * 주문 수량을 검증하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param stock- 재고 객체
-	 * @param quantity- 주문 수량
-	 * @return - 반환 값 설명 텍스트
-	*/
-	@VisibleForTesting
-	public boolean validateQuantity(final Stock stock, final Integer quantity) {
-		return stock.getAvailableStock() > quantity;
-	}
-
-	/**
-	 * 상품 매진을 확인하고, 트랜잭션으로 묶는 메소드입니다.
+	 * 상품 매진을 확인하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param transaction- Redisson 트랜잭션
 	 * @param stock- 재고 객체
-	 * @param quantity- 주문 수량
-	*/
+	 */
 	@VisibleForTesting
 	public void checkSoldOut(
 			final RTransaction transaction,
-			final Stock stock,
-			final Integer quantity
+			final Stock stock
 	) {
-		if (Objects.equals(stock.getAvailableStock(), quantity)) {
-			Product product = redisClient.getProduct(stock.getProductId()).orElseThrow(
-					() -> new CustomException(NOT_FOUND_PRODUCT_ID)
-			);
+		if (stock.isSoldOut()) {
+			Product product = ProductOperation
+					.getProduct(redissonClient, stock.getProductId())
+					.orElseThrow(() -> new CustomException(NOT_FOUND_PRODUCT_ID));
 			product.changeStatus(OUT_OF_STOCK);
-			redisClient.soldOutProduct(transaction, product);
+			ProductOperation.setProduct(transaction, product);
 		}
 	}
 
@@ -123,7 +113,7 @@ public class StockService {
 	 * @author ${Juwon}
 	 *
 	 * @param orderDetail- 상세 주문 객체
-	*/
+	 */
 	@VisibleForTesting
 	public void saveStockHistory(final OrderDetail orderDetail) {
 		stockHistoryRepository.save(StockHistory.ofRecord(

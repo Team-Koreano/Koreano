@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
-import org.ecommerce.orderapi.client.RedisClient;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
 import org.ecommerce.orderapi.dto.OrderDto;
@@ -17,6 +16,9 @@ import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
+import org.ecommerce.orderapi.util.ProductOperation;
+import org.ecommerce.orderapi.util.StockOperation;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +34,51 @@ public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
 	private final OrderRepository orderRepository;
-	private final RedisClient redisClient;
+	private final RedissonClient redissonClient;
 
 	// TODO user-service 검증 : user-service 구축 이후
-	// TODO bucket-service 상품 가져오기, 장바구니 검증
-	// TODO product-service  재고 및 상품 검증 : product-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
+	// TODO : 회원 유효성 검사
+
+	/**
+	 * 주문을 생성하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param request- 주문 내용
+	 *
+	 * @return - 생성된 주문을 반환합니다.
+	 */
+	@Transactional
+	public OrderDto placeOrder(
+			final Integer userId,
+			final OrderDto.Request.Place request
+	) {
+		final BucketSummary bucketSummary = getBuckets(userId, request.bucketIds());
+		final List<Integer> productIds = bucketSummary.getProductIds();
+		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
+
+		// TODO : FeignClient Product 정보 받기
+		final List<Product> products = ProductOperation.getProducts(redissonClient, productIds);
+
+		validateStock(productIds, productIdToQuantityMap);
+		validateProduct(products);
+
+		return OrderMapper.INSTANCE.toDto(
+				orderRepository.save(
+						Order.ofPlace(
+								userId,
+								request.receiveName(),
+								request.phoneNumber(),
+								request.address1(),
+								request.address2(),
+								request.deliveryComment(),
+								products,
+								productIdToQuantityMap
+						)
+				)
+		);
+	}
 
 	/**
 	 * 장바구니 유효성검사 internal API를 호출하는 메소드입니다.
@@ -71,13 +112,13 @@ public class OrderService {
 			final List<Integer> productIds,
 			final Map<Integer, Integer> quantities
 	) {
-		List<Stock> stocks = redisClient.getStocks(productIds);
+		List<Stock> stocks = StockOperation.getStocks(redissonClient, productIds);
 
 		stocks.forEach(stock -> {
-			if (stock.getTotal() == null || stock.getProcessingCnt() == null) {
+			if (stock.getTotal() == null) {
 				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 			}
-			if (stock.getAvailableStock() < quantities.get(stock.getProductId())) {
+			if (stock.hasStock(quantities.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
 		});
@@ -99,47 +140,5 @@ public class OrderService {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
 		});
-	}
-
-	// TODO : 회원 유효성 검사
-
-	/**
-	 * 주문을 생성하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param userId- 회원 번호
-	 * @param request- 주문 내용
-	 *
-	 * @return - 생성된 주문을 반환합니다.
-	 */
-	@Transactional
-	public OrderDto placeOrder(
-			final Integer userId,
-			final OrderDto.Request.Place request
-	) {
-		final BucketSummary bucketSummary = getBuckets(userId, request.bucketIds());
-		final List<Integer> productIds = bucketSummary.getProductIds();
-		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
-
-		// TODO : FeignClient Product 정보 받기
-		final List<Product> products = redisClient.getProducts(productIds);
-
-		validateStock(productIds, productIdToQuantityMap);
-		validateProduct(products);
-
-		return OrderMapper.INSTANCE.toDto(
-				orderRepository.save(
-						Order.ofPlace(
-								userId,
-								request.receiveName(),
-								request.phoneNumber(),
-								request.address1(),
-								request.address2(),
-								request.deliveryComment(),
-								products,
-								productIdToQuantityMap
-						)
-				)
-		);
 	}
 }
