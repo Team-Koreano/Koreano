@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController("externalOrderController")
 @RequiredArgsConstructor
-@RequestMapping("/api/orders/v1")
+@RequestMapping("/api/external/orders/v1")
 public class OrderController {
 
 	private final OrderService orderService;
