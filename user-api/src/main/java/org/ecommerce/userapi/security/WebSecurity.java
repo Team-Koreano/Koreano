@@ -32,6 +32,7 @@ public class WebSecurity {
 				authz.requestMatchers("/api/users/v1/test").hasAnyAuthority("USER"))
 			.authorizeHttpRequests((authz) -> authz
 				.requestMatchers("/**").permitAll()
+				.anyRequest().permitAll()
 			).sessionManagement((session) -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.exceptionHandling((handle) -> handle.accessDeniedHandler(new CustomerAccessDeniedHandler()))

@@ -2,8 +2,8 @@ package org.ecommerce.userapi.dto;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.type.Gender;
-import org.ecommerce.userapi.entity.type.UserStatus;
+import org.ecommerce.userapi.entity.enumerated.Gender;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
 import org.ecommerce.userapi.security.JwtUtils;
 

@@ -15,8 +15,9 @@ import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
-import org.ecommerce.userapi.entity.type.Gender;
+import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.external.service.UserService;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -105,7 +107,7 @@ class UserServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(userRepository.findUsersById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.registerAccount(authDetails, registerRequest);
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
@@ -133,7 +135,7 @@ class UserServiceTest {
 
 		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
 
-		when(userRepository.findUsersById(authDetails.getUserId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
 
 		// when
 		final AddressDto result = userService.registerAddress(authDetails, registerRequest);
@@ -227,6 +229,7 @@ class UserServiceTest {
 			// given
 			String email = "user1@example.com";
 			String password = "password1";
+			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
@@ -234,12 +237,12 @@ class UserServiceTest {
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
-			when(jwtUtils.createTokens(any(), any())).thenReturn("Bearer fake_token");
+			when(jwtUtils.createUserTokens(any(), any(), any(), any())).thenReturn("Bearer fake_token");
 
 			//then
-			UserDto response = userService.loginRequest(loginRequest);
+			UserDto expectedResponse = userService.loginRequest(loginRequest, response);
 
-			Assertions.assertThat(response.getAccessToken()).isEqualTo("Bearer fake_token");
+			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
 		}
 
 		@Test
@@ -248,12 +251,14 @@ class UserServiceTest {
 			//이메일이 틀릴 경우
 			String incorrectEmail = "incorrect@example.com";
 			String password = "password1";
+			MockHttpServletResponse response = new MockHttpServletResponse();
+
 			UserDto.Request.Login inCorrectEmailRequest = new UserDto.Request.Login(incorrectEmail, password);
 
 			//then
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest))
+			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL.getMessage());
+				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -263,13 +268,14 @@ class UserServiceTest {
 			String email = "user1@example.com";
 			String password = "password1";
 			String incorrectPassword = "incorrect";
+			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
 			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
 
 			//then
 			UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest))
+			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
 

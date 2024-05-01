@@ -32,15 +32,15 @@ public class JwtFilter extends OncePerRequestFilter implements ResponseConfigure
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		String jwt = jwtUtils.resolveToken(request);
+		String bearerToken = jwtUtils.resolveToken(request);
 
 		try {
-			if (jwt != null) {
+			if (bearerToken != null) {
 				boolean isLogin = redisUtils.hasKey(
-					jwtUtils.getAccessTokenKey(jwtUtils.getUserId(jwt), jwtUtils.getAuthority(jwt)));
+					jwtUtils.getAccessTokenKey(jwtUtils.getId(bearerToken), jwtUtils.getRoll(bearerToken)));
 				if (isLogin) {
 					// Authentication 검증 전
-					Authentication beforeAuthentication = jwtUtils.parseAuthentication(jwt);
+					Authentication beforeAuthentication = jwtUtils.parseAuthentication(bearerToken);
 					// Authentication 검증 후
 					Authentication afterAuthenticate = providerManager.authenticate(beforeAuthentication);
 					// Context 에 저장
