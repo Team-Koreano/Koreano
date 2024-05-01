@@ -118,7 +118,7 @@ public class OrderService {
 			if (stock.getTotal() == null) {
 				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 			}
-			if (stock.hasStock(quantities.get(stock.getProductId()))) {
+			if (!stock.hasStock(quantities.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
 		});
