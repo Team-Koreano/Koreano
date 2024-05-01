@@ -13,6 +13,7 @@ import java.util.List;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.external.controller.OrderController;
 import org.ecommerce.orderapi.service.OrderService;
+import org.ecommerce.orderapi.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,6 +38,9 @@ public class OrderControllerTest {
 	@MockBean
 	private OrderService orderService;
 
+	@MockBean
+	private ProductService productService;
+
 	@Test
 	void 주문하기() throws Exception {
 		// given
@@ -57,7 +61,7 @@ public class OrderControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(post("/api/orders/v1")
+		mockMvc.perform(post("/api/external/orders/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
 								new OrderDto.Request.Place(
@@ -95,7 +99,7 @@ public class OrderControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(post("/api/orders/v1")
+		mockMvc.perform(post("/api/external/orders/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(placeRequest)))
 				.andExpect(status().isBadRequest())
