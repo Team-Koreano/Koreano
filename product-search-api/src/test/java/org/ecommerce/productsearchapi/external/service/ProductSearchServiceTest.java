@@ -45,36 +45,36 @@ public class ProductSearchServiceTest {
 		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
 
 		// then
-		assertEquals(1, productSearchDto.getId());
-		assertEquals(ProductCategory.BEAN, productSearchDto.getCategory());
-		assertEquals(30000, productSearchDto.getPrice());
-		assertEquals(100, productSearchDto.getStock());
-		assertEquals(1, productSearchDto.getSellerRep().getId());
-		assertEquals("커피천국", productSearchDto.getSellerRep().getBizName());
-		assertEquals(10, productSearchDto.getFavoriteCount());
-		assertEquals(false, productSearchDto.getIsDecaf());
-		assertEquals("[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피", productSearchDto.getName());
-		assertEquals(Bean.ARABICA, productSearchDto.getBean());
-		assertEquals(Acidity.MEDIUM, productSearchDto.getAcidity());
-		assertEquals("커피천국에서만 만나볼 수 있는 특별한 커피", productSearchDto.getInformation());
-		assertEquals(ProductStatus.AVAILABLE, productSearchDto.getStatus());
-		assertEquals(false, productSearchDto.getIsCrush());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getCreateDatetime());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getUpdateDatetime());
-		assertEquals(1, productSearchDto.getImageDtoList().get(0).getId());
-		assertEquals("http://image1.com", productSearchDto.getImageDtoList().get(0).getImageUrl());
-		assertEquals(true, productSearchDto.getImageDtoList().get(0).getIsThumbnail());
-		assertEquals((short)1, productSearchDto.getImageDtoList().get(0).getSequenceNumber());
-		assertEquals(false, productSearchDto.getImageDtoList().get(0).getIsDeleted());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(0).getCreateDatetime());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
-		assertEquals(2, productSearchDto.getImageDtoList().get(1).getId());
-		assertEquals("http://image2.com", productSearchDto.getImageDtoList().get(1).getImageUrl());
-		assertEquals(false, productSearchDto.getImageDtoList().get(1).getIsThumbnail());
-		assertEquals((short)2, productSearchDto.getImageDtoList().get(1).getSequenceNumber());
-		assertEquals(false, productSearchDto.getImageDtoList().get(1).getIsDeleted());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(1).getCreateDatetime());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
+		assertEquals(product.getId(), productSearchDto.getId());
+		assertEquals(product.getCategory(), productSearchDto.getCategory());
+		assertEquals(product.getPrice(), productSearchDto.getPrice());
+		assertEquals(product.getStock(), productSearchDto.getStock());
+		assertEquals(product.getSellerRep().getId(), productSearchDto.getSellerRep().getId());
+		assertEquals(product.getSellerRep().getBizName(), productSearchDto.getSellerRep().getBizName());
+		assertEquals(product.getFavoriteCount(), productSearchDto.getFavoriteCount());
+		assertEquals(product.getIsDecaf(), productSearchDto.getIsDecaf());
+		assertEquals(product.getName(), productSearchDto.getName());
+		assertEquals(product.getBean(), productSearchDto.getBean());
+		assertEquals(product.getAcidity(), productSearchDto.getAcidity());
+		assertEquals(product.getInformation(), productSearchDto.getInformation());
+		assertEquals(product.getStatus(), productSearchDto.getStatus());
+		assertEquals(product.getIsCrush(), productSearchDto.getIsCrush());
+		assertEquals(product.getCreateDatetime(), productSearchDto.getCreateDatetime());
+		assertEquals(product.getUpdateDatetime(), productSearchDto.getUpdateDatetime());
+		assertEquals(product.getImages().get(0).getId(), productSearchDto.getImageDtoList().get(0).getId());
+		assertEquals(product.getImages().get(0).getImageUrl(), productSearchDto.getImageDtoList().get(0).getImageUrl());
+		assertEquals(product.getImages().get(0).getIsThumbnail(), productSearchDto.getImageDtoList().get(0).getIsThumbnail());
+		assertEquals(product.getImages().get(0).getSequenceNumber(), productSearchDto.getImageDtoList().get(0).getSequenceNumber());
+		assertEquals(product.getImages().get(0).getIsDeleted(), productSearchDto.getImageDtoList().get(0).getIsDeleted());
+		assertEquals(product.getImages().get(0).getCreateDatetime(), productSearchDto.getImageDtoList().get(0).getCreateDatetime());
+		assertEquals(product.getImages().get(0).getUpdateDatetime(), productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
+		assertEquals(product.getImages().get(1).getId(), productSearchDto.getImageDtoList().get(1).getId());
+		assertEquals(product.getImages().get(1).getImageUrl(), productSearchDto.getImageDtoList().get(1).getImageUrl());
+		assertEquals(product.getImages().get(1).getIsThumbnail(), productSearchDto.getImageDtoList().get(1).getIsThumbnail());
+		assertEquals(product.getImages().get(1).getSequenceNumber(), productSearchDto.getImageDtoList().get(1).getSequenceNumber());
+		assertEquals(product.getImages().get(1).getIsDeleted(), productSearchDto.getImageDtoList().get(1).getIsDeleted());
+		assertEquals(product.getImages().get(1).getCreateDatetime(), productSearchDto.getImageDtoList().get(1).getCreateDatetime());
+		assertEquals(product.getImages().get(1).getUpdateDatetime(), productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
 	}
 
 	@Test

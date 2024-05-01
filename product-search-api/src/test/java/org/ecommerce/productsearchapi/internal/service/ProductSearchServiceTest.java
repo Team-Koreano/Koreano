@@ -32,24 +32,24 @@ public class ProductSearchServiceTest {
 	@Test
 	void 엘라스틱서치에_상품_정보_저장() {
 		// given
-
+		Product product = getProduct();
 		// when
-		final ProductSearchDto productSearchDto = productSearchService.saveProduct(getProduct());
+		final ProductSearchDto productSearchDto = productSearchService.saveProduct(product);
 
 		// then
-		assertEquals(1, productSearchDto.getId());
-		assertEquals(ProductCategory.BEAN, productSearchDto.getCategory());
-		assertEquals(30000, productSearchDto.getPrice());
-		assertEquals(100, productSearchDto.getStock());
-		assertEquals(1, productSearchDto.getSellerRep().getId());
-		assertEquals("커피천국", productSearchDto.getSellerRep().getBizName());
-		assertEquals(10, productSearchDto.getFavoriteCount());
-		assertEquals(false, productSearchDto.getIsDecaf());
-		assertEquals("[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피", productSearchDto.getName());
-		assertEquals(Bean.ARABICA, productSearchDto.getBean());
-		assertEquals(Acidity.MEDIUM, productSearchDto.getAcidity());
-		assertEquals("커피천국에서만 만나볼 수 있는 특별한 커피", productSearchDto.getInformation());
-		assertEquals("http://image1.com", productSearchDto.getThumbnailUrl());
+		assertEquals(product.getId(), productSearchDto.getId());
+		assertEquals(product.getCategory(), productSearchDto.getCategory());
+		assertEquals(product.getPrice(), productSearchDto.getPrice());
+		assertEquals(product.getStock(), productSearchDto.getStock());
+		assertEquals(product.getSellerRep().getId(), productSearchDto.getSellerRep().getId());
+		assertEquals(product.getSellerRep().getBizName(), productSearchDto.getSellerRep().getBizName());
+		assertEquals(product.getFavoriteCount(), productSearchDto.getFavoriteCount());
+		assertEquals(product.getIsDecaf(), productSearchDto.getIsDecaf());
+		assertEquals(product.getName(), productSearchDto.getName());
+		assertEquals(product.getBean(), productSearchDto.getBean());
+		assertEquals(product.getAcidity(), productSearchDto.getAcidity());
+		assertEquals(product.getInformation(), productSearchDto.getInformation());
+		assertEquals(getThumbnailUrl(product.getImages()), productSearchDto.getThumbnailUrl());
 		assertEquals(TEST_DATE_TIME, productSearchDto.getCreateDatetime());
 	}
 
@@ -77,6 +77,14 @@ public class ProductSearchServiceTest {
 			TEST_DATE_TIME,
 			images
 		);
+	}
+
+	private String getThumbnailUrl(List<Image> images) {
+		return images.stream()
+			.filter(Image::getIsThumbnail)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
 	}
 
 }
