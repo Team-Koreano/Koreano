@@ -17,6 +17,7 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.external.service.UserService;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
@@ -236,7 +237,7 @@ class UserServiceTest {
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
-			when(jwtUtils.createUserToken(any(), any(), any(), any())).thenReturn("Bearer fake_token");
+			when(jwtUtils.createUserTokens(any(), any(), any(), any())).thenReturn("Bearer fake_token");
 
 			//then
 			UserDto expectedResponse = userService.loginRequest(loginRequest, response);

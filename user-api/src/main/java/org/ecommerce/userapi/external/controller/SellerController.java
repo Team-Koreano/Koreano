@@ -1,11 +1,11 @@
-package org.ecommerce.userapi.controller;
+package org.ecommerce.userapi.external.controller;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.custom.CurrentUser;
-import org.ecommerce.userapi.service.SellerService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;

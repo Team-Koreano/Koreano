@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.service;
+package org.ecommerce.userapi.external.service;
 
 import java.util.Set;
 
@@ -92,7 +92,7 @@ public class UserService {
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createUserToken(users.getId(), users.getEmail(), authorization, response));
+			jwtUtils.createUserTokens(users.getId(), users.getEmail(), authorization, response));
 
 	}
 

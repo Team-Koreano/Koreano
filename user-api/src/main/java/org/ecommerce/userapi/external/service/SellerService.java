@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.service;
+package org.ecommerce.userapi.external.service;
 
 import java.util.Set;
 

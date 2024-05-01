@@ -13,6 +13,7 @@ import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
