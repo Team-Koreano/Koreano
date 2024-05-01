@@ -9,7 +9,7 @@ import org.redisson.api.RedissonClient;
 
 public class StockOperation {
 
-	private static final String STOCK_KEY = "stock:total";
+	private static final String STOCK_KEY = "stock:total:";
 
 	public static void setStock(
 			final RTransaction transaction,
@@ -27,9 +27,8 @@ public class StockOperation {
 		Integer totalStock = (Integer)redissonClient.getBucket(key).get();
 		if (totalStock == null) {
 			return Optional.empty();
-		} else {
-			return Optional.of(new Stock(productId, totalStock));
 		}
+		return Optional.of(new Stock(productId, totalStock));
 	}
 
 	public static List<Stock> getStocks(

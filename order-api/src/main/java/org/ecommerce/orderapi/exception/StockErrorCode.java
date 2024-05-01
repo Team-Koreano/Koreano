@@ -10,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum StockErrorCode implements ErrorCode {
 	STOCK_SERIALIZATION_FAIL(HttpStatus.BAD_REQUEST.value(), "재고 직렬화 실패"),
-	STOCK_DESERIALIZATION_FAIL(HttpStatus.BAD_REQUEST.value(), "재고 역직렬화 실패");
+	STOCK_DESERIALIZATION_FAIL(HttpStatus.BAD_REQUEST.value(), "재고 역직렬화 실패"),
+	STOCK_TRANSACTION_LOCK(HttpStatus.BAD_REQUEST.value(), "해당 재고는 사용 중입니다.");
 	private final int code;
 	private final String message;
 }

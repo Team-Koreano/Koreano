@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
@@ -49,7 +50,6 @@ public class OrderService {
 	 *
 	 * @return - 생성된 주문을 반환합니다.
 	 */
-	@Transactional
 	public OrderDto placeOrder(
 			final Integer userId,
 			final OrderDto.Request.Place request

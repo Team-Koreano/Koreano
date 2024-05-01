@@ -6,6 +6,7 @@ import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.orderapi.aop.StockLock;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
@@ -13,11 +14,11 @@ import org.ecommerce.orderapi.entity.StockHistory;
 import org.ecommerce.orderapi.repository.StockHistoryRepository;
 import org.ecommerce.orderapi.util.ProductOperation;
 import org.ecommerce.orderapi.util.StockOperation;
-import org.redisson.api.RLock;
 import org.redisson.api.RTransaction;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.TransactionOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class StockService {
 
 	private final RedissonClient redissonClient;
@@ -40,30 +42,8 @@ public class StockService {
 	 */
 	public void decreaseStocks(final List<OrderDetail> orderDetails) {
 		orderDetails.forEach(orderDetail -> {
-			final Integer productId = orderDetail.getProductId();
-			final Integer quantity = orderDetail.getQuantity();
-
-			RLock lock = redissonClient.getLock("product-lock-" + productId);
-			RTransaction transaction = redissonClient.createTransaction(
-					TransactionOptions.defaults());
-
-			final Stock stock = StockOperation.getStock(redissonClient, productId)
-					.orElseThrow(
-							() -> new CustomException(INSUFFICIENT_STOCK_INFORMATION));
-
-			if (!stock.hasStock(quantity)) {
-				throw new CustomException(INSUFFICIENT_STOCK);
-			}
-			try {
-				decreaseStock(transaction, stock, quantity);
-				checkSoldOut(transaction, stock);
-				saveStockHistory(orderDetail);
-				transaction.commit();
-				lock.unlock();
-			} catch (Exception e) {
-				transaction.rollback();
-				lock.unlock();
-				log.info("Error occurred while increasing stocks: {}", e.getMessage());
+			if (!decreaseStock(orderDetail)) {
+				// TODO 처리된 재고 rollback
 			}
 		});
 	}
@@ -72,19 +52,35 @@ public class StockService {
 	 * 재고를 감소시키는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param transaction- Redisson 트랜잭션
-	 * @param stock- 재고 객체
-	 * @param quantity- 주문 수량
 	 * @return - 반환 값 설명 텍스트
 	 */
 	@VisibleForTesting
-	public void decreaseStock(
-			final RTransaction transaction,
-			final Stock stock,
-			final Integer quantity
-	) {
+	@StockLock
+	public boolean decreaseStock(final OrderDetail orderDetail) {
+		final Integer productId = orderDetail.getProductId();
+		final Integer quantity = orderDetail.getQuantity();
+		final Stock stock = StockOperation.getStock(redissonClient, productId)
+				.orElseThrow(
+						() -> new CustomException(INSUFFICIENT_STOCK_INFORMATION));
+
+		if (!stock.hasStock(quantity)) {
+			throw new CustomException(INSUFFICIENT_STOCK);
+		}
 		stock.decreaseTotalStock(quantity);
-		StockOperation.setStock(transaction, stock);
+
+		RTransaction transaction = redissonClient
+				.createTransaction(TransactionOptions.defaults());
+		try {
+			StockOperation.setStock(transaction, stock);
+			checkSoldOut(transaction, stock);
+			saveStockHistory(orderDetail);
+			transaction.commit();
+		} catch (Exception e) {
+			transaction.rollback();
+			log.info("Error occurred while decrease stock: {}", e.getMessage());
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -122,5 +118,4 @@ public class StockService {
 				orderDetail.getQuantity()
 		));
 	}
-
 }
