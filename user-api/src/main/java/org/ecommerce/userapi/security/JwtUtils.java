@@ -65,7 +65,7 @@ public class JwtUtils {
 		return accessToken;
 	}
 
-	public String createUserToken(Integer userId, String email, Set<String> authorization,
+	public String createUserTokens(Integer userId, String email, Set<String> authorization,
 		HttpServletResponse response) {
 
 		final String accessToken = createToken(userId, email,
