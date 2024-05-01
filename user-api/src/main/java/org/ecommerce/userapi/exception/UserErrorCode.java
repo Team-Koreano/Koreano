@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 public enum UserErrorCode implements ErrorCode {
-	NOT_FOUND_EMAIL(HttpStatus.NOT_FOUND, "이메일을 찾을 수 없습니다."),
+	NOT_FOUND_EMAIL(HttpStatus.BAD_REQUEST, "이메일을 찾을 수 없습니다."),
 	DUPLICATED_EMAIL_OR_PHONENUMBER(HttpStatus.BAD_REQUEST, "중복된 이메일 혹은 전화번호 입니다."),
 	NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 혹은 비밀번호가 일치하지 않습니다."),
 	IS_NOT_MATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
