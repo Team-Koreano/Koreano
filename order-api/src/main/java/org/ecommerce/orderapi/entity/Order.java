@@ -3,6 +3,7 @@ package org.ecommerce.orderapi.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -62,22 +63,31 @@ public class Order {
 			final String phoneNumber,
 			final String address1,
 			final String address2,
-			final String deliveryComment
+			final String deliveryComment,
+			final List<Product> products,
+			final Map<Integer, Integer> productIdToQuantityMap
 	) {
 		final Order order = new Order();
+		// TODO : 배송비 우선 무료로 고정, 추후 seller에서 정책 설정
+		Integer DELIVERY_FEE = 0;
 		order.userId = userId;
 		order.receiveName = receiveName;
 		order.phoneNumber = phoneNumber;
 		order.address1 = address1;
 		order.address2 = address2;
 		order.deliveryComment = deliveryComment;
-		return order;
-	}
-
-	public void attachOrderDetails(List<OrderDetail> orderDetails) {
-		this.orderDetails.addAll(orderDetails);
-		this.totalPaymentAmount = orderDetails.stream()
+		order.orderDetails = products.stream()
+				.map(product -> OrderDetail.ofPlace(
+						order,
+						product.getId(),
+						product.getPrice(),
+						productIdToQuantityMap.get(product.getId()),
+						DELIVERY_FEE,
+						product.getSeller()
+				)).toList();
+		order.totalPaymentAmount = order.orderDetails.stream()
 				.mapToInt(OrderDetail::getPaymentAmount)
 				.sum();
+		return order;
 	}
 }

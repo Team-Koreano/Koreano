@@ -10,13 +10,16 @@ public class Stock {
 	private Integer productId;
 
 	private Integer total;
-	private Integer processingCnt;
 
-	public Integer getAvailableStock() {
-		return this.total - this.processingCnt;
+	public void decreaseTotalStock(Integer quantity) {
+		this.total -= quantity;
 	}
 
-	public void increaseProcessingCnt(final Integer quantity) {
-		this.processingCnt += quantity;
+	public boolean hasStock(Integer quantity) {
+		return this.total >= quantity;
+	}
+
+	public boolean isSoldOut() {
+		return this.total == 0;
 	}
 }
