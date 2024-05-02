@@ -5,20 +5,19 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@Getter
 public enum BeanPayStatus implements EnumMapperType {
 	DEPOSIT("충전"),
 	WITHDRAW("출금");
 
 	private final String title;
 
-	@Override
-	public String getCode() {
-		return name();
+	BeanPayStatus(String title) {
+		this.title = title;
 	}
 
 	@Override
-	public String getTitle() {
-		return this.title;
+	public String getCode() {
+		return name();
 	}
 }

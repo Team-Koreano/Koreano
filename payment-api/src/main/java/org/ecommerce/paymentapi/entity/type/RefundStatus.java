@@ -5,7 +5,7 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@Getter
 public enum RefundStatus implements EnumMapperType {
 	PENDING("환불 처리전"),
 	PROCESSING("환불 진행중"),
@@ -15,12 +15,12 @@ public enum RefundStatus implements EnumMapperType {
 
 	private final String title;
 
+	RefundStatus(String title) {
+		this.title = title;
+	}
+
 	@Override
 	public String getCode() {
 		return name();
-	}
-	@Override
-	public String getTitle() {
-		return this.title;
 	}
 }

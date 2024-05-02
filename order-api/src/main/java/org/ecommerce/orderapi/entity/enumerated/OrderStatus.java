@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum OrderStatus implements EnumMapperType {
 
@@ -16,6 +15,10 @@ public enum OrderStatus implements EnumMapperType {
 	;
 
 	private final String title;
+
+	OrderStatus(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {
