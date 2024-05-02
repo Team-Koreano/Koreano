@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.entity.type;
+package org.ecommerce.orderapi.entity.enumerated;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
@@ -7,12 +7,12 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum OrderStatus implements EnumMapperType {
+public enum OrderStatusReason implements EnumMapperType {
 
-	OPEN("주문요청"),
-	ACCEPTED("주문승인"),
-	CLOSED("주문완료"),
-	CANCELLED("주문취소")
+	REFUND("환불"),
+	FAILED_PAYMENT("결제실패"),
+	EXCHANGE("교환"),
+	SIMPLE_CHANGE_OF_HEART("단순변심")
 	;
 
 	private final String title;

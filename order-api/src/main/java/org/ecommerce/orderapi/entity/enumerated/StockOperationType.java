@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.entity.type;
+package org.ecommerce.orderapi.entity.enumerated;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 

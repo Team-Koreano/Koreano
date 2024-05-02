@@ -27,18 +27,4 @@ public class BucketDto {
 			LocalDate createDate
 	) {
 	}
-
-	public static List<Integer> toProductIds(final List<BucketDto> bucketDtos) {
-		return bucketDtos.stream().map(BucketDto::getProductId).toList();
-	}
-
-	public static Map<Integer, Integer> toProductIdToQuantityMap(
-			final List<BucketDto> bucketDtos
-	) {
-		return bucketDtos.stream()
-				.collect(Collectors.toMap(
-						BucketDto::getProductId,
-						BucketDto::getQuantity
-				));
-	}
 }

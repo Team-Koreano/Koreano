@@ -2,7 +2,7 @@ package org.ecommerce.orderapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.orderapi.entity.type.OrderStatus;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -39,7 +39,7 @@ public class OrderStatusHistory {
 	@Column
 	private LocalDateTime statusChangeDatetime;
 
-	public static OrderStatusHistory ofRecord(
+	static OrderStatusHistory ofRecord(
 			final OrderDetail orderDetail,
 			final OrderStatus changeStatus
 	) {

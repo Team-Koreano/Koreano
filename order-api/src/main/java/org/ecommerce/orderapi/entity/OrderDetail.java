@@ -1,10 +1,13 @@
 package org.ecommerce.orderapi.entity;
 
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.orderapi.entity.type.OrderStatus;
-import org.ecommerce.orderapi.entity.type.OrderStatusReason;
+import org.ecommerce.orderapi.aop.StockLockInterface;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,7 +27,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "order_detail")
 @Getter
-public class OrderDetail {
+public class OrderDetail implements StockLockInterface {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,7 +60,7 @@ public class OrderDetail {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private OrderStatus status = OrderStatus.OPEN;
+	private OrderStatus status = OPEN;
 
 	@Column
 	@Enumerated(EnumType.STRING)
@@ -66,7 +69,7 @@ public class OrderDetail {
 	@OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
-	public static OrderDetail ofPlace(
+	static OrderDetail ofPlace(
 			final Order order,
 			final Integer productId,
 			final Integer price,
@@ -83,11 +86,8 @@ public class OrderDetail {
 		orderDetail.deliveryFee = deliveryFee;
 		orderDetail.paymentAmount = price * quantity + deliveryFee;
 		orderDetail.seller = seller;
+		orderDetail.orderStatusHistories = List.of(
+				OrderStatusHistory.ofRecord(orderDetail, OPEN));
 		return orderDetail;
 	}
-
-	public void recordOrderStatusHistory(final OrderStatusHistory orderStatusHistory) {
-		orderStatusHistories.add(orderStatusHistory);
-	}
-
 }

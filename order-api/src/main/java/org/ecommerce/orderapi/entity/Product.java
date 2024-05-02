@@ -1,6 +1,6 @@
 package org.ecommerce.orderapi.entity;
 
-import org.ecommerce.orderapi.entity.type.ProductStatus;
+import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
 import org.springframework.data.redis.core.RedisHash;
 
 import jakarta.persistence.Id;
