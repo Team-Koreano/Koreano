@@ -4,13 +4,14 @@ package org.ecommerce.paymentapi.service;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
-import org.ecommerce.paymentapi.entity.type.Role;
+import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
@@ -26,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class BeanPayService {
 
 	private final TossKey tossKey;
@@ -38,17 +38,16 @@ public class BeanPayService {
 	 충전하기 전 사전 객체 생성
 	 @return - BeanPayDto
 	 */
+	@Transactional
 	public BeanPayDto preChargeBeanPay(final BeanPayDto.Request.PreCharge request) {
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
 
-		final BeanPayDetail beanPayDetail = BeanPayDetail.ofCreate(
-			beanPay,
-			request.userId(),
-			request.amount()
-		);
+		BeanPayDetail beanPayDetail = beanPay.preCharge(request.amount());
+
 		final BeanPayDetail createBeanPayDetail = beanPayDetailRepository.save(
 			beanPayDetail
 		);
+
 		return BeanPayMapper.INSTANCE.toDto(createBeanPayDetail);
 
 	}
@@ -63,6 +62,7 @@ public class BeanPayService {
 	 @param - BeanPayDto.Request.TossPayment request
 	 @return - BeanPayDto response
 	 */
+	@DistributedLock(key = "BEANPAY.conat('-').concat(#request.userId")
 	public BeanPayDto validTossCharge(final TossDto.Request.TossPayment request) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(),
 			request.amount());
