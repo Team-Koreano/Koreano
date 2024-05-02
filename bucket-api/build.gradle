@@ -1,7 +1,32 @@
 plugins {
-
+    id 'java'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 dependencies {
+    implementation(project(':common'))
+
+    //공통 모듈
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    implementation("org.mapstruct:mapstruct:1.5.3.Final")
+    implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    // @VisibleForTesting 의존성
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'com.google.auto.value:auto-value-annotations:1.8'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    runtimeOnly 'com.h2database:h2'
+}
+
+tasks.register("prepareKotlinBuildScriptModel"){
 
 }
