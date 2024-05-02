@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum Gender implements EnumMapperType {
 
@@ -13,6 +12,10 @@ public enum Gender implements EnumMapperType {
 	FEMALE("여성");
 
 	private final String title;
+
+	Gender(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {

@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum ProductCategory implements EnumMapperType {
 	/**
@@ -21,6 +20,10 @@ public enum ProductCategory implements EnumMapperType {
 	BLENDER("블렌더"),
 	MACHINE("커피머신");
 	private final String title;
+
+	ProductCategory(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {
