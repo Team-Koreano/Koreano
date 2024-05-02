@@ -56,6 +56,8 @@ dependencyManagement {
     }
 }
 
+tasks.register("prepareKotlinBuildScriptModel"){}
+
 def generated = 'src/main/generated'
 
 def querydslDir = layout.buildDirectory.dir(generated).get().asFile
