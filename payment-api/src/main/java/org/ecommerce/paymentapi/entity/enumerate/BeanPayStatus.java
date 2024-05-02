@@ -1,16 +1,14 @@
-package org.ecommerce.paymentapi.entity.type;
+package org.ecommerce.paymentapi.entity.enumerate;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum ProcessStatus implements EnumMapperType {
-	PENDING("처리 전"),
-	IN_PROGRESS("진행 중"),
-	FAILED("실패"),
-	CANCELLED("취소"),
-	COMPLETED("완료");
+public enum BeanPayStatus implements EnumMapperType {
+	DEPOSIT("충전"),
+	WITHDRAW("출금");
+
 	private final String title;
 
 	@Override
@@ -20,6 +18,6 @@ public enum ProcessStatus implements EnumMapperType {
 
 	@Override
 	public String getTitle() {
-		return title;
+		return this.title;
 	}
 }

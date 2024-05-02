@@ -1,4 +1,4 @@
-package org.ecommerce.paymentapi.entity.type;
+package org.ecommerce.paymentapi.entity.enumerate;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
