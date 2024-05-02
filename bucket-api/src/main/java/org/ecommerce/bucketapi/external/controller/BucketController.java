@@ -1,4 +1,4 @@
-package org.ecommerce.bucketapi.controller;
+package org.ecommerce.bucketapi.external.controller;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController
+@RestController("ExternalBucketController")
 @RequiredArgsConstructor
 @RequestMapping("/api/external/buckets/v1")
-public class ExternalBucketController {
+public class BucketController {
 
 	private final BucketService bucketService;
 

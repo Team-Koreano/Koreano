@@ -1,4 +1,4 @@
-package org.ecommerce.bucketapi.controller;
+package org.ecommerce.bucketapi.internal.controller;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController
+@RestController("InternalBucketController")
 @RequiredArgsConstructor
 @RequestMapping("/api/internal/buckets/v1")
-public class InternalBucketController {
+public class BucketController {
 
 	private final BucketService bucketService;
 
