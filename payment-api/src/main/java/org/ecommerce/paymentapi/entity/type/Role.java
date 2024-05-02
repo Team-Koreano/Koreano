@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.entity.enumerated;
+package org.ecommerce.paymentapi.entity.type;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
@@ -6,17 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-public enum OrderStatus implements EnumMapperType {
+public enum Role implements EnumMapperType {
 
-	OPEN("주문요청"),
-	ACCEPTED("주문승인"),
-	CLOSED("주문완료"),
-	CANCELLED("주문취소")
-	;
+	USER("일반 유저"),
+	SELLER("판매 유저");
 
 	private final String title;
 
-	OrderStatus(String title) {
+	Role(String title) {
 		this.title = title;
 	}
 

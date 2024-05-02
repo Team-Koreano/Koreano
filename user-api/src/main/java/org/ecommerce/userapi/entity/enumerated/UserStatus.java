@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum UserStatus implements EnumMapperType {
 
@@ -14,6 +13,10 @@ public enum UserStatus implements EnumMapperType {
 	SUSPEND("정지 회원");
 
 	private final String title;
+
+	UserStatus(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {

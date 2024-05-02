@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum Acidity implements EnumMapperType {
 	LIGHT("라이트"),
@@ -18,6 +17,10 @@ public enum Acidity implements EnumMapperType {
 	ITALIAN("이탈리안");
 
 	private final String title;
+
+	Acidity(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {

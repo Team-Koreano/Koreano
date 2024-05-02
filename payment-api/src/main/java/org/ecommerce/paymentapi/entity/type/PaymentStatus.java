@@ -1,19 +1,17 @@
-package org.ecommerce.userapi.entity.enumerated;
+package org.ecommerce.paymentapi.entity.type;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-public enum Gender implements EnumMapperType {
-
-	MALE("남성"),
-	FEMALE("여성");
+public enum PaymentStatus implements EnumMapperType {
+	PAYMENT("결제"),
+	REFUND("환불");
 
 	private final String title;
 
-	Gender(String title) {
+	PaymentStatus(String title) {
 		this.title = title;
 	}
 
@@ -21,5 +19,4 @@ public enum Gender implements EnumMapperType {
 	public String getCode() {
 		return name();
 	}
-
 }

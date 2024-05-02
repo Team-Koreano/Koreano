@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum Bean implements EnumMapperType {
 	ARABICA("아라비카"),
@@ -14,6 +13,10 @@ public enum Bean implements EnumMapperType {
 	EXCELSA("엑셀사");
 
 	private final String title;
+
+	Bean(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {

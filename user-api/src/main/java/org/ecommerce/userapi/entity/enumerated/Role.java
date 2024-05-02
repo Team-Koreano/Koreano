@@ -5,7 +5,6 @@ import org.ecommerce.common.utils.mapper.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum Role implements EnumMapperType {
 
@@ -13,6 +12,10 @@ public enum Role implements EnumMapperType {
 	SELLER("판매 유저");
 
 	private final String title;
+
+	Role(String title) {
+		this.title = title;
+	}
 
 	@Override
 	public String getCode() {
