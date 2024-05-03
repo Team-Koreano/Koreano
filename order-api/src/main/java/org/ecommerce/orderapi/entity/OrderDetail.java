@@ -5,7 +5,6 @@ import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.orderapi.aop.StockLockInterface;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 
@@ -27,7 +26,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "order_detail")
 @Getter
-public class OrderDetail implements StockLockInterface {
+public class OrderDetail {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

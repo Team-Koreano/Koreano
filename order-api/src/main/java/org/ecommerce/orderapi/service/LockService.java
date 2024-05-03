@@ -21,9 +21,9 @@ public class LockService {
 
 	private static final String TRANSACTION_LOCK = "STOCK_LOCK_KEY:";
 
-	public void lock(Integer productId) {
-		RLock lock = redissonClient.getLock(getLockKey(productId));
-		log.debug("Trying lock for productId : {}", productId);
+	public void lock() {
+		RLock lock = redissonClient.getLock(TRANSACTION_LOCK);
+		log.debug("Trying lock for transaction");
 
 		try {
 			boolean isLock = lock.tryLock(1, 15, TimeUnit.SECONDS);
@@ -38,12 +38,8 @@ public class LockService {
 		}
 	}
 
-	public void unLock(Integer productId) {
-		log.debug("Unlock for productId : {}", productId);
-		redissonClient.getLock(getLockKey(productId)).unlock();
-	}
-
-	private String getLockKey(Integer productId) {
-		return TRANSACTION_LOCK + productId.toString();
+	public void unLock() {
+		log.debug("Unlock for transaction");
+		redissonClient.getLock(TRANSACTION_LOCK).unlock();
 	}
 }
