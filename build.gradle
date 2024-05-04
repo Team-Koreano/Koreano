@@ -162,46 +162,6 @@ project(':order-api') {
     }
 }
 
-project(':payment-api') {
-    dependencies {
-        implementation(project(':common'))
-
-        //공통 모듈
-        implementation 'org.springframework.boot:spring-boot-starter'
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        implementation 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
-        annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-        testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-        implementation("org.mapstruct:mapstruct:1.5.3.Final")
-        implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-        // @VisibleForTesting 의존성
-        implementation 'com.google.guava:guava:32.1.2-jre'
-        implementation 'com.google.auto.value:auto-value-annotations:1.8'
-
-
-        testImplementation 'com.h2database:h2:2.2.222'
-        implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
-        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-        // redis client
-        implementation 'org.redisson:redisson-spring-boot-starter:3.29.0'
-        implementation 'it.ozimov:embedded-redis:0.7.2'
-        testImplementation 'it.ozimov:embedded-redis:0.7.2'
-    }
-    compileJava {
-        options.compilerArgs << '-parameters'
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
-        }
-    }
-}
 
 project(':statistic-api') {
     dependencies {

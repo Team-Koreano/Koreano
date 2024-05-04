@@ -5,8 +5,8 @@ import static org.ecommerce.paymentapi.exception.BeanPayErrorMessage.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
-import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
