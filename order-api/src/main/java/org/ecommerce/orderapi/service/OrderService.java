@@ -7,18 +7,18 @@ import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
+import org.ecommerce.orderapi.client.ProductServiceClient;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.dto.ProductMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
-import org.ecommerce.orderapi.util.ProductOperation;
-import org.ecommerce.orderapi.util.StockOperation;
-import org.redisson.api.RedissonClient;
+import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
+	private final ProductServiceClient productServiceClient;
 	private final OrderRepository orderRepository;
-	private final RedissonClient redissonClient;
+	private final StockRepository stockRepository;
 
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
@@ -59,7 +60,7 @@ public class OrderService {
 		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
 
 		// TODO : FeignClient Product 정보 받기
-		final List<Product> products = ProductOperation.getProducts(redissonClient, productIds);
+		final List<Product> products = getProducts(productIds);
 
 		validateStock(productIds, productIdToQuantityMap);
 		validateProduct(products);
@@ -100,6 +101,17 @@ public class OrderService {
 						.map(BucketMapper.INSTANCE::responseToDto).toList());
 	}
 
+	@VisibleForTesting
+	public List<Product> getProducts(
+			final List<Integer> productIds
+	) {
+		return productServiceClient.getProducts(productIds)
+				.stream()
+				.map(ProductMapper.INSTANCE::responseToDto)
+				.map(ProductMapper.INSTANCE::toEntity)
+				.toList();
+	}
+
 	/**
 	 * 주문 생성 전 재고를 검증하는 메소드입니다.
 	 * @author ${Juwon}
@@ -112,7 +124,7 @@ public class OrderService {
 			final List<Integer> productIds,
 			final Map<Integer, Integer> quantities
 	) {
-		List<Stock> stocks = StockOperation.getStocks(redissonClient, productIds);
+		List<Stock> stocks = stockRepository.findByProductIdIn(productIds);
 
 		stocks.forEach(stock -> {
 			if (stock.getTotal() == null) {

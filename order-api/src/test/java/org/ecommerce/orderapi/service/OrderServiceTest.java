@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,18 +21,12 @@ import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
-import org.ecommerce.orderapi.util.ProductOperation;
-import org.ecommerce.orderapi.util.StockOperation;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RedissonClient;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
@@ -44,25 +39,6 @@ public class OrderServiceTest {
 
 	@Mock
 	private BucketServiceClient bucketServiceClient;
-
-	@Mock
-	private RedissonClient redissonClient;
-
-	private MockedStatic<ProductOperation> mockProductOperation;
-
-	private MockedStatic<StockOperation> mockStockOperation;
-
-	@BeforeEach
-	void setup() {
-		mockProductOperation = mockStatic(ProductOperation.class);
-		mockStockOperation = mockStatic(StockOperation.class);
-	}
-
-	@AfterEach
-	void tearDown() {
-		mockProductOperation.close();
-		mockStockOperation.close();
-	}
 
 	@Test
 	void 주문_생성() {
@@ -94,12 +70,18 @@ public class OrderServiceTest {
 		);
 		final List<Stock> stocks = List.of(
 				new Stock(
+						1,
 						101,
-						10
+						10,
+						LocalDateTime.of(2024, 5, 4, 0, 0),
+						null
 				),
 				new Stock(
+						2,
 						102,
-						20
+						20,
+						LocalDateTime.of(2024, 5, 4, 0, 0),
+						null
 				)
 		);
 		final List<BucketDto.Response> bucketServiceResponse = List.of(
@@ -122,12 +104,6 @@ public class OrderServiceTest {
 		);
 		given(bucketServiceClient.getBuckets(anyInt(), anyList()))
 				.willReturn(bucketServiceResponse);
-		mockProductOperation.when(
-						() -> ProductOperation.getProducts(any(RedissonClient.class), anyList()))
-				.thenReturn(products);
-		mockStockOperation.when(
-						() -> StockOperation.getStocks(any(RedissonClient.class), anyList()))
-				.thenReturn(stocks);
 		ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
 		// when
@@ -162,19 +138,24 @@ public class OrderServiceTest {
 		Map<Integer, Integer> productIdToQuantityMap = new HashMap<>();
 		productIdToQuantityMap.put(101, 1);
 		productIdToQuantityMap.put(102, 2);
-		final List<Stock> stocks = List.of(
-				new Stock(
+		final List<BucketDto.Response> bucketServiceResponse = List.of(
+				new BucketDto.Response(
+						1L,
+						1,
+						"seller1",
 						101,
-						0
+						1,
+						LocalDate.of(2024, 5, 1)
 				),
-				new Stock(
+				new BucketDto.Response(
+						2L,
+						1,
+						"seller2",
 						102,
-						20
+						2,
+						LocalDate.of(2024, 5, 1)
 				)
 		);
-		mockStockOperation.when(
-						() -> StockOperation.getStocks(any(RedissonClient.class), anyList()))
-				.thenReturn(stocks);
 
 		// when
 		CustomException exception = assertThrows(CustomException.class,

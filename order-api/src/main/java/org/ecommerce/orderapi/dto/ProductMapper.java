@@ -1,5 +1,6 @@
 package org.ecommerce.orderapi.dto;
 
+import org.ecommerce.orderapi.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -10,4 +11,6 @@ public interface ProductMapper {
 	ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
 	ProductDto responseToDto(ProductDto.Response response);
+
+	Product toEntity(ProductDto productDto);
 }

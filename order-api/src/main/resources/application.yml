@@ -4,3 +4,5 @@ spring:
 
 bucket-service:
   url: http://localhost:8080/api/internal/buckets/v1
+product-search-service:
+  url: http://localhost:8080/api/internal/product-search/v1
