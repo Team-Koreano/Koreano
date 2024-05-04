@@ -33,6 +33,7 @@ public class ProductManagementDto {
 	private ProductStatus status;
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
+	private List<Image> images;
 
 	public static class Request {
 		public record Register(
@@ -50,15 +51,8 @@ public class ProductManagementDto {
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
 			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
-			Boolean isCrush,
-			List<ImageDto> images
+			Boolean isCrush
 		) {
-			public record ImageDto(
-				String imageUrl,
-				Boolean isThumbnail,
-				Short sequenceNumber
-			) {
-			}
 		}
 
 		public record Stock(
@@ -66,7 +60,9 @@ public class ProductManagementDto {
 			@NotNull(message = ProductManagementErrorMessages.stockNotNull)
 			Integer requestStock
 		) {
-		} public record Modify(
+		}
+
+		public record Modify(
 			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
@@ -80,7 +76,17 @@ public class ProductManagementDto {
 			String name,
 			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
 			Boolean isCrush
-		){
+		) {
+		}
+
+		public record Image(
+			String imageUrl,
+			Short sequenceNumber,
+			boolean isThumbnail
+		) {
+			public static Image from(String imageUrl, Short sequenceNumber, boolean isThumbnail) {
+				return new Image(imageUrl, sequenceNumber, isThumbnail);
+			}
 		}
 	}
 
@@ -98,7 +104,14 @@ public class ProductManagementDto {
 		String name,
 		String status,
 		LocalDateTime createDatetime,
-		Boolean isCrush
+		Boolean isCrush,
+		List<Image> images
 	) {
+	}
+
+	public record Image(
+		String imageUrl,
+		Short sequenceNumber,
+		boolean isThumbnail) {
 	}
 }

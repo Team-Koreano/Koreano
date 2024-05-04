@@ -1,34 +1,38 @@
-package org.ecommerce.productmanagementapi.controller;
+package org.ecommerce.productmanagementapi.external;
+
+import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
-import org.ecommerce.productmanagementapi.service.ProductManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/external/product-management/v1")
+@RequestMapping("/api/external/product/v1")
 @RequiredArgsConstructor
-public class ExternalProductManagementController {
+public class ProductManagementController {
 
 	private final ProductManagementService productManagementService;
-	// TODO : S3를 통한 이미지 저장 로직 추가
-	// TODO : 상품 UD, 예외 사항 추가,
 
 	@PostMapping()
 	public Response<ProductManagementDto.Response> register(
-		@Valid @RequestBody ProductManagementDto.Request.Register product) {
-		ProductManagementDto productManagementDto = productManagementService.productRegister(product);
+		@Valid @RequestPart(value = "product") final ProductManagementDto.Request.Register product,
+		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
+		@RequestPart(value = "images", required = false) final List<MultipartFile> images) {
+		ProductManagementDto productManagementDto = productManagementService.productRegister(product, thumbnailImage,
+			images);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
@@ -43,7 +47,7 @@ public class ExternalProductManagementController {
 
 	@PutMapping("/stock/increase")
 	public Response<ProductManagementDto.Response> increaseToStock(
-		@RequestBody final ProductManagementDto.Request.Stock stock
+		@Valid @RequestBody final ProductManagementDto.Request.Stock stock
 	) {
 		ProductManagementDto productManagementDto = productManagementService.increaseToStock(stock);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
@@ -51,7 +55,7 @@ public class ExternalProductManagementController {
 
 	@PutMapping("/stock/decrease")
 	public Response<ProductManagementDto.Response> decreaseToStock(
-		@RequestBody final ProductManagementDto.Request.Stock stock
+		@Valid @RequestBody final ProductManagementDto.Request.Stock stock
 	) {
 		ProductManagementDto productManagementDto = productManagementService.decreaseToStock(stock);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
@@ -60,9 +64,14 @@ public class ExternalProductManagementController {
 	@PutMapping("/{productId}")
 	public Response<ProductManagementDto.Response> modifyToProduct(
 		@PathVariable("productId") final Integer productId,
-		@RequestBody final ProductManagementDto.Request.Modify modifyProduct
+		@Valid @RequestPart(value = "modifyProduct") final ProductManagementDto.Request.Modify modifyProduct,
+		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
+		@RequestPart(value = "images", required = false) final List<MultipartFile> images
+
 	) {
-		ProductManagementDto productManagementDto = productManagementService.modifyToProduct(productId, modifyProduct);
+		ProductManagementDto productManagementDto = productManagementService
+			.modifyToProduct(productId, modifyProduct, thumbnailImage, images);
+
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 }
