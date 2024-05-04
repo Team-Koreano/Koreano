@@ -86,7 +86,7 @@ public class S3Provider {
 			new Thread(() -> {
 				try {
 					String url = upload(thumbnailImage);
-					result.put(index, ProductManagementDto.Request.Image.from(url, index, true));
+					result.put(index, ProductManagementDto.Request.Image.ofCreate(url, index, true));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
@@ -105,7 +105,7 @@ public class S3Provider {
 				new Thread(() -> {
 					try {
 						String url = upload(file);
-						result.put(index, ProductManagementDto.Request.Image.from(url, index, isThumbnail));
+						result.put(index, ProductManagementDto.Request.Image.ofCreate(url, index, isThumbnail));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					} finally {

@@ -84,7 +84,7 @@ public class ProductManagementDto {
 			Short sequenceNumber,
 			boolean isThumbnail
 		) {
-			public static Image from(String imageUrl, Short sequenceNumber, boolean isThumbnail) {
+			public static Image ofCreate(String imageUrl, Short sequenceNumber, boolean isThumbnail) {
 				return new Image(imageUrl, sequenceNumber, isThumbnail);
 			}
 		}
