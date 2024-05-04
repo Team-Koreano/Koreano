@@ -133,6 +133,7 @@ public class BeanPayService {
 	 @param - BeanPayDto.Request.TossFail request
 	 @return - BeanPayDto
 	 */
+	@Transactional
 	public BeanPayDto failTossCharge(final BeanPayDto.Request.TossFail request) {
 
 		BeanPayDetail findBeanPayDetail = getBeanPayDetail(request.orderId());
