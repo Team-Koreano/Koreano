@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,10 +20,12 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productmanagementapi.config.MockS3Config;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.external.ProductManagementService;
+import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
-import org.ecommerce.productmanagementapi.service.ProductManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +34,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,12 +54,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-class ExternalProductManagementControllerTest {
+@Import(MockS3Config.class)
+class ProductManagementControllerTest {
 
 	private static final SellerRep test = new SellerRep(2, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.
 		parse("2024-04-14T17:41:52+09:00",
-		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
 	@Autowired
 	private MockMvc mockMvc;
 	@Autowired
@@ -62,6 +71,8 @@ class ExternalProductManagementControllerTest {
 	private ProductManagementService productManagementService;
 	@MockBean
 	private ImageRepository imageRepository;
+	@MockBean
+	private S3Provider s3Provider;
 
 	@BeforeEach
 	void 초기_셋팅() {
@@ -74,10 +85,10 @@ class ExternalProductManagementControllerTest {
 	@Test
 	void 상품_등록() throws Exception {
 		//given
-		final List<ProductManagementDto.Request.Register.ImageDto> imageDtos = List.of(
-			new ProductManagementDto.Request.Register.ImageDto("image1.jpg", true, (short)1),
-			new ProductManagementDto.Request.Register.ImageDto("image2.jpg", false, (short)2),
-			new ProductManagementDto.Request.Register.ImageDto("image3.jpg", false, (short)3)
+		final List<ProductManagementDto.Request.Image> imageDtos = List.of(
+			new ProductManagementDto.Request.Image("image1.jpg", (short)1, true),
+			new ProductManagementDto.Request.Image("image2.jpg", (short)2, false),
+			new ProductManagementDto.Request.Image("image3.jpg", (short)3, false)
 		);
 
 		final ProductManagementDto.Request.Register productDtos =
@@ -90,8 +101,7 @@ class ExternalProductManagementControllerTest {
 				ProductCategory.BEAN,
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
-				false,
-				imageDtos
+				false
 			);
 
 		final Product product = Product.ofCreate(
@@ -106,26 +116,45 @@ class ExternalProductManagementControllerTest {
 			productDtos.isDecaf(),
 			test
 		);
+		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
+
+		List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+
+		final MockMultipartFile mockMultipartFile = createMockFile("images");
+		mockMultipartFiles.add(mockMultipartFile);
+
+		final MockMultipartFile productJson = new MockMultipartFile("product", "",
+			"application/json", objectMapper.writeValueAsString(productDtos).getBytes(StandardCharsets.UTF_8));
 
 		final ProductManagementDto productConvertToDto = ProductManagementMapper.INSTANCE.toDto(product);
 
 		final ProductManagementDto.Response expectedResponse = ProductManagementMapper.INSTANCE.toResponse(
 			productConvertToDto);
+
 		saveImages(imageDtos, product);
-		when(productManagementService.productRegister(productDtos)).thenReturn(productConvertToDto);
+
+		when(productManagementService.productRegister(productDtos, mockThumbnailImage,
+			mockMultipartFiles)).thenReturn(productConvertToDto);
+
+		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 		//when
 		//then
 		final ArgumentCaptor<List<Image>> imageListCaptor = ArgumentCaptor.forClass(List.class);
+
 		verify(imageRepository, times(1)).saveAll(imageListCaptor.capture());
+
 		final List<Image> savedImages = imageListCaptor.getValue();
 
 		verifyImages(savedImages, 0, imageDtos);
 
-		ResultActions resultActions = mockMvc.perform(post("/api/external/product-management/v1")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(productDtos))
-			)
-			.andExpect(status().isOk());
+		ResultActions resultActions = mockMvc.perform(multipart("/api/external/product/v1")
+				.file(productJson)
+				.file(mockThumbnailImage)
+				.file(mockMultipartFile)
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+			).andExpect(status().isOk())
+			.andDo(print());
+
 		resultActions
 			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
 			.andExpect(jsonPath("$.result.price").value(expectedResponse.price()))
@@ -145,6 +174,7 @@ class ExternalProductManagementControllerTest {
 		// Given
 		final int productId = 1;
 		final ProductStatus status = ProductStatus.DISCONTINUED;
+
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
@@ -158,7 +188,7 @@ class ExternalProductManagementControllerTest {
 
 		// when
 		// then
-		mockMvc.perform(put("/api/external/product-management/v1/status/{productId}/{status}", productId, status)
+		mockMvc.perform(put("/api/external/product/v1/status/{productId}/{status}", productId, status)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result.id").value(productId))
@@ -191,7 +221,7 @@ class ExternalProductManagementControllerTest {
 			.thenReturn(expectedResponse);
 
 		// when & then
-		mockMvc.perform(put("/api/external/product-management/v1/stock/increase")
+		mockMvc.perform(put("/api/external/product/v1/stock/increase")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto)))
 			.andExpect(status().isOk())
@@ -212,16 +242,39 @@ class ExternalProductManagementControllerTest {
 			dto.isCrush(), null, null, null, null
 		);
 
+		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
+
+		List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+
+		final MockMultipartFile mockMultipartFile = createMockFile("images");
+
+		final MockMultipartFile productJson = new MockMultipartFile("modifyProduct", "",
+			"application/json", objectMapper.writeValueAsString(dto).getBytes(StandardCharsets.UTF_8));
+
+		mockMultipartFiles.add(mockMultipartFile);
+
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
 
 		when(productManagementService.modifyToProduct(eq(productId),
-			eq(dto))).thenReturn(expectedResponse);
+			eq(dto), eq(mockThumbnailImage), eq(mockMultipartFiles))).thenReturn(expectedResponse);
 
 		// when & then
-		mockMvc.perform(put("/api/external/product-management/v1/{productId}", productId)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(dto)))
+		ResultActions perform = mockMvc.perform(
+			multipart("/api/external/product/v1/{productId}", productId)
+				.file(productJson)
+				.file(mockThumbnailImage)
+				.file(mockMultipartFile)
+				.with(new RequestPostProcessor() {
+					@Override
+					public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+						request.setMethod("PUT");
+						return request;
+					}
+				})
+				.contentType(MediaType.MULTIPART_FORM_DATA));
+		perform
 			.andExpect(status().isOk())
+			.andDo(print())
 			.andExpect(jsonPath("$.result.id").value(expectedResponse.getId()))
 			.andExpect(jsonPath("$.result.category").value(expectedResponse.getCategory().name()))
 			.andExpect(jsonPath("$.result.price").value(expectedResponse.getPrice()))
@@ -232,13 +285,13 @@ class ExternalProductManagementControllerTest {
 	}
 
 	private void verifyImages(List<Image> images, int index,
-		List<ProductManagementDto.Request.Register.ImageDto> imageDtos) {
+		List<ProductManagementDto.Request.Image> imageDtos) {
 		if (index >= images.size()) {
 			return;
 		}
 
 		Image image = images.get(index);
-		ProductManagementDto.Request.Register.ImageDto imageDto = imageDtos.get(index);
+		ProductManagementDto.Request.Image imageDto = imageDtos.get(index);
 
 		assertThat(image.getImageUrl()).isEqualTo(imageDto.imageUrl());
 		assertThat(image.getIsThumbnail()).isEqualTo(imageDto.isThumbnail());
@@ -247,11 +300,19 @@ class ExternalProductManagementControllerTest {
 		verifyImages(images, index + 1, imageDtos);
 	}
 
-	private void saveImages(List<ProductManagementDto.Request.Register.ImageDto> imageDtos, Product savedProduct) {
+	private void saveImages(List<ProductManagementDto.Request.Image> imageDtos, Product savedProduct) {
 		List<Image> images = imageDtos.stream()
 			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(),
 				savedProduct))
 			.collect(Collectors.toList());
 		imageRepository.saveAll(images);
 	}
+
+	private static MockMultipartFile createMockFile(String name) {
+		return new MockMultipartFile(name, "test.txt",
+			"multipart/form-data",
+			"test file".getBytes(StandardCharsets.UTF_8));
+	}
+
 }
+
