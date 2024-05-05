@@ -89,4 +89,15 @@ public class OrderDetail {
 				OrderStatusHistory.ofRecord(orderDetail, OPEN));
 		return orderDetail;
 	}
+
+	public void changeStatus(
+			final OrderStatus changeStatus,
+			final OrderStatusReason changeStatusReason
+	) {
+		this.status = changeStatus;
+		this.statusReason = changeStatusReason;
+		this.orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, changeStatus)
+		);
+	}
 }

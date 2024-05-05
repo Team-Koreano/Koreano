@@ -58,13 +58,17 @@ public class Stock {
 		return stock;
 	}
 
-	public void decreaseTotalStock(final Integer quantity, final OrderDetail orderDetail) {
+	public void decreaseTotalStock(
+			final Integer quantity,
+			final OrderDetail orderDetail
+	) {
 		this.total -= quantity;
-		this.stockHistories.add(StockHistory.ofRecord(
-				this,
-				orderDetail,
-				DECREASE
-		));
+		this.stockHistories.add(
+				StockHistory.ofRecord(
+						this,
+						orderDetail,
+						DECREASE
+				));
 	}
 
 	public boolean hasStock(Integer quantity) {

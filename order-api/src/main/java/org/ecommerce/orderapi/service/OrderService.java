@@ -59,7 +59,6 @@ public class OrderService {
 		final List<Integer> productIds = bucketSummary.getProductIds();
 		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
 
-		// TODO : FeignClient Product 정보 받기
 		final List<Product> products = getProducts(productIds);
 
 		validateStock(productIds, productIdToQuantityMap);
@@ -95,7 +94,7 @@ public class OrderService {
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
-		return BucketSummary.ofCreate(
+		return BucketSummary.of(
 				bucketServiceClient.getBuckets(userId, bucketIds)
 						.stream()
 						.map(BucketMapper.INSTANCE::responseToDto).toList());
@@ -107,8 +106,7 @@ public class OrderService {
 	) {
 		return productServiceClient.getProducts(productIds)
 				.stream()
-				.map(ProductMapper.INSTANCE::responseToDto)
-				.map(ProductMapper.INSTANCE::toEntity)
+				.map(ProductMapper.INSTANCE::responseToEntity)
 				.toList();
 	}
 
@@ -125,11 +123,10 @@ public class OrderService {
 			final Map<Integer, Integer> quantities
 	) {
 		List<Stock> stocks = stockRepository.findByProductIdIn(productIds);
-
+		if (stocks.size() != productIds.size()) {
+			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
+		}
 		stocks.forEach(stock -> {
-			if (stock.getTotal() == null) {
-				throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
-			}
 			if (!stock.hasStock(quantities.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
@@ -145,9 +142,6 @@ public class OrderService {
 	@VisibleForTesting
 	public void validateProduct(final List<Product> products) {
 		products.forEach(product -> {
-			if (product == null) {
-				throw new CustomException(NOT_FOUND_PRODUCT_ID);
-			}
 			if (product.getStatus() != ProductStatus.AVAILABLE) {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
