@@ -13,14 +13,17 @@ import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
+import org.ecommerce.orderapi.client.ProductServiceClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.dto.ProductDto;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
+import org.ecommerce.orderapi.repository.StockRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +41,13 @@ public class OrderServiceTest {
 	private OrderRepository orderRepository;
 
 	@Mock
+	private StockRepository stockRepository;
+
+	@Mock
 	private BucketServiceClient bucketServiceClient;
+
+	@Mock
+	private ProductServiceClient productServiceClient;
 
 	@Test
 	void 주문_생성() {
@@ -102,8 +111,28 @@ public class OrderServiceTest {
 						LocalDate.of(2024, 5, 1)
 				)
 		);
+		final List<ProductDto.Response> productServiceResponse = List.of(
+				new ProductDto.Response(
+						101,
+						"에디오피아 아가체프",
+						1000,
+						"seller1",
+						AVAILABLE
+				),
+				new ProductDto.Response(
+						102,
+						"과테말라 안티구아",
+						2000,
+						"seller2",
+						AVAILABLE
+				)
+		);
+		given(stockRepository.findByProductIdIn(anyList()))
+				.willReturn(stocks);
 		given(bucketServiceClient.getBuckets(anyInt(), anyList()))
 				.willReturn(bucketServiceResponse);
+		given(productServiceClient.getProducts(anyList()))
+				.willReturn(productServiceResponse);
 		ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
 		// when
@@ -111,11 +140,11 @@ public class OrderServiceTest {
 
 		// then
 		verify(orderRepository, times(1)).save(orderCaptor.capture());
-
 		Order savedOrder = orderCaptor.getValue();
 		assertEquals(userId, orderCaptor.getValue().getUserId());
 		assertEquals(request.deliveryComment(), savedOrder.getDeliveryComment());
 		assertEquals(request.bucketIds().size(), savedOrder.getOrderDetails().size());
+
 		Integer product1Price = products.get(0).getPrice();
 		Integer product2Price = products.get(1).getPrice();
 		Integer product1Quantity = bucketServiceResponse.get(0).quantity();
@@ -125,6 +154,7 @@ public class OrderServiceTest {
 		List<OrderDetail> savedOrderDetails = savedOrder.getOrderDetails();
 		assertEquals(product1TotalPrice, savedOrderDetails.get(0).getTotalPrice());
 		assertEquals(product2TotalPrice, savedOrderDetails.get(1).getTotalPrice());
+
 		Integer expectedTotalPaymentAmount = product1TotalPrice + product2TotalPrice;
 		assertEquals(expectedTotalPaymentAmount, savedOrder.getTotalPaymentAmount());
 		assertEquals(OrderStatus.OPEN, savedOrderDetails.get(0).getStatus());
@@ -136,26 +166,26 @@ public class OrderServiceTest {
 		// given
 		List<Integer> productIds = List.of(101, 102);
 		Map<Integer, Integer> productIdToQuantityMap = new HashMap<>();
-		productIdToQuantityMap.put(101, 1);
+		productIdToQuantityMap.put(101, 11);
 		productIdToQuantityMap.put(102, 2);
-		final List<BucketDto.Response> bucketServiceResponse = List.of(
-				new BucketDto.Response(
-						1L,
+		final List<Stock> stocks = List.of(
+				new Stock(
 						1,
-						"seller1",
 						101,
-						1,
-						LocalDate.of(2024, 5, 1)
+						10,
+						LocalDateTime.of(2024, 5, 4, 0, 0),
+						null
 				),
-				new BucketDto.Response(
-						2L,
-						1,
-						"seller2",
-						102,
+				new Stock(
 						2,
-						LocalDate.of(2024, 5, 1)
+						102,
+						20,
+						LocalDateTime.of(2024, 5, 4, 0, 0),
+						null
 				)
 		);
+		given(stockRepository.findByProductIdIn(anyList()))
+				.willReturn(stocks);
 
 		// when
 		CustomException exception = assertThrows(CustomException.class,

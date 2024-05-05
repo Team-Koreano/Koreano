@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.service.OrderService;
+import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,6 +36,9 @@ public class OrderControllerTest {
 
 	@MockBean
 	private OrderService orderService;
+
+	@MockBean
+	private StockService stockService;
 
 	@Test
 	void 주문하기() throws Exception {
