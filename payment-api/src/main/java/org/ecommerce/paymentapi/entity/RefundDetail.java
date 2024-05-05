@@ -2,7 +2,7 @@ package org.ecommerce.paymentapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.paymentapi.entity.type.RefundStatus;
+import org.ecommerce.paymentapi.entity.enumerate.RefundStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 

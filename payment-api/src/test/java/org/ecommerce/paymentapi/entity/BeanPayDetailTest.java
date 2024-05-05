@@ -1,6 +1,6 @@
 package org.ecommerce.paymentapi.entity;
 
-import static org.ecommerce.paymentapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,8 +9,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
-import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

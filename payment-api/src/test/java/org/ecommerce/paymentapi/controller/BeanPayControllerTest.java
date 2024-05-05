@@ -1,7 +1,7 @@
 
 package org.ecommerce.paymentapi.controller;
 
-import static org.ecommerce.paymentapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -16,8 +16,8 @@ import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
-import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
-import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.service.BeanPayService;
 import org.ecommerce.paymentapi.service.LockTestService;
 import org.ecommerce.paymentapi.service.PaymentServiceImpl;
@@ -71,7 +71,8 @@ class BeanPayControllerTest {
 	void 사전결제객체_생성() throws Exception {
 		//given
 		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
-		final BeanPayDetail entity = BeanPayDetail.ofCreate(getBeanPay(), 1, 10_000);
+		final BeanPay beanPay = getBeanPay();
+		final BeanPayDetail entity = beanPay.preCharge(10000);
 		final BeanPayDto dto = BeanPayMapper.INSTANCE.toDto(entity);
 
 		when(beanPayService.preChargeBeanPay(request)).thenReturn(dto);
