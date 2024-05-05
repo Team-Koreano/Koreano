@@ -79,23 +79,6 @@ subprojects {
     sourceCompatibility = '17'
 }
 
-project(':common') {
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter'
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-        implementation 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
-        implementation 'org.springframework.boot:spring-boot-starter-aop'
-        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
-
-        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
-    }
-}
-
-
 project(':bucket-api') {
     dependencies {
         implementation(project(':common'))
