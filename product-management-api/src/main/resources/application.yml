@@ -5,7 +5,7 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
-      file-size-threshold: 2KB
+      file-size-threshold: 0KB
       enabled: true
   jpa:
     hibernate:
