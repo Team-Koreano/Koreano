@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.controller;
+package org.ecommerce.orderapi.external.controller;
 
 import static org.ecommerce.orderapi.exception.ErrorMessage.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDto;
-import org.ecommerce.orderapi.external.controller.OrderController;
 import org.ecommerce.orderapi.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

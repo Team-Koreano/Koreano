@@ -1,18 +1,23 @@
 package org.ecommerce.orderapi.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public class StockDto {
 	private Integer id;
 	private Integer productId;
 	private Integer total;
-	private LocalDate createDatetime;
+	private LocalDateTime createDatetime;
 
 	public record Response(
 			Integer id,
 			Integer productId,
 			Integer total,
-			LocalDate createDatetime
+			LocalDateTime createDatetime
 	) {
 	}
 }
