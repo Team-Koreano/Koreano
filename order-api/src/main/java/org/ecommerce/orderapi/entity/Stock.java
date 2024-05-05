@@ -63,6 +63,7 @@ public class Stock {
 			final OrderDetail orderDetail
 	) {
 		this.total -= quantity;
+		this.stockHistories = new ArrayList<>(this.stockHistories);
 		this.stockHistories.add(
 				StockHistory.ofRecord(
 						this,
@@ -73,9 +74,5 @@ public class Stock {
 
 	public boolean hasStock(Integer quantity) {
 		return this.total >= quantity;
-	}
-
-	public boolean isSoldOut() {
-		return this.total == 0;
 	}
 }

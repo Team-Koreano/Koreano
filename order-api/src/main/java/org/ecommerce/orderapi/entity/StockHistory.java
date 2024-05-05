@@ -34,7 +34,7 @@ public class StockHistory {
 	private Stock stock;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
+	@JoinColumn
 	private OrderDetail orderDetail;
 
 	@Column

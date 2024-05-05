@@ -21,10 +21,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "order_detail")
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class OrderDetail {
 
@@ -96,6 +101,7 @@ public class OrderDetail {
 	) {
 		this.status = changeStatus;
 		this.statusReason = changeStatusReason;
+		this.orderStatusHistories = new ArrayList<>(this.orderStatusHistories);
 		this.orderStatusHistories.add(
 				OrderStatusHistory.ofRecord(this, changeStatus)
 		);

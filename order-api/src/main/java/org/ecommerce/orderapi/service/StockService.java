@@ -1,7 +1,6 @@
 package org.ecommerce.orderapi.service;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
-import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
@@ -9,13 +8,17 @@ import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.aop.StockLock;
+import org.ecommerce.orderapi.dto.OrderDetailDto;
+import org.ecommerce.orderapi.dto.OrderDetailMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -38,7 +41,7 @@ public class StockService {
 	 *
 	 */
 	@StockLock
-	public List<StockDto> decreaseStocks(final Long orderId) {
+	public List<OrderDetailDto> decreaseStocks(final Long orderId) {
 		final List<OrderDetail> orderDetails =
 				orderDetailRepository.findOrderDetailsByOrderId(orderId);
 		if (orderDetails == null || orderDetails.isEmpty()) {
@@ -54,36 +57,58 @@ public class StockService {
 			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 		}
 
-		orderDetails.forEach(
-				orderDetail -> {
-					final Integer productId = orderDetail.getProductId();
-					final Integer quantity = orderDetail.getQuantity();
-					final Stock stock = productToToStockMap.get(productId);
+		boolean decreaseResult = decreaseStock(orderDetails, productToToStockMap);
+		saveOrderStatus(orderDetails, decreaseResult);
 
-					if (!stock.hasStock(quantity)) {
-						saveFailedOrderDetails(orderDetails);
-						throw new CustomException(INSUFFICIENT_STOCK);
-					}
-					stock.decreaseTotalStock(quantity, orderDetail);
-					orderDetail.changeStatus(CLOSED, null);
-				}
-		);
-		return productToToStockMap.values().stream()
-				.map(StockMapper.INSTANCE::toStockDto)
+		return orderDetails.stream()
+				.map(OrderDetailMapper.INSTANCE::toOrderDetailDto)
 				.toList();
+	}
+
+	public boolean decreaseStock(
+			final List<OrderDetail> orderDetails,
+			final Map<Integer, Stock> stockMap
+	) {
+		try {
+			orderDetails.forEach(
+					orderDetail -> {
+						final Integer productId = orderDetail.getProductId();
+						final Integer quantity = orderDetail.getQuantity();
+						final Stock stock = stockMap.get(productId);
+
+						if (!stock.hasStock(quantity)) {
+							throw new CustomException(INSUFFICIENT_STOCK);
+						}
+						stock.decreaseTotalStock(quantity, orderDetail);
+					}
+			);
+		} catch (CustomException e) {
+			log.error("Error while decrease stock : {}", e.getErrorCode());
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * 재고 차감 실패에 대한 로그를 남기는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetails- 주문상세 리스트
+	 * @param orderDetails- 주문 아이디
 	 */
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@VisibleForTesting
-	public void saveFailedOrderDetails(List<OrderDetail> orderDetails) {
-		orderDetails.forEach(
-				orderDetail -> orderDetail.changeStatus(CANCELLED, OUT_OF_STOCK));
+	public void saveOrderStatus(
+			final List<OrderDetail> orderDetails,
+			final boolean decreaseResult
+	) {
+		if (decreaseResult) {
+			orderDetails.forEach(
+					orderDetail -> orderDetail.changeStatus(CLOSED, null));
+		} else {
+			orderDetails.forEach(
+					orderDetail -> orderDetail.changeStatus(CANCELLED,
+							OrderStatusReason.OUT_OF_STOCK));
+		}
 	}
 
 	/**

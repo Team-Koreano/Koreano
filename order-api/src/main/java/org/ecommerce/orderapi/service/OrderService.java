@@ -1,5 +1,6 @@
 package org.ecommerce.orderapi.service;
 
+import static org.ecommerce.orderapi.entity.enumerated.ProductStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
@@ -16,7 +17,6 @@ import org.ecommerce.orderapi.dto.ProductMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
-import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
@@ -104,6 +104,23 @@ public class OrderService {
 	public List<Product> getProducts(
 			final List<Integer> productIds
 	) {
+		// API (PostMan) 테스트를 위한 코드
+		// return List.of(
+		// 		new Product(
+		// 				101,
+		// 				"에디오피아 이가체프",
+		// 				10000,
+		// 				"seller1",
+		// 				AVAILABLE
+		// 		),
+		// 		new Product(
+		// 				102,
+		// 				"과테말라 안티구아",
+		// 				20000,
+		// 				"seller2",
+		// 				AVAILABLE
+		// 		)
+		// );
 		return productServiceClient.getProducts(productIds)
 				.stream()
 				.map(ProductMapper.INSTANCE::responseToEntity)
@@ -142,7 +159,7 @@ public class OrderService {
 	@VisibleForTesting
 	public void validateProduct(final List<Product> products) {
 		products.forEach(product -> {
-			if (product.getStatus() != ProductStatus.AVAILABLE) {
+			if (product.getStatus() != AVAILABLE) {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
 		});
