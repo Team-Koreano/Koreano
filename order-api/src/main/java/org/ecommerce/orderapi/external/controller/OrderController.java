@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController("externalOrderController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/external/orders/v1")
 public class OrderController {

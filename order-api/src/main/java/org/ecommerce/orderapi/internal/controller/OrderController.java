@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController("InternalOrderController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/internal/orders/v1")
 public class OrderController {
