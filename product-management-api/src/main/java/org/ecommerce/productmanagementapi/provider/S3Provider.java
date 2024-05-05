@@ -8,10 +8,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.productmanagementapi.aop.TimeCheck;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +27,10 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 @Component
 public class S3Provider {
@@ -68,11 +74,16 @@ public class S3Provider {
 		return validateImageExtension(parseExtension(file));
 	}
 
+	@TimeCheck
 	public List<ProductManagementDto.Request.Image> uploadImageFiles(MultipartFile thumbnailImage,
 		List<MultipartFile> files) {
+
 		final int numberOfThreads = (files != null ? files.size() : 0) + (thumbnailImage != null ? 1 : 0);
-		final CountDownLatch latch = new CountDownLatch(numberOfThreads);
-		ConcurrentHashMap<Short, ProductManagementDto.Request.Image> result = new ConcurrentHashMap<>(numberOfThreads);
+
+		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(numberOfThreads,
+			4));
+
+		List<CompletableFuture<ProductManagementDto.Request.Image>> tasks = new ArrayList<>(numberOfThreads);
 
 		short count = 0;
 		boolean hasThumbnail = false;
@@ -83,45 +94,43 @@ public class S3Provider {
 			count++;
 			final short index = count;
 			hasThumbnail = true;
-			new Thread(() -> {
+			tasks.add(CompletableFuture.supplyAsync(() -> {
 				try {
 					String url = upload(thumbnailImage);
-					result.put(index, ProductManagementDto.Request.Image.ofCreate(url, index, true));
+					return ProductManagementDto.Request.Image.ofCreate(url, index, true);
 				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					latch.countDown();
+					throw new CustomException(ProductManagementErrorCode.FAILED_FILE_UPLOAD);
 				}
-			}).start();
+			}, executorService));
 		}
 
 		if (files != null) {
-			if (!validateImageFiles(files))
-				throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
+			short index = thumbnailImage != null ? (short)2 : (short)1;
 			for (MultipartFile file : files) {
-				count++;
-				final short index = count;
-				boolean isThumbnail = !hasThumbnail && index == 1; // 썸네일 이미지가 없고, 첫 번째 이미지일 경우
-				new Thread(() -> {
+				final short finalIndex = index++;
+				boolean isThumbnail = !hasThumbnail && finalIndex == 1;
+				tasks.add(CompletableFuture.supplyAsync(() -> {
 					try {
 						String url = upload(file);
-						result.put(index, ProductManagementDto.Request.Image.ofCreate(url, index, isThumbnail));
+						return ProductManagementDto.Request.Image.ofCreate(url, finalIndex, isThumbnail);
 					} catch (IOException e) {
-						throw new RuntimeException(e);
-					} finally {
-						latch.countDown();
+						throw new CustomException(ProductManagementErrorCode.FAILED_FILE_UPLOAD);
 					}
-				}).start();
+				}, executorService));
 			}
 		}
 
 		try {
-			latch.await();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+			CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0]));
+		} catch (CompletionException e) {
+			throw new CustomException(ProductManagementErrorCode.FAILED_FILE_UPLOAD);
+		} finally {
+			executorService.shutdown();
 		}
 
-		return new ArrayList<>(result.values());
+		return tasks.stream()
+			.map(CompletableFuture::join)
+			.collect(Collectors.toList());
 	}
 
 	private boolean validateImageFiles(Collection<MultipartFile> files) {
@@ -142,6 +151,7 @@ public class S3Provider {
 	}
 
 	private String upload(MultipartFile file) throws IOException {
+		log.info("now ThreadName = {}", Thread.currentThread().getName());
 		ObjectMetadata meta = new ObjectMetadata();
 		meta.setContentType(file.getContentType());
 		meta.setContentLength(file.getSize());
