@@ -38,6 +38,8 @@ public class StockService {
 	/**
 	 * 상세 주문들의 재고를 감소시키는 메소드입니다.
 	 * @author ${Juwon}
+	 * @param orderId- 주문 번호
+	 * @return - 주문 상세 리스트
 	 *
 	 */
 	@StockLock
@@ -65,6 +67,15 @@ public class StockService {
 				.toList();
 	}
 
+	/**
+	 * 재고를 차감하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetails- 변수 설명 텍스트
+	 * @param stockMap- 변수 설명 텍스트
+	 * @return - 재고 차감 성공 여부
+	*/
+	@VisibleForTesting
 	public boolean decreaseStock(
 			final List<OrderDetail> orderDetails,
 			final Map<Integer, Stock> stockMap
@@ -90,10 +101,11 @@ public class StockService {
 	}
 
 	/**
-	 * 재고 차감 실패에 대한 로그를 남기는 메소드입니다.
+	 * 재고 차감에 성공 여부를 주문 상세에 저장하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetails- 주문 아이디
+	 * @param orderDetails- 주문 상세 리스트
+	 * @param decreaseResult- 재고 차감 성공 여부
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@VisibleForTesting
