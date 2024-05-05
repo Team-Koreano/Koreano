@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController("externalProductSearchController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/external/product/v1")
 public class ProductSearchController {
