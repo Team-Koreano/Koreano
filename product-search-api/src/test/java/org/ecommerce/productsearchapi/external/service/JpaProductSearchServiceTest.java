@@ -29,7 +29,7 @@ public class JpaProductSearchServiceTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@InjectMocks
-	private JpaProductSearchService jpaProductSearchService;
+	private ProductSearchService productSearchService;
 	@Mock
 	private ProductRepository productRepository;
 
@@ -42,7 +42,7 @@ public class JpaProductSearchServiceTest {
 		given(productRepository.findProductById(anyInt())).willReturn(Optional.of(product));
 
 		// when
-		final ProductSearchDto productSearchDto = jpaProductSearchService.getProductById(1);
+		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
 
 		// then
 		assertEquals(product.getId(), productSearchDto.getId());
@@ -83,7 +83,7 @@ public class JpaProductSearchServiceTest {
 		given(productRepository.findProductById(anyInt())).willReturn(Optional.empty());
 
 		// when
-		CustomException exception = assertThrows(CustomException.class, () -> jpaProductSearchService.getProductById(1));
+		CustomException exception = assertThrows(CustomException.class, () -> productSearchService.getProductById(1));
 
 		//then
 		assertEquals(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID, exception.getErrorCode());
