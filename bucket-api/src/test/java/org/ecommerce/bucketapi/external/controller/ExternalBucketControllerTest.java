@@ -1,4 +1,4 @@
-package org.ecommerce.bucketapi.controller;
+package org.ecommerce.bucketapi.external.controller;
 
 import static org.ecommerce.bucketapi.exception.ErrorMessage.*;
 import static org.mockito.BDDMockito.*;
@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(ExternalBucketController.class)
+@WebMvcTest(BucketController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 public class ExternalBucketControllerTest {
 

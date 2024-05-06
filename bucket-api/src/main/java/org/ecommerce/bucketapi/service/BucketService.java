@@ -25,27 +25,13 @@ public class BucketService {
 	// TODO : 상품 검증 로직 추가 (cu)
 
 	/**
-	 * 장바구니가 회원에게 유효한지 검증하는 메소드입니다.
-	 * <p>
-	 * @author ${Juwon}
-	 *
-	 * @param userId- 회원 번호
-	 * @param bucket- 장바구니
-	*/
-	private void validateBucketWithUserId(final Integer userId, final Bucket bucket) {
-		if (!bucket.getUserId().equals(userId)) {
-			throw new CustomException(INVALID_BUCKET_WITH_USER);
-		}
-	}
-
-	/**
 	 * 회원의 장바구니 목록을 조회하는 메소드입니다.
 	 * <p>
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
 	 * @return List<BucketDto>- 장바구니 정보가 담긴 리스트
-	*/
+	 */
 	@Transactional(readOnly = true)
 	public List<BucketDto> getAllBuckets(final Integer userId) {
 
@@ -65,7 +51,7 @@ public class BucketService {
 	 * @param userId- 회원 번호
 	 * @param addRequest- 장바구니에 담을 상품 정보
 	 * @return BucketDto- 장바구니 정보
-	*/
+	 */
 	public BucketDto addBucket(
 			final Integer userId,
 			final BucketDto.Request.Add addRequest
@@ -96,16 +82,14 @@ public class BucketService {
 	 * @param bucketId- 수정할 장바구니 번호
 	 * @param modifyRequest- 수량, 옵션 둥 수정 정보
 	 * @return BucketDto- 수정된 장바구니 정보
-	*/
+	 */
 	public BucketDto modifyBucket(
 			final Integer userId,
 			final Long bucketId,
 			final BucketDto.Request.Modify modifyRequest
 	) {
-		final Bucket bucket = bucketRepository.findById(bucketId)
+		final Bucket bucket = bucketRepository.findByIdAndUserId(bucketId, userId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
-		validateBucketWithUserId(userId, bucket);
-
 		bucket.modifyQuantity(modifyRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
@@ -124,14 +108,11 @@ public class BucketService {
 	 * @param userId- 회원 번호
 	 * @param bucketIds- 정보를 조회할 장바구니 번호 리스트
 	 * @return BucketDto- 장바구니 정보가 담긴 리스트
-	*/
+	 */
 	@Transactional(readOnly = true)
 	public List<BucketDto> getBuckets(final Integer userId, final List<Long> bucketIds) {
 
-		List<Bucket> buckets = bucketRepository.findAllById(bucketIds)
-				.stream()
-				.peek(bucket -> validateBucketWithUserId(userId, bucket))
-				.toList();
+		List<Bucket> buckets = bucketRepository.findAllByIdInAndUserId(bucketIds, userId);
 
 		if (bucketIds.size() != buckets.size()) {
 			throw new CustomException(NOT_FOUND_BUCKET_ID);
