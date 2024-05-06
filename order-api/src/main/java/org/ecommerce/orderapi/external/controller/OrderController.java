@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.external.controller;
 
+import java.util.List;
+
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -39,6 +42,20 @@ public class OrderController {
 				OrderMapper.INSTANCE.toResponse(
 						orderService.placeOrder(USER_ID, placeRequest)
 				)
+		);
+	}
+
+	@GetMapping
+	public Response<List<OrderDto.Response>> getOrders(
+			@RequestParam(required = false) final Integer year,
+			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber
+	) {
+
+		return new Response<>(
+				HttpStatus.OK.value(),
+				orderService.getOrders(USER_ID, year, pageNumber).stream()
+						.map(OrderMapper.INSTANCE::toResponse)
+						.toList()
 		);
 	}
 

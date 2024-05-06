@@ -13,12 +13,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+		@Index(name = "idx_order_datetime", columnList = "orderDatetime"),
+		@Index(name = "idx_order_user_id", columnList = "userId")
+})
 @Getter
 public class Order {
 

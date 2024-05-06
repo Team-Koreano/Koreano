@@ -19,6 +19,8 @@ import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -163,5 +165,30 @@ public class OrderService {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
 		});
+	}
+
+	/**
+	 * 주문 목록을 조회하는 메소드입니다.
+	 * <p>
+	 * default : 6개월 이내의 주문 내역 조회
+	 * year : 해당 년도의 주문 내역 조회
+	 * <p>
+	 * @author ${USER}
+	 *
+	 * @param userId- 유저 번호
+	 * @param year- 조회 연도
+	 * @param pageNumber- 페이지 번호
+	 * @return - 주문 리스트
+	 */
+	@Transactional(readOnly = true)
+	public List<OrderDto> getOrders(
+			final Integer userId,
+			final Integer year,
+			final Integer pageNumber
+	) {
+		Pageable pageable = PageRequest.of(pageNumber, 5);
+		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
+				.map(OrderMapper.INSTANCE::toDto)
+				.toList();
 	}
 }
