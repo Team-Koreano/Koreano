@@ -6,13 +6,15 @@ import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class EsProductSearchService {
+public class ElasticSearchService {
 
 	private final ProductElasticsearchRepository productRepository;
 
@@ -25,9 +27,10 @@ public class EsProductSearchService {
 	 */
 
 	public List<ProductSearchDto> suggestSearchKeyword(final String keyword) {
-		final List<ProductDocument> productDocumentList = productRepository.findByNameContaining(keyword);
+		final SearchHits<ProductDocument> searchHits = productRepository.findProductsByNameContaining(keyword);
 
-		return productDocumentList.stream()
+		return searchHits.stream()
+			.map(SearchHit::getContent)
 			.map(ProductMapper.INSTANCE::documentToDto)
 			.toList();
 	}

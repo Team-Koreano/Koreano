@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class JpaProductSearchService {
+public class ProductSearchService {
 
 	private final ProductRepository productRepository;
 
