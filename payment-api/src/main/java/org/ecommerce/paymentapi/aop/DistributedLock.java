@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public @interface DistributedLock {
 
 
-	String key();
+	String[] key();
 
 	TimeUnit timeUnit() default TimeUnit.SECONDS;
 

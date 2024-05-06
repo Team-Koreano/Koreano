@@ -33,12 +33,28 @@ public class DistributedLockAop {
 		Method method = signature.getMethod();
 
 		DistributedLock distributedLock = method.getAnnotation(DistributedLock.class);
+		if(isSingle(distributedLock)) {
+			singleLock(joinPoint, signature, distributedLock);
+			return;
+		}
+		multiLock(joinPoint, signature, distributedLock);
+	}
+
+	private static boolean isSingle(DistributedLock distributedLock) {
+		return distributedLock.key().length == 1;
+	}
+
+	private void singleLock(
+		ProceedingJoinPoint joinPoint,
+		MethodSignature signature,
+		DistributedLock distributedLock
+	) throws Throwable {
 
 		String key = REDISSON_LOCK_PREFIX +
 			CustomSpringELParser.getDynamicValue(
 				signature.getParameterNames(),
 				joinPoint.getArgs(),
-				distributedLock.key()
+				distributedLock.key()[0]
 			);
 		RLock rLock = redissonClient.getLock(key);
 
@@ -49,12 +65,11 @@ public class DistributedLockAop {
 				distributedLock.timeUnit()
 			);
 
-
 			if (!available) {
 				log.info("분산락 획득 실패 : {}", key);
 				return;
 			}
-			
+
 			log.info("분산락 시작: {}", key);
 			aopForTransaction.proceed(joinPoint);  // (3)
 		} catch (InterruptedException e) {
@@ -64,6 +79,57 @@ public class DistributedLockAop {
 				log.info("분산락 종료: {}", key);
 				rLock.unlock();
 			} catch (IllegalMonitorStateException e) {
+			}
+		}
+	}
+
+	private void multiLock(
+		ProceedingJoinPoint joinPoint,
+		MethodSignature signature,
+		DistributedLock distributedLock
+	) throws Throwable{
+
+		RLock[] locks = new RLock[distributedLock.key().length];
+		StringBuilder sb = new StringBuilder();
+
+		String totalKey = null;
+
+		for (int i = 0; i < locks.length; i++) {
+			String key = REDISSON_LOCK_PREFIX +
+				CustomSpringELParser.getDynamicValue(
+					signature.getParameterNames(),
+					joinPoint.getArgs(),
+					distributedLock.key()[i]
+				);
+			sb.append(key + ' ');
+			locks[i] = redissonClient.getLock(key);
+		}
+		totalKey = sb.toString();
+
+		RLock multiLock = redissonClient.getMultiLock(locks);
+
+		try {
+			boolean available = multiLock.tryLock(
+				distributedLock.waitTime(),
+				distributedLock.leaseTime(),
+				distributedLock.timeUnit()
+			);
+
+			if (!available) {
+				log.info("분산락 획득 실패 : {}", totalKey);
+				return;
+			}
+			log.info("분산락 시작: {}", totalKey);
+			aopForTransaction.proceed(joinPoint);
+
+		} catch (Throwable e) {
+			throw new InterruptedException();
+		} finally {
+			try {
+				log.info("분산락 종료: {}", totalKey);
+				multiLock.unlock();
+			} catch (IllegalMonitorStateException e) {
+
 			}
 		}
 	}
