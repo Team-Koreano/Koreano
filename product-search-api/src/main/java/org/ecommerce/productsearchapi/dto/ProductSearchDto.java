@@ -57,10 +57,10 @@ public class ProductSearchDto {
 		private Boolean isDeleted;
 	}
 
-
 	public static class Request {
 
 	}
+
 	public static class Response {
 		public record Detail(
 			Integer id,
@@ -79,7 +79,7 @@ public class ProductSearchDto {
 			Integer favoriteCount,
 			LocalDateTime createDatetime,
 			LinkedList<ImageDto> imageDtoList
-		){
+		) {
 			public static Detail of(final ProductSearchDto productSearchDto) {
 				return new Detail(
 					productSearchDto.getId(),
@@ -104,6 +104,7 @@ public class ProductSearchDto {
 				);
 			}
 		}
+
 		public record SavedProduct(
 			Integer id,
 			String category,
@@ -119,7 +120,7 @@ public class ProductSearchDto {
 			String information,
 			String thumbnailUrl,
 			LocalDateTime createDatetime
-		){
+		) {
 			@VisibleForTesting
 			public static String getThumbnailUrl(List<ImageDto> images) {
 				return images.stream()
@@ -128,7 +129,6 @@ public class ProductSearchDto {
 					.map(ImageDto::getImageUrl)
 					.orElse(null);
 			}
-
 
 			public static SavedProduct of(final ProductSearchDto productSearchDto) {
 				return new SavedProduct(
@@ -146,6 +146,18 @@ public class ProductSearchDto {
 					productSearchDto.getInformation(),
 					productSearchDto.getThumbnailUrl(),
 					productSearchDto.getCreateDatetime()
+				);
+			}
+		}
+
+		public record SuggestedProducts(
+			Integer id,
+			String name
+		) {
+			public static SuggestedProducts of(final ProductSearchDto productSearchDto) {
+				return new SuggestedProducts(
+					productSearchDto.getId(),
+					productSearchDto.getName()
 				);
 			}
 		}
