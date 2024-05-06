@@ -16,6 +16,7 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,8 @@ public class ProductSearchControllerTest {
 	private MockMvc mockMvc;
 	@MockBean
 	private ProductSearchService productSearchService;
+	@MockBean
+	private ElasticSearchService elasticSearchService;
 
 	@Test
 	void 단일_상품_조회() throws Exception {
