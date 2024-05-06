@@ -29,3 +29,12 @@ spring:
 jasypt:
   encryptor:
     password: test
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(ROo1Lg6OWjlnGHhzA6zc6aXvyuQ5DDYsObl5GtKSoVE=)
+      secret-key: ENC(hhNjqFDlOO/ZIencYvXzCp6TsGqIhSa8rZCvszSEYy/EhY4PcA60gCbd3Bz1ub4AZ7bgt0cx8Ks=)
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: koreano-bucket

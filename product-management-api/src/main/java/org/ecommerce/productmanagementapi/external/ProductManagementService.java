@@ -1,6 +1,7 @@
-package org.ecommerce.productmanagementapi.service;
+package org.ecommerce.productmanagementapi.external;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.product.entity.Image;
@@ -10,11 +11,15 @@ import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
+import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
 import org.ecommerce.productmanagementapi.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,16 +33,19 @@ public class ProductManagementService {
 	private final ProductRepository productRepository;
 	private final ImageRepository imageRepository;
 	private final SellerRepository sellerRepository;
+	private final S3Provider s3Provider;
 
 	/**
 	 상품등록 로직
 	 <p>
 	 상품을 등록하는 메서드 입니다
 	 <p>
-	 @param product - 상품 등록 데이터 
+
+	 @param product - 상품 등록 데이터
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product) {
+	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product,
+		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
 		final Product createProduct = Product.ofCreate(
 			product.category(),
@@ -54,7 +62,7 @@ public class ProductManagementService {
 
 		final Product savedProduct = productRepository.save(createProduct);
 
-		saveImages(product.images(), savedProduct);
+		saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), savedProduct);
 
 		return ProductManagementMapper.INSTANCE.toDto(savedProduct);
 	}
@@ -106,7 +114,7 @@ public class ProductManagementService {
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto decreaseToStock(ProductManagementDto.Request.Stock stock) {
+	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 		if (!product.checkStock(stock.requestStock())) {
@@ -116,16 +124,21 @@ public class ProductManagementService {
 	}
 
 	/**
-	 * 상품 수정
-	 * <p>
-	 * 상품을 수정하는 메서드입니다 
-	 * <p>
-	 * @author Hong
-	 *
-	 * @param modifyProduct - 상품을 수정 데이터
-	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 상품 수정
+	 <p>
+	 상품을 수정하는 메서드입니다
+	 <p>
+
+	 @param modifyProduct - 상품을 수정 데이터
+	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto modifyToProduct(Integer productId, ProductManagementDto.Request.Modify modifyProduct) {
+	public ProductManagementDto modifyToProduct(
+		final Integer productId,
+		final ProductManagementDto.Request.Modify modifyProduct,
+		MultipartFile thumbnailImage,
+		List<MultipartFile> images
+	) {
+
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
@@ -140,14 +153,46 @@ public class ProductManagementService {
 			modifyProduct.isDecaf()
 		);
 
+		if (thumbnailImage != null || images != null) {
+			deleteImages(product.getImages().stream().map(Image::getId).collect(Collectors.toList()), product);
+			saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), product);
+		}
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
-	private void saveImages(List<ProductManagementDto.Request.Register.ImageDto> imageDtos, Product savedProduct) {
-		List<Image> images = imageDtos.stream()
-			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(),
-				savedProduct))
+	@VisibleForTesting
+	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
+		if (imagesRequest.isEmpty()) {
+			return;
+		}
+
+		List<Image> images = imagesRequest.stream()
+			.map(imageResponse -> Image.ofCreate(
+				imageResponse.imageUrl(),
+				imageResponse.isThumbnail(),
+				imageResponse.sequenceNumber(),
+				product
+			))
 			.toList();
-		imageRepository.saveAll(images);
+
+		product.getImages().addAll(images);
+	}
+
+	@VisibleForTesting
+	public void deleteImagesFromS3(List<Image> imagesToDelete) {
+		for (Image image : imagesToDelete) {
+			s3Provider.deleteFile(image.getImageUrl());
+		}
+	}
+
+	@VisibleForTesting
+	public void deleteImages(List<Integer> imageIdList, Product product) {
+		List<Image> imagesToDelete = product.getImages().stream()
+			.filter(image -> imageIdList.contains(image.getId()))
+			.collect(Collectors.toList());
+
+		deleteImagesFromS3(imagesToDelete);
+		product.getImages().removeAll(imagesToDelete);
+		imageRepository.deleteAll(imagesToDelete);
 	}
 }

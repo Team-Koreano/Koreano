@@ -3,12 +3,15 @@ package org.ecommerce.productmanagementapi.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.Acidity;
@@ -17,6 +20,8 @@ import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
+import org.ecommerce.productmanagementapi.external.ProductManagementService;
+import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
 import org.junit.jupiter.api.Nested;
@@ -25,8 +30,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
@@ -35,7 +42,7 @@ public class ProductManagementServiceTest {
 	private static final LocalDateTime testTime = LocalDateTime.
 		parse("2024-04-14T17:41:52+09:00",
 			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
-	private static final SellerRep test = new SellerRep(1, "TEST");
+	private static final SellerRep seller = new SellerRep(1, "TEST");
 	@InjectMocks
 	private ProductManagementService productManagementService;
 	@Mock
@@ -43,12 +50,15 @@ public class ProductManagementServiceTest {
 	@Mock
 	private ImageRepository imageRepository;
 
+	@Mock
+	private S3Provider s3Provider;
+
 	@Test
 	void 상품_등록() {
-		final List<ProductManagementDto.Request.Register.ImageDto> imageDtos = List.of(
-			new ProductManagementDto.Request.Register.ImageDto("image1.jpg", true, (short)1),
-			new ProductManagementDto.Request.Register.ImageDto("image2.jpg", false, (short)2),
-			new ProductManagementDto.Request.Register.ImageDto("image3.jpg", false, (short)3)
+		final List<ProductManagementDto.Request.Image> imageDtos = List.of(
+			new ProductManagementDto.Request.Image("image1.jpg", (short)1, true),
+			new ProductManagementDto.Request.Image("image2.jpg", (short)2, false),
+			new ProductManagementDto.Request.Image("image3.jpg", (short)3, false)
 		);
 
 		final ProductManagementDto.Request.Register productDtos =
@@ -61,8 +71,7 @@ public class ProductManagementServiceTest {
 				ProductCategory.BEAN,
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
-				false,
-				imageDtos
+				false
 			);
 
 		final Product product = Product.ofCreate(
@@ -75,7 +84,7 @@ public class ProductManagementServiceTest {
 			productDtos.information(),
 			productDtos.isCrush(),
 			productDtos.isDecaf(),
-			test
+			seller
 		);
 
 		given(productRepository.save(any(Product.class))).willReturn(
@@ -83,25 +92,35 @@ public class ProductManagementServiceTest {
 		);
 		final ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
 
-		final ProductManagementDto productManagementDto = productManagementService.productRegister(productDtos);
+		final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
+			"multipart/form-data",
+			"test file".getBytes(StandardCharsets.UTF_8));
+
+		List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+
+		final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt", "multipart/form-data",
+			"test file2".getBytes(StandardCharsets.UTF_8));
+		mockMultipartFiles.add(mockMultipartFile);
+
+		final ProductManagementDto productManagementDto = productManagementService.productRegister(productDtos,
+			mockThumbnailImage,
+			mockMultipartFiles);
 
 		verify(productRepository, times(1)).save(captor.capture());
-		verify(imageRepository, times(1)).saveAll(anyList());
 
-		assertThat(productManagementDto.getAcidity()).isEqualTo(captor.getValue().getAcidity());
-		assertThat(productManagementDto.getBean()).isEqualTo(captor.getValue().getBean());
-		assertThat(productManagementDto.getCategory()).isEqualTo(captor.getValue().getCategory());
-		assertThat(productManagementDto.getInformation()).isEqualTo(captor.getValue().getInformation());
-		assertThat(productManagementDto.getName()).isEqualTo(captor.getValue().getName());
-		assertThat(productManagementDto.getPrice()).isEqualTo(captor.getValue().getPrice());
-		assertThat(productManagementDto.getStock()).isEqualTo(captor.getValue().getStock());
+		Product productValue = captor.getValue();
+		assertThat(productManagementDto.getAcidity()).isEqualTo(productValue.getAcidity());
+		assertThat(productManagementDto.getBean()).isEqualTo(productValue.getBean());
+		assertThat(productManagementDto.getCategory()).isEqualTo(productValue.getCategory());
+		assertThat(productManagementDto.getInformation()).isEqualTo(productValue.getInformation());
+		assertThat(productManagementDto.getName()).isEqualTo(productValue.getName());
+		assertThat(productManagementDto.getPrice()).isEqualTo(productValue.getPrice());
+		assertThat(productManagementDto.getStock()).isEqualTo(productValue.getStock());
 		assertThat(productManagementDto.getSellerRep()).usingRecursiveComparison()
-			.isEqualTo(captor.getValue().getSellerRep());
-		assertThat(productManagementDto.getIsCrush()).isEqualTo(captor.getValue().getIsCrush());
-		assertThat(productManagementDto.getIsDecaf()).isEqualTo(captor.getValue().getIsDecaf());
+			.isEqualTo(productValue.getSellerRep());
+		assertThat(productManagementDto.getIsCrush()).isEqualTo(productValue.getIsCrush());
+		assertThat(productManagementDto.getIsDecaf()).isEqualTo(productValue.getIsDecaf());
 	}
-
-
 
 	@Nested
 	class 상품_상태_변경 {
@@ -113,7 +132,7 @@ public class ProductManagementServiceTest {
 			final ProductStatus newStatus = ProductStatus.DISCONTINUED;
 
 			final Product entity = new Product(
-				productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
+				productId, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
 				true, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
@@ -143,7 +162,7 @@ public class ProductManagementServiceTest {
 			ProductManagementDto.Request.Stock request = new ProductManagementDto.Request.Stock(productId, stock);
 
 			final Product entity = new Product(
-				productId, ProductCategory.BEAN, 1000, existStock, test, 0, false,
+				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
 				true, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
@@ -169,7 +188,7 @@ public class ProductManagementServiceTest {
 			ProductManagementDto.Request.Stock request = new ProductManagementDto.Request.Stock(productId, stock);
 
 			final Product entity = new Product(
-				productId, ProductCategory.BEAN, 1000, existStock, test, 0, false,
+				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
 				true, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
@@ -183,6 +202,7 @@ public class ProductManagementServiceTest {
 				.hasMessage(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO.getMessage());
 		}
 	}
+
 	@Test
 	void 상품_수정() {
 		final Integer productId = 1;
@@ -191,14 +211,39 @@ public class ProductManagementServiceTest {
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
 			"수정된", "커피", true);
 
-		final Product entity = new Product(
-			productId, ProductCategory.BEAN, 1000, 30, test, 0, false,
-			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, ProductStatus.AVAILABLE, testTime, testTime, null
+		final Image image = Image.ofCreate(
+			"test",
+			true,
+			(short)1,
+			null
 		);
+		List<Image> mockImages = new ArrayList<>();
+
+		mockImages.add(image);
+
+		Product entity = new Product(
+			productId, ProductCategory.BEAN, 1000, 30, seller, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, ProductStatus.AVAILABLE, testTime, testTime, mockImages
+		);
+
+		entity.getImages().add(image);
+
 		when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
 
-		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto);
+		final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
+			"multipart/form-data",
+			"test file".getBytes(StandardCharsets.UTF_8));
+
+		List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+
+		final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt", "multipart/form-data",
+			"test file2".getBytes(StandardCharsets.UTF_8));
+
+		mockMultipartFiles.add(mockMultipartFile);
+
+		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto, mockThumbnailImage,
+			mockMultipartFiles);
 
 		verify(productRepository).findById(productId);
 
