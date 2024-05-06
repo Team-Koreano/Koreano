@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
-import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -76,7 +76,7 @@ public class SellerDto {
 			String accessToken
 		) {
 			public static Login of(final SellerDto sellerDto) {
-				return new Login(JwtUtils.prefix(sellerDto.getAccessToken()));
+				return new Login(JwtProvider.prefix(sellerDto.getAccessToken()));
 			}
 		}
 	}

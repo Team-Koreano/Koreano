@@ -22,7 +22,7 @@ import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class UserServiceTest {
 	private AddressRepository addressRepository;
 
 	@Mock
-	private JwtUtils jwtUtils;
+	private JwtProvider jwtProvider;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -237,7 +237,7 @@ class UserServiceTest {
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
-			when(jwtUtils.createUserTokens(any(), any(), any(), any())).thenReturn("Bearer fake_token");
+			when(jwtProvider.createUserTokens(any(), any(), any(), any())).thenReturn("Bearer fake_token");
 
 			//then
 			UserDto expectedResponse = userService.loginRequest(loginRequest, response);

@@ -14,8 +14,8 @@ import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
-import org.ecommerce.userapi.utils.RedisUtils;
+import org.ecommerce.userapi.security.JwtProvider;
+import org.ecommerce.userapi.utils.RedisProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +34,9 @@ public class SellerService {
 
 	private final SellerRepository sellerRepository;
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
-	private final RedisUtils redisUtils;
+	private final RedisProvider redisProvider;
 
 	private final SellerAccountRepository sellerAccountRepository;
 
@@ -83,7 +83,7 @@ public class SellerService {
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
 		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(seller.getId(), seller.getEmail(), authorization,
+			jwtProvider.createSellerTokens(seller.getId(), seller.getEmail(), authorization,
 				response));
 	}
 
@@ -97,8 +97,8 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtUtils.removeTokens(jwtUtils.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
-			jwtUtils.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
+		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	/**
@@ -120,18 +120,18 @@ public class SellerService {
 
 	public SellerDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtUtils.getRefreshTokenKey(jwtUtils.getId(bearerToken),
-			jwtUtils.getRoll(bearerToken));
+		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+			jwtProvider.getRoll(bearerToken));
 
-		if (!redisUtils.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey)) {
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
 		}
 
-		final String refreshToken = redisUtils.getData(refreshTokenKey);
+		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(jwtUtils.getId(refreshToken), jwtUtils.getEmail(refreshToken),
-				Set.of(jwtUtils.getRoll(refreshToken)), response));
+			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken), jwtProvider.getEmail(refreshToken),
+				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {

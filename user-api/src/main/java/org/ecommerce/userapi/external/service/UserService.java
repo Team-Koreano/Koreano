@@ -18,8 +18,8 @@ import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
-import org.ecommerce.userapi.utils.RedisUtils;
+import org.ecommerce.userapi.security.JwtProvider;
+import org.ecommerce.userapi.utils.RedisProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,13 +38,13 @@ public class UserService {
 
 	private final BCryptPasswordEncoder passwordEncoder;
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
 	private final AddressRepository addressRepository;
 
 	private final UsersAccountRepository usersAccountRepository;
 
-	private final RedisUtils redisUtils;
+	private final RedisProvider redisProvider;
 	//TODO : 유저에 관한 RUD API 개발
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
@@ -92,7 +92,7 @@ public class UserService {
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createUserTokens(users.getId(), users.getEmail(), authorization, response));
+			jwtProvider.createUserTokens(users.getId(), users.getEmail(), authorization, response));
 
 	}
 
@@ -106,8 +106,8 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtUtils.removeTokens(jwtUtils.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
-			jwtUtils.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
+		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	/**
@@ -160,18 +160,18 @@ public class UserService {
 	 */
 	public UserDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtUtils.getRefreshTokenKey(jwtUtils.getId(bearerToken),
-			jwtUtils.getRoll(bearerToken));
+		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+			jwtProvider.getRoll(bearerToken));
 
-		if (!redisUtils.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey)) {
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
 		}
 
-		final String refreshToken = redisUtils.getData(refreshTokenKey);
+		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(jwtUtils.getId(refreshToken), jwtUtils.getEmail(refreshToken),
-				Set.of(jwtUtils.getRoll(refreshToken)), response));
+			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken), jwtProvider.getEmail(refreshToken),
+				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {

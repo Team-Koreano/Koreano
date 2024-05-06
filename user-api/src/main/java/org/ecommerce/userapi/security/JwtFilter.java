@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.security.custom.ResponseConfigurer;
-import org.ecommerce.userapi.utils.RedisUtils;
+import org.ecommerce.userapi.utils.RedisProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +17,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,21 +27,21 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter implements ResponseConfigurer {
 
 	private final ProviderManager providerManager;
-	private final JwtUtils jwtUtils;
-	private final RedisUtils redisUtils;
+	private final JwtProvider jwtProvider;
+	private final RedisProvider redisProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		String bearerToken = jwtUtils.resolveToken(request);
+		String bearerToken = jwtProvider.resolveToken(request);
 
 		try {
 			if (bearerToken != null) {
-				boolean isLogin = redisUtils.hasKey(
-					jwtUtils.getAccessTokenKey(jwtUtils.getId(bearerToken), jwtUtils.getRoll(bearerToken)));
+				boolean isLogin = redisProvider.hasKey(
+					jwtProvider.getAccessTokenKey(jwtProvider.getId(bearerToken), jwtProvider.getRoll(bearerToken)));
 				if (isLogin) {
 					// Authentication 검증 전
-					Authentication beforeAuthentication = jwtUtils.parseAuthentication(bearerToken);
+					Authentication beforeAuthentication = jwtProvider.parseAuthentication(bearerToken);
 					// Authentication 검증 후
 					Authentication afterAuthenticate = providerManager.authenticate(beforeAuthentication);
 					// Context 에 저장
@@ -57,7 +58,36 @@ public class JwtFilter extends OncePerRequestFilter implements ResponseConfigure
 			responseSetting(response, UserErrorCode.EMPTY_JWT);
 			return;
 		}
+		if (isLoginRequest(request)) {
+			String refreshToken = getRefreshTokenFromResponse(request);
+			if (refreshToken != null) {
+				Cookie refreshTokenCookie = jwtProvider.createRefreshTokenCookie(refreshToken);
+				response.addCookie(refreshTokenCookie);
+			}
+		}
+
 		doFilter(request, response, filterChain);
 	}
+
+	private String getRefreshTokenFromResponse(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("refreshToken")) {
+					return cookie.getValue();
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isLoginRequest(HttpServletRequest request) {
+		return request.getRequestURI().endsWith("/login");
+	}
+
+	private boolean isReissueRequest(HttpServletRequest request) {
+		return request.getRequestURI().endsWith("/reissue");
+	}
+
 }
 

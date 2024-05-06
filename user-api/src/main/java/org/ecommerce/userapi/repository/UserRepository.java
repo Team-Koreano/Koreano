@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, Integer> {
+public interface UserRepository extends JpaRepository<Users, Integer>, UserCustomRepository {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
 	boolean existsByEmailOrPhoneNumber(String email, String phoneNumber);
 
