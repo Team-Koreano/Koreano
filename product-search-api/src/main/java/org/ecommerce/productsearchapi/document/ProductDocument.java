@@ -44,7 +44,7 @@ public class ProductDocument {
 	@Field(type = FieldType.Boolean)
 	private Boolean isDecaf;
 
-	@Field(type = FieldType.Text, analyzer = "nori")
+	@Field(type = FieldType.Text, analyzer = "whitespace")
 	private String name;
 
 	@Field(type = FieldType.Text)

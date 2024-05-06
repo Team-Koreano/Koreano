@@ -16,7 +16,7 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.external.service.ProductSearchService;
+import org.ecommerce.productsearchapi.external.service.JpaProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,7 +33,7 @@ public class ProductSearchControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 	@MockBean
-	private ProductSearchService productSearchService;
+	private JpaProductSearchService jpaProductSearchService;
 
 	@Test
 	void 단일_상품_조회() throws Exception {
@@ -67,7 +67,7 @@ public class ProductSearchControllerTest {
 				null
 			);
 		// when
-		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
+		when(jpaProductSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
 		// then
 		mockMvc.perform(get("/api/external/product/v1/1"))
 			.andExpect(jsonPath("$.result.id").value(productSearchDto.getId()))

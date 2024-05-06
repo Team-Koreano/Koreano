@@ -25,11 +25,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductSearchServiceTest {
+public class JpaProductSearchServiceTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@InjectMocks
-	private ProductSearchService productSearchService;
+	private JpaProductSearchService jpaProductSearchService;
 	@Mock
 	private ProductRepository productRepository;
 
@@ -42,7 +42,7 @@ public class ProductSearchServiceTest {
 		given(productRepository.findProductById(anyInt())).willReturn(Optional.of(product));
 
 		// when
-		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
+		final ProductSearchDto productSearchDto = jpaProductSearchService.getProductById(1);
 
 		// then
 		assertEquals(product.getId(), productSearchDto.getId());
@@ -83,7 +83,7 @@ public class ProductSearchServiceTest {
 		given(productRepository.findProductById(anyInt())).willReturn(Optional.empty());
 
 		// when
-		CustomException exception = assertThrows(CustomException.class, () -> productSearchService.getProductById(1));
+		CustomException exception = assertThrows(CustomException.class, () -> jpaProductSearchService.getProductById(1));
 
 		//then
 		assertEquals(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID, exception.getErrorCode());
