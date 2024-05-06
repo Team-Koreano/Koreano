@@ -1,4 +1,4 @@
-package org.ecommerce.bucketapi.controller;
+package org.ecommerce.bucketapi.internal.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.anyList;
@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(InternalBucketController.class)
+@WebMvcTest(BucketController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 public class InternalBucketControllerTest {
 

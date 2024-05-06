@@ -10,14 +10,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "bucket")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 public class Bucket {
 
@@ -42,10 +43,10 @@ public class Bucket {
 	private LocalDate createDate;
 
 	public static Bucket ofAdd(
-		final Integer userId,
-		final String seller,
-		final Integer productId,
-		final Integer quantity
+			final Integer userId,
+			final String seller,
+			final Integer productId,
+			final Integer quantity
 	) {
 		Bucket bucket = new Bucket();
 		bucket.userId = userId;

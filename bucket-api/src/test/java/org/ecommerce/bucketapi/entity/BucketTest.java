@@ -8,21 +8,25 @@ import org.junit.jupiter.api.Test;
 
 public class BucketTest {
 
-	private static final LocalDate CREATE_DATE = LocalDate.now();
-
-	private static final Bucket BUCKET = new Bucket(1L, 1, "seller", 101, 3, CREATE_DATE);
-
 	@Test
 	void 장바구니_담기() {
 		// given
+		final Bucket bucket = new Bucket(
+				1L,
+				1,
+				"seller",
+				101,
+				3,
+				LocalDate.of(2024, 5, 2)
+		);
 		// when
-		Bucket bucket = Bucket.ofAdd(1, "seller", 101, 3);
+		Bucket newBucket = Bucket.ofAdd(1, "seller", 101, 3);
 
 		// then
-		assertThat(bucket.getUserId()).isEqualTo(BUCKET.getUserId());
-		assertThat(bucket.getSeller()).isEqualTo(BUCKET.getSeller());
-		assertThat(bucket.getProductId()).isEqualTo(BUCKET.getProductId());
-		assertThat(bucket.getQuantity()).isEqualTo(BUCKET.getQuantity());
+		assertThat(newBucket.getUserId()).isEqualTo(bucket.getUserId());
+		assertThat(newBucket.getSeller()).isEqualTo(bucket.getSeller());
+		assertThat(newBucket.getProductId()).isEqualTo(bucket.getProductId());
+		assertThat(newBucket.getQuantity()).isEqualTo(bucket.getQuantity());
 	}
 
 	@Test
