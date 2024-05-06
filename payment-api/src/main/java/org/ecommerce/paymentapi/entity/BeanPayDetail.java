@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
-import org.ecommerce.paymentapi.entity.type.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -77,7 +77,7 @@ public class BeanPayDetail {
 	@Column(updatable = false)
 	private LocalDateTime approveDateTime;
 
-	public static BeanPayDetail ofCreate(BeanPay beanPay, Integer userId,
+	protected static BeanPayDetail ofCreate(BeanPay beanPay, Integer userId,
 		Integer amount) {
 		BeanPayDetail beanPayDetail = new BeanPayDetail();
 		beanPayDetail.beanPay = beanPay;

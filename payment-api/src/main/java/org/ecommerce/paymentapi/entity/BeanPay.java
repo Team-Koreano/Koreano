@@ -2,7 +2,7 @@ package org.ecommerce.paymentapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.paymentapi.entity.type.Role;
+import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -54,6 +54,9 @@ public class BeanPay {
 		beanPay.userId = userId;
 		beanPay.role = role;
 		return beanPay;
+	}
+	public BeanPayDetail preCharge(Integer amount) {
+		return BeanPayDetail.ofCreate(this, this.userId, amount);
 	}
 
 	public void chargeBeanPayDetail(Integer amount) {

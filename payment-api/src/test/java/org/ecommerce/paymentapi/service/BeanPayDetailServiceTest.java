@@ -2,7 +2,7 @@
 package org.ecommerce.paymentapi.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.ecommerce.paymentapi.entity.type.Role.*;
+import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -18,9 +18,9 @@ import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
-import org.ecommerce.paymentapi.entity.type.BeanPayStatus;
-import org.ecommerce.paymentapi.entity.type.ProcessStatus;
-import org.ecommerce.paymentapi.entity.type.Role;
+import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
@@ -56,7 +56,7 @@ class BeanPayDetailServiceTest {
 		//given
 		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
-		final BeanPayDetail entity = BeanPayDetail.ofCreate(beanPay, 1, 10000);
+		final BeanPayDetail entity = beanPay.preCharge(beanPay.getAmount());
 		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
 
 		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));

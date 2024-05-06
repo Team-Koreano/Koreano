@@ -1,6 +1,6 @@
 package org.ecommerce.paymentapi.controller;
 
-import static org.ecommerce.paymentapi.entity.type.ProcessStatus.*;
+import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.aop.TimeCheck;
