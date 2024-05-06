@@ -1,7 +1,5 @@
-package org.ecommerce.paymentapi.service;
+package org.ecommerce.paymentapi.internal.service;
 
-import org.ecommerce.paymentapi.dto.PaymentDto;
-import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class PaymentServiceImpl {
+public class PaymentService {
 	private final PaymentRepository paymentRepository;
 
 }

@@ -1,5 +1,5 @@
 
-package org.ecommerce.paymentapi.service;
+package org.ecommerce.paymentapi.external.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;

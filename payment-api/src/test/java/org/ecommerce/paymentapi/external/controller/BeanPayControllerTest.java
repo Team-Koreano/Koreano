@@ -1,5 +1,5 @@
 
-package org.ecommerce.paymentapi.controller;
+package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,9 +18,9 @@ import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.ecommerce.paymentapi.service.BeanPayService;
-import org.ecommerce.paymentapi.service.LockTestService;
-import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.external.service.LockTestService;
+import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +46,7 @@ class BeanPayControllerTest {
 	private BeanPayService beanPayService;
 
 	@MockBean
-	private PaymentServiceImpl paymentService;
+	private PaymentService paymentService;
 
 	@MockBean
 	private LockTestService lockTestService;
@@ -79,7 +79,7 @@ class BeanPayControllerTest {
 		final Response<BeanPayDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
+		MvcResult mvcResult = mvc.perform(post("/api/external/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
 			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
 
 		//then
@@ -112,7 +112,7 @@ class BeanPayControllerTest {
 			when(beanPayService.validTossCharge(request)).thenReturn(response);
 
 			//when
-			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success")
+			MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/success")
 					.contentType(MediaType.APPLICATION_JSON)
 					.param("orderId", String.valueOf(request.orderId()))
 					.param("paymentKey", request.paymentKey())
@@ -151,7 +151,7 @@ class BeanPayControllerTest {
 		when(beanPayService.failTossCharge(request)).thenReturn(response);
 
 		//when
-		MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/fail")
+		MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/fail")
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("orderId", String.valueOf(request.orderId()))
 				.param("errorCode", request.errorCode())

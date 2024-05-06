@@ -1,4 +1,4 @@
-package org.ecommerce.paymentapi.service;
+package org.ecommerce.paymentapi.external.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package org.ecommerce.paymentapi.service;
+package org.ecommerce.paymentapi.external.service;
 
 import java.util.concurrent.TimeUnit;
 

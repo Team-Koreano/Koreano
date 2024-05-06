@@ -1,8 +1,8 @@
-package org.ecommerce.paymentapi.controller;
+package org.ecommerce.paymentapi.internal.controller;
 
 
-import org.ecommerce.paymentapi.service.BeanPayService;
-import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +19,7 @@ class PaymentControllerTest {
 	private BeanPayService beanPayService;
 
 	@MockBean
-	private PaymentServiceImpl paymentService;
+	private PaymentService paymentService;
 
 	@Autowired
 	private MockMvc mvc;

@@ -1,7 +1,7 @@
-package org.ecommerce.paymentapi.controller;
+package org.ecommerce.paymentapi.internal.controller;
 
-import org.ecommerce.paymentapi.service.BeanPayService;
-import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/payment")
 public class PaymentController {
-	private final PaymentServiceImpl paymentService;
+	private final PaymentService paymentService;
 	private final BeanPayService beanPayService;
 
 }

@@ -1,4 +1,4 @@
-package org.ecommerce.paymentapi.controller;
+package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
@@ -6,9 +6,9 @@ import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.aop.TimeCheck;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.service.BeanPayService;
-import org.ecommerce.paymentapi.service.LockTestService;
-import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.external.service.LockTestService;
+import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/beanpay/v1")
+@RequestMapping("/api/external/beanpay/v1")
 public class BeanPayController {
-	private final PaymentServiceImpl paymentService;
+	private final PaymentService paymentService;
 	private final BeanPayService beanPayService;
 	private final LockTestService lockTestService;
 
