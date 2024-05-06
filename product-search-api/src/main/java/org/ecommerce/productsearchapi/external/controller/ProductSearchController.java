@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.external.service.EsProductSearchService;
-import org.ecommerce.productsearchapi.external.service.JpaProductSearchService;
+import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
+import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,15 +20,15 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/product/v1")
 public class ProductSearchController {
 
-	private final JpaProductSearchService jpaProductSearchService;
-	private final EsProductSearchService esProductSearchService;
+	private final ProductSearchService productSearchService;
+	private final ElasticSearchService elasticSearchService;
 
 	@GetMapping("/{productId}")
 	public Response<ProductSearchDto.Response.Detail> getProductById(
 		@PathVariable("productId") final Integer productId) {
 
 		return new Response<>(HttpStatus.OK.value(),
-			ProductSearchDto.Response.Detail.of(jpaProductSearchService.getProductById(productId))
+			ProductSearchDto.Response.Detail.of(productSearchService.getProductById(productId))
 		);
 	}
 
@@ -36,7 +36,7 @@ public class ProductSearchController {
 	public Response<List<ProductSearchDto.Response.SuggestedProducts>> suggestSearchKeyword(
 		@RequestParam final String keyword) {
 
-		final List<ProductSearchDto> suggestedProducts = esProductSearchService.suggestSearchKeyword(keyword);
+		final List<ProductSearchDto> suggestedProducts = elasticSearchService.suggestSearchKeyword(keyword);
 
 		return new Response<>(HttpStatus.OK.value(),
 			suggestedProducts.stream()
