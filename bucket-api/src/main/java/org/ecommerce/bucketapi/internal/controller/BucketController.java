@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController("InternalBucketController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/internal/buckets/v1")
 public class BucketController {

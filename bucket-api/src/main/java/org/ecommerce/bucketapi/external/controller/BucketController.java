@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController("ExternalBucketController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/external/buckets/v1")
 public class BucketController {
