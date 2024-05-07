@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
-import org.ecommerce.orderapi.entity.OrderDetail;
-import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.service.OrderService;
 import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
@@ -134,27 +133,16 @@ public class OrderControllerTest {
 						LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
 						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 						List.of(
-								new OrderDetail(
+								new OrderDetailDto(
 										1L,
-										null,
 										101,
 										10000,
 										1,
 										10000,
-										0,
 										10000,
 										"seller1",
 										OPEN,
-										null,
-										List.of(
-												new OrderStatusHistory(
-														1L,
-														null,
-														OPEN,
-														LocalDateTime.of(2024, 5, 6, 0, 0)
-												)
-										)
-
+										null
 								)
 						)
 				)
@@ -165,9 +153,7 @@ public class OrderControllerTest {
 		// when
 		// then
 		OrderDto orderDto = orderDtos.get(0);
-		OrderDetail orderDetail = orderDto.getOrderDetails().get(0);
-		OrderStatusHistory orderStatusHistory = orderDetail.getOrderStatusHistories()
-				.get(0);
+		OrderDetailDto orderDetail = orderDto.getOrderDetailDtos().get(0);
 		mockMvc.perform(get("/api/external/orders/v1?year=&pageNumber=1"))
 				.andDo(print())
 				.andExpect(jsonPath("$.result.[0].id").value(orderDto.getId()))
@@ -182,11 +168,8 @@ public class OrderControllerTest {
 						.value(orderDto.getDeliveryComment()))
 				.andExpect(jsonPath("$.result.[0].orderDatetime")
 						.value(orderDto.getOrderDatetime().toString()))
-				.andExpect(jsonPath("$.result.[0].orderDetails[0].status")
-						.value(orderDetail.getStatus().toString()))
-				.andExpect(jsonPath(
-						"$.result.[0].orderDetails.[0].orderStatusHistories.[0].changeStatus")
-						.value(orderStatusHistory.getChangeStatus().toString()));
+				.andExpect(jsonPath("$.result.[0].orderDetailResponses[0].status")
+						.value(orderDetail.getStatus().toString()));
 	}
 
 }

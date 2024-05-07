@@ -66,7 +66,7 @@ public class OrderService {
 		validateStock(productIds, productIdToQuantityMap);
 		validateProduct(products);
 
-		return OrderMapper.INSTANCE.toDto(
+		return OrderMapper.INSTANCE.OrderToDto(
 				orderRepository.save(
 						Order.ofPlace(
 								userId,
@@ -188,7 +188,7 @@ public class OrderService {
 	) {
 		Pageable pageable = PageRequest.of(pageNumber, 5);
 		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
-				.map(OrderMapper.INSTANCE::toDto)
+				.map(OrderMapper.INSTANCE::OrderToDto)
 				.toList();
 	}
 }

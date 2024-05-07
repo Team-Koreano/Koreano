@@ -9,7 +9,7 @@ import java.util.Map;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.aop.StockLock;
 import org.ecommerce.orderapi.dto.OrderDetailDto;
-import org.ecommerce.orderapi.dto.OrderDetailMapper;
+import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.entity.OrderDetail;
@@ -63,7 +63,7 @@ public class StockService {
 		saveOrderStatus(orderDetails, decreaseResult);
 
 		return orderDetails.stream()
-				.map(OrderDetailMapper.INSTANCE::toOrderDetailDto)
+				.map(OrderMapper.INSTANCE::orderDetailToDto)
 				.toList();
 	}
 
@@ -74,7 +74,7 @@ public class StockService {
 	 * @param orderDetails- 변수 설명 텍스트
 	 * @param stockMap- 변수 설명 텍스트
 	 * @return - 재고 차감 성공 여부
-	*/
+	 */
 	@VisibleForTesting
 	public boolean decreaseStock(
 			final List<OrderDetail> orderDetails,

@@ -39,7 +39,7 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.toResponse(
+				OrderMapper.INSTANCE.OrderDtoToResponse(
 						orderService.placeOrder(USER_ID, placeRequest)
 				)
 		);
@@ -54,7 +54,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				orderService.getOrders(USER_ID, year, pageNumber).stream()
-						.map(OrderMapper.INSTANCE::toResponse)
+						.map(OrderMapper.INSTANCE::OrderDtoToResponse)
 						.toList()
 		);
 	}

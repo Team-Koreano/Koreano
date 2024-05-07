@@ -1,7 +1,6 @@
 package org.ecommerce.orderapi.repository.impl;
 
 import static org.ecommerce.orderapi.entity.QOrder.*;
-import static org.ecommerce.orderapi.entity.QOrderDetail.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +35,6 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 		List<Order> content = jpaQueryFactory
 				.selectFrom(order)
 				.leftJoin(order.orderDetails).fetchJoin()
-				.leftJoin(orderDetail.orderStatusHistories).fetchJoin()
 				.where(userIdEq(userId),
 						generateDateCondition(year))
 				.orderBy(order.orderDatetime.desc())

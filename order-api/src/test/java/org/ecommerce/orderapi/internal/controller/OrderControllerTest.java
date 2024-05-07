@@ -6,12 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDetailDto;
-import org.ecommerce.orderapi.entity.OrderStatusHistory;
-import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,21 +46,7 @@ public class OrderControllerTest {
 						10000,
 						"seller1",
 						CLOSED,
-						null,
-						List.of(
-								new OrderStatusHistory(
-										1L,
-										null,
-										OrderStatus.OPEN,
-										LocalDateTime.of(2024, 5, 5, 0, 0)
-								),
-								new OrderStatusHistory(
-										3L,
-										null,
-										CLOSED,
-										LocalDateTime.of(2024, 5, 6, 0, 0)
-								)
-						)
+						null
 				),
 				new OrderDetailDto(
 						2L,
@@ -74,21 +57,7 @@ public class OrderControllerTest {
 						40000,
 						"seller2",
 						CLOSED,
-						null,
-						List.of(
-								new OrderStatusHistory(
-										2L,
-										null,
-										OrderStatus.OPEN,
-										LocalDateTime.of(2024, 5, 5, 0, 0)
-								),
-								new OrderStatusHistory(
-										4L,
-										null,
-										CLOSED,
-										LocalDateTime.of(2024, 5, 6, 0, 0)
-								)
-						)
+						null
 				)
 		);
 		given(stockService.decreaseStocks(orderId))
@@ -113,10 +82,6 @@ public class OrderControllerTest {
 						.value(orderDetailDto1.getSeller()))
 				.andExpect(jsonPath("$.result.[0].status")
 						.value(orderDetailDto1.getStatus().toString()))
-				.andExpect(jsonPath("$.result.[0].orderStatusHistories[1].changeStatus")
-						.value(orderDetailDto1.getOrderStatusHistories()
-								.get(1)
-								.getChangeStatus().toString()))
 				.andExpect(jsonPath("$.result.[1].id").value(orderDetailDto2.getId()))
 				.andExpect(jsonPath("$.result.[1].productId")
 						.value(orderDetailDto2.getProductId()))
@@ -129,12 +94,6 @@ public class OrderControllerTest {
 				.andExpect(jsonPath("$.result.[1].seller")
 						.value(orderDetailDto2.getSeller()))
 				.andExpect(jsonPath("$.result.[1].status")
-						.value(orderDetailDto2.getStatus().toString()))
-				.andExpect(jsonPath(
-						"$.result.[1].orderStatusHistories[1].changeStatus")
-						.value(orderDetailDto2.getOrderStatusHistories()
-								.get(1)
-								.getChangeStatus().toString()));
-
+						.value(orderDetailDto2.getStatus().toString()));
 	}
 }

@@ -1,8 +1,5 @@
 package org.ecommerce.orderapi.dto;
 
-import java.util.List;
-
-import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 
@@ -22,7 +19,6 @@ public class OrderDetailDto {
 	private String seller;
 	private OrderStatus status;
 	private OrderStatusReason statusReason;
-	private List<OrderStatusHistory> orderStatusHistories;
 
 	public record Response(
 			Long id,
@@ -33,8 +29,7 @@ public class OrderDetailDto {
 			Integer paymentAmount,
 			String seller,
 			OrderStatus status,
-			OrderStatusReason statusReason,
-			List<OrderStatusHistory> orderStatusHistories
+			OrderStatusReason statusReason
 	) {
 	}
 }

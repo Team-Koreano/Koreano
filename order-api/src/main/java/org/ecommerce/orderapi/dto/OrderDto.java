@@ -5,8 +5,6 @@ import static org.ecommerce.orderapi.exception.ErrorMessage.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.ecommerce.orderapi.entity.OrderDetail;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -26,7 +24,7 @@ public class OrderDto {
 	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
-	private List<OrderDetail> orderDetails;
+	private List<OrderDetailDto> orderDetailDtos;
 
 	public static class Request {
 
@@ -63,7 +61,7 @@ public class OrderDto {
 			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
 			LocalDateTime orderDatetime,
-			List<OrderDetail> orderDetails
+			List<OrderDetailDto.Response> orderDetailResponses
 	) {
 	}
 }
