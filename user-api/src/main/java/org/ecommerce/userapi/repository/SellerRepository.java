@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface SellerRepository extends JpaRepository<Seller, Integer> {
+public interface SellerRepository extends JpaRepository<Seller, Integer>, SellerCustomRepository {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-	boolean existsByEmailOrPhoneNumber(String email, String phoneNumber);
+	boolean existsByEmailOrPhoneNumber(final String email, final String phoneNumber);
 
-	Optional<Seller> findByEmail(String email);
+	Optional<Seller> findByEmail(final String email);
 }
