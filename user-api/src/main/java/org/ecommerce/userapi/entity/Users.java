@@ -78,4 +78,12 @@ public class Users {
 		users.phoneNumber = phoneNumber;
 		return users;
 	}
+
+	public boolean isValidUser() {
+		return this.userStatus == UserStatus.GENERAL;
+	}
+
+	public void withdrawal() {
+		this.userStatus = UserStatus.WITHDRAWAL;
+	}
 }

@@ -1,5 +1,6 @@
 package org.ecommerce.userapi.external.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -66,6 +67,7 @@ public class UserService {
 		final Users users = Users.ofRegister(register.email(), register.name(),
 			passwordEncoder.encode(register.password()),
 			register.gender(), register.age(), register.phoneNumber());
+
 		userRepository.save(users);
 
 		return UserMapper.INSTANCE.toDto(users);
@@ -82,18 +84,19 @@ public class UserService {
 	 @return SellerDto
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
-		final Users users = userRepository.findUsersByEmail(login.email())
+
+		final Users user = userRepository.findUsersByEmail(login.email())
+			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (!passwordEncoder.matches(login.password(), users.getPassword())) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
+		if (!user.isValidUser()) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtProvider.createUserTokens(users.getId(), authorization, response));
-
+			jwtProvider.createUserTokens(user.getId(), authorization, response));
 	}
 
 	/**
@@ -106,8 +109,10 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
-			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
+		jwtProvider.removeTokens(
+			jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll())
+		);
 	}
 
 	/**
@@ -121,7 +126,7 @@ public class UserService {
 	 * @param register - 회원 주소 등록에 관련된 객체
 	 * @return AddressDto
 	 */
-	public AddressDto registerAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
+	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
 
 		final Users users = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
@@ -139,7 +144,7 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
-	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
 		final Users users = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
@@ -174,9 +179,36 @@ public class UserService {
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
+	public void withdrawUser(UserDto.Request.Withdrawal withdrawal) {
+		Users user = userRepository.findUsersByEmailAndPhoneNumber(withdrawal.email(), withdrawal.phoneNumber())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+
+		validatePassword(withdrawal.password(), user.getPassword());
+
+		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
+		if (usersAccounts == null) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
+		}
+		usersAccounts.forEach(UsersAccount::withdrawal);
+
+		List<Address> addresses = addressRepository.findByUsersId(user.getId());
+		if (addresses == null) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_ADDRESS);
+		}
+		addresses.forEach(Address::withdrawal);
+
+		user.withdrawal();
+	}
+	
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
+		}
+	}
+
+	private void validatePassword(final String password, final String encodedPassword) {
+		if (!passwordEncoder.matches(password, encodedPassword)) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }
