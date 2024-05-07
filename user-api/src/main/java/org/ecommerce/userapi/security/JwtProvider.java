@@ -78,7 +78,7 @@ public class JwtProvider {
 
 		String refreshTokenKey = getRefreshTokenKey(userId, getRoll(refreshToken));
 		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
-		
+
 		response.addCookie(createCookie(refreshToken));
 
 		return accessToken;
@@ -108,7 +108,7 @@ public class JwtProvider {
 
 	public UsernamePasswordAuthenticationToken parseAuthentication(String bearerToken) {
 		Claims claims = parseClaims(cutPreFix(bearerToken));
-		String email = claims.get("email", String.class);
+		Integer id = claims.get("id", Integer.class);
 		List<?> authorities = claims.get("authorization", List.class);
 
 		if (authorities == null)
@@ -119,7 +119,7 @@ public class JwtProvider {
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toSet());
 
-		return new UsernamePasswordAuthenticationToken(email, bearerToken, grantedAuthorities);
+		return new UsernamePasswordAuthenticationToken(id, bearerToken, grantedAuthorities);
 	}
 
 	public void removeTokens(String accessTokenKey, String refreshTokenKey) {
@@ -155,15 +155,6 @@ public class JwtProvider {
 
 	public String resolveToken(HttpServletRequest request) {
 		return request.getHeader(ACCESS_TOKEN_HEADER);
-	}
-
-	public Cookie createRefreshTokenCookie(String refreshToken) {
-		Cookie cookie = new Cookie("refreshToken", refreshToken);
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setPath("/");
-		cookie.setMaxAge((int)TWO_WEEKS);
-		return cookie;
 	}
 
 	private Cookie createCookie(String refreshToken) {

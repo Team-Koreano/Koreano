@@ -23,21 +23,19 @@ public class CustomAuthProvider implements AuthenticationProvider {
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		String email = (String)authentication.getPrincipal();
 		String bearerToken = (String)authentication.getCredentials();
 
-		String parseEmail = jwtProvider.getEmail(bearerToken);
 		String parseRole = jwtProvider.getRoll(bearerToken);
 		Integer parseId = jwtProvider.getId(bearerToken);
 
-		AuthDetails authDetails = new AuthDetails(parseId, parseEmail, parseRole);
+		AuthDetails authDetails = new AuthDetails(parseId, parseRole);
 
 		SimpleGrantedAuthority parsedGrant = new SimpleGrantedAuthority(parseRole);
 
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 		authorities.add(parsedGrant);
 
-		if (!authDetails.getEmail().equals(email) ||
+		if (!authDetails.getId().equals(authentication.getPrincipal()) ||
 			!authentication.getAuthorities().contains(parsedGrant)) {
 			throw new CustomException(UserErrorCode.AUTHENTICATION_FAILED);
 		}

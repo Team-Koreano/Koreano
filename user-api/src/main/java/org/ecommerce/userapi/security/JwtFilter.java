@@ -17,7 +17,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -58,35 +57,8 @@ public class JwtFilter extends OncePerRequestFilter implements ResponseConfigure
 			responseSetting(response, UserErrorCode.EMPTY_JWT);
 			return;
 		}
-		if (isLoginRequest(request)) {
-			String refreshToken = getRefreshTokenFromResponse(request);
-			if (refreshToken != null) {
-				Cookie refreshTokenCookie = jwtProvider.createRefreshTokenCookie(refreshToken);
-				response.addCookie(refreshTokenCookie);
-			}
-		}
 
 		doFilter(request, response, filterChain);
-	}
-
-	private String getRefreshTokenFromResponse(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("refreshToken")) {
-					return cookie.getValue();
-				}
-			}
-		}
-		return null;
-	}
-
-	private boolean isLoginRequest(HttpServletRequest request) {
-		return request.getRequestURI().endsWith("/login");
-	}
-
-	private boolean isReissueRequest(HttpServletRequest request) {
-		return request.getRequestURI().endsWith("/reissue");
 	}
 
 }
