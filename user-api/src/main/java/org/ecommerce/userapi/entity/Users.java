@@ -85,5 +85,6 @@ public class Users {
 
 	public void withdrawal() {
 		this.userStatus = UserStatus.WITHDRAWAL;
+		this.isDeleted = true;
 	}
 }
