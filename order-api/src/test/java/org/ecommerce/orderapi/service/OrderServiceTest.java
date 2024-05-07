@@ -14,9 +14,11 @@ import java.util.Map;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.client.ProductServiceClient;
+import org.ecommerce.orderapi.client.UserServiceClient;
 import org.ecommerce.orderapi.dto.BucketDto;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.ProductDto;
+import org.ecommerce.orderapi.dto.UserDto;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
@@ -44,6 +46,9 @@ public class OrderServiceTest {
 	private StockRepository stockRepository;
 
 	@Mock
+	private UserServiceClient userServiceClient;
+
+	@Mock
 	private BucketServiceClient bucketServiceClient;
 
 	@Mock
@@ -66,6 +71,7 @@ public class OrderServiceTest {
 						101,
 						"상품 이름1",
 						1000,
+						1,
 						"seller1",
 						AVAILABLE
 				),
@@ -73,6 +79,7 @@ public class OrderServiceTest {
 						102,
 						"상품 이름2",
 						2000,
+						2,
 						"seller2",
 						AVAILABLE
 				)
@@ -116,6 +123,7 @@ public class OrderServiceTest {
 						101,
 						"에디오피아 아가체프",
 						1000,
+						1,
 						"seller1",
 						AVAILABLE
 				),
@@ -123,12 +131,16 @@ public class OrderServiceTest {
 						102,
 						"과테말라 안티구아",
 						2000,
+						2,
 						"seller2",
 						AVAILABLE
 				)
 		);
+		final UserDto.Response userServiceResponse = new UserDto.Response(1, "userName");
 		given(stockRepository.findByProductIdIn(anyList()))
 				.willReturn(stocks);
+		given(userServiceClient.getUser(anyInt()))
+				.willReturn(userServiceResponse);
 		given(bucketServiceClient.getBuckets(anyInt(), anyList()))
 				.willReturn(bucketServiceResponse);
 		given(productServiceClient.getProducts(anyList()))
@@ -203,6 +215,7 @@ public class OrderServiceTest {
 						101,
 						"상품 이름1",
 						1000,
+						1,
 						"seller1",
 						DISCONTINUED
 				),
@@ -210,6 +223,7 @@ public class OrderServiceTest {
 						102,
 						"상품 이름2",
 						2000,
+						2,
 						"seller2",
 						AVAILABLE
 				)

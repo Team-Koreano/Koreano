@@ -12,7 +12,7 @@ public class BucketSummary {
 	private List<Integer> productIds;
 	private Map<Integer, Integer> productIdToQuantityMap;
 
-	public static BucketSummary of(List<BucketDto> bucketDtos) {
+	public static BucketSummary create(List<BucketDto> bucketDtos) {
 		BucketSummary bucketSummary = new BucketSummary();
 		List<Integer> productIds = new ArrayList<>();
 		Map<Integer, Integer> productIdToQuantityMap = new HashMap<>();

@@ -1,2 +1,2 @@
-insert into orders(id, user_id, receive_name, phone_number, address1, address2, delivery_comment, total_payment_amount, payment_datetime, order_datetime)
-    values (1, 1, 'receiver','010-7777-7777', '동백 8로 99', '7777동 7777호', '빠른 배송 부탁드려요', 1000000, NOW(), NOW());
+insert into orders(id, user_id, user_name, receive_name, phone_number, address1, address2, delivery_comment, total_payment_amount, payment_datetime, order_datetime)
+    values (1, 1, 'userName', 'receiver','010-7777-7777', '동백 8로 99', '7777동 7777호', '빠른 배송 부탁드려요', 1000000, NOW(), NOW());

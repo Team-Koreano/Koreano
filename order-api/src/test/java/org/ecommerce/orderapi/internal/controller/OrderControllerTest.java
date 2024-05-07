@@ -40,10 +40,12 @@ public class OrderControllerTest {
 				new OrderDetailDto(
 						1L,
 						101,
+						"productName",
 						10000,
 						1,
 						10000,
 						10000,
+						1,
 						"seller1",
 						CLOSED,
 						null
@@ -51,10 +53,12 @@ public class OrderControllerTest {
 				new OrderDetailDto(
 						2L,
 						102,
+						"productName2",
 						20000,
 						2,
 						40000,
 						40000,
+						2,
 						"seller2",
 						CLOSED,
 						null
@@ -78,8 +82,8 @@ public class OrderControllerTest {
 						.value(orderDetailDto1.getQuantity()))
 				.andExpect(jsonPath("$.result.[0].paymentAmount")
 						.value(orderDetailDto1.getPaymentAmount()))
-				.andExpect(jsonPath("$.result.[0].seller")
-						.value(orderDetailDto1.getSeller()))
+				.andExpect(jsonPath("$.result.[0].sellerName")
+						.value(orderDetailDto1.getSellerName()))
 				.andExpect(jsonPath("$.result.[0].status")
 						.value(orderDetailDto1.getStatus().toString()))
 				.andExpect(jsonPath("$.result.[1].id").value(orderDetailDto2.getId()))
@@ -91,8 +95,8 @@ public class OrderControllerTest {
 						.value(orderDetailDto2.getQuantity()))
 				.andExpect(jsonPath("$.result.[1].paymentAmount")
 						.value(orderDetailDto2.getPaymentAmount()))
-				.andExpect(jsonPath("$.result.[1].seller")
-						.value(orderDetailDto2.getSeller()))
+				.andExpect(jsonPath("$.result.[1].sellerName")
+						.value(orderDetailDto2.getSellerName()))
 				.andExpect(jsonPath("$.result.[1].status")
 						.value(orderDetailDto2.getStatus().toString()));
 	}

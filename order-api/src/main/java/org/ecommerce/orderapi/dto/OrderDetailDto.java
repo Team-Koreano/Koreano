@@ -12,22 +12,26 @@ public class OrderDetailDto {
 
 	private Long id;
 	private Integer productId;
+	private String productName;
 	private Integer price;
 	private Integer quantity;
 	private Integer totalPrice;
 	private Integer paymentAmount;
-	private String seller;
+	private Integer sellerId;
+	private String sellerName;
 	private OrderStatus status;
 	private OrderStatusReason statusReason;
 
 	public record Response(
 			Long id,
 			Integer productId,
+			String productName,
 			Integer price,
 			Integer quantity,
 			Integer totalPrice,
 			Integer paymentAmount,
-			String seller,
+			Integer sellerId,
+			String sellerName,
 			OrderStatus status,
 			OrderStatusReason statusReason
 	) {

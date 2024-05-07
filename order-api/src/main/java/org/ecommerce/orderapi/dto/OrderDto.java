@@ -16,6 +16,7 @@ public class OrderDto {
 
 	private Long id;
 	private Integer userId;
+	private String userName;
 	private String receiveName;
 	private String phoneNumber;
 	private String address1;
@@ -53,6 +54,7 @@ public class OrderDto {
 	public record Response(
 			Long id,
 			Integer userId,
+			String userName,
 			String receiveName,
 			String phoneNumber,
 			String address1,

@@ -43,11 +43,13 @@ public class StockServiceTest {
 						1L,
 						null,
 						101,
+						"productName1",
 						10000,
 						1,
 						10000,
 						0,
 						10000,
+						1,
 						"seller1",
 						OPEN,
 						null,
@@ -64,11 +66,13 @@ public class StockServiceTest {
 						2L,
 						null,
 						102,
+						"productName2",
 						20000,
 						1,
 						20000,
 						0,
 						20000,
+						2,
 						"seller2",
 						OPEN,
 						null,
@@ -94,7 +98,8 @@ public class StockServiceTest {
 								1L,
 								null,
 								null,
-								INCREASE
+								INCREASE,
+								LocalDateTime.of(2024,5,7,0,0)
 						)
 				))
 		);
@@ -108,7 +113,8 @@ public class StockServiceTest {
 								2L,
 								null,
 								null,
-								INCREASE
+								INCREASE,
+								LocalDateTime.of(2024,5,7,0,0)
 						)
 				))
 		);
@@ -163,11 +169,13 @@ public class StockServiceTest {
 						1L,
 						null,
 						101,
+						"productName1",
 						10000,
 						1,
 						10000,
 						0,
 						10000,
+						1,
 						"seller1",
 						OPEN,
 						null,
@@ -184,11 +192,13 @@ public class StockServiceTest {
 						2L,
 						null,
 						102,
+						"productName2",
 						20000,
 						20,
 						20000,
 						0,
 						20000,
+						2,
 						"seller2",
 						OPEN,
 						null,
@@ -214,7 +224,8 @@ public class StockServiceTest {
 								1L,
 								null,
 								null,
-								INCREASE
+								INCREASE,
+								LocalDateTime.of(2024,5,7,0,0)
 						)
 				))
 		);
@@ -228,7 +239,8 @@ public class StockServiceTest {
 								2L,
 								null,
 								null,
-								INCREASE
+								INCREASE,
+								LocalDateTime.of(2024,5,7,0,0)
 						)
 				))
 		);

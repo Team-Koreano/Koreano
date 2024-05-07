@@ -9,15 +9,18 @@ import java.util.Map;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.client.ProductServiceClient;
+import org.ecommerce.orderapi.client.UserServiceClient;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.ProductMapper;
+import org.ecommerce.orderapi.dto.UserMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.User;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
@@ -39,10 +42,10 @@ public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
 	private final ProductServiceClient productServiceClient;
+	private final UserServiceClient userServiceClient;
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
 	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
-
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 	// TODO : 회원 유효성 검사
@@ -60,6 +63,7 @@ public class OrderService {
 			final Integer userId,
 			final OrderDto.Request.Place request
 	) {
+		final User user = getUser(userId);
 		final BucketSummary bucketSummary = getBuckets(userId, request.bucketIds());
 		final List<Integer> productIds = bucketSummary.getProductIds();
 		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
@@ -72,7 +76,8 @@ public class OrderService {
 		return OrderMapper.INSTANCE.OrderToDto(
 				orderRepository.save(
 						Order.ofPlace(
-								userId,
+								user.getId(),
+								user.getName(),
 								request.receiveName(),
 								request.phoneNumber(),
 								request.address1(),
@@ -99,7 +104,7 @@ public class OrderService {
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
-		return BucketSummary.of(
+		return BucketSummary.create(
 				bucketServiceClient.getBuckets(userId, bucketIds)
 						.stream()
 						.map(BucketMapper.INSTANCE::responseToDto).toList());
@@ -115,6 +120,7 @@ public class OrderService {
 		// 				101,
 		// 				"에디오피아 이가체프",
 		// 				10000,
+		// 				1,
 		// 				"seller1",
 		// 				AVAILABLE
 		// 		),
@@ -122,6 +128,7 @@ public class OrderService {
 		// 				102,
 		// 				"과테말라 안티구아",
 		// 				20000,
+		// 				2,
 		// 				"seller2",
 		// 				AVAILABLE
 		// 		)
@@ -130,6 +137,13 @@ public class OrderService {
 				.stream()
 				.map(ProductMapper.INSTANCE::responseToEntity)
 				.toList();
+	}
+
+	@VisibleForTesting
+	public User getUser(final Integer userId) {
+		// API (PostMan) 테스트를 위한 코드
+		// return new User(1, "회원 이름");
+		return UserMapper.INSTANCE.responseToEntity(userServiceClient.getUser(userId));
 	}
 
 	/**
@@ -190,6 +204,7 @@ public class OrderService {
 			final Integer pageNumber
 	) {
 		// TODO : UserId 검증
+		// TODO : 상품 정보
 		Pageable pageable = PageRequest.of(pageNumber, 5);
 		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
 				.map(OrderMapper.INSTANCE::OrderToDto)

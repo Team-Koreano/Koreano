@@ -48,6 +48,9 @@ public class OrderDetail {
 	private Integer productId;
 
 	@Column(nullable = false)
+	private String productName;
+
+	@Column(nullable = false)
 	private Integer price;
 
 	@Column(nullable = false)
@@ -63,7 +66,10 @@ public class OrderDetail {
 	private Integer paymentAmount;
 
 	@Column(nullable = false)
-	private String seller;
+	private Integer sellerId;
+
+	@Column(nullable = false)
+	private String sellerName;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -79,20 +85,24 @@ public class OrderDetail {
 	static OrderDetail ofPlace(
 			final Order order,
 			final Integer productId,
+			final String productName,
 			final Integer price,
 			final Integer quantity,
 			final Integer deliveryFee,
-			final String seller
+			final Integer sellerId,
+			final String sellerName
 	) {
 		final OrderDetail orderDetail = new OrderDetail();
 		orderDetail.order = order;
 		orderDetail.productId = productId;
+		orderDetail.productName = productName;
 		orderDetail.price = price;
 		orderDetail.quantity = quantity;
 		orderDetail.totalPrice = price * quantity;
 		orderDetail.deliveryFee = deliveryFee;
 		orderDetail.paymentAmount = price * quantity + deliveryFee;
-		orderDetail.seller = seller;
+		orderDetail.sellerId = sellerId;
+		orderDetail.sellerName = sellerName;
 		orderDetail.orderStatusHistories = List.of(
 				OrderStatusHistory.ofRecord(orderDetail, OPEN));
 		return orderDetail;

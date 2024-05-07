@@ -1,6 +1,9 @@
 package org.ecommerce.orderapi.entity;
 
+import java.time.LocalDateTime;
+
 import org.ecommerce.orderapi.entity.enumerated.StockOperationType;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +43,10 @@ public class StockHistory {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private StockOperationType operationType;
+
+	@CreationTimestamp
+	@Column
+	private LocalDateTime operationDatetime;
 
 	public static StockHistory ofRecord(
 			final Stock stock,

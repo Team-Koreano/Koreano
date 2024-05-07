@@ -50,6 +50,7 @@ public class OrderControllerTest {
 		OrderDto orderDto = new OrderDto(
 				1L,
 				1,
+				"userName",
 				"receiveName",
 				"010-777-7777",
 				"동백",
@@ -125,6 +126,7 @@ public class OrderControllerTest {
 				new OrderDto(
 						1L,
 						1,
+						"userName",
 						"receiveName",
 						"010-777-7777",
 						"동백",
@@ -137,10 +139,12 @@ public class OrderControllerTest {
 								new OrderDetailDto(
 										1L,
 										101,
+										"productName1",
 										10000,
 										1,
 										10000,
 										10000,
+										1,
 										"seller1",
 										OPEN,
 										null
