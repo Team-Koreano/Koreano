@@ -46,12 +46,12 @@ public class JwtProvider {
 		return PREFIX + jwt;
 	}
 
-	public String createSellerTokens(Integer sellerId, String email, Set<String> authorization,
+	public String createSellerTokens(Integer sellerId, Set<String> authorization,
 		HttpServletResponse response) {
 
-		final String accessToken = createToken(sellerId, email,
+		final String accessToken = createToken(sellerId,
 			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(sellerId, email,
+		final String refreshToken = createToken(sellerId,
 			TWO_WEEKS, secretKey, authorization);
 
 		String accessTokenKey = getAccessTokenKey(sellerId, getRoll(accessToken));
@@ -65,12 +65,12 @@ public class JwtProvider {
 		return accessToken;
 	}
 
-	public String createUserTokens(Integer userId, String email, Set<String> authorization,
+	public String createUserTokens(Integer userId, Set<String> authorization,
 		HttpServletResponse response) {
 
-		final String accessToken = createToken(userId, email,
+		final String accessToken = createToken(userId,
 			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(userId, email,
+		final String refreshToken = createToken(userId,
 			TWO_WEEKS, secretKey, authorization);
 
 		String accessTokenKey = getAccessTokenKey(userId, getRoll(accessToken));
@@ -84,12 +84,11 @@ public class JwtProvider {
 		return accessToken;
 	}
 
-	private String createToken(Integer id, String email, long lifeCycle, SecretKey secretKey,
+	private String createToken(Integer id, long lifeCycle, SecretKey secretKey,
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
 			.claim("id", id)
-			.claim("email", email)
 			.claim("authorization", authorization)
 			.setIssuedAt(now)
 			.setExpiration(new Date(now.getTime() + lifeCycle * 1000))

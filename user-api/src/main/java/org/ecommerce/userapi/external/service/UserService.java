@@ -92,7 +92,7 @@ public class UserService {
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtProvider.createUserTokens(users.getId(), users.getEmail(), authorization, response));
+			jwtProvider.createUserTokens(users.getId(), authorization, response));
 
 	}
 
@@ -170,7 +170,7 @@ public class UserService {
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return UserMapper.INSTANCE.fromAccessToken(
-			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken), jwtProvider.getEmail(refreshToken),
+			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 

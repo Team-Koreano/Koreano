@@ -83,7 +83,7 @@ public class SellerService {
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
 		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtProvider.createSellerTokens(seller.getId(), seller.getEmail(), authorization,
+			jwtProvider.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
 
@@ -130,7 +130,7 @@ public class SellerService {
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken), jwtProvider.getEmail(refreshToken),
+			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 

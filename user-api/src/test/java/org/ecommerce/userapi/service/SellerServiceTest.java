@@ -61,8 +61,7 @@ class SellerServiceTest {
 	@Test
 	void 셀러_계좌_등록() {
 		// given
-		final String email = "test@example.com";
-		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AuthDetails authDetails = new AuthDetails(1, null);
 		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
 			"213124124123", "부산은행");
 
@@ -173,7 +172,7 @@ class SellerServiceTest {
 			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
-			when(jwtProvider.createSellerTokens(any(), any(), any(), any())).thenReturn("Bearer fake_access_token");
+			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
 
 			// when
 			SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);

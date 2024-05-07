@@ -32,10 +32,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 			Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class)));
 		if (bearerToken != null) {
 			Integer userId = jwtProvider.getId(bearerToken);
-			String email = jwtProvider.getEmail(bearerToken);
 			String role = jwtProvider.getRoll(bearerToken);
-			return new AuthDetails(userId, email, role);
+			return new AuthDetails(userId, role);
 		}
-		return new AuthDetails(null, null, null);
+		return new AuthDetails(null, null);
 	}
 }

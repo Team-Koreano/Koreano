@@ -88,8 +88,7 @@ class UserServiceTest {
 	@Test
 	void 회원_계좌_등록() {
 		// given
-		final String email = "test@example.com";
-		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AuthDetails authDetails = new AuthDetails(1, null);
 		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
 			"213124124123", "부산은행");
 
@@ -116,8 +115,7 @@ class UserServiceTest {
 
 	@Test
 	void 회원_주소_등록() {
-		final String email = "test@example.com";
-		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AuthDetails authDetails = new AuthDetails(1, null);
 		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
 			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
 
@@ -237,7 +235,7 @@ class UserServiceTest {
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
-			when(jwtProvider.createUserTokens(any(), any(), any(), any())).thenReturn("Bearer fake_token");
+			when(jwtProvider.createUserTokens(any(), any(), any())).thenReturn("Bearer fake_token");
 
 			//then
 			UserDto expectedResponse = userService.loginRequest(loginRequest, response);
