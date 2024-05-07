@@ -56,6 +56,17 @@ public class UserDto {
 			String password
 		) {
 		}
+
+		public record Withdrawal(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			String email,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
+			String password,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String phoneNumber
+		) {
+		}
 	}
 
 	public static class Response {
