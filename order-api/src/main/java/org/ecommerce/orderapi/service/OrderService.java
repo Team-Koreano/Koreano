@@ -13,11 +13,13 @@ import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.ProductMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.repository.OrderRepository;
+import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,7 @@ public class OrderService {
 	private final ProductServiceClient productServiceClient;
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
+	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
@@ -186,9 +189,17 @@ public class OrderService {
 			final Integer year,
 			final Integer pageNumber
 	) {
+		// TODO : UserId 검증
 		Pageable pageable = PageRequest.of(pageNumber, 5);
 		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
 				.map(OrderMapper.INSTANCE::OrderToDto)
+				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<OrderStatusHistoryDto> getOrderStatusHistory(final Long orderDetailId) {
+		return orderStatusHistoryRepository.findAllByOrderDetailId(orderDetailId).stream()
+				.map(OrderMapper.INSTANCE::orderStatusHistoryToDto)
 				.toList();
 	}
 }

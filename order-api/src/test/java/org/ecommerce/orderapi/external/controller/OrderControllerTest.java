@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.service.OrderService;
 import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
@@ -169,7 +170,53 @@ public class OrderControllerTest {
 				.andExpect(jsonPath("$.result.[0].orderDatetime")
 						.value(orderDto.getOrderDatetime().toString()))
 				.andExpect(jsonPath("$.result.[0].orderDetailResponses[0].status")
-						.value(orderDetail.getStatus().toString()));
+						.value(orderDetail.getStatus().toString()))
+				.andExpect(status().isOk());
+
 	}
 
+	@Test
+	void 주문상태이력_조회() throws Exception {
+		// given
+		final List<OrderStatusHistoryDto> orderStatusHistoryDtos = List.of(
+				new OrderStatusHistoryDto(
+						1L,
+						OPEN,
+						LocalDateTime.of(2024, 5, 7, 0, 0)
+				),
+				new OrderStatusHistoryDto(
+						2L,
+						CLOSED,
+						LocalDateTime.of(2024, 5, 8, 0, 0)
+				),
+				new OrderStatusHistoryDto(
+						3L,
+						CANCELLED,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		given(orderService.getOrderStatusHistory(anyLong()))
+				.willReturn(orderStatusHistoryDtos);
+
+		// when
+		// then
+		OrderStatusHistoryDto orderStatusHistoryDto1 = orderStatusHistoryDtos.get(0);
+		OrderStatusHistoryDto orderStatusHistoryDto2 = orderStatusHistoryDtos.get(1);
+		OrderStatusHistoryDto orderStatusHistoryDto3 = orderStatusHistoryDtos.get(2);
+		mockMvc.perform(get("/api/external/orders/v1/1/statusHistory"))
+				.andDo(print())
+				.andExpect(jsonPath("$.result.[0].id")
+						.value(orderStatusHistoryDto1.getId()))
+				.andExpect(jsonPath("$.result.[0].changeStatus")
+						.value(orderStatusHistoryDto1.getChangeStatus().toString()))
+				.andExpect(jsonPath("$.result.[1].id")
+						.value(orderStatusHistoryDto2.getId()))
+				.andExpect(jsonPath("$.result.[1].changeStatus")
+						.value(orderStatusHistoryDto2.getChangeStatus().toString()))
+				.andExpect(jsonPath("$.result.[2].id")
+						.value(orderStatusHistoryDto3.getId()))
+				.andExpect(jsonPath("$.result.[2].changeStatus")
+						.value(orderStatusHistoryDto3.getChangeStatus().toString()))
+				.andExpect(status().isOk());
+	}
 }

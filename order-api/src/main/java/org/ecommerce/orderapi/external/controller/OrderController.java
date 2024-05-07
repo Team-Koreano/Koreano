@@ -5,6 +5,7 @@ import java.util.List;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.service.OrderService;
@@ -55,6 +56,19 @@ public class OrderController {
 				HttpStatus.OK.value(),
 				orderService.getOrders(USER_ID, year, pageNumber).stream()
 						.map(OrderMapper.INSTANCE::OrderDtoToResponse)
+						.toList()
+		);
+	}
+
+	@GetMapping("/{orderDetailId}/statusHistory")
+	public Response<List<OrderStatusHistoryDto.Response>> getAllOrderStatusHistory(
+			@PathVariable("orderDetailId") final Long orderDetailId
+	) {
+
+		return new Response<>(
+				HttpStatus.OK.value(),
+				orderService.getOrderStatusHistory(orderDetailId).stream()
+						.map(OrderMapper.INSTANCE::orderStatusHistoryDtotoResponse)
 						.toList()
 		);
 	}
