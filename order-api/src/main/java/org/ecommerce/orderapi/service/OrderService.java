@@ -238,9 +238,10 @@ public class OrderService {
 	 * @param orderDetailId- 주문 상세 번호
 	 * @return - 주문 상세
 	 */
-	public OrderDetailDto cancelOrder(final Long orderDetailId) {
+	public OrderDetailDto cancelOrder(final Integer userId, final Long orderDetailId) {
+		final User user = getUser(userId);
 		final OrderDetail orderDetail =
-				orderDetailRepository.findOrderDetailById(orderDetailId);
+				orderDetailRepository.findOrderDetailById(orderDetailId, user.getId());
 		validateOrderDetail(orderDetail);
 		orderDetail.changeStatus(OrderStatus.CANCELLED, OrderStatusReason.REFUND);
 		return OrderMapper.INSTANCE.orderDetailToDto(orderDetail);

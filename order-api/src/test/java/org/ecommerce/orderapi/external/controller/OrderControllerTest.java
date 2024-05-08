@@ -243,7 +243,7 @@ public class OrderControllerTest {
 				OrderStatusReason.REFUND,
 				LocalDateTime.of(2024, 5, 8, 0, 0)
 		);
-		given(orderService.cancelOrder(anyLong()))
+		given(orderService.cancelOrder(anyInt(), anyLong()))
 				.willReturn(orderDetailDto);
 		// when
 		// then

@@ -30,10 +30,11 @@ public class OrderDetailRepositoryImpl implements OrderDetailCustomRepository {
 	}
 
 	@Override
-	public OrderDetail findOrderDetailById(long orderDetailId) {
+	public OrderDetail findOrderDetailById(final long orderDetailId, final Integer userId) {
 		return jpaQueryFactory.selectFrom(orderDetail)
 				.leftJoin(orderDetail.orderStatusHistories).fetchJoin()
-				.where(orderDetail.id.eq(orderDetailId))
+				.where(orderDetail.id.eq(orderDetailId),
+						orderDetail.order.userId.eq(userId))
 				.fetchOne();
 	}
 }

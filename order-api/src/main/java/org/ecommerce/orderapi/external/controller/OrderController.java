@@ -83,7 +83,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.orderDetailDtoToResponse(
-						orderService.cancelOrder(orderDetailId)
+						orderService.cancelOrder(USER_ID, orderDetailId)
 				)
 		);
 	}

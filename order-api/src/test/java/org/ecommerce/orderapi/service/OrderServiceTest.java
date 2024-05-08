@@ -253,6 +253,7 @@ public class OrderServiceTest {
 	@Test
 	void 주문_취소() {
 		// given
+		final Integer userId = 1;
 		final Long orderDetailId = 1L;
 		List<OrderStatusHistory> orderStatusHistories = spy(List.of(
 				new OrderStatusHistory(
@@ -279,11 +280,15 @@ public class OrderServiceTest {
 				LocalDateTime.of(2024, 5, 8, 0, 0),
 				orderStatusHistories
 		));
-		int previousSize = orderDetail.getOrderStatusHistories().size();
-		given(orderDetailRepository.findOrderDetailById(anyLong()))
+		final UserDto.Response userServiceResponse = new UserDto.Response(1, "userName");
+		given(userServiceClient.getUser(anyInt()))
+				.willReturn(userServiceResponse);
+		given(orderDetailRepository.findOrderDetailById(anyLong(), anyInt()))
 				.willReturn(orderDetail);
+		int previousSize = orderDetail.getOrderStatusHistories().size();
+
 		// when
-		OrderDetailDto orderDetailDto = orderService.cancelOrder(orderDetailId);
+		OrderDetailDto orderDetailDto = orderService.cancelOrder(userId, orderDetailId);
 
 		// then
 		verify(orderDetail, Mockito.times(1))
