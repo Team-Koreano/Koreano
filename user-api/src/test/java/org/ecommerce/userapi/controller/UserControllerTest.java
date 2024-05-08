@@ -207,7 +207,7 @@ public class UserControllerTest {
 
 		AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
-		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
+		final AddressDto.Response.Register expectedResponse = AddressMapper.INSTANCE.addressDtoToResponse(dto);
 
 		when(userService.createAddress(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
@@ -245,7 +245,7 @@ public class UserControllerTest {
 
 		AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
-		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
+		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
 
 		when(userService.createAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 		// when

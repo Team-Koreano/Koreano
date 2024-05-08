@@ -175,8 +175,8 @@ class UserServiceTest {
 			UserDto expectedResult = UserMapper.INSTANCE.userToDto(savedUser);
 
 			//then
-			Assertions.assertThat(UserDto.Response.Register.of(expectedResult))
-				.isEqualTo(UserDto.Response.Register.of(result));
+			Assertions.assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
+				.isEqualTo(UserMapper.INSTANCE.userDtoToResponse(result));
 		}
 
 		@Test

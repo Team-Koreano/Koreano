@@ -185,7 +185,7 @@ class SellerControllerTest {
 
 		AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
-		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
+		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
 
 		when(sellerService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 

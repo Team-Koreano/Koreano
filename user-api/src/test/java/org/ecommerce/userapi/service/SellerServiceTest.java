@@ -115,8 +115,8 @@ class SellerServiceTest {
 			SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
 
 			//then
-			Assertions.assertThat(SellerDto.Response.Register.of(expectedResult))
-				.isEqualTo(SellerDto.Response.Register.of(result));
+			Assertions.assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
+				.isEqualTo(SellerMapper.INSTANCE.sellerDtoToResponse(result));
 		}
 
 		@Test
