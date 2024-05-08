@@ -24,7 +24,7 @@ public class StockRepositoryImpl implements StockCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Map<Integer, Stock> findStocksByProductIdIn(List<Integer> productIds) {
+	public Map<Integer, Stock> findStocksByProductIdIn(final List<Integer> productIds) {
 		List<Stock> stocks = jpaQueryFactory.selectFrom(stock)
 				.leftJoin(stock.stockHistories).fetchJoin()
 				.where(stock.productId.in(productIds))

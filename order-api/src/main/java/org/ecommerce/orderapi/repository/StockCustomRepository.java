@@ -6,5 +6,5 @@ import java.util.Map;
 import org.ecommerce.orderapi.entity.Stock;
 
 public interface StockCustomRepository {
-	Map<Integer, Stock> findStocksByProductIdIn(List<Integer> productIds);
+	Map<Integer, Stock> findStocksByProductIdIn(final List<Integer> productIds);
 }
