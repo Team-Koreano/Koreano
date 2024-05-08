@@ -2,10 +2,12 @@ package org.ecommerce.paymentapi.external.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
@@ -97,12 +99,54 @@ public class LockTestServiceTest {
 		Integer userId = 1;
 		Integer totalAmount = threadCount * 5000;
 
+
 		//when
 		for(int i = 0; i < threadCount; i++) {
 			executorService.submit(() -> {
 				//		분산락 적용 메소드 호출
 				try {
 					lockTestService.useDistributeLock(lockName, userId);
+				}finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+		//then
+		Long endTime = System.currentTimeMillis();
+		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
+		log.info("Actual total amount : {}", beanPay.getAmount());
+		log.info("expect total amount : {}", totalAmount);
+		log.info("total Time : {}", (endTime - startTime) + "ms");
+		assertEquals(totalAmount, beanPay.getAmount());
+	}
+
+	@Test
+	void 멀티분산락_성공() throws InterruptedException {
+		//given
+		Long startTime = System.currentTimeMillis();
+		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+		String lockName = "BEANPAY";
+		Integer userId = 1;
+		Integer totalAmount = threadCount * 5000;
+		PaymentDto.Request.PaymentPrice paymentPrice = new PaymentDto.Request.PaymentPrice(
+			1L,
+			1000,
+			1,
+			2,
+			"orderName",
+			List.of()
+		);
+
+
+		//when
+		for(int i = 0; i < threadCount; i++) {
+			executorService.submit(() -> {
+				//		분산락 적용 메소드 호출
+				try {
+					lockTestService.useMultiLockTest(paymentPrice);
 				}finally {
 					latch.countDown();
 				}

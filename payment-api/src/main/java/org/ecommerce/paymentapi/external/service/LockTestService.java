@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.AopForTransaction;
 import org.ecommerce.paymentapi.aop.DistributedLock;
+import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
@@ -29,8 +30,22 @@ public class LockTestService {
 	private final RedissonClient redissonClient;
 	private final AopForTransaction aopForTransaction;
 
-	@DistributedLock(key = "#lockName.concat('-').concat(#userId)")
+	@DistributedLock(key = "#lockName.concat(#userId)")
 	public void useDistributeLock(String lockName, Integer userId) {
+		BeanPay beanPay = getBeanPay(1, Role.USER);
+
+		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+
+		beanPayDetailRepository.save(beanPayDetail);
+		beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
+	}
+
+	@DistributedLock(key = {
+		"'BEANPAY'.concat(#paymentPrice.sellerId()).concat('SELLER')",
+		"'BEANPAY'.concat(#paymentPrice.userId()).concat('USER')",
+	})
+	public void useMultiLockTest(PaymentPrice paymentPrice) {
+
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
 		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
@@ -64,7 +79,7 @@ public class LockTestService {
 
 	@Transactional
 	public void notUseAopTest(String lockName, Integer userId) {
-		final String key = "LOCK: BEANPAY-1";
+		final String key = "LOCK: BEANPAY1";
 		final RLock lock = redissonClient.getLock(key);
 		try{
 			final boolean available = lock.tryLock(5L, 3L, TimeUnit.SECONDS);
