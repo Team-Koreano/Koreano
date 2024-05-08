@@ -77,6 +77,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String paymentType = "카드";
@@ -99,7 +100,7 @@ class BeanPayDetailServiceTest {
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossResponse);
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 		}
 
 		@Test
@@ -107,6 +108,8 @@ class BeanPayDetailServiceTest {
 
 			//given
 			final UUID orderId = UUID.randomUUID();
+			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String paymentType = "카드";
 			final Integer amount = 1000;
@@ -120,7 +123,7 @@ class BeanPayDetailServiceTest {
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
-				beanPayService.validTossCharge(request);
+				beanPayService.validTossCharge(request, userId, role);
 			});
 			assertEquals(returnException.getErrorCode(), NOT_EXIST);
 		}
@@ -130,6 +133,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String paymentType = "카드";
 			final Integer amount = 1000;
@@ -146,7 +150,7 @@ class BeanPayDetailServiceTest {
 			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), VERIFICATION_FAIL.getMessage());
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
@@ -157,6 +161,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String paymentType = "카드";
@@ -180,7 +185,7 @@ class BeanPayDetailServiceTest {
 			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), TOSS_RESPONSE_FAIL.getMessage());
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
@@ -214,7 +219,7 @@ class BeanPayDetailServiceTest {
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), errorMessage);
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
-		}	
+		}
 	}
 	@Test
 	void 빈페이_존재안함_예외발생() {

@@ -18,6 +18,7 @@ import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
 import org.ecommerce.paymentapi.external.service.LockTestService;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
@@ -79,8 +80,9 @@ class BeanPayControllerTest {
 		final Response<BeanPayDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/external/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
-			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult =
+			mvc.perform(post("/api/external/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
 
 		//then
 		String actual = mvcResult.getResponse().getContentAsString();
@@ -96,6 +98,7 @@ class BeanPayControllerTest {
 			final UUID orderId = UUID.randomUUID();
 			final String paymentKey = "paymentKey";
 			final Integer userId = 1;
+			final Role role = USER;
 			final String paymentType = "카드";
 
 			final Integer amount = 1000;
@@ -109,7 +112,7 @@ class BeanPayControllerTest {
 				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
 			final Response<BeanPayDto> result = new Response<>(200, response);
 
-			when(beanPayService.validTossCharge(request)).thenReturn(response);
+			when(beanPayService.validTossCharge(request, userId, role)).thenReturn(response);
 
 			//when
 			MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/success")
