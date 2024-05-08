@@ -34,7 +34,7 @@ public class ProductSearchController {
 
 	@GetMapping("/suggest")
 	public Response<List<ProductSearchDto.Response.SuggestedProducts>> suggestSearchKeyword(
-		@RequestParam final String keyword) {
+		@RequestParam(value = "keyword") final String keyword) {
 
 		final List<ProductSearchDto> suggestedProducts = elasticSearchService.suggestSearchKeyword(keyword);
 
