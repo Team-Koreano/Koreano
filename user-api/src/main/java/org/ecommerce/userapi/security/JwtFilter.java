@@ -3,8 +3,8 @@ package org.ecommerce.userapi.security;
 import java.io.IOException;
 
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.security.custom.ResponseConfigurer;
-import org.ecommerce.userapi.utils.RedisProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

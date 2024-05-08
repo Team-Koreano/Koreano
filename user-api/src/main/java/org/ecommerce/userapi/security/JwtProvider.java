@@ -10,7 +10,7 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.utils.RedisProvider;
+import org.ecommerce.userapi.provider.RedisProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.utils;
+package org.ecommerce.userapi.provider;
 
 import java.util.concurrent.TimeUnit;
 
