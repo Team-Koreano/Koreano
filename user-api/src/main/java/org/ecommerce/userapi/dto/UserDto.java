@@ -77,15 +77,6 @@ public class UserDto {
 			Short age,
 			String phoneNumber
 		) {
-			public static Register of(final UserDto users) {
-				return new Register(
-					users.getEmail(),
-					users.getName(),
-					users.getGender(),
-					users.getAge(),
-					users.getPhoneNumber()
-				);
-			}
 		}
 
 		public record Login(

@@ -10,6 +10,10 @@ import org.mapstruct.factory.Mappers;
 public interface AccountMapper {
 	AccountMapper INSTANCE = Mappers.getMapper(AccountMapper.class);
 
-	AccountDto toDto(SellerAccount sellerAccount);
-	AccountDto toDto(UsersAccount usersAccount);
+	AccountDto sellerAccountToDto(SellerAccount sellerAccount);
+
+	AccountDto userAccountToDto(UsersAccount usersAccount);
+
+	AccountDto.Response.Register accountDtoToResponse(AccountDto accountDto);
+
 }

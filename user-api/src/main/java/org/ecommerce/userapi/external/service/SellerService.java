@@ -59,7 +59,7 @@ public class SellerService {
 
 		sellerRepository.save(seller);
 
-		return SellerMapper.INSTANCE.toDto(seller);
+		return SellerMapper.INSTANCE.sellerToDto(seller);
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class SellerService {
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
-		return SellerMapper.INSTANCE.fromAccessToken(
+		return SellerMapper.INSTANCE.accessTokenToDto(
 			jwtProvider.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
@@ -115,9 +115,20 @@ public class SellerService {
 
 		sellerAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.toDto(account);
+		return AccountMapper.INSTANCE.sellerAccountToDto(account);
 	}
 
+	/**
+	 * 엑세스 토큰을 재발급 하는 메서드입니다.
+	 * <p>
+	 * 리프래시 토큰을 통해 엑세스 토큰을 재발급 해주는 로직입니다
+	 * <p>
+	 * @author Hong
+	 *
+	 * @param bearerToken - 리프래시토큰
+	 * @param response - 쿠키를 담을 response 객체
+	 * @return SellerDto
+	 */
 	public SellerDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
 		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
@@ -129,7 +140,7 @@ public class SellerService {
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return SellerMapper.INSTANCE.fromAccessToken(
+		return SellerMapper.INSTANCE.accessTokenToDto(
 			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}

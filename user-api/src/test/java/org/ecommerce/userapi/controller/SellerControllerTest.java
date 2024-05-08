@@ -105,7 +105,7 @@ class SellerControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		final SellerDto responseDto = SellerMapper.INSTANCE.toDto(seller);
+		final SellerDto responseDto = SellerMapper.INSTANCE.sellerToDto(seller);
 
 		final String content = objectMapper.writeValueAsString(responseDto);
 		//when
@@ -137,7 +137,7 @@ class SellerControllerTest {
 
 		String mockAccessToken = "mocked_access_token";
 
-		SellerDto mocking = SellerMapper.INSTANCE.fromAccessToken(mockAccessToken);
+		SellerDto mocking = SellerMapper.INSTANCE.accessTokenToDto(mockAccessToken);
 
 		when(sellerService.loginRequest(any(SellerDto.Request.Login.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
@@ -183,7 +183,7 @@ class SellerControllerTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 

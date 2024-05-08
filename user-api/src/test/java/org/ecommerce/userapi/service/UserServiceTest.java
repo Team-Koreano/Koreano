@@ -105,7 +105,7 @@ class UserServiceTest {
 		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
 		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
 		// when
@@ -132,7 +132,7 @@ class UserServiceTest {
 		final Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
+		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
 		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
 
@@ -172,7 +172,7 @@ class UserServiceTest {
 				newUserRequest.age(),
 				newUserRequest.phoneNumber()
 			);
-			UserDto expectedResult = UserMapper.INSTANCE.toDto(savedUser);
+			UserDto expectedResult = UserMapper.INSTANCE.userToDto(savedUser);
 
 			//then
 			Assertions.assertThat(UserDto.Response.Register.of(expectedResult))

@@ -2,7 +2,9 @@ package org.ecommerce.userapi.external.controller;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.custom.CurrentUser;
@@ -33,7 +35,7 @@ public class SellerController {
 	@PostMapping()
 	public Response<SellerDto.Response.Register> register(@RequestBody final SellerDto.Request.Register seller) {
 		final SellerDto responseSeller = sellerService.registerRequest(seller);
-		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Register.of(responseSeller));
+		return new Response<>(HttpStatus.OK.value(), SellerMapper.INSTANCE.sellerDtoToResponse(responseSeller));
 	}
 
 	@PostMapping("/login")
@@ -56,7 +58,7 @@ public class SellerController {
 		@CurrentUser final AuthDetails authDetails,
 		@RequestBody @Valid final AccountDto.Request.Register account) {
 		AccountDto accountDto = sellerService.registerAccount(authDetails, account);
-		return new Response<>(HttpStatus.OK.value(), AccountDto.Response.Register.of(accountDto));
+		return new Response<>(HttpStatus.OK.value(), AccountMapper.INSTANCE.accountDtoToResponse(accountDto));
 	}
 
 	@PostMapping("/reissue")

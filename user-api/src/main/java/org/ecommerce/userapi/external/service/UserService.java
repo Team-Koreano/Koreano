@@ -70,7 +70,7 @@ public class UserService {
 
 		userRepository.save(users);
 
-		return UserMapper.INSTANCE.toDto(users);
+		return UserMapper.INSTANCE.userToDto(users);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class UserService {
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
-		return UserMapper.INSTANCE.fromAccessToken(
+		return UserMapper.INSTANCE.accessTokenToDto(
 			jwtProvider.createUserTokens(user.getId(), authorization, response));
 	}
 
@@ -135,7 +135,7 @@ public class UserService {
 
 		addressRepository.save(address);
 
-		return AddressMapper.INSTANCE.toDto(address);
+		return AddressMapper.INSTANCE.addressToDto(address);
 
 	}
 
@@ -152,7 +152,7 @@ public class UserService {
 
 		usersAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.toDto(account);
+		return AccountMapper.INSTANCE.userAccountToDto(account);
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class UserService {
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return UserMapper.INSTANCE.fromAccessToken(
+		return UserMapper.INSTANCE.accessTokenToDto(
 			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}

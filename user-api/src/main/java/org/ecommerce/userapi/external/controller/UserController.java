@@ -2,8 +2,11 @@ package org.ecommerce.userapi.external.controller;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
+import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.UserDto;
+import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.external.service.UserService;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.custom.CurrentUser;
@@ -32,7 +35,7 @@ public class UserController {
 	@PostMapping()
 	public Response<UserDto.Response.Register> register(@RequestBody final UserDto.Request.Register user) {
 		final UserDto userDto = userService.registerRequest(user);
-		return new Response<>(HttpStatus.OK.value(), UserDto.Response.Register.of(userDto));
+		return new Response<>(HttpStatus.OK.value(), UserMapper.INSTANCE.userDtoToResponse(userDto));
 	}
 
 	@PostMapping("/login")
@@ -55,7 +58,7 @@ public class UserController {
 		@CurrentUser final AuthDetails authDetails,
 		@RequestBody @Valid final AddressDto.Request.Register address) {
 		final AddressDto addressDto = userService.createAddress(authDetails, address);
-		return new Response<>(HttpStatus.OK.value(), AddressDto.Response.Register.of(addressDto));
+		return new Response<>(HttpStatus.OK.value(), AddressMapper.INSTANCE.addressDtoToResponse(addressDto));
 	}
 
 	@PostMapping("/account")
@@ -63,7 +66,7 @@ public class UserController {
 		@CurrentUser final AuthDetails authDetails,
 		@RequestBody @Valid final AccountDto.Request.Register account) {
 		AccountDto accountDto = userService.createAccount(authDetails, account);
-		return new Response<>(HttpStatus.OK.value(), AccountDto.Response.Register.of(accountDto));
+		return new Response<>(HttpStatus.OK.value(), AccountMapper.INSTANCE.accountDtoToResponse(accountDto));
 	}
 
 	@PostMapping("/reissue")

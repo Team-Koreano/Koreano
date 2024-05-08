@@ -76,7 +76,7 @@ class SellerServiceTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
 		when(sellerRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(seller));
 		// when
@@ -112,7 +112,7 @@ class SellerServiceTest {
 				newSellerReqeust.phoneNumber()
 			);
 
-			SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
+			SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
 
 			//then
 			Assertions.assertThat(SellerDto.Response.Register.of(expectedResult))

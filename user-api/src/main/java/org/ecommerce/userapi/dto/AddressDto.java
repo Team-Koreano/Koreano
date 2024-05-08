@@ -40,14 +40,6 @@ public class AddressDto {
 			String postAddress,
 			String detail
 		) {
-			public static Register of(final AddressDto addressDto) {
-				return new Register(
-					addressDto.id,
-					addressDto.name,
-					addressDto.postAddress,
-					addressDto.detail
-				);
-			}
 		}
 	}
 }

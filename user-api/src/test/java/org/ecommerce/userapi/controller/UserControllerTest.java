@@ -127,7 +127,7 @@ public class UserControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		UserDto responseDto = UserMapper.INSTANCE.toDto(users);
+		UserDto responseDto = UserMapper.INSTANCE.userToDto(users);
 
 		when(userService.registerRequest(registerRequest)).thenReturn(responseDto);
 
@@ -162,7 +162,7 @@ public class UserControllerTest {
 
 		String mockAccessToken = "mocked_access_token";
 
-		UserDto mocking = UserMapper.INSTANCE.fromAccessToken(mockAccessToken);
+		UserDto mocking = UserMapper.INSTANCE.accessTokenToDto(mockAccessToken);
 
 		when(userService.loginRequest(any(UserDto.Request.Login.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
@@ -205,7 +205,7 @@ public class UserControllerTest {
 		Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		AddressDto dto = AddressMapper.INSTANCE.toDto(address);
+		AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
 		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
 
@@ -243,7 +243,7 @@ public class UserControllerTest {
 
 		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.number());
 
-		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
 		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
 

@@ -61,15 +61,6 @@ public class SellerDto {
 			String address,
 			String phoneNumber
 		) {
-			public static Register of(final SellerDto seller) {
-				return new Register(
-					seller.getEmail(),
-					seller.getName(),
-					seller.getAddress(),
-					seller.getPhoneNumber()
-				);
-			}
-
 		}
 
 		public record Login(

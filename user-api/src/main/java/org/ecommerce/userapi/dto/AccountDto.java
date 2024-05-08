@@ -38,13 +38,6 @@ public class AccountDto {
 			String number,
 			String bankName
 		) {
-			public static Register of(final AccountDto accountDto){
-				return new Register(
-					accountDto.id,
-					accountDto.number,
-					accountDto.bankName
-				);
-			}
 		}
 	}
 }

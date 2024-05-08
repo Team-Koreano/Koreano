@@ -32,7 +32,7 @@ class UserDtoTest {
 	@Test
 	void 회원_응답() {
 		//given
-		final UserDto userDto = UserMapper.INSTANCE.toDto(USERS);
+		final UserDto userDto = UserMapper.INSTANCE.userToDto(USERS);
 		//when
 		final UserDto.Response.Register register = UserDto.Response.Register.of(userDto);
 		//then
