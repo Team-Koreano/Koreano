@@ -1,5 +1,7 @@
 package org.ecommerce.paymentapi.dto;
 
+import static org.ecommerce.paymentapi.exception.PaymentDetailErrorMessage.*;
+
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.Min;
@@ -17,21 +19,21 @@ public class PaymentDetailDto {
 
 	public static class Request {
 		public record PaymentDetailPrice(
-			@Min(value = 1, message = "1이상의 주문상세ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
 			Integer orderDetailId,
-			@Min(value = 0, message = "0이상의 총액을 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_TOTAL_AMOUNT)
 			Integer totalPrice,
-			@Min(value = 0, message = "0이상의 결제액을 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
 			Integer paymentAmount,
-			@Min(value = 0, message = "0이상의 상품금액을 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_PRICE)
 			Integer price,
-			@Min(value = 0, message = "0이상의 수량을 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_QUANTITY)
 			Integer quantity,
-			@Min(value = 0, message = "0이상의 배달료를 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_DELIVERY_FEE)
 			Integer deliveryFee,
-			@Min(value = 1, message = "1이상의 판매자ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId,
-			@NotBlank(message = "제품의 이름을 전달해주세요")
+			@NotBlank(message = BLANK_PRODUCT_NAME)
 			String productName
 		) {
 		}

@@ -39,11 +39,11 @@ public class BeanPayDto {
 		}
 
 		public record TossFail(
-			@NotNull(message = orderIdBlank)
+			@NotNull(message = NOT_BLANK_ORDER_ID)
 			UUID orderId,
-			@NotBlank(message = errorCodeBlank)
+			@NotBlank(message = NOT_BLANK_ERROR_CODE)
 			String errorCode,
-			@NotBlank(message = errorMessageBlank)
+			@NotBlank(message = NOT_BLANK_ERROR_MESSAGE)
 			String errorMessage
 		) {
 		}

@@ -1,5 +1,7 @@
 package org.ecommerce.paymentapi.dto;
 
+import static org.ecommerce.paymentapi.exception.PaymentErrorMessage.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,15 +25,15 @@ public class PaymentDto {
 
 	public static class Request {
 		public record PaymentPrice(
-			@Min(value = 1, message = "1이상의 주문ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ID)
 			Long orderId,
-			@Min(value = 0, message = "0이상의 총 금액을 전달해주세요")
+			@Min(value = 0, message = NOT_UNDER_ZERO_AMOUNT)
 			Integer totalAmount,
-			@Min(value = 1, message = "1이상의 유저ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
-			@Min(value = 1, message = "1이상의 셀러ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId,
-			@NotBlank(message = "주문명을 입력해주세요")
+			@NotBlank(message = NOT_BLANK_ORDER_NAME)
 			String orderName,
 			List<PaymentDetailPrice> paymentDetails
 		) {
