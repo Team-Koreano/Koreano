@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDetailDto;
@@ -48,7 +49,8 @@ public class OrderControllerTest {
 						1,
 						"seller1",
 						CLOSED,
-						null
+						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 				),
 				new OrderDetailDto(
 						2L,
@@ -61,7 +63,8 @@ public class OrderControllerTest {
 						2,
 						"seller2",
 						CLOSED,
-						null
+						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 				)
 		);
 		given(stockService.decreaseStocks(orderId))

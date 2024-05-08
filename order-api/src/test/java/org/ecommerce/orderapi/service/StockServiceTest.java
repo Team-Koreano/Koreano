@@ -53,6 +53,7 @@ public class StockServiceTest {
 						"seller1",
 						OPEN,
 						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 						List.of(
 								new OrderStatusHistory(
 										1L,
@@ -76,6 +77,7 @@ public class StockServiceTest {
 						"seller2",
 						OPEN,
 						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 						List.of(
 								new OrderStatusHistory(
 										2L,
@@ -179,6 +181,7 @@ public class StockServiceTest {
 						"seller1",
 						OPEN,
 						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 						List.of(
 								new OrderStatusHistory(
 										1L,
@@ -202,6 +205,7 @@ public class StockServiceTest {
 						"seller2",
 						OPEN,
 						null,
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 						List.of(
 								new OrderStatusHistory(
 										2L,
