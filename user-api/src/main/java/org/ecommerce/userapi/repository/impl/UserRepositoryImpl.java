@@ -40,6 +40,15 @@ public class UserRepositoryImpl implements UserCustomRepository {
 			.fetchFirst() > 0;
 	}
 
+	@Override
+	public Optional<Users> findUsersByEmail(String email) {
+		return Optional.ofNullable(
+			jpaQueryFactory.selectFrom(users)
+				.where(emailEq(email))
+				.fetchFirst()
+		);
+	}
+
 	private BooleanExpression emailEq(final String email) {
 		return email != null ? users.email.eq(email) : null;
 	}
