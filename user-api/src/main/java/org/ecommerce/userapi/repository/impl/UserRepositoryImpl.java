@@ -54,7 +54,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	}
 
 	private BooleanExpression phoneNumberEq(final String phoneNumber) {
-		return phoneNumber != null ? users.email.eq(phoneNumber) : null;
+		return phoneNumber != null ? users.phoneNumber.eq(phoneNumber) : null;
 	}
 
 }
