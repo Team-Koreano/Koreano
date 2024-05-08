@@ -205,8 +205,9 @@ public class OrderService {
 	) {
 		// TODO : UserId 검증
 		// TODO : 상품 정보
+		User user = getUser(userId);
 		Pageable pageable = PageRequest.of(pageNumber, 5);
-		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
+		return orderRepository.findOrdersByUserId(user.getId(), year, pageable).stream()
 				.map(OrderMapper.INSTANCE::OrderToDto)
 				.toList();
 	}
