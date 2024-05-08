@@ -24,14 +24,20 @@ public class BeanPayRepositoryImpl implements BeanPayCustomRepository {
 	public Optional<BeanPay> findBeanPayByUserIdAndRole(Integer userId, Role role) {
 
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(beanPay)
-			.where(beanPay.userId.eq(userId).and(beanPay.role.eq(role)))
+			.where(
+				beanPay.userId.eq(userId)
+				.and(
+				beanPay.role.eq(role)))
 			.fetchOne());
 	}
 
 	@Override
 	public BeanPay findBeanPayByUserIdAndRoleUseBetaLock(Integer userId, Role role) {
 		return jpaQueryFactory.selectFrom(beanPay)
-			.where(beanPay.userId.eq(userId).and(beanPay.role.eq(role)))
+			.where(
+				beanPay.userId.eq(userId)
+					.and(
+				beanPay.role.eq(role)))
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne();
 	}
