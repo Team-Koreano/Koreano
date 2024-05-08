@@ -270,7 +270,7 @@ public class UserControllerTest {
 		final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, phoneNumber,
 			password);
 
-		Users user = Users.ofRegister(
+		final Users user = Users.ofRegister(
 			email,
 			"Jane Smith",
 			password,
@@ -279,7 +279,7 @@ public class UserControllerTest {
 			phoneNumber
 		);
 
-		when(userRepository.findUsersByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(Optional.of(user));
+		when(userRepository.findById(any(Integer.class))).thenReturn(Optional.of(user));
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/users/v1")
 			.with(csrf())

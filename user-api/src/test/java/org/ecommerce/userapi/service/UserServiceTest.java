@@ -307,28 +307,28 @@ class UserServiceTest {
 		@Test
 		void 회원_탈퇴_성공() {
 			// given
-			String email = "user1@example.com";
-			String phoneNumber = "01012345678";
-			String password = "password1";
+			final String email = "user1@example.com";
+			final String phoneNumber = "01012345678";
+			final String password = "password1";
+			final AuthDetails authDetails = new AuthDetails(1, null);
 
-			UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, password,
+			final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, password,
 				phoneNumber);
+			final Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, phoneNumber);
+			final UsersAccount account = UsersAccount.ofRegister(user, "1234567890", "KEB하나은행");
+			final Address address = Address.ofRegister(user, "집", "부산시 사하구", "123-45");
 
-			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, phoneNumber);
-			UsersAccount account = UsersAccount.ofRegister(user, "1234567890", "KEB하나은행");
-			Address address = Address.ofRegister(user, "집", "부산시 사하구", "123-45");
-
-			when(userRepository.findUsersByEmailAndPhoneNumber(any(String.class), any(String.class)))
+			when(userRepository.findById(authDetails.getId()))
 				.thenReturn(Optional.of(user));
 
 			when(usersAccountRepository.findByUsersId(user.getId())).thenReturn(List.of(account));
 			when(addressRepository.findByUsersId(user.getId())).thenReturn(List.of(address));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			// when
-			userService.withdrawUser(withdrawalRequest);
+			userService.withdrawUser(withdrawalRequest, authDetails);
 
 			// then
-			verify(userRepository, times(1)).findUsersByEmailAndPhoneNumber(email, phoneNumber);
+			verify(userRepository, times(1)).findById(authDetails.getId());
 			verify(usersAccountRepository, times(1)).findByUsersId(user.getId());
 			verify(addressRepository, times(1)).findByUsersId(user.getId());
 
@@ -340,15 +340,16 @@ class UserServiceTest {
 		@Test
 		void 회원_탈퇴_실패_이메일_또는_전화번호_틀림() {
 			// given
-			String incorrectEmail = "incorrect@example.com";
-			String incorrectPhoneNumber = "01011112222";
-			String password = "password1";
+			final String incorrectEmail = "incorrect@example.com";
+			final String incorrectPhoneNumber = "01011112222";
+			final String password = "password1";
 
-			UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(incorrectEmail,
+			final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(incorrectEmail,
 				password, incorrectPhoneNumber);
+			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest))
+			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -362,13 +363,14 @@ class UserServiceTest {
 
 			UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email,
 				incorrectPassword, phoneNumber);
+			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			Users user = Users.ofRegister(email, "John Doe", "password1", Gender.MALE, (short)25, phoneNumber);
 
-			when(userRepository.findUsersByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(Optional.of(user));
+			when(userRepository.findById(authDetails.getId())).thenReturn(Optional.of(user));
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest))
+			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
