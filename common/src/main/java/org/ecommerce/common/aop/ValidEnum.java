@@ -14,6 +14,7 @@ import jakarta.validation.Constraint;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidEnum {
 	String message() default "Invalid Enum Value";
+	boolean nullable() default false;
 	Class<?>[] groups() default {};
 	Class<?>[] payload() default {};
 	Class<? extends Enum<?>> enumClass();
