@@ -1,28 +1,34 @@
 package org.ecommerce.paymentapi.entity;
 
-import java.time.LocalDateTime;
+import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 
-import org.hibernate.annotations.ColumnDefault;
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Getter
 @Entity
 @Table(name = "payment_detail")
@@ -33,21 +39,46 @@ public class PaymentDetail {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "payment_id", nullable = false)
+	@JoinColumn(nullable = false)
 	private Payment payment;
 
-	@Column(name = "user_id")
-	private Integer userId;
+	@Column(nullable = false)
+	private Integer orderDetailId;
 
-	@Column(name = "seller_id")
-	private Integer sellerId;
+	@Column(nullable = false)
+	private Integer totalPrice = 0;
 
-	@ColumnDefault("0")
-	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount;
+	@Column(nullable = false)
+	private Integer deliveryFee = 0;
 
-	@Column(name = "order_name", nullable = false)
-	private String orderName;
+	@Column(nullable = false)
+	private Integer paymentAmount = 0;
+
+	@Column(nullable = false)
+	private Integer quantity = 0;
+
+	@Column(nullable = false)
+	private String productName;
+
+	@Column
+	private String cancelReason;
+
+	@Column
+	private String failReason;
+
+
+	@Column
+	@Enumerated(EnumType.STRING)
+	private PaymentStatus status = PaymentStatus.PAYMENT;
+
+	@OneToMany(
+		mappedBy = "paymentDetail",
+		cascade = {
+			CascadeType.PERSIST,
+			CascadeType.MERGE
+		}
+	)
+	private List<PaymentStatusHistory> paymentStatusHistories = new LinkedList<>();
 
 	@CreationTimestamp
 	@Column(name = "create_datetime", updatable = false)
@@ -59,4 +90,39 @@ public class PaymentDetail {
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
+
+	public static PaymentDetail ofPayment(
+		Payment payment,
+		Integer orderDetailId,
+		Integer totalPrice,
+		Integer deliveryFee,
+		Integer paymentAmount,
+		Integer quantity,
+		String productName
+	) {
+		PaymentDetail paymentDetail = new PaymentDetail();
+		paymentDetail.payment = payment;
+		paymentDetail.orderDetailId = orderDetailId;
+		paymentDetail.totalPrice = totalPrice;
+		paymentDetail.deliveryFee = deliveryFee;
+		paymentDetail.paymentAmount = paymentAmount;
+		paymentDetail.quantity = quantity;
+		paymentDetail.productName = productName;
+		paymentDetail.paymentStatusHistories.add(
+			PaymentStatusHistory.ofRecord(paymentDetail)
+		);
+		return paymentDetail;
+	}
+	//TODO: FailReason 매개변수 추가 예정
+	public void rollbackPayment() {
+		changePaymentStatus(ROLLBACK);
+		this.failReason = "FAIL REASON";
+		this.paymentStatusHistories.add(
+			PaymentStatusHistory.ofRecord(this)
+		);
+	}
+
+	private void changePaymentStatus(PaymentStatus status) {
+		this.status = status;
+	}
 }
