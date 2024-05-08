@@ -35,7 +35,7 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 		List<Order> content = jpaQueryFactory
 				.selectFrom(order)
 				.leftJoin(order.orderDetails).fetchJoin()
-				.where(userIdEq(userId),
+				.where(order.userId.eq(userId),
 						generateDateCondition(year))
 				.orderBy(order.orderDatetime.desc())
 				.offset(pageable.getOffset())
@@ -45,24 +45,19 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 		JPAQuery<Long> countQuery = jpaQueryFactory
 				.select(order.count())
 				.from(order)
-				.where(userIdEq(userId),
+				.where(order.userId.eq(userId),
 						generateDateCondition(year));
 
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
 	}
 
-	private BooleanExpression userIdEq(final Integer userId) {
-		return userId == null ? null : order.userId.eq(userId);
-	}
-
 	private BooleanExpression generateDateCondition(final Integer year) {
 		if (year == null) {
 			return order.orderDatetime.after(LocalDateTime.now().minusMonths(6));
-		} else {
-			final LocalDateTime startOfYear = LocalDateTime.of(year, 1, 1, 0, 0);
-			final LocalDateTime endOfYear = startOfYear.plusYears(1).minusNanos(1);
-			return order.orderDatetime.between(startOfYear, endOfYear);
 		}
+		final LocalDateTime startOfYear = LocalDateTime.of(year, 1, 1, 0, 0);
+		final LocalDateTime endOfYear = startOfYear.plusYears(1).minusNanos(1);
+		return order.orderDatetime.between(startOfYear, endOfYear);
 	}
 
 }
