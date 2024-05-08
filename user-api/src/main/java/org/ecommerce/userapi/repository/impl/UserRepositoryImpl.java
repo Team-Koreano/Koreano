@@ -34,8 +34,8 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return jpaQueryFactory.select(users.count())
 			.from(users)
 			.where(
-				emailEq(email),
-				phoneNumberEq(phoneNumber)
+				emailEq(email)
+					.or(phoneNumberEq(phoneNumber))
 			)
 			.fetchFirst() > 0;
 	}
