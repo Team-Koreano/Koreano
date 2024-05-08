@@ -1,6 +1,7 @@
 package org.ecommerce.userapi.external.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -179,11 +180,11 @@ public class UserService {
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
-	public void withdrawUser(UserDto.Request.Withdrawal withdrawal) {
-		Users user = userRepository.findUsersByEmailAndPhoneNumber(withdrawal.email(), withdrawal.phoneNumber())
+	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
+		Users user = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		validatePassword(withdrawal.password(), user.getPassword());
+		isValidUser(withdrawal, user);
 
 		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
 		if (usersAccounts == null) {
@@ -206,8 +207,12 @@ public class UserService {
 		}
 	}
 
-	private void validatePassword(final String password, final String encodedPassword) {
-		if (!passwordEncoder.matches(password, encodedPassword)) {
+	private void isValidUser(final UserDto.Request.Withdrawal withdrawal, final Users users) {
+		if (
+			!passwordEncoder.matches(withdrawal.password(), users.getPassword()) ||
+				!Objects.equals(withdrawal.email(), users.getEmail()) ||
+				!Objects.equals(withdrawal.phoneNumber(), users.getPhoneNumber())
+		) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}

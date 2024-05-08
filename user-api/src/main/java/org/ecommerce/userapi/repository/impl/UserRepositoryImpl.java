@@ -20,28 +20,16 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<Users> findUsersByEmailAndPhoneNumber(final String email, final String phoneNumber) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(users)
-				.where(emailEq(email)
-					.and(phoneNumberEq(phoneNumber)))
-				.fetchFirst()
-		);
-	}
-
-	@Override
 	public boolean existsByEmailOrPhoneNumber(final String email, final String phoneNumber) {
-		return jpaQueryFactory.select(users.count())
-			.from(users)
+		return jpaQueryFactory
+			.selectFrom(users)
 			.where(
-				emailEq(email)
-					.or(phoneNumberEq(phoneNumber))
-			)
-			.fetchFirst() > 0;
+				emailEq(email).or(phoneNumberEq(phoneNumber))
+			).fetchFirst() != null;
 	}
 
 	@Override
-	public Optional<Users> findUsersByEmail(String email) {
+	public Optional<Users> findUsersByEmail(final String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
 				.where(emailEq(email))

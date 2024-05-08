@@ -80,9 +80,10 @@ public class UserController {
 
 	@DeleteMapping()
 	public Response<String> withdrawUser(
+		@CurrentUser final AuthDetails authDetails,
 		@Valid @RequestBody final UserDto.Request.Withdrawal withdrawal
 	) {
-		userService.withdrawUser(withdrawal);
+		userService.withdrawUser(withdrawal, authDetails);
 		return new Response<>(HttpStatus.OK.value(), "탈퇴에 성공하였습니다");
 	}
 }
