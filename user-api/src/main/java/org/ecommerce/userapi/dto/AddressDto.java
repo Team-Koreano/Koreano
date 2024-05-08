@@ -2,7 +2,6 @@ package org.ecommerce.userapi.dto;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.exception.UserErrorMessages;
 
 import jakarta.validation.constraints.NotBlank;
@@ -13,7 +12,6 @@ import lombok.Getter;
 @Getter
 public class AddressDto {
 	private Integer id;
-	private Users users;
 	private String name;
 	private String postAddress;
 	private String detail;

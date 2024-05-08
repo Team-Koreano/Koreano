@@ -2,8 +2,6 @@ package org.ecommerce.userapi.dto;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.userapi.entity.Seller;
-import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.exception.UserErrorMessages;
 
 import jakarta.validation.constraints.NotBlank;
@@ -14,8 +12,6 @@ import lombok.Getter;
 @Getter
 public class AccountDto {
 	private Integer id;
-	private Seller seller;
-	private Users users;
 	private String number;
 	private String bankName;
 	private LocalDateTime createDatetime;
