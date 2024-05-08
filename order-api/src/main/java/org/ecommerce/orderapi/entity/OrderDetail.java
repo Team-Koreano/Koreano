@@ -41,7 +41,6 @@ public class OrderDetail {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
-	@JsonBackReference
 	private Order order;
 
 	@Column(nullable = false)
