@@ -70,8 +70,8 @@ public class OrderService {
 
 		final List<Product> products = getProducts(productIds);
 
-		validateStock(productIds, productIdToQuantityMap);
 		validateProduct(products);
+		validateStock(productIds, productIdToQuantityMap);
 
 		return OrderMapper.INSTANCE.OrderToDto(
 				orderRepository.save(
