@@ -6,6 +6,7 @@ import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
@@ -35,4 +36,13 @@ public class ElasticSearchService {
 			.toList();
 	}
 
+	public List<ProductSearchDto> searchProducts(ProductSearchDto.Request.Search request, Integer pageNumber, Integer pageSize) {
+		final Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
+		final SearchHits<ProductDocument> searchHits = productRepository.searchProducts(request, pageable);
+
+		return searchHits.stream()
+			.map(SearchHit::getContent)
+			.map(ProductMapper.INSTANCE::documentToDto)
+			.toList();
+	}
 }

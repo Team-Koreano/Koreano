@@ -44,4 +44,21 @@ public class ProductSearchController {
 				.toList());
 	}
 
+	@GetMapping("/search")
+	public Response<List<ProductSearchDto.Response.Search>> searchProducts(
+		ProductSearchDto.Request.Search request,
+		@RequestParam(required = false, defaultValue = "0", name = "pageNumber")
+		Integer pageNumber,
+		@RequestParam(required = false, defaultValue = "10", name = "pageSize")
+		Integer pageSize
+		) {
+
+		final List<ProductSearchDto> searchProducts = elasticSearchService.searchProducts(request, pageNumber, pageSize);
+
+		return new Response<>(HttpStatus.OK.value(),
+			searchProducts.stream()
+				.map(ProductSearchDto.Response.Search::of)
+				.toList());
+	}
+
 }
