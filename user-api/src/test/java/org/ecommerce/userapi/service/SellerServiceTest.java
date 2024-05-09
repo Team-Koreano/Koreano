@@ -2,6 +2,7 @@ package org.ecommerce.userapi.service;
 
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -91,7 +92,7 @@ class SellerServiceTest {
 		@Test
 		void 셀러_등록() {
 			//given
-			SellerDto.Request.Register newSellerReqeust = new SellerDto.Request.Register(
+			final SellerDto.Request.Register newSellerReqeust = new SellerDto.Request.Register(
 				"newuser@example.com",
 				"New User",
 				"newpassword",
@@ -102,9 +103,9 @@ class SellerServiceTest {
 			when(sellerRepository.existsByEmailOrPhoneNumber(newSellerReqeust.email(),
 				newSellerReqeust.phoneNumber())).thenReturn(false);
 
-			SellerDto result = sellerService.registerRequest(newSellerReqeust);
+			final SellerDto result = sellerService.registerRequest(newSellerReqeust);
 
-			Seller savedSeller = Seller.ofRegister(
+			final Seller savedSeller = Seller.ofRegister(
 				newSellerReqeust.email(),
 				newSellerReqeust.name(),
 				bCryptPasswordEncoder.encode(newSellerReqeust.password()),
@@ -112,7 +113,7 @@ class SellerServiceTest {
 				newSellerReqeust.phoneNumber()
 			);
 
-			SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
+			final SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
 
 			//then
 			Assertions.assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
@@ -123,7 +124,7 @@ class SellerServiceTest {
 		void 중복_이메일_케이스() {
 			// given
 			// 중복 이메일 케이스
-			SellerDto.Request.Register duplicatedEmailRequest = new SellerDto.Request.Register("user3@example.com"
+			final SellerDto.Request.Register duplicatedEmailRequest = new SellerDto.Request.Register("user3@example.com"
 				, "Duplicate Email"
 				, "password",
 				"manchester"
@@ -142,7 +143,7 @@ class SellerServiceTest {
 		void 중복_전화번호_케이스() {
 			//given
 			// 중복 전화번호 케이스
-			SellerDto.Request.Register duplicatedPhoneRequest = new SellerDto.Request.Register("user3@example.com"
+			final SellerDto.Request.Register duplicatedPhoneRequest = new SellerDto.Request.Register("user3@example.com"
 				, "Duplicate Phone"
 				, "password",
 				"manchester"
@@ -165,17 +166,17 @@ class SellerServiceTest {
 			// given
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			String email = "user1@example.com";
-			String password = "password1";
+			final String email = "user1@example.com";
+			final String password = "password1";
 
-			SellerDto.Request.Login loginRequest = new SellerDto.Request.Login(email, password);
-			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
-			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
+			final SellerDto.Request.Login loginRequest = new SellerDto.Request.Login(email, password);
+			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
 
 			// when
-			SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
+			final SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
 
 			// then
 			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_access_token");
@@ -184,11 +185,11 @@ class SellerServiceTest {
 		@Test
 		void 셀러_로그인_실패_이메일_틀림() {
 			// given
-			String password = "password1";
-			String incorrectEmail = "incorrect@example.com";
+			final String password = "password1";
+			final String incorrectEmail = "incorrect@example.com";
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
+			final SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
 
 			// then
 			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
@@ -199,19 +200,91 @@ class SellerServiceTest {
 		@Test
 		void 셀러_로그인_실패_비밀번호_틀림() {
 			// given
-			String email = "user1@example.com";
-			String incorrectPassword = "incorrect";
-			String password = "password1";
+			final String email = "user1@example.com";
+			final String incorrectPassword = "incorrect";
+			final String password = "password1";
 
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			SellerDto.Request.Login inCorrectPasswordRequest = new SellerDto.Request.Login(email, incorrectPassword);
-			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
-			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
+			final SellerDto.Request.Login inCorrectPasswordRequest = new SellerDto.Request.Login(email,
+				incorrectPassword);
+			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
+
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
 			// then
 			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+		}
+	}
+
+	@Nested
+	class 셀러_탈퇴_API {
+		@Test
+		void 셀러_탈퇴_성공() {
+			// given
+			final String email = "user1@example.com";
+			final String phoneNumber = "01012345678";
+			final String password = "password1";
+			final AuthDetails authDetails = new AuthDetails(1, null);
+
+			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email, password,
+				phoneNumber);
+			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
+			final SellerAccount account = SellerAccount.ofRegister(seller, "1234567890", "KEB하나은행");
+
+			when(sellerRepository.findById(authDetails.getId()))
+				.thenReturn(Optional.of(seller));
+
+			when(sellerAccountRepository.findBySellerId(seller.getId())).thenReturn(List.of(account));
+			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
+			// when
+			sellerService.withdrawSeller(withdrawalRequest, authDetails);
+
+			// then
+			verify(sellerRepository, times(1)).findById(authDetails.getId());
+			verify(sellerAccountRepository, times(1)).findBySellerId(seller.getId());
+
+			Assertions.assertThat(seller.isValidSeller()).isFalse();
+			Assertions.assertThat(account.isDeleted()).isTrue();
+		}
+
+		@Test
+		void 회원_탈퇴_실패_이메일_또는_전화번호_틀림() {
+			// given
+			final String incorrectEmail = "incorrect@example.com";
+			final String incorrectPhoneNumber = "01011112222";
+			final String password = "password1";
+
+			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(incorrectEmail,
+				password, incorrectPhoneNumber);
+			final AuthDetails authDetails = new AuthDetails(1, null);
+
+			// then
+			Assertions.assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
+				.isInstanceOf(CustomException.class)
+				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+		}
+
+		@Test
+		void 회원_탈퇴_실패_비밀번호_틀림() {
+			// given
+			final String email = "user1@example.com";
+			final String phoneNumber = "01012345678";
+			final String incorrectPassword = "incorrectPassword";
+
+			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email,
+				incorrectPassword, phoneNumber);
+			final AuthDetails authDetails = new AuthDetails(1, null);
+
+			final Seller seller = Seller.ofRegister(email, "John Doe", incorrectPassword, "어쩌구 저쩌구", phoneNumber);
+
+			when(sellerRepository.findById(authDetails.getId())).thenReturn(Optional.of(seller));
+
+			// then
+			Assertions.assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
+				.isInstanceOf(CustomException.class)
+				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
 	}
 }

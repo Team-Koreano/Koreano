@@ -232,7 +232,7 @@ class UserServiceTest {
 
 			UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
@@ -270,7 +270,7 @@ class UserServiceTest {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 
 			//then
 			UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
@@ -291,7 +291,7 @@ class UserServiceTest {
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
 			user.withdrawal();
 
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			//then
 			UserDto.Request.Login request = new UserDto.Request.Login(email, password);
