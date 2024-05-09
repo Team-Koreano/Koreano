@@ -1,5 +1,7 @@
 package org.ecommerce.userapi.external.service;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -73,7 +75,7 @@ public class SellerService {
 	 * @return SellerDto
 	 */
 	public SellerDto loginRequest(SellerDto.Request.Login login, HttpServletResponse response) {
-		final Seller seller = sellerRepository.findByEmail(login.email())
+		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		if (!passwordEncoder.matches(login.password(), seller.getPassword())) {
@@ -145,9 +147,44 @@ public class SellerService {
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
+	/**
+	 * 셀러 탈퇴 로직입니다
+	 * <p>
+	 * 탈퇴 요청이 들어오면 해당 셀러의 정보를 확인하여 탈퇴를 하도록 하는 로직입니다.
+	 * <p>
+	 * @author Hong
+	 *
+	 * @param withdrawal- 탈퇴 요청 dto
+	 * @return void
+	 */
+	public void withdrawSeller(final SellerDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
+		Seller seller = sellerRepository.findById(authDetails.getId())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+
+		isValidSeller(withdrawal, seller);
+
+		seller.withdrawal();
+
+		List<SellerAccount> sellerAccounts = sellerAccountRepository.findBySellerId(seller.getId());
+		if (sellerAccounts == null) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
+		}
+		sellerAccounts.forEach(SellerAccount::withdrawal);
+	}
+
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (sellerRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
+		}
+	}
+
+	private void isValidSeller(final SellerDto.Request.Withdrawal withdrawal, final Seller seller) {
+		if (
+			!passwordEncoder.matches(withdrawal.password(), seller.getPassword()) ||
+				!Objects.equals(withdrawal.email(), seller.getEmail()) ||
+				!Objects.equals(withdrawal.phoneNumber(), seller.getPhoneNumber())
+		) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }

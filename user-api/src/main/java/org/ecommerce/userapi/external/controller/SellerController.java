@@ -10,6 +10,7 @@ import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.custom.CurrentUser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -68,5 +69,14 @@ public class SellerController {
 	) {
 		SellerDto sellerDto = sellerService.reissueAccessToken(bearerToken, response);
 		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Login.of(sellerDto));
+	}
+
+	@DeleteMapping()
+	public Response<String> withdrawSeller(
+		@CurrentUser final AuthDetails authDetails,
+		@Valid @RequestBody final SellerDto.Request.Withdrawal withdrawal
+	) {
+		sellerService.withdrawSeller(withdrawal, authDetails);
+		return new Response<>(HttpStatus.OK.value(), "탈퇴에 성공하였습니다");
 	}
 }
