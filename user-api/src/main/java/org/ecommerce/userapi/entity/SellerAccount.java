@@ -52,4 +52,9 @@ public class SellerAccount {
 		sellerAccount.number = number;
 		return sellerAccount;
 	}
+
+	public void withdrawal() {
+		this.isDeleted = true;
+	}
+
 }
