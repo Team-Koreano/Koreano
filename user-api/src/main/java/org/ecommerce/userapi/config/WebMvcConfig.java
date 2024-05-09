@@ -2,7 +2,7 @@ package org.ecommerce.userapi.config;
 
 import java.util.List;
 
-import org.ecommerce.userapi.security.JwtProvider;
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.security.custom.CurrentUserArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

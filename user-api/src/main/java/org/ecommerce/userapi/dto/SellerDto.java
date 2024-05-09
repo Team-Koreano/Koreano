@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
-import org.ecommerce.userapi.security.JwtProvider;
+import org.ecommerce.userapi.provider.JwtProvider;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

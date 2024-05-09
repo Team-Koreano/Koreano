@@ -58,7 +58,7 @@ public class SellerController {
 	public Response<AccountDto.Response.Register> account(
 		@CurrentUser final AuthDetails authDetails,
 		@RequestBody @Valid final AccountDto.Request.Register account) {
-		AccountDto accountDto = sellerService.registerAccount(authDetails, account);
+		final AccountDto accountDto = sellerService.registerAccount(authDetails, account);
 		return new Response<>(HttpStatus.OK.value(), AccountMapper.INSTANCE.accountDtoToResponse(accountDto));
 	}
 
@@ -67,7 +67,7 @@ public class SellerController {
 		@RequestHeader(HttpHeaders.AUTHORIZATION) final String bearerToken,
 		HttpServletResponse response
 	) {
-		SellerDto sellerDto = sellerService.reissueAccessToken(bearerToken, response);
+		final SellerDto sellerDto = sellerService.reissueAccessToken(bearerToken, response);
 		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Login.of(sellerDto));
 	}
 

@@ -2,8 +2,8 @@ package org.ecommerce.userapi.security.custom;
 
 import java.util.Objects;
 
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtProvider;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
