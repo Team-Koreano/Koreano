@@ -29,7 +29,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	}
 
 	@Override
-	public Optional<Users> findUsersByEmail(final String email) {
+	public Optional<Users> findUsersByEmailAndIsDeletedIsFalse(final String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
 				.where(emailEq(email))
