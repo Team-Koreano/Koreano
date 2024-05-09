@@ -31,20 +31,23 @@ public class PaymentDto {
 			Integer totalAmount,
 			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
-			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
-			Integer sellerId,
 			@NotBlank(message = NOT_BLANK_ORDER_NAME)
 			String orderName,
 			List<PaymentDetailPrice> paymentDetails
 		) {
+			public List<Integer> getSellerIds() {
+				return paymentDetails.stream()
+					.map(PaymentDetailPrice::sellerId)
+					.toList();
+			}
 		}
 
 		public record PaymentRollBack(
-			@Min(value = 1, message = "1이상의 주문ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ID)
 			Long orderId,
-			@Min(value = 1, message = "1이상의 유저ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
-			@Min(value = 1, message = "1이상의 셀러ID를 전달해주세요")
+			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId
 		) {
 		}
