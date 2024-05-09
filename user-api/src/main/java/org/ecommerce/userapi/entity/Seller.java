@@ -71,4 +71,13 @@ public class Seller {
 		seller.phoneNumber = phoneNumber;
 		return seller;
 	}
+
+	public void withdrawal() {
+		this.isDeleted = true;
+		this.userStatus = UserStatus.WITHDRAWAL;
+	}
+
+	public boolean isValidSeller() {
+		return this.userStatus == UserStatus.GENERAL;
+	}
 }
