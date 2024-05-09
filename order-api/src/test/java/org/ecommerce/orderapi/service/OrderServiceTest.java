@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.service;
 
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
 import static org.ecommerce.orderapi.entity.enumerated.ProductStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,6 +9,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +19,17 @@ import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.client.ProductServiceClient;
 import org.ecommerce.orderapi.client.UserServiceClient;
 import org.ecommerce.orderapi.dto.BucketDto;
+import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.ProductDto;
 import org.ecommerce.orderapi.dto.UserDto;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
-import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
+import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.junit.jupiter.api.Test;
@@ -31,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +50,9 @@ public class OrderServiceTest {
 	private OrderRepository orderRepository;
 
 	@Mock
+	private OrderDetailRepository orderDetailRepository;
+
+	@Mock
 	private StockRepository stockRepository;
 
 	@Mock
@@ -53,6 +63,9 @@ public class OrderServiceTest {
 
 	@Mock
 	private ProductServiceClient productServiceClient;
+
+	@Mock
+	private OrderMapper orderMapper;
 
 	@Test
 	void 주문_생성() {
@@ -169,8 +182,8 @@ public class OrderServiceTest {
 
 		Integer expectedTotalPaymentAmount = product1TotalPrice + product2TotalPrice;
 		assertEquals(expectedTotalPaymentAmount, savedOrder.getTotalPaymentAmount());
-		assertEquals(OrderStatus.OPEN, savedOrderDetails.get(0).getStatus());
-		assertEquals(OrderStatus.OPEN, savedOrderDetails.get(1).getStatus());
+		assertEquals(OPEN, savedOrderDetails.get(0).getStatus());
+		assertEquals(OPEN, savedOrderDetails.get(1).getStatus());
 	}
 
 	@Test
@@ -236,4 +249,117 @@ public class OrderServiceTest {
 		// then
 		assertEquals(NOT_AVAILABLE_PRODUCT, exception.getErrorCode());
 	}
+
+	@Test
+	void 주문_취소() {
+		// given
+		final Integer userId = 1;
+		final Long orderDetailId = 1L;
+		List<OrderStatusHistory> orderStatusHistories = spy(List.of(
+				new OrderStatusHistory(
+						1L,
+						null,
+						CLOSED,
+						LocalDateTime.of(2024, 5, 8, 0, 0)
+				)
+		));
+		OrderDetail orderDetail = spy(new OrderDetail(
+				orderDetailId,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName1",
+				CLOSED,
+				null,
+				LocalDateTime.of(2024, 5, 8, 0, 0),
+				orderStatusHistories
+		));
+		final UserDto.Response userServiceResponse = new UserDto.Response(1, "userName");
+		given(userServiceClient.getUser(anyInt()))
+				.willReturn(userServiceResponse);
+		given(orderDetailRepository.findOrderDetailById(anyLong(), anyInt()))
+				.willReturn(orderDetail);
+		int previousSize = orderDetail.getOrderStatusHistories().size();
+
+		// when
+		OrderDetailDto orderDetailDto = orderService.cancelOrder(userId, orderDetailId);
+
+		// then
+		verify(orderDetail, Mockito.times(1))
+				.isCancelableStatus();
+		verify(orderDetail, Mockito.times(1))
+				.isCancellableOrderDate();
+		verify(orderDetail, Mockito.times(1))
+				.changeStatus(CANCELLED, REFUND);
+		assertEquals(CANCELLED, orderDetailDto.getStatus());
+		assertEquals(REFUND, orderDetailDto.getStatusReason());
+		List<OrderStatusHistory> afterOrderStatusHistories = orderDetail.getOrderStatusHistories();
+		assertEquals(previousSize + 1, afterOrderStatusHistories.size());
+		assertEquals(CANCELLED, afterOrderStatusHistories.get(1).getChangeStatus());
+	}
+
+	@Test
+	void 잘못된_주문상태_주문취소_실패() {
+		// given
+		OrderDetail orderDetail = spy(new OrderDetail(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName1",
+				OPEN,
+				null,
+				LocalDateTime.of(2024, 5, 8, 0, 0),
+				new ArrayList<>()
+		));
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> orderService.validateOrderDetail(orderDetail));
+
+		// then
+		verify(orderDetail, Mockito.times(1)).isCancelableStatus();
+		assertEquals(MUST_CLOSED_ORDER_TO_CANCEL, exception.getErrorCode());
+	}
+
+	@Test
+	void 기간만료_주문취소_실패() {
+		// given
+		OrderDetail orderDetail = spy(new OrderDetail(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName1",
+				CLOSED,
+				null,
+				LocalDateTime.of(2023, 5, 8, 0, 0),
+				new ArrayList<>()
+		));
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> orderService.validateOrderDetail(orderDetail));
+
+		// then
+		verify(orderDetail, Mockito.times(1)).isCancellableOrderDate();
+		assertEquals(TOO_OLD_ORDER_TO_CANCEL, exception.getErrorCode());
+	}
+
 }

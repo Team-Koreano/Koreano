@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.dto;
 
+import java.time.LocalDateTime;
+
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 
@@ -21,6 +23,7 @@ public class OrderDetailDto {
 	private String sellerName;
 	private OrderStatus status;
 	private OrderStatusReason statusReason;
+	private LocalDateTime statusDatetime;
 
 	public record Response(
 			Long id,
@@ -33,7 +36,8 @@ public class OrderDetailDto {
 			Integer sellerId,
 			String sellerName,
 			OrderStatus status,
-			OrderStatusReason statusReason
+			OrderStatusReason statusReason,
+			LocalDateTime statusDatetime
 	) {
 	}
 }

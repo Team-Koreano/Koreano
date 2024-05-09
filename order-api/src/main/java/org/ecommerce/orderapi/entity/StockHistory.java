@@ -48,7 +48,7 @@ public class StockHistory {
 	@Column
 	private LocalDateTime operationDatetime;
 
-	public static StockHistory ofRecord(
+	static StockHistory ofRecord(
 			final Stock stock,
 			final OrderDetail orderDetail,
 			final StockOperationType operationType
@@ -58,5 +58,9 @@ public class StockHistory {
 		stockHistory.orderDetail = orderDetail;
 		stockHistory.operationType = operationType;
 		return stockHistory;
+	}
+
+	public boolean isOperationTypeDecrease() {
+		return this.operationType == StockOperationType.DECREASE;
 	}
 }

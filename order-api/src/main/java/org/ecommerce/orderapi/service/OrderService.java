@@ -12,15 +12,20 @@ import org.ecommerce.orderapi.client.ProductServiceClient;
 import org.ecommerce.orderapi.client.UserServiceClient;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
+import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.ProductMapper;
 import org.ecommerce.orderapi.dto.UserMapper;
 import org.ecommerce.orderapi.entity.Order;
+import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.User;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
+import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
@@ -46,6 +51,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
 	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+	private final OrderDetailRepository orderDetailRepository;
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 	// TODO : 회원 유효성 검사
@@ -70,8 +76,8 @@ public class OrderService {
 
 		final List<Product> products = getProducts(productIds);
 
-		validateStock(productIds, productIdToQuantityMap);
 		validateProduct(products);
+		validateStock(productIds, productIdToQuantityMap);
 
 		return OrderMapper.INSTANCE.OrderToDto(
 				orderRepository.save(
@@ -212,10 +218,54 @@ public class OrderService {
 				.toList();
 	}
 
+	/**
+	 * 주문 상세 이력을 조회하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetailId- 주문 상세 번호
+	 * @return - 주문 상세 이력 리스트
+	 */
 	@Transactional(readOnly = true)
 	public List<OrderStatusHistoryDto> getOrderStatusHistory(final Long orderDetailId) {
 		return orderStatusHistoryRepository.findAllByOrderDetailId(orderDetailId).stream()
 				.map(OrderMapper.INSTANCE::orderStatusHistoryToDto)
 				.toList();
+	}
+
+	/**
+	 * 주문을 취소하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetailId- 주문 상세 번호
+	 * @return - 주문 상세
+	 */
+	public OrderDetailDto cancelOrder(final Integer userId, final Long orderDetailId) {
+		final User user = getUser(userId);
+		final OrderDetail orderDetail =
+				orderDetailRepository.findOrderDetailById(orderDetailId, user.getId());
+		validateOrderDetail(orderDetail);
+		orderDetail.changeStatus(OrderStatus.CANCELLED, OrderStatusReason.REFUND);
+		return OrderMapper.INSTANCE.orderDetailToDto(orderDetail);
+	}
+
+	/**
+	 * 주문 상세를 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetail- 주문 상세
+	 */
+	@VisibleForTesting
+	public void validateOrderDetail(final OrderDetail orderDetail) {
+		if (orderDetail == null) {
+			throw new CustomException(NOT_FOUND_ORDER_DETAIL_ID);
+		}
+
+		if (!orderDetail.isCancelableStatus()) {
+			throw new CustomException(MUST_CLOSED_ORDER_TO_CANCEL);
+		}
+
+		if (!orderDetail.isCancellableOrderDate()) {
+			throw new CustomException(TOO_OLD_ORDER_TO_CANCEL);
+		}
 	}
 }

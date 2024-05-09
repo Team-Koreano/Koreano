@@ -1,12 +1,17 @@
 package org.ecommerce.orderapi.entity;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
+import static org.ecommerce.orderapi.util.OrderPolicyConstants.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -78,6 +83,10 @@ public class OrderDetail {
 	@Enumerated(EnumType.STRING)
 	private OrderStatusReason statusReason;
 
+	@Column
+	@CreationTimestamp
+	private LocalDateTime statusDatetime;
+
 	@OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
@@ -113,9 +122,24 @@ public class OrderDetail {
 	) {
 		this.status = changeStatus;
 		this.statusReason = changeStatusReason;
+		this.statusDatetime = LocalDateTime.now();
 		this.orderStatusHistories = new ArrayList<>(this.orderStatusHistories);
 		this.orderStatusHistories.add(
 				OrderStatusHistory.ofRecord(this, changeStatus)
 		);
+	}
+
+	public boolean isCancelableStatus() {
+		return this.status == CLOSED;
+	}
+
+	public boolean isCancellableOrderDate() {
+		final LocalDateTime now = LocalDateTime.now();
+		final Duration duration = Duration.between(this.statusDatetime, now);
+		return duration.toDays() <= ORDER_CANCELLABLE_DATE;
+	}
+
+	public boolean isRefundedOrder() {
+		return this.status == CANCELLED && this.statusReason == REFUND;
 	}
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.service.OrderService;
 import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
@@ -147,7 +148,8 @@ public class OrderControllerTest {
 										1,
 										"seller1",
 										OPEN,
-										null
+										null,
+										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 								)
 						)
 				)
@@ -223,4 +225,42 @@ public class OrderControllerTest {
 						.value(orderStatusHistoryDto3.getChangeStatus().toString()))
 				.andExpect(status().isOk());
 	}
+
+	@Test
+	void 주문_취소() throws Exception {
+		// given
+		OrderDetailDto orderDetailDto = new OrderDetailDto(
+				1L,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				10000,
+				1,
+				"sellerName1",
+				CANCELLED,
+				OrderStatusReason.REFUND,
+				LocalDateTime.of(2024, 5, 8, 0, 0)
+		);
+		given(orderService.cancelOrder(anyInt(), anyLong()))
+				.willReturn(orderDetailDto);
+		// when
+		// then
+		mockMvc.perform(put("/api/external/orders/v1/1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.result.id").value(orderDetailDto.getId()))
+				.andExpect(jsonPath("$.result.productId").value(orderDetailDto.getProductId()))
+				.andExpect(jsonPath("$.result.productName").value(orderDetailDto.getProductName()))
+				.andExpect(jsonPath("$.result.price").value(orderDetailDto.getPrice()))
+				.andExpect(jsonPath("$.result.quantity").value(orderDetailDto.getQuantity()))
+				.andExpect(jsonPath("$.result.totalPrice").value(orderDetailDto.getTotalPrice()))
+				.andExpect(jsonPath("$.result.paymentAmount").value(orderDetailDto.getPaymentAmount()))
+				.andExpect(jsonPath("$.result.sellerId").value(orderDetailDto.getSellerId()))
+				.andExpect(jsonPath("$.result.sellerName").value(orderDetailDto.getSellerName()))
+				.andExpect(jsonPath("$.result.status").value(orderDetailDto.getStatus().toString()))
+				.andExpect(jsonPath("$.result.statusReason").value(orderDetailDto.getStatusReason().toString()))
+				.andDo(print());
+	}
+
 }
