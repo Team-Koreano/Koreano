@@ -75,11 +75,13 @@ public class SellerService {
 	 * @return SellerDto
 	 */
 	public SellerDto loginRequest(SellerDto.Request.Login login, HttpServletResponse response) {
-		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
-		if (!passwordEncoder.matches(login.password(), seller.getPassword())) {
-			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_PASSWORD);
+		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email())
+			.filter(sellers -> passwordEncoder.matches(login.password(), sellers.getPassword()))
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+
+		if (!seller.isValidSeller()) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
