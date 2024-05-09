@@ -86,7 +86,7 @@ public class UserService {
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
 
-		final Users user = userRepository.findUsersByEmail(login.email())
+		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email())
 			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
@@ -166,7 +166,7 @@ public class UserService {
 	 */
 	public UserDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+		final String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
 			jwtProvider.getRoll(bearerToken));
 
 		if (!redisProvider.hasKey(refreshTokenKey)) {
@@ -180,6 +180,15 @@ public class UserService {
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
+	/**
+	 * 회원 탈퇴 로직입니다
+	 * <p>
+	 * 탈퇴 요청이 들어오면 해당 유저의 정보를 확인하여 탈퇴를 하도록 하는 로직입니다.
+	 * <p>
+	 * @author Hong
+	 * @param withdrawal - 탈퇴 요청 dto
+	 * @return void
+	 */
 	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
 		Users user = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
