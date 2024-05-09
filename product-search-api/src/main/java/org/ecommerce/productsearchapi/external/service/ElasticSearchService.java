@@ -24,7 +24,7 @@ public class ElasticSearchService {
 	 * @author ${no.oneho}
 	 * 특정 키워드가 포함된 상품 리스트를 추려낸다.
 	 * @param  keyword 검색 키워드
-	 * @return ProductSearchDto
+	 * @return List<ProductSearchDto>
 	 */
 
 	public List<ProductSearchDto> suggestSearchKeyword(final String keyword) {
@@ -35,6 +35,16 @@ public class ElasticSearchService {
 			.map(ProductMapper.INSTANCE::documentToDto)
 			.toList();
 	}
+
+	/**
+	 *
+	 * @author ${no.oneho}
+	 * 여러 조건을 통해 상품 리스트 검색
+	 * @param request search 조건이 들어갈 Dto
+	 * @param pageSize page 의 사이즈
+	 * @param pageNumber page 의 넘버
+	 * @return List<ProductSearchDto>
+	 */
 
 	public List<ProductSearchDto> searchProducts(ProductSearchDto.Request.Search request, Integer pageNumber, Integer pageSize) {
 		final Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
