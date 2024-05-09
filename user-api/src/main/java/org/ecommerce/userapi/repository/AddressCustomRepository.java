@@ -5,6 +5,6 @@ import java.util.List;
 import org.ecommerce.userapi.entity.Address;
 
 public interface AddressCustomRepository {
-	List<Address> findByUsersId(final Integer userId);
+	List<Address> findByUsersIdAndIsDeletedIsFalse(final Integer userId);
 
 }

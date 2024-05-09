@@ -79,7 +79,8 @@ class SellerServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
-		when(sellerRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+			java.util.Optional.of(seller));
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then
@@ -233,17 +234,18 @@ class SellerServiceTest {
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			final SellerAccount account = SellerAccount.ofRegister(seller, "1234567890", "KEB하나은행");
 
-			when(sellerRepository.findById(authDetails.getId()))
+			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId()))
 				.thenReturn(Optional.of(seller));
 
-			when(sellerAccountRepository.findBySellerId(seller.getId())).thenReturn(List.of(account));
+			when(sellerAccountRepository.findBySellerIdAndIsDeletedIsFalse(seller.getId())).thenReturn(
+				List.of(account));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 			// when
 			sellerService.withdrawSeller(withdrawalRequest, authDetails);
 
 			// then
-			verify(sellerRepository, times(1)).findById(authDetails.getId());
-			verify(sellerAccountRepository, times(1)).findBySellerId(seller.getId());
+			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
+			verify(sellerAccountRepository, times(1)).findBySellerIdAndIsDeletedIsFalse(seller.getId());
 
 			Assertions.assertThat(seller.isValidSeller()).isFalse();
 			Assertions.assertThat(account.isDeleted()).isTrue();
@@ -279,7 +281,8 @@ class SellerServiceTest {
 
 			final Seller seller = Seller.ofRegister(email, "John Doe", incorrectPassword, "어쩌구 저쩌구", phoneNumber);
 
-			when(sellerRepository.findById(authDetails.getId())).thenReturn(Optional.of(seller));
+			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+				Optional.of(seller));
 
 			// then
 			Assertions.assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))

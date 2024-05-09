@@ -38,8 +38,22 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 		);
 	}
 
+	@Override
+	public Optional<Seller> findSellerByIdAndIsDeletedIsFalse(Integer sellerId) {
+		return Optional.ofNullable(
+			jpaQueryFactory.selectFrom(seller)
+				.where(idEq(sellerId).
+					and(seller.isDeleted.eq(false)))
+				.fetchFirst()
+		);
+	}
+
 	private BooleanExpression emailEq(final String email) {
 		return email != null ? seller.email.eq(email) : null;
+	}
+
+	private BooleanExpression idEq(final Integer sellerId) {
+		return sellerId != null ? seller.id.eq(sellerId) : null;
 	}
 
 	private BooleanExpression phoneNumberEq(final String phoneNumber) {

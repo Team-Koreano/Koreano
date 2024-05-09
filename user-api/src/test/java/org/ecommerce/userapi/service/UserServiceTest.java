@@ -107,7 +107,8 @@ class UserServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
-		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+			java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.createAccount(authDetails, registerRequest);
 		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
@@ -134,7 +135,8 @@ class UserServiceTest {
 
 		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
-		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+			java.util.Optional.of(users));
 
 		// when
 		final AddressDto result = userService.createAddress(authDetails, registerRequest);
@@ -318,19 +320,19 @@ class UserServiceTest {
 			final UsersAccount account = UsersAccount.ofRegister(user, "1234567890", "KEB하나은행");
 			final Address address = Address.ofRegister(user, "집", "부산시 사하구", "123-45");
 
-			when(userRepository.findById(authDetails.getId()))
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId()))
 				.thenReturn(Optional.of(user));
 
-			when(usersAccountRepository.findByUsersId(user.getId())).thenReturn(List.of(account));
-			when(addressRepository.findByUsersId(user.getId())).thenReturn(List.of(address));
+			when(usersAccountRepository.findByUsersIdAndIsDeletedIsFalse(user.getId())).thenReturn(List.of(account));
+			when(addressRepository.findByUsersIdAndIsDeletedIsFalse(user.getId())).thenReturn(List.of(address));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			// when
 			userService.withdrawUser(withdrawalRequest, authDetails);
 
 			// then
-			verify(userRepository, times(1)).findById(authDetails.getId());
-			verify(usersAccountRepository, times(1)).findByUsersId(user.getId());
-			verify(addressRepository, times(1)).findByUsersId(user.getId());
+			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
+			verify(usersAccountRepository, times(1)).findByUsersIdAndIsDeletedIsFalse(user.getId());
+			verify(addressRepository, times(1)).findByUsersIdAndIsDeletedIsFalse(user.getId());
 
 			Assertions.assertThat(user.isValidUser()).isFalse();
 			Assertions.assertThat(account.isDeleted()).isTrue();
@@ -367,7 +369,7 @@ class UserServiceTest {
 
 			Users user = Users.ofRegister(email, "John Doe", "password1", Gender.MALE, (short)25, phoneNumber);
 
-			when(userRepository.findById(authDetails.getId())).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(Optional.of(user));
 
 			// then
 			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))

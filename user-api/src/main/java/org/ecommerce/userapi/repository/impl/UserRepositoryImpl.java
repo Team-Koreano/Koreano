@@ -32,7 +32,18 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	public Optional<Users> findUsersByEmailAndIsDeletedIsFalse(final String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
-				.where(emailEq(email))
+				.where(emailEq(email)
+					.and(users.isDeleted.isFalse()))
+				.fetchFirst()
+		);
+	}
+
+	@Override
+	public Optional<Users> findUsersByIdAndIsDeletedIsFalse(Integer userId) {
+		return Optional.ofNullable(
+			jpaQueryFactory.selectFrom(users)
+				.where(idEq(userId)
+					.and(users.isDeleted.isFalse()))
 				.fetchFirst()
 		);
 	}
@@ -45,4 +56,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return phoneNumber != null ? users.phoneNumber.eq(phoneNumber) : null;
 	}
 
+	private BooleanExpression idEq(final Integer userId) {
+		return userId != null ? users.id.eq(userId) : null;
+	}
 }

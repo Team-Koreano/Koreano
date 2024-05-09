@@ -129,7 +129,7 @@ public class UserService {
 	 */
 	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
 
-		final Users users = userRepository.findById(authDetails.getId())
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final Address address = Address.ofRegister(users, register.name(), register.postAddress(), register.detail());
@@ -146,7 +146,7 @@ public class UserService {
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
 	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Users users = userRepository.findById(authDetails.getId())
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final UsersAccount account = UsersAccount.ofRegister(users, register.number(), register.bankName());
@@ -190,18 +190,18 @@ public class UserService {
 	 * @return void
 	 */
 	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Users user = userRepository.findById(authDetails.getId())
+		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
 		isValidUser(withdrawal, user);
 
-		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
+		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersIdAndIsDeletedIsFalse(user.getId());
 		if (usersAccounts.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
 		}
 		usersAccounts.forEach(UsersAccount::withdrawal);
 
-		List<Address> addresses = addressRepository.findByUsersId(user.getId());
+		List<Address> addresses = addressRepository.findByUsersIdAndIsDeletedIsFalse(user.getId());
 		if (addresses.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ADDRESS);
 		}

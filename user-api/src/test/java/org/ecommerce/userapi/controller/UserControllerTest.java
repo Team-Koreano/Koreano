@@ -279,7 +279,7 @@ public class UserControllerTest {
 			phoneNumber
 		);
 
-		when(userRepository.findById(any(Integer.class))).thenReturn(Optional.of(user));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(user));
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/users/v1")
 			.with(csrf())

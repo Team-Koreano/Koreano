@@ -5,5 +5,5 @@ import java.util.List;
 import org.ecommerce.userapi.entity.SellerAccount;
 
 public interface SellerCustomAccountRepository {
-	List<SellerAccount> findBySellerId(Integer sellerId);
+	List<SellerAccount> findBySellerIdAndIsDeletedIsFalse(Integer sellerId);
 }

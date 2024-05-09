@@ -19,9 +19,10 @@ public class AddressRepositoryImpl implements AddressCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<Address> findByUsersId(final Integer userId) {
+	public List<Address> findByUsersIdAndIsDeletedIsFalse(final Integer userId) {
 		return jpaQueryFactory.selectFrom(address)
-			.where(address.users.id.eq(userId))
+			.where(address.users.id.eq(userId)
+				.and(address.isDeleted.isFalse()))
 			.fetch();
 	}
 }

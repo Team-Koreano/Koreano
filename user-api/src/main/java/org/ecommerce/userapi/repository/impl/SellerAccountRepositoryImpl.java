@@ -19,7 +19,7 @@ public class SellerAccountRepositoryImpl implements SellerCustomAccountRepositor
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<SellerAccount> findBySellerId(final Integer sellerId) {
+	public List<SellerAccount> findBySellerIdAndIsDeletedIsFalse(final Integer sellerId) {
 		return jpaQueryFactory.selectFrom(sellerAccount)
 			.where(sellerAccount.seller.id.eq(sellerId))
 			.fetch();

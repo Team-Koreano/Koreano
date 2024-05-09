@@ -219,7 +219,7 @@ class SellerControllerTest {
 			"01087654321"
 		);
 
-		when(sellerRepository.findById(any(Integer.class))).thenReturn(Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(seller));
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/sellers/v1")
 			.with(csrf())

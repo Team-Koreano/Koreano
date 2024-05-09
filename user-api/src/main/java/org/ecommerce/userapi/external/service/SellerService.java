@@ -112,7 +112,7 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Seller seller = sellerRepository.findById(authDetails.getId())
+		final Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final SellerAccount account = SellerAccount.ofRegister(seller, register.number(), register.bankName());
@@ -160,14 +160,14 @@ public class SellerService {
 	 * @return void
 	 */
 	public void withdrawSeller(final SellerDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Seller seller = sellerRepository.findById(authDetails.getId())
+		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
 		isValidSeller(withdrawal, seller);
 
 		seller.withdrawal();
 
-		List<SellerAccount> sellerAccounts = sellerAccountRepository.findBySellerId(seller.getId());
+		List<SellerAccount> sellerAccounts = sellerAccountRepository.findBySellerIdAndIsDeletedIsFalse(seller.getId());
 		if (sellerAccounts.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
 		}
