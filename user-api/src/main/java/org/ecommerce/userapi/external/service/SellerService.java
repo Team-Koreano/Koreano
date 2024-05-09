@@ -168,7 +168,7 @@ public class SellerService {
 		seller.withdrawal();
 
 		List<SellerAccount> sellerAccounts = sellerAccountRepository.findBySellerId(seller.getId());
-		if (sellerAccounts == null) {
+		if (sellerAccounts.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
 		}
 		sellerAccounts.forEach(SellerAccount::withdrawal);
