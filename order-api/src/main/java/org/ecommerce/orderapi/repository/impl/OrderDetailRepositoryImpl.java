@@ -8,6 +8,7 @@ import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.repository.OrderDetailCustomRepository;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,18 @@ public class OrderDetailRepositoryImpl implements OrderDetailCustomRepository {
 	}
 
 	@Override
-	public OrderDetail findOrderDetailById(final long orderDetailId, final Integer userId) {
+	public OrderDetail findOrderDetailById(
+			final long orderDetailId,
+			final Integer userId
+	) {
 		return jpaQueryFactory.selectFrom(orderDetail)
 				.leftJoin(orderDetail.orderStatusHistories).fetchJoin()
 				.where(orderDetail.id.eq(orderDetailId),
-						orderDetail.order.userId.eq(userId))
-				.fetchOne();
+						userIdEq(userId))
+				.fetchFirst();
+	}
+
+	private BooleanExpression userIdEq(final Integer userId) {
+		return userId == null ? null : orderDetail.order.userId.eq(userId);
 	}
 }

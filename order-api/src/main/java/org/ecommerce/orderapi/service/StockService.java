@@ -2,6 +2,7 @@ package org.ecommerce.orderapi.service;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
+import static org.ecommerce.orderapi.exception.StockErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,10 @@ import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.StockHistory;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
+import org.ecommerce.orderapi.repository.StockHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockService {
 
 	private final StockRepository stockRepository;
+	private final StockHistoryRepository stockHistoryRepository;
 	private final OrderDetailRepository orderDetailRepository;
 
 	/**
@@ -120,6 +124,47 @@ public class StockService {
 			orderDetails.forEach(
 					orderDetail -> orderDetail.changeStatus(CANCELLED,
 							OrderStatusReason.OUT_OF_STOCK));
+		}
+	}
+
+	@StockLock
+	public StockDto increaseStock(final Long orderDetailId) {
+		final OrderDetail orderDetail = orderDetailRepository
+				.findOrderDetailById(orderDetailId, null);
+		validateOrderDetail(orderDetail);
+
+		final StockHistory stockHistory = stockHistoryRepository
+				.findStockHistoryByOrderDetailId(orderDetail.getId());
+		validateStockHistory(stockHistory);
+
+		final Stock stock = stockHistory.getStock();
+		if (stock == null) {
+			throw new CustomException(NOT_FOUND_STOCK);
+		}
+		stock.increaseTotalStock(orderDetail);
+		return StockMapper.INSTANCE.toStockDto(stock);
+	}
+
+	@VisibleForTesting
+	public void validateOrderDetail(final OrderDetail orderDetail) {
+		if (orderDetail == null) {
+			throw new CustomException(NOT_FOUND_ORDER_DETAIL);
+		}
+
+		if (orderDetail.getStatus() != CANCELLED) {
+			throw new CustomException(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK);
+		}
+	}
+
+	@VisibleForTesting
+	public void validateStockHistory(final StockHistory stockHistory) {
+		if (stockHistory == null) {
+			throw new CustomException(NOT_FOUND_STOCK_HISTORY);
+		}
+
+		if (!stockHistory.isOperationTypeDecrease()) {
+			throw new CustomException(
+					MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK);
 		}
 	}
 
