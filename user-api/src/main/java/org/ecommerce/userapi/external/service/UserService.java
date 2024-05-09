@@ -187,13 +187,13 @@ public class UserService {
 		isValidUser(withdrawal, user);
 
 		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
-		if (usersAccounts == null) {
+		if (usersAccounts.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
 		}
 		usersAccounts.forEach(UsersAccount::withdrawal);
 
 		List<Address> addresses = addressRepository.findByUsersId(user.getId());
-		if (addresses == null) {
+		if (addresses.isEmpty()) {
 			throw new CustomException(UserErrorCode.NOT_FOUND_ADDRESS);
 		}
 		addresses.forEach(Address::withdrawal);
