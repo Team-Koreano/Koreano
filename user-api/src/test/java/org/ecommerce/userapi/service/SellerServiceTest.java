@@ -194,7 +194,7 @@ class SellerServiceTest {
 			// then
 			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL.getMessage());
+				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -214,7 +214,7 @@ class SellerServiceTest {
 			// then
 			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
 	}
 
