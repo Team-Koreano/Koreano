@@ -1,6 +1,7 @@
 package org.ecommerce.orderapi.entity;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
 import static org.ecommerce.orderapi.util.OrderPolicyConstants.*;
 
 import java.time.Duration;
@@ -137,5 +138,9 @@ public class OrderDetail {
 		final LocalDateTime now = LocalDateTime.now();
 		final Duration duration = Duration.between(this.statusDatetime, now);
 		return duration.toDays() <= ORDER_CANCELLABLE_DATE;
+	}
+
+	public boolean isRefundedOrder() {
+		return this.status == CANCELLED && this.statusReason == REFUND;
 	}
 }

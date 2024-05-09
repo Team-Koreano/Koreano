@@ -75,8 +75,9 @@ public class Stock {
 	public void increaseTotalStock(
 			final OrderDetail orderDetail
 	) {
-		total += orderDetail.getQuantity();
-		stockHistories.add(
+		this.total += orderDetail.getQuantity();
+		this.stockHistories = new ArrayList<>(this.stockHistories);
+		this.stockHistories.add(
 				StockHistory.ofRecord(
 						this,
 						orderDetail,

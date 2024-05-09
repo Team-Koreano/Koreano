@@ -1,7 +1,9 @@
 package org.ecommerce.orderapi.service;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
 import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
+import static org.ecommerce.orderapi.exception.StockErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
@@ -11,16 +13,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ecommerce.common.error.CustomException;
+import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.StockHistory;
 import org.ecommerce.orderapi.repository.OrderDetailRepository;
+import org.ecommerce.orderapi.repository.StockHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +40,9 @@ public class StockServiceTest {
 
 	@Mock
 	private StockRepository stockRepository;
+
+	@Mock
+	private StockHistoryRepository stockHistoryRepository;
 
 	@Test
 	void 재고_감소() {
@@ -101,7 +110,7 @@ public class StockServiceTest {
 								null,
 								null,
 								INCREASE,
-								LocalDateTime.of(2024,5,7,0,0)
+								LocalDateTime.of(2024, 5, 7, 0, 0)
 						)
 				))
 		);
@@ -116,7 +125,7 @@ public class StockServiceTest {
 								null,
 								null,
 								INCREASE,
-								LocalDateTime.of(2024,5,7,0,0)
+								LocalDateTime.of(2024, 5, 7, 0, 0)
 						)
 				))
 		);
@@ -229,7 +238,7 @@ public class StockServiceTest {
 								null,
 								null,
 								INCREASE,
-								LocalDateTime.of(2024,5,7,0,0)
+								LocalDateTime.of(2024, 5, 7, 0, 0)
 						)
 				))
 		);
@@ -244,7 +253,7 @@ public class StockServiceTest {
 								null,
 								null,
 								INCREASE,
-								LocalDateTime.of(2024,5,7,0,0)
+								LocalDateTime.of(2024, 5, 7, 0, 0)
 						)
 				))
 		);
@@ -260,5 +269,122 @@ public class StockServiceTest {
 		assertFalse(decreaseStockResult);
 		assertEquals(initialStockTotal2, stock2.getTotal());
 		verify(stock2, never()).decreaseTotalStock(anyInt(), any(OrderDetail.class));
+	}
+
+	@Test
+	void 재고_증가() {
+		// given
+		final List<OrderStatusHistory> orderStatusHistories = List.of(
+				new OrderStatusHistory(
+						1L,
+						null,
+						OPEN,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		final OrderDetail orderDetail = new OrderDetail(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName",
+				CANCELLED,
+				REFUND,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				orderStatusHistories
+		);
+		final Stock stock = spy(new Stock(
+				1,
+				101,
+				9,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				List.of(
+						new StockHistory(
+								1L,
+								null,
+								orderDetail,
+								DECREASE,
+								LocalDateTime.of(2024, 5, 9, 0, 0)
+						)
+				)
+		));
+		final StockHistory stockHistory = new StockHistory(
+				1L,
+				stock,
+				orderDetail,
+				DECREASE,
+				LocalDateTime.of(2024, 5, 9, 0, 0)
+		);
+		given(orderDetailRepository.findOrderDetailById(anyLong(), isNull()))
+				.willReturn(orderDetail);
+		given(stockHistoryRepository.findStockHistoryByOrderDetailId(anyLong()))
+				.willReturn(stockHistory);
+		final int previousStockHistoriesSize = stock.getStockHistories().size();
+		final int previousStockTotal = stock.getTotal();
+		// when
+		StockDto stockDto = stockService.increaseStock(orderDetail.getId());
+
+		// then
+		verify(stock, Mockito.times(1))
+				.increaseTotalStock(orderDetail);
+		List<StockHistory> stockHistories = stock.getStockHistories();
+		assertEquals(previousStockHistoriesSize + 1, stockHistories.size());
+		assertEquals(previousStockTotal + orderDetail.getQuantity(), stockDto.getTotal());
+		assertEquals(INCREASE, stockHistories.get(1).getOperationType());
+	}
+
+	@Test
+	void 잘못된_주문상태_재고증가_실패() {
+		// given
+		final OrderDetail orderDetail = spy(new OrderDetail(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName",
+				OPEN,
+				null,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				null
+		));
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> stockService.validateOrderDetail(orderDetail));
+
+		// then
+		verify(orderDetail, Mockito.times(1)).isRefundedOrder();
+		assertEquals(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK, exception.getErrorCode());
+	}
+
+	@Test
+	void 잘못된_재고이력_재고증가_실패() {
+		// given
+		StockHistory stockHistory = spy(new StockHistory(
+				1L,
+				null,
+				null,
+				INCREASE,
+				LocalDateTime.of(2024, 5, 9, 0, 0)
+		));
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> stockService.validateStockHistory(stockHistory));
+
+		// then
+		verify(stockHistory, Mockito.times(1)).isOperationTypeDecrease();
+		assertEquals(MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK,
+				exception.getErrorCode());
 	}
 }

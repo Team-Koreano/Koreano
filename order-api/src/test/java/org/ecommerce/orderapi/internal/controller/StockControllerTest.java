@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.orderapi.dto.OrderDetailDto;
+import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.service.StockService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(OrderController.class)
+@WebMvcTest(StockController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class OrderControllerTest {
+public class StockControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -74,7 +75,7 @@ public class OrderControllerTest {
 		// then
 		OrderDetailDto orderDetailDto1 = orderDetailDtos.get(0);
 		OrderDetailDto orderDetailDto2 = orderDetailDtos.get(1);
-		mockMvc.perform(put("/api/internal/orders/v1/1/stocks"))
+		mockMvc.perform(put("/api/internal/stocks/v1/1/decrease"))
 				.andDo(print())
 				.andExpect(jsonPath("$.result.[0].id").value(orderDetailDto1.getId()))
 				.andExpect(jsonPath("$.result.[0].productId")
@@ -103,4 +104,28 @@ public class OrderControllerTest {
 				.andExpect(jsonPath("$.result.[1].status")
 						.value(orderDetailDto2.getStatus().toString()));
 	}
+
+	@Test
+	void 재고_증가() throws Exception {
+		// given
+		final Long orderDetailId = 1L;
+		final StockDto stockDto = new StockDto(
+				1,
+				101,
+				10,
+				LocalDateTime.of(2024, 5, 9, 0, 0)
+		);
+		given(stockService.increaseStock(orderDetailId))
+				.willReturn(stockDto);
+
+		// when
+		// then
+		mockMvc.perform(put("/api/internal/stocks/v1/1/increase"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.result.id").value(stockDto.getId()))
+				.andExpect(jsonPath("$.result.productId").value(stockDto.getProductId()))
+				.andExpect(jsonPath("$.result.total").value(stockDto.getTotal()));
+	}
+
 }

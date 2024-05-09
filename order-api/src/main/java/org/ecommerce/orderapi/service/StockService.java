@@ -164,7 +164,7 @@ public class StockService {
 			throw new CustomException(NOT_FOUND_ORDER_DETAIL);
 		}
 
-		if (orderDetail.getStatus() != CANCELLED) {
+		if (!orderDetail.isRefundedOrder()) {
 			throw new CustomException(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK);
 		}
 	}
