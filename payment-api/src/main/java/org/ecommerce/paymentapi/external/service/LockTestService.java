@@ -41,7 +41,7 @@ public class LockTestService {
 	}
 
 	@DistributedLock(key = {
-		"'BEANPAY'.concat(#paymentPrice.sellerId()).concat('SELLER')",
+		"'BEANPAY'.concat(1).concat('SELLER')",
 		"'BEANPAY'.concat(#paymentPrice.userId()).concat('USER')",
 	})
 	public void useMultiLockTest(PaymentPrice paymentPrice) {

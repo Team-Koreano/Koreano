@@ -11,6 +11,7 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.context.annotation.Bean;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -51,11 +52,7 @@ public class Payment {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "beanpay_detail_user_id", nullable = false)
-	private BeanPayDetail userBeanPayDetail;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "beanpay_detail_seller_id", nullable = false)
-	private BeanPayDetail sellerBeanPayDetail;
+	private BeanPay userBeanPay;
 
 	@ColumnDefault("0")
 	@Column(name = "total_amount", nullable = false)
@@ -89,7 +86,7 @@ public class Payment {
 
 	public static Payment ofPayment(
 		BeanPay userBeanPay,
-		BeanPay sellerBeanPay,
+		List<BeanPay> selllerBeanPays,
 		Long orderId,
 		Integer totalAmount,
 		String orderName,
@@ -97,32 +94,28 @@ public class Payment {
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
-		payment.userBeanPayDetail = BeanPayDetail.ofPayment(
-			userBeanPay,
-			userBeanPay.getUserId(),
-			payment.totalAmount
-		);
-		payment.sellerBeanPayDetail = BeanPayDetail.ofReceive(
-			sellerBeanPay,
-			sellerBeanPay.getUserId(),
-			payment.totalAmount
-		);
+		payment.userBeanPay = userBeanPay;
 		payment.totalAmount = totalAmount;
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
-		createPaymentDetails(paymentDetails, payment);
-
-		userBeanPay.payment(payment, sellerBeanPay);
+		createPaymentDetails(selllerBeanPays, paymentDetails, payment);
 
 		return payment;
 	}
 
-	private static void createPaymentDetails(List<PaymentDetailPrice> paymentDetailPrices,
-		Payment payment) {
-		for (PaymentDetailPrice paymentDetailPrice : paymentDetailPrices) {
+	private static void createPaymentDetails(
+		List<BeanPay> sellerBeanPays,
+		List<PaymentDetailPrice> paymentDetailPrices,
+		Payment payment
+	) {
+		for(int i = 0; i < sellerBeanPays.size(); i++) {
+			PaymentDetailPrice paymentDetailPrice = paymentDetailPrices.get(i);
+			BeanPay sellerBeanPay = sellerBeanPays.get(i);
+
 			payment.paymentDetails.add(
 				PaymentDetail.ofPayment(
 					payment,
+					sellerBeanPay,
 					paymentDetailPrice.orderDetailId(),
 					paymentDetailPrice.totalPrice(),
 					paymentDetailPrice.deliveryFee(),
@@ -134,13 +127,11 @@ public class Payment {
 		}
 	}
 
-	public Payment rollbackPayment() {
+	public Payment rollbackPayment(String message) {
 		changeProcessStatus(CANCELLED);
-		this.paymentDetails.forEach(PaymentDetail::rollbackPayment);
-		userBeanPayDetail.getBeanPay()
-			.rollbackPayment(
-				this,
-				this.sellerBeanPayDetail.getBeanPay());
+		this.paymentDetails.forEach( paymentDetail ->
+			paymentDetail.rollbackPayment(message)
+		);
 		return this;
 	}
 

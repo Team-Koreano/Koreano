@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.ecommerce.paymentapi.dto.PaymentDto;
+import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
@@ -131,11 +132,10 @@ public class LockTestServiceTest {
 		String lockName = "BEANPAY";
 		Integer userId = 1;
 		Integer totalAmount = threadCount * 5000;
-		PaymentDto.Request.PaymentPrice paymentPrice = new PaymentDto.Request.PaymentPrice(
+		PaymentPrice paymentPrice = new PaymentPrice(
 			1L,
-			1000,
+			5000,
 			1,
-			2,
 			"orderName",
 			List.of()
 		);

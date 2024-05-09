@@ -86,13 +86,13 @@ public class BeanPay {
 		sellerBeanPay.addBeanPay(payment.getTotalAmount());
 	}
 
-	public void rollbackPayment(Payment payment, BeanPay sellerBeanPay) {
-		int remainAmount = sellerBeanPay.getAmount() - payment.getTotalAmount();
+	public void rollbackPayment(Integer amount, BeanPay sellerBeanPay) {
+		int remainAmount = sellerBeanPay.getAmount() - amount;
 
 		if(remainAmount < 0)
 			throw new CustomException(INSUFFICIENT_AMOUNT);
 
-		sellerBeanPay.subBeanPay(payment.getTotalAmount());
-		this.addBeanPay(payment.getTotalAmount());
+		sellerBeanPay.subBeanPay(amount);
+		this.addBeanPay(amount);
 	}
 }

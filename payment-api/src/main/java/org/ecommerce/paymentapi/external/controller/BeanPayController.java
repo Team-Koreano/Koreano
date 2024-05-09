@@ -60,7 +60,6 @@ public class BeanPayController {
 			1L,
 			5000,
 			1,
-			1,
 			"orderName",
 			List.of()
 		));

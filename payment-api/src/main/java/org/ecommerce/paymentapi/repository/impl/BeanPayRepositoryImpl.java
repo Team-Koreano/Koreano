@@ -2,6 +2,7 @@ package org.ecommerce.paymentapi.repository.impl;
 
 import static org.ecommerce.paymentapi.entity.QBeanPay.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.ecommerce.paymentapi.entity.BeanPay;
@@ -25,9 +26,8 @@ public class BeanPayRepositoryImpl implements BeanPayCustomRepository {
 
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(beanPay)
 			.where(
-				beanPay.userId.eq(userId)
-				.and(
-				beanPay.role.eq(role)))
+				beanPay.userId.eq(userId),
+				beanPay.role.eq(role))
 			.fetchOne());
 	}
 
@@ -35,10 +35,19 @@ public class BeanPayRepositoryImpl implements BeanPayCustomRepository {
 	public BeanPay findBeanPayByUserIdAndRoleUseBetaLock(Integer userId, Role role) {
 		return jpaQueryFactory.selectFrom(beanPay)
 			.where(
-				beanPay.userId.eq(userId)
-					.and(
-				beanPay.role.eq(role)))
+				beanPay.userId.eq(userId),
+				beanPay.role.eq(role)
+			)
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne();
+	}
+
+	@Override
+	public List<BeanPay> findBeanPayByUserIdsAndRole(List<Integer> userIds, Role role) {
+		return jpaQueryFactory.selectFrom(beanPay)
+			.where(
+				beanPay.userId.in(userIds),
+				beanPay.role.eq(role)
+			).fetch();
 	}
 }

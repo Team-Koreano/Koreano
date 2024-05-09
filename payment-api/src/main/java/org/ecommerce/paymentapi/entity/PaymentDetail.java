@@ -42,6 +42,14 @@ public class PaymentDetail {
 	@JoinColumn(nullable = false)
 	private Payment payment;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "beanpay_detail_user_id", nullable = false)
+	private BeanPayDetail userBeanPayDetail;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "beanpay_detail_seller_id", nullable = false)
+	private BeanPayDetail sellerBeanPayDetail;
+
 	@Column(nullable = false)
 	private Integer orderDetailId;
 
@@ -93,6 +101,7 @@ public class PaymentDetail {
 
 	public static PaymentDetail ofPayment(
 		Payment payment,
+		BeanPay sellerBeanPay,
 		Integer orderDetailId,
 		Integer totalPrice,
 		Integer deliveryFee,
@@ -100,8 +109,19 @@ public class PaymentDetail {
 		Integer quantity,
 		String productName
 	) {
+
+		BeanPay userBeanPay = payment.getUserBeanPay();
+
 		PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.payment = payment;
+		paymentDetail.userBeanPayDetail = BeanPayDetail.ofPayment(
+			userBeanPay,
+			paymentAmount
+		);
+		paymentDetail.sellerBeanPayDetail = BeanPayDetail.ofReceive(
+			sellerBeanPay,
+			paymentAmount
+		);
 		paymentDetail.orderDetailId = orderDetailId;
 		paymentDetail.totalPrice = totalPrice;
 		paymentDetail.deliveryFee = deliveryFee;
@@ -111,14 +131,23 @@ public class PaymentDetail {
 		paymentDetail.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(paymentDetail)
 		);
+		// 계산
+		userBeanPay.payment(payment, sellerBeanPay);
+
 		return paymentDetail;
 	}
-	//TODO: FailReason 매개변수 추가 예정
-	public void rollbackPayment() {
+
+
+	public void rollbackPayment(String message) {
 		changePaymentStatus(ROLLBACK);
-		this.failReason = "FAIL REASON";
+		this.failReason = message;
 		this.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(this)
+		);
+		this.userBeanPayDetail.rollbackPayment(
+			this.getTotalPrice(),
+			this.sellerBeanPayDetail.getBeanPay(),
+			failReason
 		);
 	}
 
