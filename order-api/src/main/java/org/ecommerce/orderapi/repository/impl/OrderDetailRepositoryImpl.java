@@ -23,7 +23,6 @@ public class OrderDetailRepositoryImpl implements OrderDetailCustomRepository {
 	@Override
 	public List<OrderDetail> findOrderDetailsByOrderId(long orderId) {
 		return jpaQueryFactory.selectFrom(orderDetail)
-				.leftJoin(orderDetail.order).fetchJoin()
 				.leftJoin(orderDetail.orderStatusHistories).fetchJoin()
 				.where(orderDetail.order.id.eq(orderId))
 				.fetch();
