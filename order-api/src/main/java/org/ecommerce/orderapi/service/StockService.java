@@ -127,6 +127,13 @@ public class StockService {
 		}
 	}
 
+	/**
+	 * 재고 감소 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetailId- 주문 상세 번호
+	 * @return - 재고
+	 */
 	@StockLock
 	public StockDto increaseStock(final Long orderDetailId) {
 		final OrderDetail orderDetail = orderDetailRepository
@@ -145,6 +152,12 @@ public class StockService {
 		return StockMapper.INSTANCE.toStockDto(stock);
 	}
 
+	/**
+	 * 주문 상세를 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetail- 주문 상세
+	 */
 	@VisibleForTesting
 	public void validateOrderDetail(final OrderDetail orderDetail) {
 		if (orderDetail == null) {
@@ -156,6 +169,12 @@ public class StockService {
 		}
 	}
 
+	/**
+	 * 재고 이력을 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param stockHistory- 재고 이력
+	 */
 	@VisibleForTesting
 	public void validateStockHistory(final StockHistory stockHistory) {
 		if (stockHistory == null) {
