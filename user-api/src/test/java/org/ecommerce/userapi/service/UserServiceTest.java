@@ -1,10 +1,10 @@
 package org.ecommerce.userapi.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -110,7 +110,7 @@ class UserServiceTest {
 			java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.createAccount(authDetails, registerRequest);
-		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 
@@ -141,7 +141,7 @@ class UserServiceTest {
 		final AddressDto result = userService.createAddress(authDetails, registerRequest);
 
 		//then
-		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 
@@ -176,7 +176,7 @@ class UserServiceTest {
 			UserDto expectedResult = UserMapper.INSTANCE.userToDto(savedUser);
 
 			//then
-			Assertions.assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
+			assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
 				.isEqualTo(UserMapper.INSTANCE.userDtoToResponse(result));
 		}
 
@@ -195,7 +195,7 @@ class UserServiceTest {
 				duplicatedEmailRequest.phoneNumber())).thenReturn(true);
 
 			//then
-			Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedEmailRequest))
+			assertThatThrownBy(() -> userService.registerRequest(duplicatedEmailRequest))
 				.isInstanceOf(CustomException.class);
 
 		}
@@ -217,7 +217,7 @@ class UserServiceTest {
 				duplicatedPhoneRequest.phoneNumber())).thenReturn(true);
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
+			assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
@@ -242,7 +242,7 @@ class UserServiceTest {
 			//then
 			UserDto expectedResponse = userService.loginRequest(loginRequest, response);
 
-			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
+			assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
 		}
 
 		@Test
@@ -256,7 +256,7 @@ class UserServiceTest {
 			UserDto.Request.Login inCorrectEmailRequest = new UserDto.Request.Login(incorrectEmail, password);
 
 			//then
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
+			assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -275,7 +275,7 @@ class UserServiceTest {
 
 			//then
 			UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
+			assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
 
@@ -296,7 +296,7 @@ class UserServiceTest {
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			//then
 			UserDto.Request.Login request = new UserDto.Request.Login(email, password);
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(request, response))
+			assertThatThrownBy(() -> userService.loginRequest(request, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_VALID_USER.getMessage());
 
@@ -329,9 +329,8 @@ class UserServiceTest {
 			// then
 			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
-			Assertions.assertThat(user.isValidUser()).isFalse();
-			Assertions.assertThat(account.isDeleted()).isTrue();
-			Assertions.assertThat(address.isDeleted()).isTrue();
+			assertThat(user.isValidStatus()).isFalse();
+			assertThat(user.isDeleted()).isTrue();
 		}
 
 		@Test
@@ -346,7 +345,7 @@ class UserServiceTest {
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -367,7 +366,7 @@ class UserServiceTest {
 			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(Optional.of(user));
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}

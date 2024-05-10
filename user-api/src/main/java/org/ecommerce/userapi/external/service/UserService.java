@@ -188,6 +188,7 @@ public class UserService {
 	 */
 	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
 		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
+			.filter(users -> passwordEncoder.matches(withdrawal.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
 		if (!user.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {

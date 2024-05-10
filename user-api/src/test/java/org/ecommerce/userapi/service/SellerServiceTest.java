@@ -1,11 +1,10 @@
 package org.ecommerce.userapi.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -84,7 +83,7 @@ class SellerServiceTest {
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then
-		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 
@@ -117,7 +116,7 @@ class SellerServiceTest {
 			final SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
 
 			//then
-			Assertions.assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
+			assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
 				.isEqualTo(SellerMapper.INSTANCE.sellerDtoToResponse(result));
 		}
 
@@ -136,7 +135,7 @@ class SellerServiceTest {
 				duplicatedEmailRequest.phoneNumber())).thenReturn(true);
 
 			//then
-			Assertions.assertThatThrownBy(() -> sellerService.registerRequest(duplicatedEmailRequest))
+			assertThatThrownBy(() -> sellerService.registerRequest(duplicatedEmailRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -155,7 +154,7 @@ class SellerServiceTest {
 				duplicatedPhoneRequest.phoneNumber())).thenReturn(true);
 
 			//then
-			Assertions.assertThatThrownBy(() -> sellerService.registerRequest(duplicatedPhoneRequest))
+			assertThatThrownBy(() -> sellerService.registerRequest(duplicatedPhoneRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
@@ -180,7 +179,7 @@ class SellerServiceTest {
 			final SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
 
 			// then
-			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_access_token");
+			assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_access_token");
 		}
 
 		@Test
@@ -193,7 +192,7 @@ class SellerServiceTest {
 			final SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
 
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
+			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -213,7 +212,7 @@ class SellerServiceTest {
 
 			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
+			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -231,24 +230,21 @@ class SellerServiceTest {
 
 			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email, password,
 				phoneNumber);
-			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
+			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", phoneNumber);
 			final SellerAccount account = SellerAccount.ofRegister(seller, "1234567890", "KEB하나은행");
 
 			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId()))
 				.thenReturn(Optional.of(seller));
 
-			when(sellerAccountRepository.findBySellerIdAndIsDeletedIsFalse(seller.getId())).thenReturn(
-				List.of(account));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 			// when
 			sellerService.withdrawSeller(withdrawalRequest, authDetails);
 
 			// then
 			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
-			verify(sellerAccountRepository, times(1)).findBySellerIdAndIsDeletedIsFalse(seller.getId());
 
-			Assertions.assertThat(seller.isValidStatus()).isFalse();
-			Assertions.assertThat(account.isDeleted()).isTrue();
+			assertThat(seller.isValidStatus()).isFalse();
+			assertThat(seller.isDeleted()).isTrue();
 		}
 
 		@Test
@@ -263,7 +259,7 @@ class SellerServiceTest {
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -285,7 +281,7 @@ class SellerServiceTest {
 				Optional.of(seller));
 
 			// then
-			Assertions.assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}

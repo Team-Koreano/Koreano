@@ -159,12 +159,12 @@ public class SellerService {
 	 */
 	public void withdrawSeller(final SellerDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
 		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
+			.filter(sellers -> passwordEncoder.matches(withdrawal.password(), sellers.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber())) {
+		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber())) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
 		}
-
 		seller.withdrawal();
 	}
 
