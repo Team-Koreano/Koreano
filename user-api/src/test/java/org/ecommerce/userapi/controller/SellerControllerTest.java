@@ -112,7 +112,7 @@ class SellerControllerTest {
 		//when
 		when(sellerService.registerRequest(registerRequest)).thenReturn(responseDto);
 
-		final ResultActions perform = mockMvc.perform(post("/api/sellers/v1")
+		final ResultActions perform = mockMvc.perform(post("/api/external/sellers/v1")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -150,7 +150,7 @@ class SellerControllerTest {
 		when(sellerService.loginRequest(login, response)).thenReturn(mocking);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/login")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/sellers/v1/login")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content));
@@ -191,7 +191,7 @@ class SellerControllerTest {
 		when(sellerService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/account")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/sellers/v1/account")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(registerRequest)));
@@ -221,7 +221,7 @@ class SellerControllerTest {
 
 		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(seller));
 		// when
-		final ResultActions resultActions = mockMvc.perform(delete("/api/sellers/v1")
+		final ResultActions resultActions = mockMvc.perform(delete("/api/external/sellers/v1")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(withdrawalRequest)));

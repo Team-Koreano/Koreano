@@ -92,7 +92,7 @@ public class UserControllerTest {
 	}
 
 	private ResultActions performLoginRequest(String content) throws Exception {
-		return mockMvc.perform(post("/api/users/v1/login")
+		return mockMvc.perform(post("/api/external/users/v1/login")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -134,7 +134,7 @@ public class UserControllerTest {
 		final String content = objectMapper.writeValueAsString(registerRequest);
 
 		//when
-		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/users/v1")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -212,7 +212,7 @@ public class UserControllerTest {
 		when(userService.createAddress(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/address")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/users/v1/address")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(registerRequest))
@@ -249,7 +249,7 @@ public class UserControllerTest {
 
 		when(userService.createAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/account")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/users/v1/account")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(registerRequest)));
@@ -281,7 +281,7 @@ public class UserControllerTest {
 
 		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(user));
 		// when
-		final ResultActions resultActions = mockMvc.perform(delete("/api/users/v1")
+		final ResultActions resultActions = mockMvc.perform(delete("/api/external/users/v1")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(withdrawalRequest)));
