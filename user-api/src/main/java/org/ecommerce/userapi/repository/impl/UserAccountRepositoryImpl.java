@@ -22,7 +22,7 @@ public class UserAccountRepositoryImpl implements UserAccountCustomRepository {
 	public List<UsersAccount> findByUsersIdAndIsDeletedIsFalse(final Integer userId) {
 		return jpaQueryFactory.selectFrom(usersAccount)
 			.where(usersAccount.users.id.eq(userId)
-				.and(usersAccount.isDeleted).isFalse())
+				, usersAccount.isDeleted.isFalse())
 			.fetch();
 	}
 }

@@ -24,7 +24,8 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 		return jpaQueryFactory
 			.selectFrom(seller)
 			.where(
-				emailEq(email).or(phoneNumberEq(phoneNumber))
+				emailEq(email)
+					.or(phoneNumberEq(phoneNumber))
 			).fetchFirst() != null;
 	}
 
@@ -32,8 +33,8 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 	public Optional<Seller> findSellerByEmailAndIsDeletedIsFalse(String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(seller)
-				.where(emailEq(email).
-					and(seller.isDeleted.eq(false)))
+				.where(emailEq(email),
+					seller.isDeleted.eq(false))
 				.fetchFirst()
 		);
 	}
@@ -42,8 +43,8 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 	public Optional<Seller> findSellerByIdAndIsDeletedIsFalse(Integer sellerId) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(seller)
-				.where(idEq(sellerId).
-					and(seller.isDeleted.eq(false)))
+				.where(idEq(sellerId),
+					seller.isDeleted.eq(false))
 				.fetchFirst()
 		);
 	}

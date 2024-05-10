@@ -21,7 +21,8 @@ public class SellerAccountRepositoryImpl implements SellerCustomAccountRepositor
 	@Override
 	public List<SellerAccount> findBySellerIdAndIsDeletedIsFalse(final Integer sellerId) {
 		return jpaQueryFactory.selectFrom(sellerAccount)
-			.where(sellerAccount.seller.id.eq(sellerId))
+			.where(sellerAccount.seller.id.eq(sellerId)
+				, sellerAccount.isDeleted.isFalse())
 			.fetch();
 	}
 }

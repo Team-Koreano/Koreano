@@ -24,7 +24,8 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return jpaQueryFactory
 			.selectFrom(users)
 			.where(
-				emailEq(email).or(phoneNumberEq(phoneNumber))
+				emailEq(email)
+					.or(phoneNumberEq(phoneNumber))
 			).fetchFirst() != null;
 	}
 
@@ -33,7 +34,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
 				.where(emailEq(email)
-					.and(users.isDeleted.isFalse()))
+					, users.isDeleted.isFalse())
 				.fetchFirst()
 		);
 	}
@@ -43,7 +44,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
 				.where(idEq(userId)
-					.and(users.isDeleted.isFalse()))
+					, users.isDeleted.isFalse())
 				.fetchFirst()
 		);
 	}

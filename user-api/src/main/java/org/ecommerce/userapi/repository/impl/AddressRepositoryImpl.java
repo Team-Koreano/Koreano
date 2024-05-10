@@ -22,7 +22,7 @@ public class AddressRepositoryImpl implements AddressCustomRepository {
 	public List<Address> findByUsersIdAndIsDeletedIsFalse(final Integer userId) {
 		return jpaQueryFactory.selectFrom(address)
 			.where(address.users.id.eq(userId)
-				.and(address.isDeleted.isFalse()))
+				, address.isDeleted.isFalse())
 			.fetch();
 	}
 }
