@@ -2,10 +2,15 @@ package org.ecommerce.paymentapi.internal.service;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
@@ -16,7 +21,9 @@ import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,36 +50,45 @@ public class PaymentService {
 			"#paymentPrice.paymentDetails()"
 		}
 	)
-	public PaymentDto paymentPrice(PaymentPrice paymentPrice) {
+	public PaymentDto paymentPrice(final PaymentPrice paymentPrice) {
 		//유저 BeanPay 가져오기
-		BeanPay userBeanPay = getBeanPay(paymentPrice.userId(), USER);
+		final BeanPay userBeanPay = getBeanPay(paymentPrice.userId(), USER);
 
 		// 판매자들 BeanPay 가져오기
-		List<BeanPay> sellerBeanPays = beanPayRepository.findBeanPayByUserIdsAndRole(
+		final List<BeanPay> sellerBeanPays =
+			beanPayRepository.findBeanPayByUserIdsAndRole(
 			paymentPrice.getSellerIds(),
 			SELLER
 		);
+		
+		final Map<Integer, Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap =
+			new HashMap<>();
 
-		// 판매자 검증
-		if(validSellerBeanPay(paymentPrice, sellerBeanPays))
-			throw new CustomException(BeanPayErrorCode.NOT_FOUND_SELLER_ID);
+		// 빈페이와 결제 디테일 맵핑
+		for (PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
+			beanPayPaymentDetailPriceMap.put(
+				detailPrice.sellerId(),
+				Pair.of(
+					sellerBeanPays.stream()
+						.filter(sellerBeanPay ->
+							sellerBeanPay.getUserId().equals(detailPrice.sellerId()))
+						.findFirst()
+						.orElseThrow(
+							() -> new CustomException(BeanPayErrorCode.NOT_FOUND_SELLER_ID)),
+					detailPrice)
+			);
+		}
 
 		// 결제
-		Payment payment = Payment.ofPayment(
+		final Payment payment = Payment.ofPayment(
 			userBeanPay,
-			sellerBeanPays,
 			paymentPrice.orderId(),
 			paymentPrice.totalAmount(),
 			paymentPrice.orderName(),
-			paymentPrice.paymentDetails()
+			beanPayPaymentDetailPriceMap
 		);
 
 		return PaymentMapper.INSTANCE.toDto(payment);
-	}
-
-	private static boolean validSellerBeanPay(PaymentPrice paymentPrice,
-		List<BeanPay> sellerBeanPays) {
-		return sellerBeanPays.size() != paymentPrice.getSellerIds().size();
 	}
 
 	/**
@@ -90,13 +106,13 @@ public class PaymentService {
 	public PaymentDto paymentPriceRollBack(
 		final Long orderId
 	) {
-		Payment payment = getPayment(orderId);
+		final Payment payment = getPayment(orderId);
 		//TODO: FailReason 추가 예정
 		return PaymentMapper.INSTANCE.toDto(
 			payment.rollbackPayment("fail Reason"));
 	}
 
-	private Payment getPayment(Long orderId) {
+	private Payment getPayment(final Long orderId) {
 		return paymentRepository.findByOrderId(orderId).orElseThrow(
 			() -> new CustomException(PaymentErrorCode.NOT_FOUND_ORDER_ID)
 		);

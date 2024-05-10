@@ -100,19 +100,18 @@ public class PaymentDetail {
 	private Boolean isDeleted;
 
 	public static PaymentDetail ofPayment(
-		Payment payment,
-		BeanPay sellerBeanPay,
-		Integer orderDetailId,
-		Integer totalPrice,
-		Integer deliveryFee,
-		Integer paymentAmount,
-		Integer quantity,
-		String productName
+		final Payment payment,
+		final BeanPay sellerBeanPay,
+		final Integer orderDetailId,
+		final Integer totalPrice,
+		final Integer deliveryFee,
+		final Integer paymentAmount,
+		final Integer quantity,
+		final String productName
 	) {
+		final BeanPay userBeanPay = payment.getUserBeanPay();
 
-		BeanPay userBeanPay = payment.getUserBeanPay();
-
-		PaymentDetail paymentDetail = new PaymentDetail();
+		final PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.payment = payment;
 		paymentDetail.userBeanPayDetail = BeanPayDetail.ofPayment(
 			userBeanPay,
@@ -128,17 +127,27 @@ public class PaymentDetail {
 		paymentDetail.paymentAmount = paymentAmount;
 		paymentDetail.quantity = quantity;
 		paymentDetail.productName = productName;
+
 		paymentDetail.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(paymentDetail)
 		);
-		// 계산
-		userBeanPay.payment(payment, sellerBeanPay);
+		// 각 결제 디테일 계산
+		userBeanPay.payment(payment.getTotalAmount(), sellerBeanPay);
 
 		return paymentDetail;
 	}
 
-
-	public void rollbackPayment(String message) {
+	/**
+	 결제 취소 이벤트 발생 시 롤백
+	 1. 실수 이유 저장
+	 2. 상태  히스토리 추가
+	 3. user, seller 빈페이 롤백
+	 * @author 이우진
+	 *
+	 * @param - String message
+	 * @return - void
+	 */
+	public void rollbackPayment(final String message) {
 		changePaymentStatus(ROLLBACK);
 		this.failReason = message;
 		this.paymentStatusHistories.add(
@@ -151,7 +160,7 @@ public class PaymentDetail {
 		);
 	}
 
-	private void changePaymentStatus(PaymentStatus status) {
+	private void changePaymentStatus(final PaymentStatus status) {
 		this.status = status;
 	}
 }

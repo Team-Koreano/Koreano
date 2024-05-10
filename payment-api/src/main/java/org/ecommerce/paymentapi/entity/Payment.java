@@ -5,6 +5,7 @@ import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.util.Pair;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -51,7 +53,7 @@ public class Payment {
 	private Long orderId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "beanpay_detail_user_id", nullable = false)
+	@JoinColumn(name = "beanpay_user_id", nullable = false)
 	private BeanPay userBeanPay;
 
 	@ColumnDefault("0")
@@ -81,16 +83,15 @@ public class Payment {
 	@Column(name = "update_datetime", insertable = false)
 	private LocalDateTime updateDateTime;
 
-	@Column(name = "is_deleted")
+	@Column(name = "is_visible")
 	private Boolean isVisible = Boolean.TRUE;
 
 	public static Payment ofPayment(
 		BeanPay userBeanPay,
-		List<BeanPay> selllerBeanPays,
 		Long orderId,
 		Integer totalAmount,
 		String orderName,
-		List<PaymentDetailPrice> paymentDetails
+		Map<Integer ,Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
@@ -98,20 +99,12 @@ public class Payment {
 		payment.totalAmount = totalAmount;
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
-		createPaymentDetails(selllerBeanPays, paymentDetails, payment);
 
-		return payment;
-	}
+		beanPayPaymentDetailPriceMap.forEach((beanPayId, beanPayPaymentDetailPrice) -> {
 
-	private static void createPaymentDetails(
-		List<BeanPay> sellerBeanPays,
-		List<PaymentDetailPrice> paymentDetailPrices,
-		Payment payment
-	) {
-		for(int i = 0; i < sellerBeanPays.size(); i++) {
-			PaymentDetailPrice paymentDetailPrice = paymentDetailPrices.get(i);
-			BeanPay sellerBeanPay = sellerBeanPays.get(i);
-
+			BeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
+			PaymentDetailPrice paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
+			//결제 디테일 생성
 			payment.paymentDetails.add(
 				PaymentDetail.ofPayment(
 					payment,
@@ -124,7 +117,8 @@ public class Payment {
 					paymentDetailPrice.productName()
 				)
 			);
-		}
+		});
+		return payment;
 	}
 
 	public Payment rollbackPayment(String message) {
