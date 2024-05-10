@@ -1,7 +1,5 @@
 package org.ecommerce.userapi.external.service;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -80,8 +78,8 @@ public class SellerService {
 			.filter(sellers -> passwordEncoder.matches(login.password(), sellers.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (!seller.isValidSeller()) {
-			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
+		if (!seller.isValidStatus()) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
 		}
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
@@ -163,30 +161,16 @@ public class SellerService {
 		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		isValidSeller(withdrawal, seller);
+		if (seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber())) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
+		}
 
 		seller.withdrawal();
-
-		List<SellerAccount> sellerAccounts = sellerAccountRepository.findBySellerIdAndIsDeletedIsFalse(seller.getId());
-		if (sellerAccounts.isEmpty()) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
-		}
-		sellerAccounts.forEach(SellerAccount::withdrawal);
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (sellerRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
-		}
-	}
-
-	private void isValidSeller(final SellerDto.Request.Withdrawal withdrawal, final Seller seller) {
-		if (
-			!passwordEncoder.matches(withdrawal.password(), seller.getPassword()) ||
-				!Objects.equals(withdrawal.email(), seller.getEmail()) ||
-				!Objects.equals(withdrawal.phoneNumber(), seller.getPhoneNumber())
-		) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }

@@ -247,7 +247,7 @@ class SellerServiceTest {
 			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
 			verify(sellerAccountRepository, times(1)).findBySellerIdAndIsDeletedIsFalse(seller.getId());
 
-			Assertions.assertThat(seller.isValidSeller()).isFalse();
+			Assertions.assertThat(seller.isValidStatus()).isFalse();
 			Assertions.assertThat(account.isDeleted()).isTrue();
 		}
 

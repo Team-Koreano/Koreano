@@ -1,11 +1,15 @@
 package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -62,6 +67,9 @@ public class Seller {
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;
 
+	@OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+	private List<SellerAccount> sellerAccounts = new ArrayList<>();
+
 	public static Seller ofRegister(String email, String name, String password, String address, String phoneNumber) {
 		Seller seller = new Seller();
 		seller.email = email;
@@ -77,7 +85,15 @@ public class Seller {
 		this.userStatus = UserStatus.WITHDRAWAL;
 	}
 
-	public boolean isValidSeller() {
-		return this.userStatus == UserStatus.GENERAL;
+	public boolean isValidSeller(String email, String phoneNumber) {
+		return Objects.equals(email, this.email) &&
+			Objects.equals(phoneNumber, this.phoneNumber) &&
+			isValidStatus();
+
+	}
+
+	public boolean isValidStatus() {
+		return this.userStatus == UserStatus.GENERAL &&
+			!this.isDeleted;
 	}
 }

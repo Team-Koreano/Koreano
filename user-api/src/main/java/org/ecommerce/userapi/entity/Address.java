@@ -58,7 +58,7 @@ public class Address {
 		return address;
 	}
 
-	public void withdrawal() {
+	public void delete() {
 		this.isDeleted = true;
 	}
 }

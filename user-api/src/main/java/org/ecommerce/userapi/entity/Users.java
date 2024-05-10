@@ -3,6 +3,7 @@ package org.ecommerce.userapi.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
@@ -71,10 +72,10 @@ public class Users {
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;
 
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
 	private List<UsersAccount> usersAccounts = new ArrayList<>();
 
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
 	private List<Address> addresses = new ArrayList<>();
 
 	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
@@ -89,14 +90,19 @@ public class Users {
 		return users;
 	}
 
-	public boolean isValidUser() {
-		return this.userStatus == UserStatus.GENERAL;
+	public boolean isValidStatus() {
+		return this.userStatus == UserStatus.GENERAL &&
+			!this.isDeleted;
+	}
+
+	public boolean isValidUser(String email, String phoneNumber) {
+		return Objects.equals(email, this.email) &&
+			Objects.equals(phoneNumber, this.phoneNumber) &&
+			isValidStatus();
 	}
 
 	public void withdrawal() {
 		this.userStatus = UserStatus.WITHDRAWAL;
 		this.isDeleted = true;
-		this.addresses.forEach(Address::withdrawal);
-		this.usersAccounts.forEach(UsersAccount::withdrawal);
 	}
 }

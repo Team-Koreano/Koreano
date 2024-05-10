@@ -1,6 +1,5 @@
 package org.ecommerce.userapi.external.service;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -89,7 +88,7 @@ public class UserService {
 			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (!user.isValidUser()) {
+		if (!user.isValidStatus()) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
@@ -191,7 +190,9 @@ public class UserService {
 		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		isValidUser(withdrawal, user);
+		if (!user.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
+		}
 
 		user.withdrawal();
 	}
@@ -199,16 +200,6 @@ public class UserService {
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
-		}
-	}
-
-	private void isValidUser(final UserDto.Request.Withdrawal withdrawal, final Users users) {
-		if (
-			!passwordEncoder.matches(withdrawal.password(), users.getPassword()) ||
-				!Objects.equals(withdrawal.email(), users.getEmail()) ||
-				!Objects.equals(withdrawal.phoneNumber(), users.getPhoneNumber())
-		) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }

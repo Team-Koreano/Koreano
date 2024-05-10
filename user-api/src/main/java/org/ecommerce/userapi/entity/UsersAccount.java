@@ -55,7 +55,7 @@ public class UsersAccount {
 		return usersAccount;
 	}
 
-	public void withdrawal() {
+	public void delete() {
 		this.isDeleted = true;
 	}
 }
