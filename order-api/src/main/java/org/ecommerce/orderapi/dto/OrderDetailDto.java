@@ -1,8 +1,7 @@
 package org.ecommerce.orderapi.dto;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 
@@ -15,26 +14,30 @@ public class OrderDetailDto {
 
 	private Long id;
 	private Integer productId;
+	private String productName;
 	private Integer price;
 	private Integer quantity;
 	private Integer totalPrice;
 	private Integer paymentAmount;
-	private String seller;
+	private Integer sellerId;
+	private String sellerName;
 	private OrderStatus status;
 	private OrderStatusReason statusReason;
-	private List<OrderStatusHistory> orderStatusHistories;
+	private LocalDateTime statusDatetime;
 
 	public record Response(
 			Long id,
 			Integer productId,
+			String productName,
 			Integer price,
 			Integer quantity,
 			Integer totalPrice,
 			Integer paymentAmount,
-			String seller,
+			Integer sellerId,
+			String sellerName,
 			OrderStatus status,
 			OrderStatusReason statusReason,
-			List<OrderStatusHistory> orderStatusHistories
+			LocalDateTime statusDatetime
 	) {
 	}
 }

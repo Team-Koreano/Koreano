@@ -36,7 +36,6 @@ public class OrderStatusHistory {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
-	@JsonBackReference
 	private OrderDetail orderDetail;
 
 	@Column(nullable = false)

@@ -9,17 +9,18 @@ import lombok.Getter;
 @Getter
 public class ProductDto {
 	private Integer id;
-
 	private String name;
 	private Integer price;
-	private String seller;
+	private Integer sellerId;
+	private String sellerName;
 	private ProductStatus status;
 
 	public record Response(
 			Integer id,
 			String name,
 			Integer price,
-			String seller,
+			Integer sellerId,
+			String sellerName,
 			ProductStatus status
 	) {
 	}

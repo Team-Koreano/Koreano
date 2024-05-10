@@ -10,9 +10,9 @@ import lombok.Getter;
 public class Product {
 
 	private Integer id;
-
 	private String name;
 	private Integer price;
-	private String seller;
+	private Integer sellerId;
+	private String sellerName;
 	private ProductStatus status;
 }

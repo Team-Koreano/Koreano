@@ -9,16 +9,28 @@ import java.util.Map;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.client.BucketServiceClient;
 import org.ecommerce.orderapi.client.ProductServiceClient;
+import org.ecommerce.orderapi.client.UserServiceClient;
 import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
+import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
+import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.ProductMapper;
+import org.ecommerce.orderapi.dto.UserMapper;
 import org.ecommerce.orderapi.entity.Order;
+import org.ecommerce.orderapi.entity.OrderDetail;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.entity.User;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
+import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
+import org.ecommerce.orderapi.repository.OrderDetailRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
+import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,9 +47,11 @@ public class OrderService {
 
 	private final BucketServiceClient bucketServiceClient;
 	private final ProductServiceClient productServiceClient;
+	private final UserServiceClient userServiceClient;
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
-
+	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+	private final OrderDetailRepository orderDetailRepository;
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 	// TODO : 회원 유효성 검사
@@ -55,19 +69,21 @@ public class OrderService {
 			final Integer userId,
 			final OrderDto.Request.Place request
 	) {
+		final User user = getUser(userId);
 		final BucketSummary bucketSummary = getBuckets(userId, request.bucketIds());
 		final List<Integer> productIds = bucketSummary.getProductIds();
 		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
 
 		final List<Product> products = getProducts(productIds);
 
-		validateStock(productIds, productIdToQuantityMap);
 		validateProduct(products);
+		validateStock(productIds, productIdToQuantityMap);
 
-		return OrderMapper.INSTANCE.toDto(
+		return OrderMapper.INSTANCE.OrderToDto(
 				orderRepository.save(
 						Order.ofPlace(
-								userId,
+								user.getId(),
+								user.getName(),
 								request.receiveName(),
 								request.phoneNumber(),
 								request.address1(),
@@ -94,7 +110,7 @@ public class OrderService {
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
-		return BucketSummary.of(
+		return BucketSummary.create(
 				bucketServiceClient.getBuckets(userId, bucketIds)
 						.stream()
 						.map(BucketMapper.INSTANCE::responseToDto).toList());
@@ -110,6 +126,7 @@ public class OrderService {
 		// 				101,
 		// 				"에디오피아 이가체프",
 		// 				10000,
+		// 				1,
 		// 				"seller1",
 		// 				AVAILABLE
 		// 		),
@@ -117,6 +134,7 @@ public class OrderService {
 		// 				102,
 		// 				"과테말라 안티구아",
 		// 				20000,
+		// 				2,
 		// 				"seller2",
 		// 				AVAILABLE
 		// 		)
@@ -125,6 +143,13 @@ public class OrderService {
 				.stream()
 				.map(ProductMapper.INSTANCE::responseToEntity)
 				.toList();
+	}
+
+	@VisibleForTesting
+	public User getUser(final Integer userId) {
+		// API (PostMan) 테스트를 위한 코드
+		// return new User(1, "회원 이름");
+		return UserMapper.INSTANCE.responseToEntity(userServiceClient.getUser(userId));
 	}
 
 	/**
@@ -163,5 +188,84 @@ public class OrderService {
 				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
 		});
+	}
+
+	/**
+	 * 주문 목록을 조회하는 메소드입니다.
+	 * <p>
+	 * default : 6개월 이내의 주문 내역 조회
+	 * year : 해당 년도의 주문 내역 조회
+	 * <p>
+	 * @author ${USER}
+	 *
+	 * @param userId- 유저 번호
+	 * @param year- 조회 연도
+	 * @param pageNumber- 페이지 번호
+	 * @return - 주문 리스트
+	 */
+	@Transactional(readOnly = true)
+	public List<OrderDto> getOrders(
+			final Integer userId,
+			final Integer year,
+			final Integer pageNumber
+	) {
+		// TODO : UserId 검증
+		// TODO : 상품 정보
+		User user = getUser(userId);
+		Pageable pageable = PageRequest.of(pageNumber, 5);
+		return orderRepository.findOrdersByUserId(user.getId(), year, pageable).stream()
+				.map(OrderMapper.INSTANCE::OrderToDto)
+				.toList();
+	}
+
+	/**
+	 * 주문 상세 이력을 조회하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetailId- 주문 상세 번호
+	 * @return - 주문 상세 이력 리스트
+	 */
+	@Transactional(readOnly = true)
+	public List<OrderStatusHistoryDto> getOrderStatusHistory(final Long orderDetailId) {
+		return orderStatusHistoryRepository.findAllByOrderDetailId(orderDetailId).stream()
+				.map(OrderMapper.INSTANCE::orderStatusHistoryToDto)
+				.toList();
+	}
+
+	/**
+	 * 주문을 취소하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetailId- 주문 상세 번호
+	 * @return - 주문 상세
+	 */
+	public OrderDetailDto cancelOrder(final Integer userId, final Long orderDetailId) {
+		final User user = getUser(userId);
+		final OrderDetail orderDetail =
+				orderDetailRepository.findOrderDetailById(orderDetailId, user.getId());
+		validateOrderDetail(orderDetail);
+		orderDetail.changeStatus(OrderStatus.CANCELLED, OrderStatusReason.REFUND);
+		return OrderMapper.INSTANCE.orderDetailToDto(orderDetail);
+	}
+
+	/**
+	 * 주문 상세를 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderDetail- 주문 상세
+	 */
+	@VisibleForTesting
+	public void validateOrderDetail(final OrderDetail orderDetail) {
+		if (orderDetail == null) {
+			throw new CustomException(NOT_FOUND_ORDER_DETAIL_ID);
+		}
+
+		if (!orderDetail.isCancelableStatus()) {
+			throw new CustomException(MUST_CLOSED_ORDER_TO_CANCEL);
+		}
+
+		if (!orderDetail.isCancellableOrderDate()) {
+			throw new CustomException(TOO_OLD_ORDER_TO_CANCEL);
+		}
 	}
 }

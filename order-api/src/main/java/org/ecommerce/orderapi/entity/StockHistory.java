@@ -1,6 +1,9 @@
 package org.ecommerce.orderapi.entity;
 
+import java.time.LocalDateTime;
+
 import org.ecommerce.orderapi.entity.enumerated.StockOperationType;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,7 +44,11 @@ public class StockHistory {
 	@Enumerated(EnumType.STRING)
 	private StockOperationType operationType;
 
-	public static StockHistory ofRecord(
+	@CreationTimestamp
+	@Column
+	private LocalDateTime operationDatetime;
+
+	static StockHistory ofRecord(
 			final Stock stock,
 			final OrderDetail orderDetail,
 			final StockOperationType operationType
@@ -51,5 +58,9 @@ public class StockHistory {
 		stockHistory.orderDetail = orderDetail;
 		stockHistory.operationType = operationType;
 		return stockHistory;
+	}
+
+	public boolean isOperationTypeDecrease() {
+		return this.operationType == StockOperationType.DECREASE;
 	}
 }

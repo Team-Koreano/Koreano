@@ -1,12 +1,19 @@
 package org.ecommerce.orderapi.entity;
 
 import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
+import static org.ecommerce.orderapi.util.OrderPolicyConstants.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,6 +52,9 @@ public class OrderDetail {
 	private Integer productId;
 
 	@Column(nullable = false)
+	private String productName;
+
+	@Column(nullable = false)
 	private Integer price;
 
 	@Column(nullable = false)
@@ -60,7 +70,10 @@ public class OrderDetail {
 	private Integer paymentAmount;
 
 	@Column(nullable = false)
-	private String seller;
+	private Integer sellerId;
+
+	@Column(nullable = false)
+	private String sellerName;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -70,26 +83,34 @@ public class OrderDetail {
 	@Enumerated(EnumType.STRING)
 	private OrderStatusReason statusReason;
 
+	@Column
+	@CreationTimestamp
+	private LocalDateTime statusDatetime;
+
 	@OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
 	static OrderDetail ofPlace(
 			final Order order,
 			final Integer productId,
+			final String productName,
 			final Integer price,
 			final Integer quantity,
 			final Integer deliveryFee,
-			final String seller
+			final Integer sellerId,
+			final String sellerName
 	) {
 		final OrderDetail orderDetail = new OrderDetail();
 		orderDetail.order = order;
 		orderDetail.productId = productId;
+		orderDetail.productName = productName;
 		orderDetail.price = price;
 		orderDetail.quantity = quantity;
 		orderDetail.totalPrice = price * quantity;
 		orderDetail.deliveryFee = deliveryFee;
 		orderDetail.paymentAmount = price * quantity + deliveryFee;
-		orderDetail.seller = seller;
+		orderDetail.sellerId = sellerId;
+		orderDetail.sellerName = sellerName;
 		orderDetail.orderStatusHistories = List.of(
 				OrderStatusHistory.ofRecord(orderDetail, OPEN));
 		return orderDetail;
@@ -101,9 +122,24 @@ public class OrderDetail {
 	) {
 		this.status = changeStatus;
 		this.statusReason = changeStatusReason;
+		this.statusDatetime = LocalDateTime.now();
 		this.orderStatusHistories = new ArrayList<>(this.orderStatusHistories);
 		this.orderStatusHistories.add(
 				OrderStatusHistory.ofRecord(this, changeStatus)
 		);
+	}
+
+	public boolean isCancelableStatus() {
+		return this.status == CLOSED;
+	}
+
+	public boolean isCancellableOrderDate() {
+		final LocalDateTime now = LocalDateTime.now();
+		final Duration duration = Duration.between(this.statusDatetime, now);
+		return duration.toDays() <= ORDER_CANCELLABLE_DATE;
+	}
+
+	public boolean isRefundedOrder() {
+		return this.status == CANCELLED && this.statusReason == REFUND;
 	}
 }

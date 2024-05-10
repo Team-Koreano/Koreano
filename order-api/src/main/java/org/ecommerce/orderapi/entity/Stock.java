@@ -72,6 +72,19 @@ public class Stock {
 				));
 	}
 
+	public void increaseTotalStock(
+			final OrderDetail orderDetail
+	) {
+		this.total += orderDetail.getQuantity();
+		this.stockHistories = new ArrayList<>(this.stockHistories);
+		this.stockHistories.add(
+				StockHistory.ofRecord(
+						this,
+						orderDetail,
+						INCREASE
+				));
+	}
+
 	public boolean hasStock(Integer quantity) {
 		return this.total >= quantity;
 	}
