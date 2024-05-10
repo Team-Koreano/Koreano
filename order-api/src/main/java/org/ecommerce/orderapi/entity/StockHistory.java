@@ -1,23 +1,30 @@
 package org.ecommerce.orderapi.entity;
 
-import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
+import java.time.LocalDateTime;
 
 import org.ecommerce.orderapi.entity.enumerated.StockOperationType;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "stock_history",
-		indexes = {@Index(name = "idx_orderDetailId", columnList = "orderDetailId")})
+@Table(name = "stock_history")
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class StockHistory {
 
@@ -25,28 +32,35 @@ public class StockHistory {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
-	private Long orderDetailId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable = false)
+	private Stock stock;
 
-	@Column(nullable = false)
-	private Integer productId;
-
-	@Column(nullable = false)
-	private Integer quantity;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn
+	private OrderDetail orderDetail;
 
 	@Column
 	@Enumerated(EnumType.STRING)
-	private StockOperationType operationType = INCREASE;
+	private StockOperationType operationType;
 
-	public static StockHistory ofRecord(
-			final Long orderDetailId,
-			final Integer productId,
-			final Integer quantity
+	@CreationTimestamp
+	@Column
+	private LocalDateTime operationDatetime;
+
+	static StockHistory ofRecord(
+			final Stock stock,
+			final OrderDetail orderDetail,
+			final StockOperationType operationType
 	) {
 		final StockHistory stockHistory = new StockHistory();
-		stockHistory.orderDetailId = orderDetailId;
-		stockHistory.productId = productId;
-		stockHistory.quantity = quantity;
+		stockHistory.stock = stock;
+		stockHistory.orderDetail = orderDetail;
+		stockHistory.operationType = operationType;
 		return stockHistory;
+	}
+
+	public boolean isOperationTypeDecrease() {
+		return this.operationType == StockOperationType.DECREASE;
 	}
 }
