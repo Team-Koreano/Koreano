@@ -1,12 +1,15 @@
 package org.ecommerce.userapi.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -67,6 +71,12 @@ public class Users {
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;
 
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UsersAccount> usersAccounts = new ArrayList<>();
+
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Address> addresses = new ArrayList<>();
+
 	public static Users ofRegister(String email, String name, String password, Gender gender, Short age,
 		String phoneNumber) {
 		Users users = new Users();
@@ -86,5 +96,7 @@ public class Users {
 	public void withdrawal() {
 		this.userStatus = UserStatus.WITHDRAWAL;
 		this.isDeleted = true;
+		this.addresses.forEach(Address::withdrawal);
+		this.usersAccounts.forEach(UsersAccount::withdrawal);
 	}
 }

@@ -2,7 +2,6 @@ package org.ecommerce.userapi.service;
 
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -323,16 +322,12 @@ class UserServiceTest {
 			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId()))
 				.thenReturn(Optional.of(user));
 
-			when(usersAccountRepository.findByUsersIdAndIsDeletedIsFalse(user.getId())).thenReturn(List.of(account));
-			when(addressRepository.findByUsersIdAndIsDeletedIsFalse(user.getId())).thenReturn(List.of(address));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			// when
 			userService.withdrawUser(withdrawalRequest, authDetails);
 
 			// then
 			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
-			verify(usersAccountRepository, times(1)).findByUsersIdAndIsDeletedIsFalse(user.getId());
-			verify(addressRepository, times(1)).findByUsersIdAndIsDeletedIsFalse(user.getId());
 
 			Assertions.assertThat(user.isValidUser()).isFalse();
 			Assertions.assertThat(account.isDeleted()).isTrue();

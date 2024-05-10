@@ -51,6 +51,7 @@ public class UsersAccount {
 		usersAccount.users = users;
 		usersAccount.bankName = bankName;
 		usersAccount.number = number;
+		users.getUsersAccounts().add(usersAccount);
 		return usersAccount;
 	}
 
