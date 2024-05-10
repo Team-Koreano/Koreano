@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/sellers/v1")
+@RequestMapping("/api/external/sellers/v1")
 public class SellerController {
 
 	// TODO : 계좌, 주소 테이블 생성 로직 구현
