@@ -1,34 +1,25 @@
 package org.ecommerce.orderapi.service;
 
-import static org.ecommerce.orderapi.entity.enumerated.ProductStatus.*;
 import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.client.BucketServiceClient;
-import org.ecommerce.orderapi.client.ProductServiceClient;
-import org.ecommerce.orderapi.client.UserServiceClient;
-import org.ecommerce.orderapi.dto.BucketMapper;
 import org.ecommerce.orderapi.dto.BucketSummary;
-import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
-import org.ecommerce.orderapi.dto.ProductMapper;
-import org.ecommerce.orderapi.dto.UserMapper;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.OrderItem;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
-import org.ecommerce.orderapi.entity.User;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.repository.OrderItemRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
-import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,15 +34,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class OrderService {
+public class OrderDomainService {
 
-	private final BucketServiceClient bucketServiceClient;
-	private final ProductServiceClient productServiceClient;
-	private final UserServiceClient userServiceClient;
-	private final OrderRepository orderRepository;
-	private final StockRepository stockRepository;
 	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 	private final OrderItemRepository orderItemRepository;
+	private final OrderRepository orderRepository;
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 	// TODO : 회원 유효성 검사
@@ -60,131 +47,42 @@ public class OrderService {
 	 * 주문을 생성하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param userId- 회원 번호
-	 * @param request- 주문 내용
+	 * @param order- 회원 번호
+	 * @param bucketSummary- 주문 내용
+	 * @param products- 주문 내용
+	 * @param stocks- 주문 내용
 	 *
-	 * @return - 생성된 주문을 반환합니다.
 	 */
-	public OrderDto placeOrder(
-			final Integer userId,
-			final OrderDto.Request.Place request
+	public void placeOrder(
+			final Order order,
+			final BucketSummary bucketSummary,
+			final List<Product> products,
+			final List<Stock> stocks
 	) {
-		final User user = getUser(userId);
-		final BucketSummary bucketSummary = getBuckets(userId, request.bucketIds());
-		final List<Integer> productIds = bucketSummary.getProductIds();
-		final Map<Integer, Integer> productIdToQuantityMap = bucketSummary.getProductIdToQuantityMap();
-		final List<Product> products = getProducts(productIds);
-
-		validateProduct(products);
-		validateStock(productIds, productIdToQuantityMap);
-
-		return OrderMapper.INSTANCE.OrderToDto(
-				orderRepository.save(
-						Order.ofPlace(
-								user.getId(),
-								user.getName(),
-								request.receiveName(),
-								request.phoneNumber(),
-								request.address1(),
-								request.address2(),
-								request.deliveryComment(),
-								products,
-								productIdToQuantityMap
-						)
-				)
-		);
-	}
-
-	/**
-	 * 장바구니 유효성검사 internal API를 호출하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param userId-    주문을 생성하는 회원 번호
-	 * @param bucketIds- 회원이 주문하는 장바구니 번호가 들어있는 리스트
-	 *
-	 * @return - 장바구니 정보가 들어있는 BucketDto 입니다.
-	 */
-	@VisibleForTesting
-	public BucketSummary getBuckets(
-			final Integer userId,
-			final List<Long> bucketIds
-	) {
-		return BucketSummary.create(
-				bucketServiceClient.getBuckets(userId, bucketIds)
-						.stream()
-						.map(BucketMapper.INSTANCE::responseToDto).toList());
-	}
-
-	@VisibleForTesting
-	public List<Product> getProducts(
-			final List<Integer> productIds
-	) {
-		// API (PostMan) 테스트를 위한 코드
-		// return List.of(
-		// 		new Product(
-		// 				101,
-		// 				"에디오피아 이가체프",
-		// 				10000,
-		// 				1,
-		// 				"seller1",
-		// 				AVAILABLE
-		// 		),
-		// 		new Product(
-		// 				102,
-		// 				"과테말라 안티구아",
-		// 				20000,
-		// 				2,
-		// 				"seller2",
-		// 				AVAILABLE
-		// 		)
-		// );
-		return productServiceClient.getProducts(productIds)
-				.stream()
-				.map(ProductMapper.INSTANCE::responseToEntity)
-				.toList();
-	}
-
-	@VisibleForTesting
-	public User getUser(final Integer userId) {
-		// API (PostMan) 테스트를 위한 코드
-		// return new User(1, "회원 이름");
-		return UserMapper.INSTANCE.responseToEntity(userServiceClient.getUser(userId));
+		validateStock(stocks, bucketSummary);
+		order.place(products, bucketSummary.getQuantityMap());
 	}
 
 	/**
 	 * 주문 생성 전 재고를 검증하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param productIds- 재고를 확인할 상품 번호
-	 * @param quantities- 회원이 주문한 상품의 수량
+	 * @param stocks- 재고를 확인할 상품 번호
+	 * @param bucketSummary- 회원이 주문한 상품의 수량
 	 */
 	@VisibleForTesting
 	public void validateStock(
-			final List<Integer> productIds,
-			final Map<Integer, Integer> quantities
+			final List<Stock> stocks,
+			final BucketSummary bucketSummary
 	) {
-		List<Stock> stocks = stockRepository.findByProductIdIn(productIds);
+		final List<Integer> productIds = bucketSummary.getProductIds();
+		final Map<Integer, Integer> quantities = bucketSummary.getQuantityMap();
 		if (stocks.size() != productIds.size()) {
 			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 		}
 		stocks.forEach(stock -> {
 			if (!stock.hasStock(quantities.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
-			}
-		});
-	}
-
-	/**
-	 * 주문 생성 전 상품을 검증하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param products - 상품 리스트
-	 */
-	@VisibleForTesting
-	public void validateProduct(final List<Product> products) {
-		products.forEach(product -> {
-			if (product.getStatus() != AVAILABLE) {
-				throw new CustomException(NOT_AVAILABLE_PRODUCT);
 			}
 		});
 	}
@@ -210,9 +108,9 @@ public class OrderService {
 	) {
 		// TODO : UserId 검증
 		// TODO : 상품 정보
-		User user = getUser(userId);
+		// User user = getUser(userId);
 		Pageable pageable = PageRequest.of(pageNumber, 5);
-		return orderRepository.findOrdersByUserId(user.getId(), year, pageable).stream()
+		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
 				.map(OrderMapper.INSTANCE::OrderToDto)
 				.toList();
 	}
@@ -239,9 +137,9 @@ public class OrderService {
 	 * @return - 주문 상세
 	 */
 	public OrderItemDto cancelOrder(final Integer userId, final Long orderItemId) {
-		final User user = getUser(userId);
+		// final User user = getUser(userId);
 		final OrderItem orderItem =
-				orderItemRepository.findOrderItemById(orderItemId, user.getId());
+				orderItemRepository.findOrderItemById(orderItemId, userId);
 		validateOrderItem(orderItem);
 		orderItem.changeStatus(OrderStatus.CANCELLED, OrderStatusReason.REFUND);
 		return OrderMapper.INSTANCE.orderItemToDto(orderItem);

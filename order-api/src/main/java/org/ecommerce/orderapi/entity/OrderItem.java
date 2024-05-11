@@ -88,7 +88,7 @@ public class OrderItem {
 	@OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
-	static OrderItem ofPlace(
+	static OrderItem ofAdd(
 			final Order order,
 			final Integer productId,
 			final String productName,
@@ -109,8 +109,8 @@ public class OrderItem {
 		orderItem.paymentAmount = price * quantity + deliveryFee;
 		orderItem.sellerId = sellerId;
 		orderItem.sellerName = sellerName;
-		orderItem.orderStatusHistories = List.of(
-				OrderStatusHistory.ofRecord(orderItem, OPEN));
+		orderItem.orderStatusHistories = new ArrayList<>();
+		orderItem.orderStatusHistories.add(OrderStatusHistory.ofRecord(orderItem, OPEN));
 		return orderItem;
 	}
 
@@ -121,10 +121,7 @@ public class OrderItem {
 		this.status = changeStatus;
 		this.statusReason = changeStatusReason;
 		this.statusDatetime = LocalDateTime.now();
-		this.orderStatusHistories = new ArrayList<>(this.orderStatusHistories);
-		this.orderStatusHistories.add(
-				OrderStatusHistory.ofRecord(this, changeStatus)
-		);
+		this.orderStatusHistories.add(OrderStatusHistory.ofRecord(this, changeStatus));
 	}
 
 	public boolean isCancelableStatus() {

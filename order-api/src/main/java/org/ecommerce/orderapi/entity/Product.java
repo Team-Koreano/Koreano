@@ -15,4 +15,8 @@ public class Product {
 	private Integer sellerId;
 	private String sellerName;
 	private ProductStatus status;
+
+	public boolean isAvailableStatus() {
+		return status == ProductStatus.AVAILABLE;
+	}
 }

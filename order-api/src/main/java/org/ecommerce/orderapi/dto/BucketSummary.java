@@ -5,25 +5,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ecommerce.orderapi.entity.Bucket;
+
 import lombok.Getter;
 
 @Getter
 public class BucketSummary {
 	private List<Integer> productIds;
-	private Map<Integer, Integer> productIdToQuantityMap;
+	private Map<Integer, Integer> quantityMap;
 
-	public static BucketSummary create(List<BucketDto> bucketDtos) {
+	public static BucketSummary create(List<Bucket> buckets) {
 		BucketSummary bucketSummary = new BucketSummary();
 		List<Integer> productIds = new ArrayList<>();
-		Map<Integer, Integer> productIdToQuantityMap = new HashMap<>();
+		Map<Integer, Integer> quantityMap = new HashMap<>();
 
-		bucketDtos.forEach(bucketDto -> {
+		buckets.forEach(bucketDto -> {
 			productIds.add(bucketDto.getProductId());
-			productIdToQuantityMap.put(bucketDto.getProductId(), bucketDto.getQuantity());
+			quantityMap.put(bucketDto.getProductId(), bucketDto.getQuantity());
 		});
 
 		bucketSummary.productIds = productIds;
-		bucketSummary.productIdToQuantityMap = productIdToQuantityMap;
+		bucketSummary.quantityMap = quantityMap;
 		return bucketSummary;
 	}
 }
