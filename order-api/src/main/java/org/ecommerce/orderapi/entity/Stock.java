@@ -60,27 +60,27 @@ public class Stock {
 
 	public void decreaseTotalStock(
 			final Integer quantity,
-			final OrderDetail orderDetail
+			final OrderItem orderItem
 	) {
 		this.total -= quantity;
 		this.stockHistories = new ArrayList<>(this.stockHistories);
 		this.stockHistories.add(
 				StockHistory.ofRecord(
 						this,
-						orderDetail,
+						orderItem,
 						DECREASE
 				));
 	}
 
 	public void increaseTotalStock(
-			final OrderDetail orderDetail
+			final OrderItem orderItem
 	) {
-		this.total += orderDetail.getQuantity();
+		this.total += orderItem.getQuantity();
 		this.stockHistories = new ArrayList<>(this.stockHistories);
 		this.stockHistories.add(
 				StockHistory.ofRecord(
 						this,
-						orderDetail,
+						orderItem,
 						INCREASE
 				));
 	}

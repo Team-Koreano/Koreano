@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StockHistoryCustomRepository {
-	StockHistory findStockHistoryByOrderDetailId(final Long orderDetailId);
+	StockHistory findStockHistoryByOrderItemId(final Long orderItemId);
 }

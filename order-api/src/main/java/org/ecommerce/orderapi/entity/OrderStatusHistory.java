@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,7 +34,7 @@ public class OrderStatusHistory {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = false)
-	private OrderDetail orderDetail;
+	private OrderItem orderItem;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -47,11 +45,11 @@ public class OrderStatusHistory {
 	private LocalDateTime statusChangeDatetime;
 
 	static OrderStatusHistory ofRecord(
-			final OrderDetail orderDetail,
+			final OrderItem orderItem,
 			final OrderStatus changeStatus
 	) {
 		final OrderStatusHistory orderStatusHistory = new OrderStatusHistory();
-		orderStatusHistory.orderDetail = orderDetail;
+		orderStatusHistory.orderItem = orderItem;
 		orderStatusHistory.changeStatus = changeStatus;
 		return orderStatusHistory;
 	}

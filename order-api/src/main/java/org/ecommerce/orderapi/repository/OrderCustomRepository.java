@@ -5,6 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderCustomRepository {
-	Page<Order> findOrdersByUserId(final Integer customerId, final Integer year,
+	Page<Order> findOrdersByUserId(final Integer userId, final Integer year,
 			final Pageable pageable);
 }

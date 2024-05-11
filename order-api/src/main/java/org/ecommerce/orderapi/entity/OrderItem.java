@@ -13,8 +13,6 @@ import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,11 +32,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "order_detail")
+@Table(name = "order_item")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class OrderDetail {
+public class OrderItem {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,10 +85,10 @@ public class OrderDetail {
 	@CreationTimestamp
 	private LocalDateTime statusDatetime;
 
-	@OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
-	static OrderDetail ofPlace(
+	static OrderItem ofPlace(
 			final Order order,
 			final Integer productId,
 			final String productName,
@@ -100,20 +98,20 @@ public class OrderDetail {
 			final Integer sellerId,
 			final String sellerName
 	) {
-		final OrderDetail orderDetail = new OrderDetail();
-		orderDetail.order = order;
-		orderDetail.productId = productId;
-		orderDetail.productName = productName;
-		orderDetail.price = price;
-		orderDetail.quantity = quantity;
-		orderDetail.totalPrice = price * quantity;
-		orderDetail.deliveryFee = deliveryFee;
-		orderDetail.paymentAmount = price * quantity + deliveryFee;
-		orderDetail.sellerId = sellerId;
-		orderDetail.sellerName = sellerName;
-		orderDetail.orderStatusHistories = List.of(
-				OrderStatusHistory.ofRecord(orderDetail, OPEN));
-		return orderDetail;
+		final OrderItem orderItem = new OrderItem();
+		orderItem.order = order;
+		orderItem.productId = productId;
+		orderItem.productName = productName;
+		orderItem.price = price;
+		orderItem.quantity = quantity;
+		orderItem.totalPrice = price * quantity;
+		orderItem.deliveryFee = deliveryFee;
+		orderItem.paymentAmount = price * quantity + deliveryFee;
+		orderItem.sellerId = sellerId;
+		orderItem.sellerName = sellerName;
+		orderItem.orderStatusHistories = List.of(
+				OrderStatusHistory.ofRecord(orderItem, OPEN));
+		return orderItem;
 	}
 
 	public void changeStatus(

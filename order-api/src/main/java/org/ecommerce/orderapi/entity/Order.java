@@ -62,7 +62,7 @@ public class Order {
 	private LocalDateTime orderDatetime;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-	private List<OrderDetail> orderDetails = new ArrayList<>();
+	private List<OrderItem> orderItems = new ArrayList<>();
 
 	public static Order ofPlace(
 			final Integer userId,
@@ -85,8 +85,8 @@ public class Order {
 		order.address1 = address1;
 		order.address2 = address2;
 		order.deliveryComment = deliveryComment;
-		order.orderDetails = products.stream()
-				.map(product -> OrderDetail.ofPlace(
+		order.orderItems = products.stream()
+				.map(product -> OrderItem.ofPlace(
 						order,
 						product.getId(),
 						product.getName(),
@@ -96,8 +96,8 @@ public class Order {
 						product.getSellerId(),
 						product.getSellerName()
 				)).toList();
-		order.totalPaymentAmount = order.orderDetails.stream()
-				.mapToInt(OrderDetail::getPaymentAmount)
+		order.totalPaymentAmount = order.orderItems.stream()
+				.mapToInt(OrderItem::getPaymentAmount)
 				.sum();
 		return order;
 	}

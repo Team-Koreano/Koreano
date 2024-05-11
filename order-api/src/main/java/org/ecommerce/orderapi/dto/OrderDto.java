@@ -25,7 +25,7 @@ public class OrderDto {
 	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
-	private List<OrderDetailDto> orderDetailDtos;
+	private List<OrderItemDto> orderItemDtos;
 
 	public static class Request {
 
@@ -63,7 +63,7 @@ public class OrderDto {
 			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
 			LocalDateTime orderDatetime,
-			List<OrderDetailDto.Response> orderDetailResponses
+			List<OrderItemDto.Response> orderItemResponses
 	) {
 	}
 }

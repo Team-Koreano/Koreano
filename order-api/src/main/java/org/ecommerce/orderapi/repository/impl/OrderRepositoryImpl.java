@@ -34,7 +34,7 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	) {
 		List<Order> content = jpaQueryFactory
 				.selectFrom(order)
-				.leftJoin(order.orderDetails).fetchJoin()
+				.leftJoin(order.orderItems).fetchJoin()
 				.where(order.userId.eq(userId),
 						generateDateCondition(year))
 				.orderBy(order.orderDatetime.desc())

@@ -9,15 +9,15 @@ import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.aop.StockLock;
-import org.ecommerce.orderapi.dto.OrderDetailDto;
+import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
-import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.OrderItem;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.StockHistory;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
-import org.ecommerce.orderapi.repository.OrderDetailRepository;
+import org.ecommerce.orderapi.repository.OrderItemRepository;
 import org.ecommerce.orderapi.repository.StockHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class StockService {
 
 	private final StockRepository stockRepository;
 	private final StockHistoryRepository stockHistoryRepository;
-	private final OrderDetailRepository orderDetailRepository;
+	private final OrderItemRepository orderItemRepository;
 
 	/**
 	 * 상세 주문들의 재고를 감소시키는 메소드입니다.
@@ -47,15 +47,15 @@ public class StockService {
 	 *
 	 */
 	@StockLock
-	public List<OrderDetailDto> decreaseStocks(final Long orderId) {
-		final List<OrderDetail> orderDetails =
-				orderDetailRepository.findOrderDetailsByOrderId(orderId);
-		if (orderDetails == null || orderDetails.isEmpty()) {
-			throw new CustomException(NOT_FOUND_ORDER_DETAIL);
+	public List<OrderItemDto> decreaseStocks(final Long orderId) {
+		final List<OrderItem> orderItems =
+				orderItemRepository.findOrderItemsByOrderId(orderId);
+		if (orderItems == null || orderItems.isEmpty()) {
+			throw new CustomException(NOT_FOUND_ORDER_ITEM);
 		}
 
-		final List<Integer> productIds = orderDetails.stream()
-				.map(OrderDetail::getProductId)
+		final List<Integer> productIds = orderItems.stream()
+				.map(OrderItem::getProductId)
 				.toList();
 		final Map<Integer, Stock> productToToStockMap =
 				stockRepository.findStocksByProductIdIn(productIds);
@@ -63,11 +63,11 @@ public class StockService {
 			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
 		}
 
-		boolean decreaseResult = decreaseStock(orderDetails, productToToStockMap);
-		saveOrderStatus(orderDetails, decreaseResult);
+		boolean decreaseResult = decreaseStock(orderItems, productToToStockMap);
+		saveOrderStatus(orderItems, decreaseResult);
 
-		return orderDetails.stream()
-				.map(OrderMapper.INSTANCE::orderDetailToDto)
+		return orderItems.stream()
+				.map(OrderMapper.INSTANCE::orderItemToDto)
 				.toList();
 	}
 
@@ -75,26 +75,26 @@ public class StockService {
 	 * 재고를 차감하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetails- 변수 설명 텍스트
+	 * @param orderItems- 변수 설명 텍스트
 	 * @param stockMap- 변수 설명 텍스트
 	 * @return - 재고 차감 성공 여부
 	 */
 	@VisibleForTesting
 	public boolean decreaseStock(
-			final List<OrderDetail> orderDetails,
+			final List<OrderItem> orderItems,
 			final Map<Integer, Stock> stockMap
 	) {
 		try {
-			orderDetails.forEach(
-					orderDetail -> {
-						final Integer productId = orderDetail.getProductId();
-						final Integer quantity = orderDetail.getQuantity();
+			orderItems.forEach(
+					orderItem -> {
+						final Integer productId = orderItem.getProductId();
+						final Integer quantity = orderItem.getQuantity();
 						final Stock stock = stockMap.get(productId);
 
 						if (!stock.hasStock(quantity)) {
 							throw new CustomException(INSUFFICIENT_STOCK);
 						}
-						stock.decreaseTotalStock(quantity, orderDetail);
+						stock.decreaseTotalStock(quantity, orderItem);
 					}
 			);
 		} catch (CustomException e) {
@@ -108,21 +108,21 @@ public class StockService {
 	 * 재고 차감에 성공 여부를 주문 상세에 저장하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetails- 주문 상세 리스트
+	 * @param orderItems- 주문 상세 리스트
 	 * @param decreaseResult- 재고 차감 성공 여부
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@VisibleForTesting
 	public void saveOrderStatus(
-			final List<OrderDetail> orderDetails,
+			final List<OrderItem> orderItems,
 			final boolean decreaseResult
 	) {
 		if (decreaseResult) {
-			orderDetails.forEach(
-					orderDetail -> orderDetail.changeStatus(CLOSED, null));
+			orderItems.forEach(
+					orderItem -> orderItem.changeStatus(CLOSED, null));
 		} else {
-			orderDetails.forEach(
-					orderDetail -> orderDetail.changeStatus(CANCELLED,
+			orderItems.forEach(
+					orderItem -> orderItem.changeStatus(CANCELLED,
 							OrderStatusReason.OUT_OF_STOCK));
 		}
 	}
@@ -131,24 +131,24 @@ public class StockService {
 	 * 재고 감소 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetailId- 주문 상세 번호
+	 * @param orderItemId- 주문 상세 번호
 	 * @return - 재고
 	 */
 	@StockLock
-	public StockDto increaseStock(final Long orderDetailId) {
-		final OrderDetail orderDetail = orderDetailRepository
-				.findOrderDetailById(orderDetailId, null);
-		validateOrderDetail(orderDetail);
+	public StockDto increaseStock(final Long orderItemId) {
+		final OrderItem orderItem = orderItemRepository
+				.findOrderItemById(orderItemId, null);
+		validateOrderItem(orderItem);
 
 		final StockHistory stockHistory = stockHistoryRepository
-				.findStockHistoryByOrderDetailId(orderDetail.getId());
+				.findStockHistoryByOrderItemId(orderItem.getId());
 		validateStockHistory(stockHistory);
 
 		final Stock stock = stockHistory.getStock();
 		if (stock == null) {
 			throw new CustomException(NOT_FOUND_STOCK);
 		}
-		stock.increaseTotalStock(orderDetail);
+		stock.increaseTotalStock(orderItem);
 		return StockMapper.INSTANCE.toStockDto(stock);
 	}
 
@@ -156,15 +156,15 @@ public class StockService {
 	 * 주문 상세를 검증하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param orderDetail- 주문 상세
+	 * @param orderItem- 주문 상세
 	 */
 	@VisibleForTesting
-	public void validateOrderDetail(final OrderDetail orderDetail) {
-		if (orderDetail == null) {
-			throw new CustomException(NOT_FOUND_ORDER_DETAIL);
+	public void validateOrderItem(final OrderItem orderItem) {
+		if (orderItem == null) {
+			throw new CustomException(NOT_FOUND_ORDER_ITEM);
 		}
 
-		if (!orderDetail.isRefundedOrder()) {
+		if (!orderItem.isRefundedOrder()) {
 			throw new CustomException(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK);
 		}
 	}
