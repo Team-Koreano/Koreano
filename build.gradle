@@ -79,6 +79,7 @@ subprojects {
     sourceCompatibility = '17'
 }
 
+
 project(':order-api') {
     dependencies {
         implementation(project(':common'))
@@ -116,8 +117,23 @@ project(':order-api') {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
         }
     }
-}
 
+
+project(':common') {
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        implementation 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    }
+}
 
 project(':statistic-api') {
     dependencies {

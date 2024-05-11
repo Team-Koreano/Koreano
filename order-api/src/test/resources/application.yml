@@ -4,6 +4,8 @@ bucket-service:
   url: http://localhost:8080/api/buckets/v1
 product-search-service:
   url: http://localhost:8082/api/product-search/v1
+user-service:
+  url: http://localhost:8083/api/internal/users/v1
 spring:
     profiles:
       active: test

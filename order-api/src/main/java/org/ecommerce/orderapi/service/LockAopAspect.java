@@ -3,7 +3,6 @@ package org.ecommerce.orderapi.service;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.ecommerce.orderapi.aop.StockLockInterface;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -17,16 +16,15 @@ public class LockAopAspect {
 
 	private final LockService lockService;
 
-	@Around("@annotation(org.ecommerce.orderapi.aop.StockLock) && args(orderDetail)")
+	@Around("@annotation(org.ecommerce.orderapi.aop.StockLock)")
 	public Object aroundMethod(
-			ProceedingJoinPoint proceedingJoinPoint,
-			StockLockInterface orderDetail
+			ProceedingJoinPoint proceedingJoinPoint
 	) throws Throwable {
-		lockService.lock(orderDetail.getProductId());
+		lockService.lock();
 		try {
 			return proceedingJoinPoint.proceed();
 		} finally {
-			lockService.unLock(orderDetail.getProductId());
+			lockService.unLock();
 		}
 	}
 }

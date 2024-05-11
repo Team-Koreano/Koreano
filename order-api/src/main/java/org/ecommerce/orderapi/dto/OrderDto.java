@@ -16,6 +16,7 @@ public class OrderDto {
 
 	private Long id;
 	private Integer userId;
+	private String userName;
 	private String receiveName;
 	private String phoneNumber;
 	private String address1;
@@ -24,6 +25,7 @@ public class OrderDto {
 	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
+	private List<OrderDetailDto> orderDetailDtos;
 
 	public static class Request {
 
@@ -52,6 +54,7 @@ public class OrderDto {
 	public record Response(
 			Long id,
 			Integer userId,
+			String userName,
 			String receiveName,
 			String phoneNumber,
 			String address1,
@@ -59,7 +62,8 @@ public class OrderDto {
 			String deliveryComment,
 			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
-			LocalDateTime orderDatetime
+			LocalDateTime orderDatetime,
+			List<OrderDetailDto.Response> orderDetailResponses
 	) {
 	}
 }
