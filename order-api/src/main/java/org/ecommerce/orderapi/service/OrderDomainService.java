@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.dto.BucketSummary;
-import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
@@ -20,8 +18,7 @@ import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.repository.OrderItemRepository;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class OrderDomainService {
 
+	private final StockRepository stockRepository;
 	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 	private final OrderItemRepository orderItemRepository;
-	private final OrderRepository orderRepository;
 	// TODO user-service 검증 : user-service 구축 이후
 	// TODO payment-service 결제 과정 : payment-service 구축 이후
 	// TODO : 회원 유효성 검사
@@ -47,19 +44,17 @@ public class OrderDomainService {
 	 * 주문을 생성하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param order- 회원 번호
-	 * @param quantityMap- 상품 수량
+	 * @param order- 주문
 	 * @param products- 상품 리스트
-	 * @param stocks- 재고 리스트
+	 * @param quantityMap- 상품 수량
 	 *
 	 */
 	public void placeOrder(
 			final Order order,
 			final List<Product> products,
-			final Map<Integer, Integer> quantityMap,
-			final List<Stock> stocks
+			final Map<Integer, Integer> quantityMap
 	) {
-		validateStock(stocks, quantityMap);
+		validateStock(quantityMap);
 		order.place(products, quantityMap);
 	}
 
@@ -67,47 +62,19 @@ public class OrderDomainService {
 	 * 주문 생성 전 재고를 검증하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param stocks- 재고를 확인할 상품 번호
 	 * @param quantityMap- 상품 수량
 	 */
 	@VisibleForTesting
-	public void validateStock(
-			final List<Stock> stocks,
-			final Map<Integer, Integer> quantityMap
-	) {
+	public void validateStock(final Map<Integer, Integer> quantityMap) {
+		List<Stock> stocks = stockRepository.findByProductIdIn(quantityMap.keySet());
+		if (stocks.size() != quantityMap.size()) {
+			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
+		}
 		stocks.forEach(stock -> {
 			if (!stock.hasStock(quantityMap.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
 		});
-	}
-
-	/**
-	 * 주문 목록을 조회하는 메소드입니다.
-	 * <p>
-	 * default : 6개월 이내의 주문 내역 조회
-	 * year : 해당 년도의 주문 내역 조회
-	 * <p>
-	 * @author ${USER}
-	 *
-	 * @param userId- 유저 번호
-	 * @param year- 조회 연도
-	 * @param pageNumber- 페이지 번호
-	 * @return - 주문 리스트
-	 */
-	@Transactional(readOnly = true)
-	public List<OrderDto> getOrders(
-			final Integer userId,
-			final Integer year,
-			final Integer pageNumber
-	) {
-		// TODO : UserId 검증
-		// TODO : 상품 정보
-		// User user = getUser(userId);
-		Pageable pageable = PageRequest.of(pageNumber, 5);
-		return orderRepository.findOrdersByUserId(userId, year, pageable).stream()
-				.map(OrderMapper.INSTANCE::OrderToDto)
-				.toList();
 	}
 
 	/**

@@ -17,10 +17,8 @@ import org.ecommerce.orderapi.dto.UserMapper;
 import org.ecommerce.orderapi.entity.Bucket;
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Product;
-import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.User;
 import org.ecommerce.orderapi.repository.OrderRepository;
-import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +35,6 @@ public class OrderHelper {
 	private final UserServiceClient userServiceClient;
 	private final BucketServiceClient bucketServiceClient;
 	private final ProductServiceClient productServiceClient;
-	private final StockRepository stockRepository;
 
 	/**
 	 * 주문을 생성하는 메소드입니다.
@@ -56,7 +53,6 @@ public class OrderHelper {
 		final List<Bucket> buckets = getBuckets(userId, request.bucketIds());
 		final BucketSummary bucketSummary = BucketSummary.create(buckets);
 		final List<Product> products = getProducts(bucketSummary.getProductIds());
-		final List<Stock> stocks = getStock(bucketSummary.getProductIds());
 		final Order order = Order.of(
 				user.getId(),
 				user.getName(),
@@ -66,8 +62,7 @@ public class OrderHelper {
 				request.address2(),
 				request.deliveryComment()
 		);
-		orderDomainService.placeOrder(
-				order, products, bucketSummary.getQuantityMap(), stocks);
+		orderDomainService.placeOrder(order, products, bucketSummary.getQuantityMap());
 		return OrderMapper.INSTANCE.OrderToDto(orderRepository.save(order));
 	}
 
@@ -144,21 +139,5 @@ public class OrderHelper {
 			throw new CustomException(NOT_AVAILABLE_PRODUCT);
 		}
 		return products;
-	}
-
-	/**
-	 * 재고를 가져오는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param productIds- 상품 번호 리스트
-	 * @return - 재고 리스트
-	 */
-	@VisibleForTesting
-	public List<Stock> getStock(final List<Integer> productIds) {
-		List<Stock> stocks = stockRepository.findByProductIdIn(productIds);
-		if (stocks.size() != productIds.size()) {
-			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
-		}
-		return stocks;
 	}
 }
