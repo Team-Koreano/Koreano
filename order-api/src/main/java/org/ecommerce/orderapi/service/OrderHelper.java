@@ -39,6 +39,14 @@ public class OrderHelper {
 	private final ProductServiceClient productServiceClient;
 	private final StockRepository stockRepository;
 
+	/**
+	 * 주문을 생성하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param request- 주문 요청 정보
+	 * @return - 반환 값 설명 텍스트
+	 */
 	@Transactional
 	public OrderDto createOrder(
 			final Integer userId,
@@ -62,6 +70,13 @@ public class OrderHelper {
 		return OrderMapper.INSTANCE.OrderToDto(orderRepository.save(order));
 	}
 
+	/**
+	 * 회원 유효성 검사 internal API를 호출하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @return - 유저
+	 */
 	@VisibleForTesting
 	public User getUser(final Integer userId) {
 		// API (PostMan) 테스트를 위한 코드
@@ -70,13 +85,13 @@ public class OrderHelper {
 	}
 
 	/**
-	 * 장바구니 유효성검사 internal API를 호출하는 메소드입니다.
+	 * 장바구니 유효성 검사 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param userId-    주문을 생성하는 회원 번호
-	 * @param bucketIds- 회원이 주문하는 장바구니 번호가 들어있는 리스트
+	 * @param bucketIds- 장바구니 번호 리스트
 	 *
-	 * @return - 장바구니 정보가 들어있는 BucketDto 입니다.
+	 * @return - 장바구니 리스트
 	 */
 	@VisibleForTesting
 	public List<Bucket> getBuckets(
@@ -89,6 +104,13 @@ public class OrderHelper {
 				.toList();
 	}
 
+	/**
+	 * 상품 유효성 검사 internal API를 호출하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productIds- 상품 번호 리스트
+	 * @return - 상품 리스트
+	 */
 	@VisibleForTesting
 	public List<Product> getProducts(
 			final List<Integer> productIds
@@ -123,6 +145,13 @@ public class OrderHelper {
 		return products;
 	}
 
+	/**
+	 * 재고를 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productIds- 상품 번호 리스트
+	 * @return - 재고 리스트
+	 */
 	@VisibleForTesting
 	public List<Stock> getStock(final List<Integer> productIds) {
 		List<Stock> stocks = stockRepository.findByProductIdIn(productIds);
