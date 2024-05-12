@@ -5,14 +5,12 @@ import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.util.Pair;
 
 import jakarta.persistence.CascadeType;
@@ -29,7 +27,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -87,11 +84,11 @@ public class Payment {
 	private Boolean isVisible = Boolean.TRUE;
 
 	public static Payment ofPayment(
-		BeanPay userBeanPay,
-		Long orderId,
-		Integer totalAmount,
-		String orderName,
-		Map<Integer ,Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
+		final BeanPay userBeanPay,
+		final Long orderId,
+		final Integer totalAmount,
+		final String orderName,
+		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
@@ -100,7 +97,7 @@ public class Payment {
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
 
-		beanPayPaymentDetailPriceMap.forEach((beanPayId, beanPayPaymentDetailPrice) -> {
+		beanPayPaymentDetailPriceMap.forEach((beanPayPaymentDetailPrice) -> {
 
 			BeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
 			PaymentDetailPrice paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
@@ -121,10 +118,10 @@ public class Payment {
 		return payment;
 	}
 
-	public Payment rollbackPayment(String message) {
+	public Payment cancelPayment(String message) {
 		changeProcessStatus(CANCELLED);
 		this.paymentDetails.forEach( paymentDetail ->
-			paymentDetail.rollbackPayment(message)
+			paymentDetail.cancelPayment(message)
 		);
 		return this;
 	}

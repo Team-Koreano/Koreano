@@ -1,5 +1,7 @@
 package org.ecommerce.paymentapi.entity.enumerate;
 
+import java.util.Arrays;
+
 import lombok.Getter;
 
 @Getter
@@ -14,4 +16,12 @@ public enum ProcessStatus{
 	ProcessStatus(String title) {
 		this.title = title;
 	}
+
+	public static ProcessStatus getProcessStatus(String status) {
+		return Arrays.stream(ProcessStatus.values()).filter((name) ->
+				name.name().equals(status))
+			.findFirst()
+			.orElse(null);
+	}
+
 }

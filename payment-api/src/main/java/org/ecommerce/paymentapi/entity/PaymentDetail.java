@@ -1,12 +1,14 @@
 package org.ecommerce.paymentapi.entity;
 
 import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
+import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -51,7 +53,7 @@ public class PaymentDetail {
 	private BeanPayDetail sellerBeanPayDetail;
 
 	@Column(nullable = false)
-	private Integer orderDetailId;
+	private Long orderDetailId;
 
 	@Column(nullable = false)
 	private Integer totalPrice = 0;
@@ -77,7 +79,11 @@ public class PaymentDetail {
 
 	@Column
 	@Enumerated(EnumType.STRING)
-	private PaymentStatus status = PaymentStatus.PAYMENT;
+	private PaymentStatus paymentStatus = PAYMENT;
+
+	@Column
+	@Enumerated(EnumType.STRING)
+	private ProcessStatus processStatus = CANCELLED;
 
 	@OneToMany(
 		mappedBy = "paymentDetail",
@@ -102,7 +108,7 @@ public class PaymentDetail {
 	public static PaymentDetail ofPayment(
 		final Payment payment,
 		final BeanPay sellerBeanPay,
-		final Integer orderDetailId,
+		final Long orderDetailId,
 		final Integer totalPrice,
 		final Integer deliveryFee,
 		final Integer paymentAmount,
@@ -132,7 +138,7 @@ public class PaymentDetail {
 			PaymentStatusHistory.ofRecord(paymentDetail)
 		);
 		// 각 결제 디테일 계산
-		userBeanPay.payment(payment.getTotalAmount(), sellerBeanPay);
+		userBeanPay.payment(totalPrice, sellerBeanPay);
 
 		return paymentDetail;
 	}
@@ -147,8 +153,8 @@ public class PaymentDetail {
 	 * @param - String message
 	 * @return - void
 	 */
-	public void rollbackPayment(final String message) {
-		changePaymentStatus(ROLLBACK);
+	public void cancelPayment(final String message) {
+		changeProcessStatus(CANCELLED);
 		this.failReason = message;
 		this.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(this)
@@ -160,7 +166,7 @@ public class PaymentDetail {
 		);
 	}
 
-	private void changePaymentStatus(final PaymentStatus status) {
-		this.status = status;
+	private void changeProcessStatus(final ProcessStatus status) {
+		this.processStatus = status;
 	}
 }

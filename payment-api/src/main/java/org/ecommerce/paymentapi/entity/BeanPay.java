@@ -1,6 +1,6 @@
 package org.ecommerce.paymentapi.entity;
 
-import static org.ecommerce.paymentapi.exception.PaymentErrorCode.*;
+import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
 
 import java.time.LocalDateTime;
 

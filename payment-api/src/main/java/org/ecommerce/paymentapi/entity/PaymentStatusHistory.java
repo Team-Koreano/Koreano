@@ -47,7 +47,7 @@ public class PaymentStatusHistory {
 	) {
 		final PaymentStatusHistory paymentStatusHistory = new PaymentStatusHistory();
 		paymentStatusHistory.paymentDetail = paymentDetail;
-		paymentStatusHistory.paymentStatus = paymentDetail.getStatus();
+		paymentStatusHistory.paymentStatus = paymentDetail.getPaymentStatus();
 		return paymentStatusHistory;
 	}
 }
