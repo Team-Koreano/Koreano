@@ -2,14 +2,11 @@ package org.ecommerce.paymentapi.internal.service;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
@@ -24,6 +21,7 @@ import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,24 +58,6 @@ public class PaymentService {
 			paymentPrice.getSellerIds(),
 			SELLER
 		);
-		
-		final Map<Integer, Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap =
-			new HashMap<>();
-
-		// 빈페이와 결제 디테일 맵핑
-		for (PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
-			beanPayPaymentDetailPriceMap.put(
-				detailPrice.sellerId(),
-				Pair.of(
-					sellerBeanPays.stream()
-						.filter(sellerBeanPay ->
-							sellerBeanPay.getUserId().equals(detailPrice.sellerId()))
-						.findFirst()
-						.orElseThrow(
-							() -> new CustomException(BeanPayErrorCode.NOT_FOUND_SELLER_ID)),
-					detailPrice)
-			);
-		}
 
 		// 결제
 		final Payment payment = Payment.ofPayment(
@@ -85,10 +65,34 @@ public class PaymentService {
 			paymentPrice.orderId(),
 			paymentPrice.totalAmount(),
 			paymentPrice.orderName(),
-			beanPayPaymentDetailPriceMap
+			mappedBeanPayPaymentDetailPrice(paymentPrice, sellerBeanPays)
 		);
 
-		return PaymentMapper.INSTANCE.toDto(payment);
+		Payment save = paymentRepository.save(payment);
+		return PaymentMapper.INSTANCE.toDto(save);
+	}
+
+	@VisibleForTesting
+	public static List<Pair<BeanPay, PaymentDetailPrice>> mappedBeanPayPaymentDetailPrice(
+		PaymentPrice paymentPrice,
+		List<BeanPay> sellerBeanPays
+	) {
+		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap =
+			new LinkedList<>();
+
+		for (PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
+			beanPayPaymentDetailPriceMap.add(
+				Pair.of(
+					sellerBeanPays.stream()
+						.filter(sellerBeanPay ->
+							sellerBeanPay.getUserId().equals(detailPrice.sellerId()))
+						.findFirst()
+						.orElseThrow(() ->
+							new CustomException(BeanPayErrorCode.NOT_FOUND_SELLER_ID)),
+					detailPrice)
+			);
+		}
+		return beanPayPaymentDetailPriceMap;
 	}
 
 	/**
@@ -103,13 +107,13 @@ public class PaymentService {
 		"'BEANPAY'.concat(#userId).concat('SELLER')",
 		"'BEANPAY'.concat(#sellerId).concat('USER')",
 	})
-	public PaymentDto paymentPriceRollBack(
+	public PaymentDto paymentPriceCancel(
 		final Long orderId
 	) {
 		final Payment payment = getPayment(orderId);
 		//TODO: FailReason 추가 예정
 		return PaymentMapper.INSTANCE.toDto(
-			payment.rollbackPayment("fail Reason"));
+			payment.cancelPayment("fail Reason"));
 	}
 
 	private Payment getPayment(final Long orderId) {
