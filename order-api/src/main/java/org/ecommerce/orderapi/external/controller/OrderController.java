@@ -9,8 +9,8 @@ import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
+import org.ecommerce.orderapi.handler.OrderEventHandler;
 import org.ecommerce.orderapi.service.OrderDomainService;
-import org.ecommerce.orderapi.service.OrderHelper;
 import org.ecommerce.orderapi.service.StockService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
 	private final OrderDomainService orderDomainService;
-	private final OrderHelper orderHelper;
+	private final OrderEventHandler orderEventHandler;
 	private final StockService stockService;
 
 	// todo jwt 도입 후 로직 변경
@@ -44,9 +44,7 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.OrderDtoToResponse(
-						orderHelper.createOrder(USER_ID, placeRequest)
-				)
+				orderEventHandler.createOrder(USER_ID, placeRequest)
 		);
 	}
 
