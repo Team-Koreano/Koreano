@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.dto;
 
+import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -7,15 +9,19 @@ import lombok.Getter;
 @Getter
 public class ProductDto {
 	private Integer id;
+	private String name;
 	private Integer price;
-	private Integer stock;
-	private String seller;
+	private Integer sellerId;
+	private String sellerName;
+	private ProductStatus status;
 
 	public record Response(
 			Integer id,
+			String name,
 			Integer price,
-			Integer stock,
-			String seller
+			Integer sellerId,
+			String sellerName,
+			ProductStatus status
 	) {
 	}
 }

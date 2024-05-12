@@ -13,12 +13,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+		@Index(name = "idx_order_datetime", columnList = "orderDatetime"),
+		@Index(name = "idx_order_user_id", columnList = "userId")
+})
 @Getter
 public class Order {
 
@@ -28,6 +32,9 @@ public class Order {
 
 	@Column(nullable = false)
 	private Integer userId;
+
+	@Column(nullable = false)
+	private String userName;
 
 	@Column(nullable = false)
 	private String receiveName;
@@ -59,6 +66,7 @@ public class Order {
 
 	public static Order ofPlace(
 			final Integer userId,
+			final String userName,
 			final String receiveName,
 			final String phoneNumber,
 			final String address1,
@@ -71,6 +79,7 @@ public class Order {
 		// TODO : 배송비 우선 무료로 고정, 추후 seller에서 정책 설정
 		Integer DELIVERY_FEE = 0;
 		order.userId = userId;
+		order.userName = userName;
 		order.receiveName = receiveName;
 		order.phoneNumber = phoneNumber;
 		order.address1 = address1;
@@ -80,10 +89,12 @@ public class Order {
 				.map(product -> OrderDetail.ofPlace(
 						order,
 						product.getId(),
+						product.getName(),
 						product.getPrice(),
 						productIdToQuantityMap.get(product.getId()),
 						DELIVERY_FEE,
-						product.getSeller()
+						product.getSellerId(),
+						product.getSellerName()
 				)).toList();
 		order.totalPaymentAmount = order.orderDetails.stream()
 				.mapToInt(OrderDetail::getPaymentAmount)

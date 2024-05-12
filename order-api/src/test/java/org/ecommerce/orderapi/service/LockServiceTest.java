@@ -30,7 +30,6 @@ public class LockServiceTest {
 	@Test
 	void 락_획득() throws InterruptedException {
 		// given
-		final Integer productId = 101;
 		given(redissonClient.getLock(anyString()))
 				.willReturn(rLock);
 		given(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class)))
@@ -38,13 +37,12 @@ public class LockServiceTest {
 
 		// when
 		// then
-		assertDoesNotThrow(() -> lockService.lock(productId));
+		assertDoesNotThrow(() -> lockService.lock());
 	}
 
 	@Test
 	void 락_획득_실패() throws InterruptedException {
 		// given
-		final Integer productId = 101;
 		given(redissonClient.getLock(anyString()))
 				.willReturn(rLock);
 		given(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class)))
@@ -52,7 +50,7 @@ public class LockServiceTest {
 
 		// when
 		CustomException exception = assertThrows(CustomException.class,
-				() -> lockService.lock(productId));
+				() -> lockService.lock());
 
 		// then
 		assertEquals(STOCK_TRANSACTION_LOCK, exception.getErrorCode());
