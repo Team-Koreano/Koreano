@@ -10,12 +10,15 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class PaymentDto {
-	private Integer id;
-	private Integer orderId;
+	private Long id;
+	private Long orderId;
 	private Integer userId;
-	private Integer sellerId;
 	private Integer totalAmount;
 	private String orderName;
 	private ProcessStatus processStatus;

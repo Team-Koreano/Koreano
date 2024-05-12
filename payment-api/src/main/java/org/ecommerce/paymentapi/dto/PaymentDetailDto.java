@@ -20,7 +20,7 @@ public class PaymentDetailDto {
 	public static class Request {
 		public record PaymentDetailPrice(
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
-			Integer orderDetailId,
+			Long orderDetailId,
 			@Min(value = 0, message = NOT_UNDER_ZERO_TOTAL_AMOUNT)
 			Integer totalPrice,
 			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
