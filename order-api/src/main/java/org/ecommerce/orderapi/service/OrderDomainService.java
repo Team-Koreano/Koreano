@@ -48,19 +48,19 @@ public class OrderDomainService {
 	 * @author ${Juwon}
 	 *
 	 * @param order- 회원 번호
-	 * @param bucketSummary- 주문 내용
-	 * @param products- 주문 내용
-	 * @param stocks- 주문 내용
+	 * @param quantityMap- 상품 수량
+	 * @param products- 상품 리스트
+	 * @param stocks- 재고 리스트
 	 *
 	 */
 	public void placeOrder(
 			final Order order,
-			final BucketSummary bucketSummary,
 			final List<Product> products,
+			final Map<Integer, Integer> quantityMap,
 			final List<Stock> stocks
 	) {
-		validateStock(stocks, bucketSummary);
-		order.place(products, bucketSummary.getQuantityMap());
+		validateStock(stocks, quantityMap);
+		order.place(products, quantityMap);
 	}
 
 	/**
@@ -68,20 +68,15 @@ public class OrderDomainService {
 	 * @author ${Juwon}
 	 *
 	 * @param stocks- 재고를 확인할 상품 번호
-	 * @param bucketSummary- 회원이 주문한 상품의 수량
+	 * @param quantityMap- 상품 수량
 	 */
 	@VisibleForTesting
 	public void validateStock(
 			final List<Stock> stocks,
-			final BucketSummary bucketSummary
+			final Map<Integer, Integer> quantityMap
 	) {
-		final List<Integer> productIds = bucketSummary.getProductIds();
-		final Map<Integer, Integer> quantities = bucketSummary.getQuantityMap();
-		if (stocks.size() != productIds.size()) {
-			throw new CustomException(INSUFFICIENT_STOCK_INFORMATION);
-		}
 		stocks.forEach(stock -> {
-			if (!stock.hasStock(quantities.get(stock.getProductId()))) {
+			if (!stock.hasStock(quantityMap.get(stock.getProductId()))) {
 				throw new CustomException(INSUFFICIENT_STOCK);
 			}
 		});

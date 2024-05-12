@@ -66,7 +66,8 @@ public class OrderHelper {
 				request.address2(),
 				request.deliveryComment()
 		);
-		orderDomainService.placeOrder(order, bucketSummary, products, stocks);
+		orderDomainService.placeOrder(
+				order, products, bucketSummary.getQuantityMap(), stocks);
 		return OrderMapper.INSTANCE.OrderToDto(orderRepository.save(order));
 	}
 
@@ -88,7 +89,7 @@ public class OrderHelper {
 	 * 장바구니 유효성 검사 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param userId-    주문을 생성하는 회원 번호
+	 * @param userId-    회원 번호
 	 * @param bucketIds- 장바구니 번호 리스트
 	 *
 	 * @return - 장바구니 리스트

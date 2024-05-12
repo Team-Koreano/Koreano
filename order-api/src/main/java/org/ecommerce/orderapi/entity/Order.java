@@ -60,11 +60,11 @@ public class Order {
 	private String deliveryComment;
 
 	@Column
-	private Integer totalPaymentAmount;
+	private Integer totalPaymentAmount = 0;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private OrderStatus status = OPEN;
+	private OrderStatus status;
 
 	@Column
 	private LocalDateTime paymentDatetime;
@@ -102,6 +102,7 @@ public class Order {
 	) {
 		validateOrder(products.size());
 		addOrderItems(products, quantities);
+		status = OPEN;
 	}
 
 	private void validateOrder(final int productCount) {
