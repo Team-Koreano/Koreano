@@ -7,10 +7,10 @@ import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
 
-public abstract class ProductFactory {
-	public abstract Product createProduct(ProductManagementDto.Request.Register request, SellerRep seller);
+public interface ProductFactory {
+	Product createProduct(ProductManagementDto.Request.Register request, SellerRep seller);
 
-	public static ProductFactory getFactory(ProductCategory category) {
+	static ProductFactory getFactory(ProductCategory category) {
 		return switch (category) {
 			case BEAN -> new BeanProductFactory();
 			case CUP, BLENDER, MACHINE, CUP_STAND -> new DefaultProductFactory();
@@ -18,7 +18,7 @@ public abstract class ProductFactory {
 		};
 	}
 
-	static class BeanProductFactory extends ProductFactory {
+	class BeanProductFactory implements ProductFactory {
 		@Override
 		public Product createProduct(ProductManagementDto.Request.Register request, SellerRep seller) {
 			return Product.createBean(
@@ -36,7 +36,7 @@ public abstract class ProductFactory {
 		}
 	}
 
-	static class DefaultProductFactory extends ProductFactory {
+	class DefaultProductFactory implements ProductFactory {
 		@Override
 		public Product createProduct(ProductManagementDto.Request.Register request, SellerRep seller) {
 			return Product.createDefault(request.category(), request.price(), request.stock(), request.name(),
