@@ -15,6 +15,7 @@ import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
 import org.ecommerce.productmanagementapi.repository.SellerRepository;
+import org.ecommerce.productmanagementapi.util.ProductFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,20 +48,10 @@ public class ProductManagementService {
 	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product,
 		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
-		final Product createProduct = Product.ofCreate(
-			product.category(),
-			product.price(),
-			product.stock(),
-			product.name(),
-			product.bean(),
-			product.acidity(),
-			product.information(),
-			product.isCrush(),
-			product.isDecaf(),
-			seller
-		);
+		final Product createdProduct = ProductFactory.getFactory(product.category())
+			.createProduct(product, seller);
 
-		final Product savedProduct = productRepository.save(createProduct);
+		final Product savedProduct = productRepository.save(createdProduct);
 
 		saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), savedProduct);
 
@@ -100,7 +91,9 @@ public class ProductManagementService {
 	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+
 		product.increaseStock(stock.requestStock());
+
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
@@ -117,9 +110,11 @@ public class ProductManagementService {
 	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+
 		if (!product.checkStock(stock.requestStock())) {
 			throw new CustomException(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
 		}
+
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
@@ -162,20 +157,16 @@ public class ProductManagementService {
 
 	@VisibleForTesting
 	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
-		if (imagesRequest.isEmpty()) {
-			return;
+		if (!imagesRequest.isEmpty()) {
+			product.getImages().addAll(imagesRequest.stream()
+				.map(imageResponse -> Image.ofCreate(
+					imageResponse.imageUrl(),
+					imageResponse.isThumbnail(),
+					imageResponse.sequenceNumber(),
+					product
+				))
+				.toList());
 		}
-
-		List<Image> images = imagesRequest.stream()
-			.map(imageResponse -> Image.ofCreate(
-				imageResponse.imageUrl(),
-				imageResponse.isThumbnail(),
-				imageResponse.sequenceNumber(),
-				product
-			))
-			.toList();
-
-		product.getImages().addAll(images);
 	}
 
 	@VisibleForTesting

@@ -31,13 +31,13 @@ public class ProductManagementDto {
 	private String information;
 	private Boolean isCrush;
 	private ProductStatus status;
+	private String size;
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
 	private List<Image> images;
 
 	public static class Request {
 		public record Register(
-			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
 			Integer price,
@@ -50,8 +50,8 @@ public class ProductManagementDto {
 			String information,
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
-			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
-			Boolean isCrush
+			Boolean isCrush,
+			String size
 		) {
 		}
 
@@ -63,7 +63,6 @@ public class ProductManagementDto {
 		}
 
 		public record Modify(
-			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
 			Integer price,
@@ -74,7 +73,6 @@ public class ProductManagementDto {
 			String information,
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
-			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
 			Boolean isCrush
 		) {
 		}
@@ -107,6 +105,24 @@ public class ProductManagementDto {
 		Boolean isCrush,
 		List<Image> images
 	) {
+		public record BeanProduct(
+			Integer id,
+			Boolean isDecaf,
+			Integer price,
+			String bizName,
+			Integer stock,
+			Integer favoriteCount,
+			String acidity,
+			String bean,
+			String category,
+			String information,
+			String name,
+			String status,
+			LocalDateTime createDatetime,
+			Boolean isCrush,
+			String size,
+			List<Image> images) {
+		}
 	}
 
 	public record Image(
