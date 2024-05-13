@@ -5,7 +5,9 @@ import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
-import org.ecommerce.paymentapi.dto.TossDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.PreCharge;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.TossFail;
+import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +28,14 @@ public class BeanPayController {
 
 	private final BeanPayService beanPayService;
 
-	@PostMapping
-	public Response<BeanPayDetailDto> preCharge(@RequestBody final BeanPayDetailDto.Request.PreCharge request) {
+	@PostMapping("/charge")
+	public Response<BeanPayDetailDto> beforeCharge(@RequestBody final PreCharge request) {
 		final BeanPayDetailDto response = beanPayService.preChargeBeanPay(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/success")
-	public Response<BeanPayDetailDto> validCharge(@Valid final TossDto.Request.TossPayment request) {
+	public Response<BeanPayDetailDto> validCharge(@Valid final TossPayment request) {
 		//TODO: Id, Role 적용 예정
 		final BeanPayDetailDto response = beanPayService.validTossCharge(request, 1, USER);
 		if(response.getProcessStatus() == FAILED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
@@ -41,11 +43,10 @@ public class BeanPayController {
 	}
 
 	@GetMapping("/fail")
-	public Response<BeanPayDetailDto> failCharge(@Valid final BeanPayDetailDto.Request.TossFail request) {
+	public Response<BeanPayDetailDto> failCharge(@Valid final TossFail request) {
 		final BeanPayDetailDto response = beanPayService.failTossCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
-
 
 
 

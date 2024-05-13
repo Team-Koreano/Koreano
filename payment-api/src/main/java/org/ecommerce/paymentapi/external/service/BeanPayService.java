@@ -1,6 +1,7 @@
 
 package org.ecommerce.paymentapi.external.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
@@ -9,6 +10,9 @@ import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
 import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.PreCharge;
 import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
+import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
 import org.ecommerce.paymentapi.entity.BeanPay;
@@ -146,5 +150,19 @@ public class BeanPayService {
 		handleException(findBeanPayDetail, request.errorMessage());
 
 		return BeanPayDetailMapper.INSTANCE.toDto(findBeanPayDetail);
+	}
+
+	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
+		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+			createBeanPay.userId(),
+			createBeanPay.role()
+		);
+
+		if (beanPay.isPresent())
+			throw new CustomException(BeanPayErrorCode.ALREADY_EXISTS);
+
+		return BeanPayMapper.INSTANCE.toDto(
+			beanPayRepository.save(
+				BeanPay.ofCreate(createBeanPay.userId(), createBeanPay.role())));
 	}
 }

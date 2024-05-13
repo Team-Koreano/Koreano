@@ -28,6 +28,7 @@ public class BeanPayRepositoryImpl implements BeanPayCustomRepository {
 			.where(
 				beanPay.userId.eq(userId),
 				beanPay.role.eq(role))
+			.limit(1)
 			.fetchOne());
 	}
 
@@ -39,6 +40,7 @@ public class BeanPayRepositoryImpl implements BeanPayCustomRepository {
 				beanPay.role.eq(role)
 			)
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+			.limit(1)
 			.fetchOne();
 	}
 
