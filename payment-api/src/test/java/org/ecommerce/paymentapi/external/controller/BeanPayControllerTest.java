@@ -81,7 +81,7 @@ class BeanPayControllerTest {
 
 		//when
 		MvcResult mvcResult =
-			mvc.perform(post("/api/external/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
+			mvc.perform(post("/api/external/beanpay/v1/charge").contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
 
 		//then
