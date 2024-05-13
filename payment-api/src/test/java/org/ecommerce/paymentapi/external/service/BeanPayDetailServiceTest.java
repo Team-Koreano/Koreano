@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
@@ -54,17 +54,17 @@ class BeanPayDetailServiceTest {
 	void 사전충전객체_생성() {
 
 		//given
-		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
+		final BeanPayDetailDto.Request.PreCharge request = new BeanPayDetailDto.Request.PreCharge(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
 		final BeanPayDetail entity = beanPay.preCharge(beanPay.getAmount());
-		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
+		final BeanPayDetailDto response = BeanPayDetailMapper.INSTANCE.toDto(entity);
 
 		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
 		given(beanPayDetailRepository.save(any())).willReturn(entity);
 
 
 		//when
-		final BeanPayDto actual = beanPayService.preChargeBeanPay(request);
+		final BeanPayDetailDto actual = beanPayService.preChargeBeanPay(request);
 
 		//then
 		assertThat(actual).usingRecursiveComparison().isEqualTo(response);
@@ -204,7 +204,7 @@ class BeanPayDetailServiceTest {
 			final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
-			final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+			final BeanPayDetailDto.Request.TossFail request = new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
 				amount, null, null, errorMessage,
@@ -228,7 +228,7 @@ class BeanPayDetailServiceTest {
 		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 		final String errorCode = "PAY_PROCESS_CANCELED";
 
-		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+		final BeanPayDetailDto.Request.TossFail request = new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 		//when
 		when(beanPayDetailRepository.findById(request.orderId())).thenThrow(

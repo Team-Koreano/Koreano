@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.client.TossServiceClient;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.PreCharge;
+import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
 import org.ecommerce.paymentapi.entity.BeanPay;
@@ -41,7 +41,7 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public BeanPayDto preChargeBeanPay(final PreCharge request) {
+	public BeanPayDetailDto preChargeBeanPay(final PreCharge request) {
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
 
 		BeanPayDetail beanPayDetail = beanPay.preCharge(request.amount());
@@ -50,7 +50,7 @@ public class BeanPayService {
 			beanPayDetail
 		);
 
-		return BeanPayMapper.INSTANCE.toDto(createBeanPayDetail);
+		return BeanPayDetailMapper.INSTANCE.toDto(createBeanPayDetail);
 
 	}
 
@@ -65,7 +65,7 @@ public class BeanPayService {
 	 @return - BeanPayDto response
 	 */
 	@DistributedLock(key = "'BEANPAY'.concat(#userId).concat(#role)")
-	public BeanPayDto validTossCharge(
+	public BeanPayDetailDto validTossCharge(
 		final TossPayment request,
 		final Integer userId,
 		final Role role
@@ -79,7 +79,7 @@ public class BeanPayService {
 		} catch (CustomException e) {
 			handleException(beanPayDetail, e.getErrorMessage());
 		}
-		return BeanPayMapper.INSTANCE.toDto(beanPayDetail);
+		return BeanPayDetailMapper.INSTANCE.toDto(beanPayDetail);
 	}
 
 	/**
@@ -140,11 +140,11 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public BeanPayDto failTossCharge(final BeanPayDto.Request.TossFail request) {
+	public BeanPayDetailDto failTossCharge(final BeanPayDetailDto.Request.TossFail request) {
 
 		BeanPayDetail findBeanPayDetail = getBeanPayDetail(request.orderId());
 		handleException(findBeanPayDetail, request.errorMessage());
 
-		return BeanPayMapper.INSTANCE.toDto(findBeanPayDetail);
+		return BeanPayDetailMapper.INSTANCE.toDto(findBeanPayDetail);
 	}
 }

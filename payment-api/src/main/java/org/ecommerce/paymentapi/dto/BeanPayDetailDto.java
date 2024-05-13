@@ -17,7 +17,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BeanPayDto {
+public class BeanPayDetailDto {
 
 	private UUID id;
 	private String paymentKey;

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.aop.TimeCheck;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
@@ -34,22 +34,22 @@ public class BeanPayController {
 	private final LockTestService lockTestService;
 
 	@PostMapping
-	public Response<BeanPayDto> preCharge(@RequestBody final BeanPayDto.Request.PreCharge request) {
-		final BeanPayDto response = beanPayService.preChargeBeanPay(request);
+	public Response<BeanPayDetailDto> preCharge(@RequestBody final BeanPayDetailDto.Request.PreCharge request) {
+		final BeanPayDetailDto response = beanPayService.preChargeBeanPay(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/success")
-	public Response<BeanPayDto> validCharge(@Valid final TossDto.Request.TossPayment request) {
+	public Response<BeanPayDetailDto> validCharge(@Valid final TossDto.Request.TossPayment request) {
 		//TODO: Id, Role 적용 예정
-		final BeanPayDto response = beanPayService.validTossCharge(request, 1, USER);
+		final BeanPayDetailDto response = beanPayService.validTossCharge(request, 1, USER);
 		if(response.getProcessStatus() == FAILED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/fail")
-	public Response<BeanPayDto> failCharge(@Valid final BeanPayDto.Request.TossFail request) {
-		final BeanPayDto response = beanPayService.failTossCharge(request);
+	public Response<BeanPayDetailDto> failCharge(@Valid final BeanPayDetailDto.Request.TossFail request) {
+		final BeanPayDetailDto response = beanPayService.failTossCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
