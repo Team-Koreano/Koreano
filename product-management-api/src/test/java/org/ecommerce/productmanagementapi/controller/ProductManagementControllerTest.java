@@ -102,9 +102,10 @@ class ProductManagementControllerTest {
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
 				false
+				, "20 * 50"
 			);
 
-		final Product product = Product.ofCreate(
+		final Product product = Product.createBean(
 			productDtos.category(),
 			productDtos.price(),
 			productDtos.stock(),
@@ -178,7 +179,7 @@ class ProductManagementControllerTest {
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, status, testTime, testTime, null
+			true, "20*50", status, testTime, testTime, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
@@ -206,13 +207,12 @@ class ProductManagementControllerTest {
 		final Product originalEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
-
 		final Product expectedEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
@@ -239,7 +239,7 @@ class ProductManagementControllerTest {
 		final Product expectedEntity = new Product(
 			productId, dto.category(), dto.price(), null, null, null, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), null, null, null, null
+			dto.isCrush(), null, null, null, null, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
