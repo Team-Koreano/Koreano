@@ -9,7 +9,8 @@ import lombok.Getter;
 public enum BeanPayErrorCode implements ErrorCode {
 	NOT_FOUND_ID(HttpStatus.BAD_REQUEST.value(), "빈페이의 ID를 찾을 수 없습니다."),
 	NOT_FOUND_SELLER_ID(HttpStatus.BAD_REQUEST.value(), "판매자 ID를 찾을 수 없습니다." ),
-	INSUFFICIENT_AMOUNT(HttpStatus.BAD_REQUEST.value(), "잔액이 부족합니다");
+	INSUFFICIENT_AMOUNT(HttpStatus.BAD_REQUEST.value(), "잔액이 부족합니다"),
+	ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(), "유저가 이미 존재합니다.");
 
 	BeanPayErrorCode(int code, String message) {
 		this.code = code;

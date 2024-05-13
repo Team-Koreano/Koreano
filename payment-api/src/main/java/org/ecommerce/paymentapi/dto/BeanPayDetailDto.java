@@ -1,6 +1,6 @@
 package org.ecommerce.paymentapi.dto;
 
-import static org.ecommerce.paymentapi.exception.BeanPayErrorMessage.*;
+import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
