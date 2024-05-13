@@ -3,16 +3,10 @@ package org.ecommerce.paymentapi.external.controller;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
-import java.util.List;
-
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.paymentapi.aop.TimeCheck;
 import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.external.service.LockTestService;
-import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,9 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/external/beanpay/v1")
 public class BeanPayController {
-	private final PaymentService paymentService;
+
 	private final BeanPayService beanPayService;
-	private final LockTestService lockTestService;
 
 	@PostMapping
 	public Response<BeanPayDetailDto> preCharge(@RequestBody final BeanPayDetailDto.Request.PreCharge request) {
@@ -53,25 +46,7 @@ public class BeanPayController {
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
-	@TimeCheck
-	@PostMapping("/multilock")
-	public Response<Void> test1() {
-		lockTestService.useMultiLockTest(new PaymentDto.Request.PaymentPrice(
-			1L,
-			5000,
-			1,
-			"orderName",
-			List.of()
-		));
-		return new Response<>(HttpStatus.OK.value(), null);
-	}
 
-	@TimeCheck
-	@PostMapping("/singlelock")
-	public Response<Void> test2() {
-		lockTestService.useDistributeLock("beanPay", 1);
-		return new Response<>(HttpStatus.OK.value(), null);
-	}
 
 
 }
