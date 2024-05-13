@@ -22,6 +22,13 @@ public class BeanPayService {
 
 	private final BeanPayRepository beanPayRepository;
 
+	/**
+	 * 빈페이 생성 메소드
+	 * @author 이우진
+	 *
+	 * @param - CreateBeanPay createBeanPay
+	 * @return - BeanPayDto
+	 */
 	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
 		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
 			createBeanPay.userId(),
