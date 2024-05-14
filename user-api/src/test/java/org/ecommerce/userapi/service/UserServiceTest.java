@@ -1,11 +1,10 @@
 package org.ecommerce.userapi.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -19,11 +18,11 @@ import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.UserService;
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -107,10 +106,11 @@ class UserServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
-		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+			java.util.Optional.of(users));
 		// when
 		final AccountDto result = userService.createAccount(authDetails, registerRequest);
-		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 
@@ -134,13 +134,14 @@ class UserServiceTest {
 
 		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
-		when(userRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(users));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
+			java.util.Optional.of(users));
 
 		// when
 		final AddressDto result = userService.createAddress(authDetails, registerRequest);
 
 		//then
-		Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(dto);
+		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
 
 	}
 
@@ -175,7 +176,7 @@ class UserServiceTest {
 			UserDto expectedResult = UserMapper.INSTANCE.userToDto(savedUser);
 
 			//then
-			Assertions.assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
+			assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
 				.isEqualTo(UserMapper.INSTANCE.userDtoToResponse(result));
 		}
 
@@ -194,7 +195,7 @@ class UserServiceTest {
 				duplicatedEmailRequest.phoneNumber())).thenReturn(true);
 
 			//then
-			Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedEmailRequest))
+			assertThatThrownBy(() -> userService.registerRequest(duplicatedEmailRequest))
 				.isInstanceOf(CustomException.class);
 
 		}
@@ -216,7 +217,7 @@ class UserServiceTest {
 				duplicatedPhoneRequest.phoneNumber())).thenReturn(true);
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
+			assertThatThrownBy(() -> userService.registerRequest(duplicatedPhoneRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
@@ -232,7 +233,7 @@ class UserServiceTest {
 
 			UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 
 			//when
@@ -241,7 +242,7 @@ class UserServiceTest {
 			//then
 			UserDto expectedResponse = userService.loginRequest(loginRequest, response);
 
-			Assertions.assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
+			assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
 		}
 
 		@Test
@@ -255,7 +256,7 @@ class UserServiceTest {
 			UserDto.Request.Login inCorrectEmailRequest = new UserDto.Request.Login(incorrectEmail, password);
 
 			//then
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
+			assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -270,11 +271,11 @@ class UserServiceTest {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 
 			//then
 			UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
+			assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
 
@@ -291,11 +292,11 @@ class UserServiceTest {
 			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
 			user.withdrawal();
 
-			when(userRepository.findUsersByEmail(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			//then
 			UserDto.Request.Login request = new UserDto.Request.Login(email, password);
-			Assertions.assertThatThrownBy(() -> userService.loginRequest(request, response))
+			assertThatThrownBy(() -> userService.loginRequest(request, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_VALID_USER.getMessage());
 
@@ -318,23 +319,18 @@ class UserServiceTest {
 			final UsersAccount account = UsersAccount.ofRegister(user, "1234567890", "KEB하나은행");
 			final Address address = Address.ofRegister(user, "집", "부산시 사하구", "123-45");
 
-			when(userRepository.findById(authDetails.getId()))
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId()))
 				.thenReturn(Optional.of(user));
 
-			when(usersAccountRepository.findByUsersId(user.getId())).thenReturn(List.of(account));
-			when(addressRepository.findByUsersId(user.getId())).thenReturn(List.of(address));
 			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			// when
 			userService.withdrawUser(withdrawalRequest, authDetails);
 
 			// then
-			verify(userRepository, times(1)).findById(authDetails.getId());
-			verify(usersAccountRepository, times(1)).findByUsersId(user.getId());
-			verify(addressRepository, times(1)).findByUsersId(user.getId());
+			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
-			Assertions.assertThat(user.isValidUser()).isFalse();
-			Assertions.assertThat(account.isDeleted()).isTrue();
-			Assertions.assertThat(address.isDeleted()).isTrue();
+			assertThat(user.isValidStatus()).isFalse();
+			assertThat(user.isDeleted()).isTrue();
 		}
 
 		@Test
@@ -349,7 +345,7 @@ class UserServiceTest {
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}
@@ -367,10 +363,10 @@ class UserServiceTest {
 
 			Users user = Users.ofRegister(email, "John Doe", "password1", Gender.MALE, (short)25, phoneNumber);
 
-			when(userRepository.findById(authDetails.getId())).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(Optional.of(user));
 
 			// then
-			Assertions.assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
+			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
 		}

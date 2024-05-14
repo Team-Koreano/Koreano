@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
-import org.ecommerce.userapi.security.JwtProvider;
+import org.ecommerce.userapi.provider.JwtProvider;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -49,6 +49,17 @@ public class SellerDto {
 			String email,
 			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
 			String password
+		) {
+		}
+
+		public record Withdrawal(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			String email,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
+			String password,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String phoneNumber
 		) {
 		}
 	}

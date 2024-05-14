@@ -54,11 +54,11 @@ public class Address {
 		address.name = name;
 		address.postAddress = postAddress;
 		address.detail = detail;
-
+		users.getAddresses().add(address);
 		return address;
 	}
 
-	public void withdrawal() {
+	public void delete() {
 		this.isDeleted = true;
 	}
 }

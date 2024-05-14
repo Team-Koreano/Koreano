@@ -1,7 +1,5 @@
 package org.ecommerce.userapi.external.service;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -16,12 +14,12 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,11 +84,11 @@ public class UserService {
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
 
-		final Users user = userRepository.findUsersByEmail(login.email())
+		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email())
 			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (!user.isValidUser()) {
+		if (!user.isValidStatus()) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
@@ -128,8 +126,7 @@ public class UserService {
 	 * @return AddressDto
 	 */
 	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
-
-		final Users users = userRepository.findById(authDetails.getId())
+		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final Address address = Address.ofRegister(users, register.name(), register.postAddress(), register.detail());
@@ -146,7 +143,7 @@ public class UserService {
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
 	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Users users = userRepository.findById(authDetails.getId())
+		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
 		final UsersAccount account = UsersAccount.ofRegister(users, register.number(), register.bankName());
@@ -166,7 +163,7 @@ public class UserService {
 	 */
 	public UserDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+		final String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
 			jwtProvider.getRoll(bearerToken));
 
 		if (!redisProvider.hasKey(refreshTokenKey)) {
@@ -180,23 +177,23 @@ public class UserService {
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
+	/**
+	 * 회원 탈퇴 로직입니다
+	 * <p>
+	 * 탈퇴 요청이 들어오면 해당 유저의 정보를 확인하여 탈퇴를 하도록 하는 로직입니다.
+	 * <p>
+	 * @author Hong
+	 * @param withdrawal - 탈퇴 요청 dto
+	 * @return void
+	 */
 	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Users user = userRepository.findById(authDetails.getId())
+		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
+			.filter(users -> passwordEncoder.matches(withdrawal.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		isValidUser(withdrawal, user);
-
-		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
-		if (usersAccounts.isEmpty()) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
+		if (!user.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
-		usersAccounts.forEach(UsersAccount::withdrawal);
-
-		List<Address> addresses = addressRepository.findByUsersId(user.getId());
-		if (addresses.isEmpty()) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_ADDRESS);
-		}
-		addresses.forEach(Address::withdrawal);
 
 		user.withdrawal();
 	}
@@ -204,16 +201,6 @@ public class UserService {
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
-		}
-	}
-
-	private void isValidUser(final UserDto.Request.Withdrawal withdrawal, final Users users) {
-		if (
-			!passwordEncoder.matches(withdrawal.password(), users.getPassword()) ||
-				!Objects.equals(withdrawal.email(), users.getEmail()) ||
-				!Objects.equals(withdrawal.phoneNumber(), users.getPhoneNumber())
-		) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }

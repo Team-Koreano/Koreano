@@ -3,6 +3,7 @@ package org.ecommerce.userapi.dto;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.enumerated.Gender;
@@ -26,7 +27,9 @@ class UserDtoTest {
 		false,
 		null,
 		0L,
-		UserStatus.GENERAL
+		UserStatus.GENERAL,
+		new ArrayList<>(),
+		new ArrayList<>()
 	);
 
 	@Test

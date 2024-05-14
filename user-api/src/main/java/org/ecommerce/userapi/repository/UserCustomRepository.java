@@ -8,5 +8,8 @@ public interface UserCustomRepository {
 
 	boolean existsByEmailOrPhoneNumber(final String email, final String phoneNumber);
 
-	Optional<Users> findUsersByEmail(final String email);
+	Optional<Users> findUsersByEmailAndIsDeletedIsFalse(final String email);
+
+	Optional<Users> findUsersByIdAndIsDeletedIsFalse(final Integer userId);
+
 }

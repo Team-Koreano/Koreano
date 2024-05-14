@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
@@ -111,7 +112,7 @@ class SellerControllerTest {
 		//when
 		when(sellerService.registerRequest(registerRequest)).thenReturn(responseDto);
 
-		final ResultActions perform = mockMvc.perform(post("/api/sellers/v1")
+		final ResultActions perform = mockMvc.perform(post("/api/external/sellers/v1")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content)
@@ -149,7 +150,7 @@ class SellerControllerTest {
 		when(sellerService.loginRequest(login, response)).thenReturn(mocking);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/login")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/sellers/v1/login")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(content));
@@ -190,7 +191,7 @@ class SellerControllerTest {
 		when(sellerService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
 		// when
-		final ResultActions resultActions = mockMvc.perform(post("/api/sellers/v1/account")
+		final ResultActions resultActions = mockMvc.perform(post("/api/external/sellers/v1/account")
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(registerRequest)));
@@ -201,5 +202,35 @@ class SellerControllerTest {
 			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()));
 	}
 
+	@Test
+	void 회원_탈퇴() throws Exception {
+		// given
+		final String email = "test@example.com";
+		final String phoneNumber = "01087654321";
+		final String password = "test";
+		final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email, phoneNumber,
+			password);
+
+		final Seller seller = Seller.ofRegister(
+			"test@example.com",
+			"Jane Smith",
+			"test",
+			"부산시 사하구",
+			"01087654321"
+		);
+
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(seller));
+		// when
+		final ResultActions resultActions = mockMvc.perform(delete("/api/external/sellers/v1")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(withdrawalRequest)));
+
+		// then
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result").value("탈퇴에 성공하였습니다"))
+			.andReturn();
+
+	}
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현

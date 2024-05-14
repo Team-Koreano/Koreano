@@ -19,9 +19,10 @@ public class UserAccountRepositoryImpl implements UserAccountCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<UsersAccount> findByUsersId(final Integer userId) {
+	public List<UsersAccount> findByUsersIdAndIsDeletedIsFalse(final Integer userId) {
 		return jpaQueryFactory.selectFrom(usersAccount)
-			.where(usersAccount.users.id.eq(userId))
+			.where(usersAccount.users.id.eq(userId)
+				, usersAccount.isDeleted.isFalse())
 			.fetch();
 	}
 }

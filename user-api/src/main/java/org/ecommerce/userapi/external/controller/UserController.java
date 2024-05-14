@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/users/v1")
+@RequestMapping("/api/external/users/v1")
 public class UserController {
 
 	private final UserService userService;
