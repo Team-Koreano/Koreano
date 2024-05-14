@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @Import(MockS3Config.class)
-class ProductManagementControllerTest {
+class ExternalProductManagementControllerTest {
 
 	private static final SellerRep test = new SellerRep(2, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.
