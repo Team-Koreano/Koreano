@@ -137,7 +137,7 @@ public class StockService {
 	@StockLock
 	public StockDto increaseStock(final Long orderItemId) {
 		final OrderItem orderItem = orderItemRepository
-				.findOrderItemById(orderItemId, null);
+				.findOrderItemByIdAndUserId(orderItemId, null);
 		validateOrderItem(orderItem);
 
 		final StockHistory stockHistory = stockHistoryRepository

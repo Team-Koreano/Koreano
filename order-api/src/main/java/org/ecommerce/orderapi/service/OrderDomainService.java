@@ -16,7 +16,6 @@ import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.repository.OrderItemRepository;
-import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.OrderStatusHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
@@ -101,7 +100,7 @@ public class OrderDomainService {
 	public OrderItemDto cancelOrder(final Integer userId, final Long orderItemId) {
 		// final User user = getUser(userId);
 		final OrderItem orderItem =
-				orderItemRepository.findOrderItemById(orderItemId, userId);
+				orderItemRepository.findOrderItemByIdAndUserId(orderItemId, userId);
 		validateOrderItem(orderItem);
 		orderItem.changeStatus(OrderStatus.CANCELLED, OrderStatusReason.REFUND);
 		return OrderMapper.INSTANCE.orderItemToDto(orderItem);

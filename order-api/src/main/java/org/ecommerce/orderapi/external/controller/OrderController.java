@@ -6,10 +6,10 @@ import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
-import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.handler.OrderEventHandler;
+import org.ecommerce.orderapi.handler.OrderQueryHandler;
 import org.ecommerce.orderapi.service.OrderDomainService;
 import org.ecommerce.orderapi.service.StockService;
 import org.springframework.http.HttpStatus;
@@ -32,6 +32,7 @@ public class OrderController {
 
 	private final OrderDomainService orderDomainService;
 	private final OrderEventHandler orderEventHandler;
+	private final OrderQueryHandler orderQueryHandler;
 	private final StockService stockService;
 
 	// todo jwt 도입 후 로직 변경
@@ -44,7 +45,9 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderEventHandler.createOrder(USER_ID, placeRequest)
+				OrderMapper.INSTANCE.OrderDtoToResponse(
+						orderEventHandler.createOrder(USER_ID, placeRequest)
+				)
 		);
 	}
 
@@ -56,22 +59,8 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderDomainService.getOrders(USER_ID, year, pageNumber).stream()
+				orderQueryHandler.getOrders(USER_ID, year, pageNumber).stream()
 						.map(OrderMapper.INSTANCE::OrderDtoToResponse)
-						.toList()
-		);
-	}
-
-	@GetMapping("{orderId}/orderItems/{orderItemId}/statusHistory")
-	public Response<List<OrderStatusHistoryDto.Response>> getAllOrderStatusHistory(
-			@PathVariable("orderId") final Long orderId,
-			@PathVariable("orderItemId") final Long orderItemId
-	) {
-
-		return new Response<>(
-				HttpStatus.OK.value(),
-				orderDomainService.getOrderStatusHistory(orderItemId).stream()
-						.map(OrderMapper.INSTANCE::orderStatusHistoryDtotoResponse)
 						.toList()
 		);
 	}

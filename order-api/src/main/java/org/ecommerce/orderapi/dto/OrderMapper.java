@@ -27,4 +27,13 @@ public interface OrderMapper {
 
 	OrderStatusHistoryDto.Response orderStatusHistoryDtotoResponse(
 			OrderStatusHistoryDto orderStatusHistoryDto);
+
+	@Mapping(source = "orderItem.orderStatusHistories", target = "orderStatusHistoryDtos")
+	OrderItemStatusHistoryDto orderItemToOrderItemStatusHistoryDto(
+			OrderItem orderItem);
+
+	@Mapping(source = "orderItemStatusHistoryDto.orderStatusHistoryDtos", target = "orderStatusHistoryResponses")
+	OrderItemStatusHistoryDto.Response orderItemStatusHistoryDtotoResponse(
+			OrderItemStatusHistoryDto orderItemStatusHistoryDto
+	);
 }

@@ -30,7 +30,7 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	}
 
 	@Override
-	public OrderItem findOrderItemById(
+	public OrderItem findOrderItemByIdAndUserId(
 			final long orderItemId,
 			final Integer userId
 	) {
@@ -38,6 +38,14 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 				.leftJoin(orderItem.orderStatusHistories).fetchJoin()
 				.where(orderItem.id.eq(orderItemId),
 						userIdEq(userId))
+				.fetchFirst();
+	}
+
+	@Override
+	public OrderItem findOrderItemById(Long orderItemId) {
+		return jpaQueryFactory.selectFrom(orderItem)
+				.leftJoin(orderItem.orderStatusHistories).fetchJoin()
+				.where(orderItem.id.eq(orderItemId))
 				.fetchFirst();
 	}
 
