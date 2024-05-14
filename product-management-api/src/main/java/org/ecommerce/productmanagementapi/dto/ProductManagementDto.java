@@ -105,24 +105,6 @@ public class ProductManagementDto {
 		Boolean isCrush,
 		List<Image> images
 	) {
-		public record BeanProduct(
-			Integer id,
-			Boolean isDecaf,
-			Integer price,
-			String bizName,
-			Integer stock,
-			Integer favoriteCount,
-			String acidity,
-			String bean,
-			String category,
-			String information,
-			String name,
-			String status,
-			LocalDateTime createDatetime,
-			Boolean isCrush,
-			String size,
-			List<Image> images) {
-		}
 	}
 
 	public record Image(
