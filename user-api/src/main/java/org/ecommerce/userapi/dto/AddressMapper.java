@@ -10,6 +10,8 @@ public interface AddressMapper {
 
 	AddressMapper INSTANCE = Mappers.getMapper(AddressMapper.class);
 
-	AddressDto toDto(Address address);
+	AddressDto addressToDto(Address address);
+
+	AddressDto.Response.Register addressDtoToResponse(AddressDto addressDto);
 
 }

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
-import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -56,6 +56,17 @@ public class UserDto {
 			String password
 		) {
 		}
+
+		public record Withdrawal(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			String email,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
+			String password,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String phoneNumber
+		) {
+		}
 	}
 
 	public static class Response {
@@ -66,22 +77,13 @@ public class UserDto {
 			Short age,
 			String phoneNumber
 		) {
-			public static Register of(final UserDto users) {
-				return new Register(
-					users.getEmail(),
-					users.getName(),
-					users.getGender(),
-					users.getAge(),
-					users.getPhoneNumber()
-				);
-			}
 		}
 
 		public record Login(
 			String accessToken
 		) {
 			public static Login of(final UserDto userDto) {
-				return new Login(JwtUtils.prefix(userDto.accessToken));
+				return new Login(JwtProvider.prefix(userDto.accessToken));
 			}
 		}
 	}

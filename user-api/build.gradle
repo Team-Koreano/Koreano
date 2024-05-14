@@ -7,35 +7,68 @@ repositories {
     mavenCentral()
 }
 
+def generated = 'src/main/generated'
+
+def querydslDir = layout.buildDirectory.dir(generated).get().asFile
+
+
 dependencies {
     //공통 모듈
     implementation(project(':common'))
+
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    //lombok
     implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+
+    //mapstruct
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
+    //openFeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
     // @VisibleForTesting 의존성
     implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'com.google.auto.value:auto-value-annotations:1.8'
 
-
+    //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.mysql:mysql-connector-j:8.0.33'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    //validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //mysql
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
+
+
+    //jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    //h2
     runtimeOnly 'com.h2database:h2'
+
+
+    // querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
@@ -43,3 +76,15 @@ dependencies {
     }
 }
 tasks.register("prepareKotlinBuildScriptModel") {}
+
+sourceSets {
+    main.java.srcDirs += [querydslDir]
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = file(generated)
+}
+
+clean {
+    delete file('src/main/generated')
+}

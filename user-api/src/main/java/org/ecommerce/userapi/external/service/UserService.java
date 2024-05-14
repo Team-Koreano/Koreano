@@ -1,5 +1,7 @@
 package org.ecommerce.userapi.external.service;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
@@ -14,12 +16,12 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
-import org.ecommerce.userapi.utils.RedisUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,13 +40,13 @@ public class UserService {
 
 	private final BCryptPasswordEncoder passwordEncoder;
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
 	private final AddressRepository addressRepository;
 
 	private final UsersAccountRepository usersAccountRepository;
 
-	private final RedisUtils redisUtils;
+	private final RedisProvider redisProvider;
 	//TODO : 유저에 관한 RUD API 개발
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
@@ -66,9 +68,10 @@ public class UserService {
 		final Users users = Users.ofRegister(register.email(), register.name(),
 			passwordEncoder.encode(register.password()),
 			register.gender(), register.age(), register.phoneNumber());
+
 		userRepository.save(users);
 
-		return UserMapper.INSTANCE.toDto(users);
+		return UserMapper.INSTANCE.userToDto(users);
 	}
 
 	/**
@@ -82,18 +85,19 @@ public class UserService {
 	 @return SellerDto
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
-		final Users users = userRepository.findUsersByEmail(login.email())
+
+		final Users user = userRepository.findUsersByEmail(login.email())
+			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
 
-		if (!passwordEncoder.matches(login.password(), users.getPassword())) {
-			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
+		if (!user.isValidUser()) {
+			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
-		return UserMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createUserTokens(users.getId(), users.getEmail(), authorization, response));
-
+		return UserMapper.INSTANCE.accessTokenToDto(
+			jwtProvider.createUserTokens(user.getId(), authorization, response));
 	}
 
 	/**
@@ -106,8 +110,10 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtUtils.removeTokens(jwtUtils.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
-			jwtUtils.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
+		jwtProvider.removeTokens(
+			jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll())
+		);
 	}
 
 	/**
@@ -121,7 +127,7 @@ public class UserService {
 	 * @param register - 회원 주소 등록에 관련된 객체
 	 * @return AddressDto
 	 */
-	public AddressDto registerAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
+	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
 
 		final Users users = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
@@ -130,7 +136,7 @@ public class UserService {
 
 		addressRepository.save(address);
 
-		return AddressMapper.INSTANCE.toDto(address);
+		return AddressMapper.INSTANCE.addressToDto(address);
 
 	}
 
@@ -139,7 +145,7 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
-	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
 		final Users users = userRepository.findById(authDetails.getId())
 			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
 
@@ -147,7 +153,7 @@ public class UserService {
 
 		usersAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.toDto(account);
+		return AccountMapper.INSTANCE.userAccountToDto(account);
 	}
 
 	/**
@@ -160,23 +166,54 @@ public class UserService {
 	 */
 	public UserDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtUtils.getRefreshTokenKey(jwtUtils.getId(bearerToken),
-			jwtUtils.getRoll(bearerToken));
+		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+			jwtProvider.getRoll(bearerToken));
 
-		if (!redisUtils.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey)) {
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
 		}
 
-		final String refreshToken = redisUtils.getData(refreshTokenKey);
+		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return UserMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(jwtUtils.getId(refreshToken), jwtUtils.getEmail(refreshToken),
-				Set.of(jwtUtils.getRoll(refreshToken)), response));
+		return UserMapper.INSTANCE.accessTokenToDto(
+			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
+				Set.of(jwtProvider.getRoll(refreshToken)), response));
+	}
+
+	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
+		Users user = userRepository.findById(authDetails.getId())
+			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+
+		isValidUser(withdrawal, user);
+
+		List<UsersAccount> usersAccounts = usersAccountRepository.findByUsersId(user.getId());
+		if (usersAccounts.isEmpty()) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_ACCOUNT);
+		}
+		usersAccounts.forEach(UsersAccount::withdrawal);
+
+		List<Address> addresses = addressRepository.findByUsersId(user.getId());
+		if (addresses.isEmpty()) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_ADDRESS);
+		}
+		addresses.forEach(Address::withdrawal);
+
+		user.withdrawal();
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
+		}
+	}
+
+	private void isValidUser(final UserDto.Request.Withdrawal withdrawal, final Users users) {
+		if (
+			!passwordEncoder.matches(withdrawal.password(), users.getPassword()) ||
+				!Objects.equals(withdrawal.email(), users.getEmail()) ||
+				!Objects.equals(withdrawal.phoneNumber(), users.getPhoneNumber())
+		) {
+			throw new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD);
 		}
 	}
 }

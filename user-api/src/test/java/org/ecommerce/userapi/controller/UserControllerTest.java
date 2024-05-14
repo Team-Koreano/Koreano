@@ -1,5 +1,6 @@
 package org.ecommerce.userapi.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -7,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -21,7 +22,9 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.external.service.UserService;
+import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
+import org.ecommerce.userapi.repository.UsersAccountRepository;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +65,12 @@ public class UserControllerTest {
 
 	@MockBean
 	private UserRepository userRepository;
+
+	@MockBean
+	private UsersAccountRepository usersAccountRepository;
+
+	@MockBean
+	private AddressRepository addressRepository;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -118,7 +127,7 @@ public class UserControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		UserDto responseDto = UserMapper.INSTANCE.toDto(users);
+		UserDto responseDto = UserMapper.INSTANCE.userToDto(users);
 
 		when(userService.registerRequest(registerRequest)).thenReturn(responseDto);
 
@@ -153,7 +162,7 @@ public class UserControllerTest {
 
 		String mockAccessToken = "mocked_access_token";
 
-		UserDto mocking = UserMapper.INSTANCE.fromAccessToken(mockAccessToken);
+		UserDto mocking = UserMapper.INSTANCE.accessTokenToDto(mockAccessToken);
 
 		when(userService.loginRequest(any(UserDto.Request.Login.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
@@ -175,7 +184,7 @@ public class UserControllerTest {
 
 		UserDto.Response.Login result = responseDto.result();
 
-		Assertions.assertThat(result).isEqualTo(expectedResponse);
+		assertThat(result).isEqualTo(expectedResponse);
 	}
 
 	@Test
@@ -196,11 +205,11 @@ public class UserControllerTest {
 		Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		AddressDto dto = AddressMapper.INSTANCE.toDto(address);
+		AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
-		final AddressDto.Response.Register expectedResponse = AddressDto.Response.Register.of(dto);
+		final AddressDto.Response.Register expectedResponse = AddressMapper.INSTANCE.addressDtoToResponse(dto);
 
-		when(userService.registerAddress(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
+		when(userService.createAddress(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
 		// when
 		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/address")
@@ -234,11 +243,11 @@ public class UserControllerTest {
 
 		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.number());
 
-		AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
-		final AccountDto.Response.Register expectedResponse = AccountDto.Response.Register.of(dto);
+		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
 
-		when(userService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
+		when(userService.createAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 		// when
 		final ResultActions resultActions = mockMvc.perform(post("/api/users/v1/account")
 			.with(csrf())
@@ -250,6 +259,38 @@ public class UserControllerTest {
 			.andExpect(jsonPath("$.result.number").value(expectedResponse.number()))
 			.andExpect(jsonPath("$.result.bankName").value(expectedResponse.bankName()))
 			.andReturn();
+	}
+
+	@Test
+	void 회원_탈퇴() throws Exception {
+		// given
+		final String email = "test@example.com";
+		final String phoneNumber = "01087654321";
+		final String password = "test";
+		final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, phoneNumber,
+			password);
+
+		final Users user = Users.ofRegister(
+			email,
+			"Jane Smith",
+			password,
+			Gender.FEMALE,
+			(short)30,
+			phoneNumber
+		);
+
+		when(userRepository.findById(any(Integer.class))).thenReturn(Optional.of(user));
+		// when
+		final ResultActions resultActions = mockMvc.perform(delete("/api/users/v1")
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(withdrawalRequest)));
+
+		// then
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result").value("탈퇴에 성공하였습니다"))
+			.andReturn();
+
 	}
 }
 //TODO : 레디스로 인해 로그아웃 테스트 추후 구현

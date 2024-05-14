@@ -17,7 +17,7 @@ import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class SellerServiceTest {
 	private SellerAccountRepository sellerAccountRepository;
 
 	@Mock
-	private JwtUtils jwtUtils;
+	private JwtProvider jwtProvider;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -61,8 +61,7 @@ class SellerServiceTest {
 	@Test
 	void 셀러_계좌_등록() {
 		// given
-		final String email = "test@example.com";
-		final AuthDetails authDetails = new AuthDetails(1, email, null);
+		final AuthDetails authDetails = new AuthDetails(1, null);
 		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
 			"213124124123", "부산은행");
 
@@ -77,7 +76,7 @@ class SellerServiceTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
 		when(sellerRepository.findById(authDetails.getId())).thenReturn(java.util.Optional.of(seller));
 		// when
@@ -113,11 +112,11 @@ class SellerServiceTest {
 				newSellerReqeust.phoneNumber()
 			);
 
-			SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
+			SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
 
 			//then
-			Assertions.assertThat(SellerDto.Response.Register.of(expectedResult))
-				.isEqualTo(SellerDto.Response.Register.of(result));
+			Assertions.assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
+				.isEqualTo(SellerMapper.INSTANCE.sellerDtoToResponse(result));
 		}
 
 		@Test
@@ -173,7 +172,7 @@ class SellerServiceTest {
 			Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			when(sellerRepository.findByEmail(email)).thenReturn(Optional.of(seller));
 			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
-			when(jwtUtils.createSellerTokens(any(), any(), any(), any())).thenReturn("Bearer fake_access_token");
+			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
 
 			// when
 			SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);

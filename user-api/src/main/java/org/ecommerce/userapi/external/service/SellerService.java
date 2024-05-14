@@ -11,11 +11,11 @@ import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
-import org.ecommerce.userapi.utils.RedisUtils;
+import org.ecommerce.userapi.security.JwtProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +34,9 @@ public class SellerService {
 
 	private final SellerRepository sellerRepository;
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
-	private final RedisUtils redisUtils;
+	private final RedisProvider redisProvider;
 
 	private final SellerAccountRepository sellerAccountRepository;
 
@@ -59,7 +59,7 @@ public class SellerService {
 
 		sellerRepository.save(seller);
 
-		return SellerMapper.INSTANCE.toDto(seller);
+		return SellerMapper.INSTANCE.sellerToDto(seller);
 	}
 
 	/**
@@ -82,8 +82,8 @@ public class SellerService {
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
-		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(seller.getId(), seller.getEmail(), authorization,
+		return SellerMapper.INSTANCE.accessTokenToDto(
+			jwtProvider.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
 
@@ -97,8 +97,8 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtUtils.removeTokens(jwtUtils.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
-			jwtUtils.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
+		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	/**
@@ -115,23 +115,34 @@ public class SellerService {
 
 		sellerAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.toDto(account);
+		return AccountMapper.INSTANCE.sellerAccountToDto(account);
 	}
 
+	/**
+	 * 엑세스 토큰을 재발급 하는 메서드입니다.
+	 * <p>
+	 * 리프래시 토큰을 통해 엑세스 토큰을 재발급 해주는 로직입니다
+	 * <p>
+	 * @author Hong
+	 *
+	 * @param bearerToken - 리프래시토큰
+	 * @param response - 쿠키를 담을 response 객체
+	 * @return SellerDto
+	 */
 	public SellerDto reissueAccessToken(final String bearerToken, HttpServletResponse response) {
 
-		String refreshTokenKey = jwtUtils.getRefreshTokenKey(jwtUtils.getId(bearerToken),
-			jwtUtils.getRoll(bearerToken));
+		String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
+			jwtProvider.getRoll(bearerToken));
 
-		if (!redisUtils.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey)) {
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
 		}
 
-		final String refreshToken = redisUtils.getData(refreshTokenKey);
+		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return SellerMapper.INSTANCE.fromAccessToken(
-			jwtUtils.createSellerTokens(jwtUtils.getId(refreshToken), jwtUtils.getEmail(refreshToken),
-				Set.of(jwtUtils.getRoll(refreshToken)), response));
+		return SellerMapper.INSTANCE.accessTokenToDto(
+			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
+				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {

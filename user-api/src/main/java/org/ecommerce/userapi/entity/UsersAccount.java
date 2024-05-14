@@ -46,11 +46,15 @@ public class UsersAccount {
 	@Column()
 	private LocalDateTime updateDatetime;
 
-	public static UsersAccount ofRegister(Users users, String number, String bankName){
+	public static UsersAccount ofRegister(Users users, String number, String bankName) {
 		UsersAccount usersAccount = new UsersAccount();
 		usersAccount.users = users;
 		usersAccount.bankName = bankName;
 		usersAccount.number = number;
 		return usersAccount;
+	}
+
+	public void withdrawal() {
+		this.isDeleted = true;
 	}
 }

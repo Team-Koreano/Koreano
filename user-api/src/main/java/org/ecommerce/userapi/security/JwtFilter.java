@@ -3,8 +3,8 @@ package org.ecommerce.userapi.security;
 import java.io.IOException;
 
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.security.custom.ResponseConfigurer;
-import org.ecommerce.userapi.utils.RedisUtils;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,21 +26,21 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter implements ResponseConfigurer {
 
 	private final ProviderManager providerManager;
-	private final JwtUtils jwtUtils;
-	private final RedisUtils redisUtils;
+	private final JwtProvider jwtProvider;
+	private final RedisProvider redisProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		String bearerToken = jwtUtils.resolveToken(request);
+		String bearerToken = jwtProvider.resolveToken(request);
 
 		try {
 			if (bearerToken != null) {
-				boolean isLogin = redisUtils.hasKey(
-					jwtUtils.getAccessTokenKey(jwtUtils.getId(bearerToken), jwtUtils.getRoll(bearerToken)));
+				boolean isLogin = redisProvider.hasKey(
+					jwtProvider.getAccessTokenKey(jwtProvider.getId(bearerToken), jwtProvider.getRoll(bearerToken)));
 				if (isLogin) {
 					// Authentication 검증 전
-					Authentication beforeAuthentication = jwtUtils.parseAuthentication(bearerToken);
+					Authentication beforeAuthentication = jwtProvider.parseAuthentication(bearerToken);
 					// Authentication 검증 후
 					Authentication afterAuthenticate = providerManager.authenticate(beforeAuthentication);
 					// Context 에 저장
@@ -57,7 +57,9 @@ public class JwtFilter extends OncePerRequestFilter implements ResponseConfigure
 			responseSetting(response, UserErrorCode.EMPTY_JWT);
 			return;
 		}
+
 		doFilter(request, response, filterChain);
 	}
+
 }
 
