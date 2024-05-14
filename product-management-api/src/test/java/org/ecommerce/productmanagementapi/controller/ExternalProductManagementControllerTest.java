@@ -234,7 +234,7 @@ class ExternalProductManagementControllerTest {
 		final Integer productId = 1;
 		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", true);
+			"수정된", "커피", null, true);
 
 		final Product expectedEntity = new Product(
 			productId, dto.category(), dto.price(), null, null, null, dto.isDecaf(),

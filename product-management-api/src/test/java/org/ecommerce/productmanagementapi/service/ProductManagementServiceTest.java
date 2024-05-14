@@ -270,7 +270,7 @@ public class ProductManagementServiceTest {
 
 		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", true);
+			"수정된", "커피", null, true);
 
 		final Image image = Image.ofCreate(
 			"test",

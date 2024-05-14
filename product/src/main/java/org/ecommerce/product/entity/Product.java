@@ -125,7 +125,7 @@ public class Product {
 	}
 
 	public void toModify(ProductCategory category, Integer price, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size) {
 		this.category = category;
 		this.price = price;
 		this.name = name;
@@ -134,6 +134,7 @@ public class Product {
 		this.information = information;
 		this.isCrush = isCrush;
 		this.isDecaf = isDecaf;
+		this.size = size;
 	}
 
 	public void toModifyStatus(ProductStatus productStatus) {

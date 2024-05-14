@@ -137,16 +137,7 @@ public class ProductManagementService {
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
-		product.toModify(
-			modifyProduct.category(),
-			modifyProduct.price(),
-			modifyProduct.name(),
-			modifyProduct.bean(),
-			modifyProduct.acidity(),
-			modifyProduct.information(),
-			modifyProduct.isCrush(),
-			modifyProduct.isDecaf()
-		);
+		ProductFactory.getFactory(modifyProduct.category()).modifyProduct(product, modifyProduct);
 
 		if (thumbnailImage != null || images != null) {
 			deleteImages(product.getImages().stream().map(Image::getId).collect(Collectors.toList()), product);

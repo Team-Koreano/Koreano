@@ -73,6 +73,7 @@ public class ProductManagementDto {
 			String information,
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
+			String size,
 			Boolean isCrush
 		) {
 		}
@@ -103,7 +104,9 @@ public class ProductManagementDto {
 		String status,
 		LocalDateTime createDatetime,
 		Boolean isCrush,
+		String size,
 		List<Image> images
+
 	) {
 	}
 
