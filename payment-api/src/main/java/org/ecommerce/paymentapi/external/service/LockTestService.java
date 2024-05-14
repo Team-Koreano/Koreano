@@ -1,5 +1,7 @@
 package org.ecommerce.paymentapi.external.service;
 
+import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
+
 import java.util.concurrent.TimeUnit;
 
 import org.ecommerce.common.error.CustomException;
@@ -30,7 +32,7 @@ public class LockTestService {
 	private final RedissonClient redissonClient;
 	private final AopForTransaction aopForTransaction;
 
-	@DistributedLock(key = "#lockName.concat(#userId)")
+	@DistributedLock(key = "#lockName + #userId")
 	public void useDistributeLock(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
@@ -40,10 +42,13 @@ public class LockTestService {
 		beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
 	}
 
-	@DistributedLock(key = {
-		"'BEANPAY'.concat(1).concat('SELLER')",
-		"'BEANPAY'.concat(#paymentPrice.userId()).concat('USER')",
-	})
+	@DistributedLock(
+		lockName = BEANPAY,
+		key = {
+			"#paymentPrice.userId() + 'USER'",
+			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
+		}
+	)
 	public void useMultiLockTest(PaymentPrice paymentPrice) {
 
 		BeanPay beanPay = getBeanPay(1, Role.USER);

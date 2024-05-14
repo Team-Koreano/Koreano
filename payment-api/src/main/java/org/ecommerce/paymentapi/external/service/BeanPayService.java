@@ -1,6 +1,8 @@
 
 package org.ecommerce.paymentapi.external.service;
 
+import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,7 +70,9 @@ public class BeanPayService {
 	 @param - TossPayment request
 	 @return - BeanPayDto response
 	 */
-	@DistributedLock(key = "'BEANPAY'.concat(#userId).concat(#role)")
+	@DistributedLock(
+		lockName = BEANPAY,
+		key = "#userId.concat(#role)")
 	public BeanPayDetailDto validTossCharge(
 		final TossPayment request,
 		final Integer userId,
