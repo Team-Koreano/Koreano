@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum OrderErrorCode implements ErrorCode {
 	NOT_FOUND_PRODUCT_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 상품 번호입니다."),
+	NOT_FOUND_ORDER_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 주문 번호입니다."),
 	NOT_FOUND_ORDER_ITEM_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 주문 항목 번호입니다."),
 	MUST_CLOSED_ORDER_TO_CANCEL(HttpStatus.BAD_REQUEST.value(),
 			"주문을 취소하려면 주문 상태가 CLOSED 여야 합니다."),

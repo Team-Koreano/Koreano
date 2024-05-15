@@ -114,21 +114,26 @@ public class OrderItem {
 		return orderItem;
 	}
 
+	void cancel() {
+		changeStatus(CANCELLED, REFUND);
+		orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, CANCELLED));
+	}
+
 	public void changeStatus(
 			final OrderStatus changeStatus,
 			final OrderStatusReason changeStatusReason
 	) {
-		this.status = changeStatus;
-		this.statusReason = changeStatusReason;
-		this.statusDatetime = LocalDateTime.now();
-		this.orderStatusHistories.add(OrderStatusHistory.ofRecord(this, changeStatus));
+		status = changeStatus;
+		statusReason = changeStatusReason;
+		statusDatetime = LocalDateTime.now();
 	}
 
-	public boolean isCancelableStatus() {
+	boolean isCancelableStatus() {
 		return this.status == CLOSED;
 	}
 
-	public boolean isCancellableOrderDate() {
+	boolean isCancellableOrderDate() {
 		final LocalDateTime now = LocalDateTime.now();
 		final Duration duration = Duration.between(this.statusDatetime, now);
 		return duration.toDays() <= ORDER_CANCELLABLE_DATE;

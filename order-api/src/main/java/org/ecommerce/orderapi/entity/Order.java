@@ -105,6 +105,15 @@ public class Order {
 		status = OPEN;
 	}
 
+	public void cancelItem(final Long orderItemId) {
+		OrderItem orderItem = orderItems.stream()
+				.filter(item -> item.getId().equals(orderItemId))
+				.findFirst()
+				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM_ID));
+		isCancelableOrderItem(orderItem);
+		orderItem.cancel();
+	}
+
 	private void validateOrder(final int productCount) {
 		validateInitialOrder();
 		validateInitialOrderItems();
@@ -167,6 +176,16 @@ public class Order {
 
 		if (quantity < MINIMUM_PRODUCT_QUANTITY) {
 			throw new CustomException(TOO_FEW_QUANTITY_ON_ORDER);
+		}
+	}
+
+	private void isCancelableOrderItem(final OrderItem orderItem) {
+		if (!orderItem.isCancelableStatus()) {
+			throw new CustomException(MUST_CLOSED_ORDER_TO_CANCEL);
+		}
+
+		if (!orderItem.isCancellableOrderDate()) {
+			throw new CustomException(TOO_OLD_ORDER_TO_CANCEL);
 		}
 	}
 

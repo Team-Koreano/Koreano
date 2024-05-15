@@ -4,6 +4,7 @@ import static org.ecommerce.orderapi.entity.QOrder.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.repository.OrderCustomRepository;
@@ -49,6 +50,18 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 						generateDateCondition(year));
 
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Optional<Order> findOrderByIdAndUserId(
+			final Integer userId,
+			final Long orderId
+	) {
+		return Optional.ofNullable(jpaQueryFactory.selectFrom(order)
+				.leftJoin(order.orderItems).fetchJoin()
+				.where(order.id.eq(orderId),
+						order.userId.eq(userId))
+				.fetchFirst());
 	}
 
 	private BooleanExpression generateDateCondition(final Integer year) {

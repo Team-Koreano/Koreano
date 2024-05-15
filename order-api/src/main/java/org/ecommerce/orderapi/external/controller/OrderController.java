@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.dto.OrderDto;
-import org.ecommerce.orderapi.dto.OrderItemDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
@@ -66,15 +65,15 @@ public class OrderController {
 	}
 
 	@DeleteMapping("/{orderId}/orderItems/{orderItemId}")
-	public Response<OrderItemDto.Response> cancelOrder(
+	public Response<OrderDto.Response> cancelOrder(
 			@PathVariable("orderId") final Long orderId,
 			@PathVariable("orderItemId") final Long orderItemId
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.orderItemDtoToResponse(
-						orderDomainService.cancelOrder(USER_ID, orderItemId)
+				OrderMapper.INSTANCE.OrderDtoToResponse(
+						orderEventHandler.cancelOrder(USER_ID, orderId, orderItemId)
 				)
 		);
 	}

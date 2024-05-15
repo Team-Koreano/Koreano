@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class OrderHelper {
 
 	private final OrderDomainService orderDomainService;
@@ -44,7 +45,6 @@ public class OrderHelper {
 	 * @param request- 주문 요청 정보
 	 * @return - 반환 값 설명 텍스트
 	 */
-	@Transactional
 	public OrderDto createOrder(
 			final Integer userId,
 			final OrderDto.Request.Place request
@@ -64,6 +64,19 @@ public class OrderHelper {
 		);
 		orderDomainService.placeOrder(order, products, bucketSummary.getQuantityMap());
 		return OrderMapper.INSTANCE.OrderToDto(orderRepository.save(order));
+	}
+
+	public OrderDto cancelOrder(
+			final Integer userId,
+			final Long orderId,
+			final Long orderItemId
+	) {
+		final User user = getUser(userId);
+		Order order = orderRepository.findOrderByIdAndUserId(
+						user.getId(), orderId)
+				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
+		orderDomainService.cancelOrder(order, orderItemId);
+		return OrderMapper.INSTANCE.OrderToDto(order);
 	}
 
 	/**

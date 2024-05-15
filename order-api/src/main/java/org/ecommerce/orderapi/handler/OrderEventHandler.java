@@ -3,6 +3,7 @@ package org.ecommerce.orderapi.handler;
 import java.time.LocalDateTime;
 
 import org.ecommerce.orderapi.dto.OrderDto;
+import org.ecommerce.orderapi.event.OrderCanceledEvent;
 import org.ecommerce.orderapi.event.OrderCreatedEvent;
 import org.ecommerce.orderapi.service.OrderHelper;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,16 @@ public class OrderEventHandler {
 
 		// TODO : Kafka 결제 요청 이벤트 Publish
 		new OrderCreatedEvent(orderDto.getId(), LocalDateTime.now());
+		return orderDto;
+	}
+
+	public OrderDto cancelOrder(
+			final Integer userId,
+			final Long OrderId,
+			final Long OrderItemId
+	) {
+		OrderDto orderDto = orderHelper.cancelOrder(userId, OrderId, OrderItemId);
+		new OrderCanceledEvent(orderDto.getId(), LocalDateTime.now());
 		return orderDto;
 	}
 }
