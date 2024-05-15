@@ -61,8 +61,10 @@ public class DistributedLockAop {
 				signature.getParameterNames(),
 				joinPoint.getArgs(),
 				distributedLock.key()[i]
-			)).map(value -> distributedLock.lockName() + REDISSON_LOCK_PREFIX + value)
-			.forEach(keys::add);
+			)).map(value -> distributedLock.lockName().name()
+					.concat(REDISSON_LOCK_PREFIX)
+					.concat((String) value))
+				.forEach(keys::add);
 		});
 		return keys.toArray(String[]::new);
 	}
