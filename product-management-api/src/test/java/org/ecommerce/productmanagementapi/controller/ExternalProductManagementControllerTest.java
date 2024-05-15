@@ -284,6 +284,44 @@ class ExternalProductManagementControllerTest {
 			.andExpect(jsonPath("$.result.isDecaf").value(expectedResponse.getIsDecaf()));
 	}
 
+	@Test
+	void 상품_여러개_상태_변경() throws Exception {
+		// Given
+		final List<Integer> list = List.of(1, 2);
+		final ProductStatus status = ProductStatus.DISCONTINUED;
+		final ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(list,
+			status);
+
+		final Product entity1 = new Product(
+			1, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, "20*50", status, null, null, null
+		);
+
+		final Product entity2 = new Product(
+			2, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, "20*50", status, null, null, null
+		);
+
+		List<Product> products = List.of(entity1, entity2);
+		final List<ProductManagementDto> productManagementDtos = ProductManagementMapper.INSTANCE.productsToDtos(
+			products);
+
+		when(productManagementService.bulkModifyStatus(eq(request)))
+			.thenReturn(productManagementDtos);
+
+		// when, then
+		mockMvc.perform(put("/api/external/product/v1/status")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result[0].id").value(entity1.getId()))
+			.andExpect(jsonPath("$.result[0].status").value(status.name()))
+			.andExpect(jsonPath("$.result[1].id").value(entity2.getId()))
+			.andExpect(jsonPath("$.result[1].status").value(status.name()));
+	}
+
 	private void verifyImages(List<Image> images, int index,
 		List<ProductManagementDto.Request.Image> imageDtos) {
 		if (index >= images.size()) {

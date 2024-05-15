@@ -207,6 +207,40 @@ public class ProductManagementServiceTest {
 
 			assertThat(result.getStatus()).isEqualTo(newStatus);
 		}
+
+		@Test
+		void 상품_여러개_상태_변경_성공() {
+
+			final List<Integer> productIds = List.of(1, 2);
+
+			final ProductStatus newStatus = ProductStatus.DISCONTINUED;
+
+			final Product entity1 = new Product(
+				1, ProductCategory.BEAN, 1000, 50, seller, 0, false,
+				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+			);
+
+			final Product entity2 = new Product(
+				2, ProductCategory.BEAN, 1000, 50, seller, 0, false,
+				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+			);
+
+			List<Product> products = List.of(entity1, entity2);
+
+			given(productRepository.findProductById(productIds)).willReturn(products);
+			given(productRepository.saveAll(products)).willReturn(products);
+
+			ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(productIds,
+				newStatus);
+
+			List<ProductManagementDto> result = productManagementService.bulkModifyStatus(request);
+
+			assertThat(result).hasSize(2);
+			assertThat(result.get(0).getStatus()).isEqualTo(newStatus);
+			assertThat(result.get(1).getStatus()).isEqualTo(newStatus);
+		}
 	}
 
 	@Nested
