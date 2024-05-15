@@ -146,6 +146,28 @@ public class ProductManagementService {
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
+	/**
+	 * 여러 상품의 상태를 한번에 변경하는 메서드 입니다
+	 * @author Hong
+	 *
+	 * @param bulkStatus - RequestDto 입니다.
+	 * @return List<ProductManagementDto>
+	 */
+	public List<ProductManagementDto> bulkModifyStatus(
+		final ProductManagementDto.Request.BulkStatus bulkStatus
+	) {
+
+		List<Product> products = productRepository.findProductById(bulkStatus.productId());
+
+		if (products.isEmpty()) {
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
+		}
+
+		products.forEach(product -> product.toModifyStatus(bulkStatus.productStatus()));
+
+		return ProductManagementMapper.INSTANCE.productsToDtos(products);
+	}
+
 	@VisibleForTesting
 	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
 		if (!imagesRequest.isEmpty()) {

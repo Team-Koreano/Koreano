@@ -87,6 +87,12 @@ public class ProductManagementDto {
 				return new Image(imageUrl, sequenceNumber, isThumbnail);
 			}
 		}
+
+		public record BulkStatus(
+			List<Integer> productId,
+			ProductStatus productStatus
+		) {
+		}
 	}
 
 	public record Response(
