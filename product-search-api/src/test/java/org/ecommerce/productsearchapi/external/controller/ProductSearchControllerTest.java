@@ -16,6 +16,7 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,8 @@ public class ProductSearchControllerTest {
 	private MockMvc mockMvc;
 	@MockBean
 	private ProductSearchService productSearchService;
+	@MockBean
+	private ElasticSearchService elasticSearchService;
 
 	@Test
 	void 단일_상품_조회() throws Exception {
@@ -103,6 +106,61 @@ public class ProductSearchControllerTest {
 			.andExpect(jsonPath("$.result.imageDtoList[1].updateDatetime").value(
 				imageDtoList.get(1).getUpdateDatetime().toString()))
 			.andExpect(jsonPath("$.result.imageDtoList[1].imageUrl").value(imageDtoList.get(1).getImageUrl()))
+			.andExpect(status().isOk())
+			.andDo(print());
+	}
+
+	@Test
+	void 검색어_제안() throws Exception {
+		// given
+		final List<ProductSearchDto> suggestedProducts = List.of(
+			new ProductSearchDto(
+				1,
+				ProductCategory.BEAN,
+				30000,
+				100,
+				new ProductSearchDto.SellerRep(1, "커피천국"),
+				10,
+				false,
+				"아메리카노",
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
+				false,
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null
+			),
+			new ProductSearchDto(
+				2,
+				ProductCategory.BEAN,
+				30000,
+				100,
+				new ProductSearchDto.SellerRep(1, "커피천국"),
+				10,
+				false,
+				"아메아메아메",
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
+				false,
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null
+			)
+		);
+		// when
+		when(elasticSearchService.suggestSearchKeyword(anyString())).thenReturn(suggestedProducts);
+		// then
+		mockMvc.perform(get("/api/external/product/v1/suggest?keyword=아메"))
+			.andExpect(jsonPath("$.result[0].id").value(suggestedProducts.get(0).getId()))
+			.andExpect(jsonPath("$.result[0].name").value(suggestedProducts.get(0).getName()))
+			.andExpect(jsonPath("$.result[1].id").value(suggestedProducts.get(1).getId()))
+			.andExpect(jsonPath("$.result[1].name").value(suggestedProducts.get(1).getName()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
