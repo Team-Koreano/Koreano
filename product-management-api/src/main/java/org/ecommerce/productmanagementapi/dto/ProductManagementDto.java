@@ -95,30 +95,60 @@ public class ProductManagementDto {
 		}
 	}
 
-	public record Response(
-		Integer id,
-		Boolean isDecaf,
-		Integer price,
-		String bizName,
-		Integer stock,
-		Integer favoriteCount,
-		String acidity,
-		String bean,
-		String category,
-		String information,
-		String name,
-		String status,
-		LocalDateTime createDatetime,
-		Boolean isCrush,
-		String size,
-		List<Image> images
+	@Getter
+	@AllArgsConstructor
+	public static class Response {
+		private Integer id;
+		private Integer price;
+		private String bizName;
+		private Integer stock;
+		private Integer favoriteCount;
+		private String category;
+		private String name;
+		private String status;
+		private String information;
+		private LocalDateTime createDatetime;
+		private List<Image> images;
 
-	) {
+		@Getter
+		public static class BeanProductResponse extends Response {
+			private final Boolean isDecaf;
+			private final String acidity;
+			private final String bean;
+			private final Boolean isCrush;
+
+			public BeanProductResponse(Integer id, Integer price, String bizName, Integer stock, Integer favoriteCount,
+				String category, String name, String status, String information, LocalDateTime createDatetime,
+				List<Image> images,
+				Boolean isDecaf, String acidity, String bean, Boolean isCrush) {
+				super(id, price, bizName, stock, favoriteCount, category, name, status, information, createDatetime,
+					images);
+				this.isDecaf = isDecaf;
+				this.acidity = acidity;
+				this.bean = bean;
+				this.isCrush = isCrush;
+			}
+		}
+
+		@Getter
+		public static class DefaultProductResponse extends Response {
+			private final String size;
+
+			public DefaultProductResponse(Integer id, Integer price, String bizName, Integer stock,
+				Integer favoriteCount, String category, String name, String status, String information,
+				LocalDateTime createDatetime,
+				List<Image> images, String size) {
+				super(id, price, bizName, stock, favoriteCount, category, name, status, information, createDatetime,
+					images);
+				this.size = size;
+			}
+		}
 	}
 
 	public record Image(
 		String imageUrl,
 		Short sequenceNumber,
-		boolean isThumbnail) {
+		boolean isThumbnail
+	) {
 	}
 }
