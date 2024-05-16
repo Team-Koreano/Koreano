@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.security;
+package org.ecommerce.userapi.provider;
 
 import java.util.Date;
 import java.util.List;
@@ -10,7 +10,6 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.utils.RedisUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,13 +29,13 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtils {
+public class JwtProvider {
 	private static final String ACCESS_TOKEN_HEADER = HttpHeaders.AUTHORIZATION;
 	private static final String PREFIX = "Bearer ";
 	private static final long ONE_HOUR = 3_600;
 	private static final long TWO_WEEKS = ONE_HOUR * 24 * 14;
 
-	private final RedisUtils redisUtils;
+	private final RedisProvider redisProvider;
 
 	private final SecretKey secretKey;
 
@@ -46,50 +45,49 @@ public class JwtUtils {
 		return PREFIX + jwt;
 	}
 
-	public String createSellerTokens(Integer sellerId, String email, Set<String> authorization,
+	public String createSellerTokens(Integer sellerId, Set<String> authorization,
 		HttpServletResponse response) {
 
-		final String accessToken = createToken(sellerId, email,
+		final String accessToken = createToken(sellerId,
 			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(sellerId, email,
+		final String refreshToken = createToken(sellerId,
 			TWO_WEEKS, secretKey, authorization);
 
 		String accessTokenKey = getAccessTokenKey(sellerId, getRoll(accessToken));
-		redisUtils.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
+		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
 
 		String refreshTokenKey = getRefreshTokenKey(sellerId, getRoll(refreshToken));
-		redisUtils.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
+		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
 
 		response.addCookie(createCookie(refreshToken));
 
 		return accessToken;
 	}
 
-	public String createUserTokens(Integer userId, String email, Set<String> authorization,
+	public String createUserTokens(Integer userId, Set<String> authorization,
 		HttpServletResponse response) {
 
-		final String accessToken = createToken(userId, email,
+		final String accessToken = createToken(userId,
 			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(userId, email,
+		final String refreshToken = createToken(userId,
 			TWO_WEEKS, secretKey, authorization);
 
 		String accessTokenKey = getAccessTokenKey(userId, getRoll(accessToken));
-		redisUtils.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
+		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
 
 		String refreshTokenKey = getRefreshTokenKey(userId, getRoll(refreshToken));
-		redisUtils.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
+		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
 
 		response.addCookie(createCookie(refreshToken));
 
 		return accessToken;
 	}
 
-	private String createToken(Integer id, String email, long lifeCycle, SecretKey secretKey,
+	private String createToken(Integer id, long lifeCycle, SecretKey secretKey,
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
 			.claim("id", id)
-			.claim("email", email)
 			.claim("authorization", authorization)
 			.setIssuedAt(now)
 			.setExpiration(new Date(now.getTime() + lifeCycle * 1000))
@@ -108,7 +106,7 @@ public class JwtUtils {
 
 	public UsernamePasswordAuthenticationToken parseAuthentication(String bearerToken) {
 		Claims claims = parseClaims(cutPreFix(bearerToken));
-		String email = claims.get("email", String.class);
+		Integer id = claims.get("id", Integer.class);
 		List<?> authorities = claims.get("authorization", List.class);
 
 		if (authorities == null)
@@ -119,12 +117,12 @@ public class JwtUtils {
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toSet());
 
-		return new UsernamePasswordAuthenticationToken(email, bearerToken, grantedAuthorities);
+		return new UsernamePasswordAuthenticationToken(id, bearerToken, grantedAuthorities);
 	}
 
 	public void removeTokens(String accessTokenKey, String refreshTokenKey) {
-		redisUtils.deleteData(accessTokenKey);
-		redisUtils.deleteData(refreshTokenKey);
+		redisProvider.deleteData(accessTokenKey);
+		redisProvider.deleteData(refreshTokenKey);
 	}
 
 	public String getRoll(String bearerToken) {
