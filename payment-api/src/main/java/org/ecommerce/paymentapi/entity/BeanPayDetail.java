@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -49,7 +48,6 @@ public class BeanPayDetail {
 	@Column(name = "user_id")
 	private Integer userId;
 
-	@ColumnDefault("0")
 	@Column(name = "amount", nullable = false)
 	private Integer amount;
 
@@ -86,7 +84,21 @@ public class BeanPayDetail {
 		return beanPayDetail;
 	}
 
+	protected static BeanPayDetail ofPayment(BeanPay beanPay,
+		Integer amount) {
+		BeanPayDetail beanPayDetail = ofCreate(beanPay, beanPay.getUserId(), amount);
+		beanPayDetail.beanPayStatus = BeanPayStatus.PAYMENT;
+		beanPayDetail.processStatus = ProcessStatus.COMPLETED;
+		return beanPayDetail;
+	}
 
+	protected static BeanPayDetail ofReceive(BeanPay beanPay,
+		Integer amount) {
+		BeanPayDetail beanPayDetail = ofCreate(beanPay, beanPay.getUserId(), amount);
+		beanPayDetail.beanPayStatus = BeanPayStatus.RECEIVE;
+		beanPayDetail.processStatus = ProcessStatus.COMPLETED;
+		return beanPayDetail;
+	}
 
 	public boolean validBeanPay(UUID orderId, Integer amount) {
 		beginValidProcess();
@@ -117,5 +129,11 @@ public class BeanPayDetail {
 
 	private void changeProcessStatus(ProcessStatus status) {
 		this.processStatus = status;
+	}
+
+	public void rollbackPayment(Integer amount, BeanPay sellerBeanPay, String message) {
+		this.beanPay.rollbackPayment(amount, sellerBeanPay);
+		this.failReason = message;
+		changeProcessStatus(ProcessStatus.FAILED);
 	}
 }

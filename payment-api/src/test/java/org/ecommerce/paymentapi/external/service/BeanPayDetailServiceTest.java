@@ -1,5 +1,5 @@
 
-package org.ecommerce.paymentapi.service;
+package org.ecommerce.paymentapi.external.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
@@ -54,17 +54,17 @@ class BeanPayDetailServiceTest {
 	void 사전충전객체_생성() {
 
 		//given
-		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
+		final BeanPayDetailDto.Request.PreCharge request = new BeanPayDetailDto.Request.PreCharge(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
 		final BeanPayDetail entity = beanPay.preCharge(beanPay.getAmount());
-		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
+		final BeanPayDetailDto response = BeanPayDetailMapper.INSTANCE.toDto(entity);
 
 		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
 		given(beanPayDetailRepository.save(any())).willReturn(entity);
 
 
 		//when
-		final BeanPayDto actual = beanPayService.preChargeBeanPay(request);
+		final BeanPayDetailDto actual = beanPayService.preChargeBeanPay(request);
 
 		//then
 		assertThat(actual).usingRecursiveComparison().isEqualTo(response);
@@ -77,6 +77,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String paymentType = "카드";
@@ -99,7 +100,7 @@ class BeanPayDetailServiceTest {
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossResponse);
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 		}
 
 		@Test
@@ -107,6 +108,8 @@ class BeanPayDetailServiceTest {
 
 			//given
 			final UUID orderId = UUID.randomUUID();
+			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String paymentType = "카드";
 			final Integer amount = 1000;
@@ -120,7 +123,7 @@ class BeanPayDetailServiceTest {
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
-				beanPayService.validTossCharge(request);
+				beanPayService.validTossCharge(request, userId, role);
 			});
 			assertEquals(returnException.getErrorCode(), NOT_EXIST);
 		}
@@ -130,6 +133,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String paymentType = "카드";
 			final Integer amount = 1000;
@@ -146,7 +150,7 @@ class BeanPayDetailServiceTest {
 			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), VERIFICATION_FAIL.getMessage());
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
@@ -157,6 +161,7 @@ class BeanPayDetailServiceTest {
 			//given
 			final UUID orderId = UUID.randomUUID();
 			final Integer userId = 1;
+			final Role role = Role.USER;
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String paymentType = "카드";
@@ -180,7 +185,7 @@ class BeanPayDetailServiceTest {
 			Optional<BeanPayDetail> optionalBeanPay = beanPayDetailRepository.findById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), TOSS_RESPONSE_FAIL.getMessage());
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
@@ -199,7 +204,7 @@ class BeanPayDetailServiceTest {
 			final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
-			final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+			final BeanPayDetailDto.Request.TossFail request = new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 			final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
 				amount, null, null, errorMessage,
@@ -214,7 +219,7 @@ class BeanPayDetailServiceTest {
 			assertTrue(optionalBeanPay.isPresent());
 			assertEquals(optionalBeanPay.get().getFailReason(), errorMessage);
 			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
-		}	
+		}
 	}
 	@Test
 	void 빈페이_존재안함_예외발생() {
@@ -223,7 +228,7 @@ class BeanPayDetailServiceTest {
 		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 		final String errorCode = "PAY_PROCESS_CANCELED";
 
-		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+		final BeanPayDetailDto.Request.TossFail request = new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 		//when
 		when(beanPayDetailRepository.findById(request.orderId())).thenThrow(

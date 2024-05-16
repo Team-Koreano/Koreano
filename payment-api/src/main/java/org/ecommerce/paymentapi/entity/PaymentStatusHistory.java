@@ -2,8 +2,7 @@ package org.ecommerce.paymentapi.entity;
 
 import java.time.LocalDateTime;
 
-import org.ecommerce.paymentapi.entity.enumerate.RefundStatus;
-import org.hibernate.annotations.ColumnDefault;
+import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -18,45 +17,37 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Entity
-@Table(name = "refund_detail")
-public class RefundDetail {
+@Table(name = "payment_status_history")
+public class PaymentStatusHistory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "payment_id", nullable = false)
-	private Payment payment;
+	@JoinColumn(nullable = false)
+	private PaymentDetail paymentDetail;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "refund_id")
-	private Refund refund;
-
-	@ColumnDefault("0")
-	@Column(name = "total_amount")
-	private Integer totalAmount;
-
-	@ColumnDefault("0")
-	@Column(name = "delivery_fee")
-	private Integer deliveryFee;
-
-	@ColumnDefault("0")
-	@Column(name = "amount")
-	private Integer amount;
-
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	@Column(name = "status")
-	private RefundStatus status;
+	private PaymentStatus paymentStatus;
 
 	@CreationTimestamp
-	@Column(name = "create_datetime", updatable = false)
-	private LocalDateTime createDateTime;
+	@Column
+	private LocalDateTime statusChangeDatetime;
+
+	protected static PaymentStatusHistory ofRecord(
+		final PaymentDetail paymentDetail
+	) {
+		final PaymentStatusHistory paymentStatusHistory = new PaymentStatusHistory();
+		paymentStatusHistory.paymentDetail = paymentDetail;
+		paymentStatusHistory.paymentStatus = paymentDetail.getPaymentStatus();
+		return paymentStatusHistory;
+	}
 }

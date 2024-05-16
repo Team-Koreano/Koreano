@@ -1,5 +1,5 @@
 
-package org.ecommerce.paymentapi.controller;
+package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,16 +11,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
+import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.BeanPayDetail;
 import org.ecommerce.paymentapi.entity.enumerate.BeanPayStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.ecommerce.paymentapi.service.BeanPayService;
-import org.ecommerce.paymentapi.service.LockTestService;
-import org.ecommerce.paymentapi.service.PaymentServiceImpl;
+import org.ecommerce.paymentapi.entity.enumerate.Role;
+import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.external.service.LockTestService;
+import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +47,7 @@ class BeanPayControllerTest {
 	private BeanPayService beanPayService;
 
 	@MockBean
-	private PaymentServiceImpl paymentService;
+	private PaymentService paymentService;
 
 	@MockBean
 	private LockTestService lockTestService;
@@ -70,17 +71,18 @@ class BeanPayControllerTest {
 	@Test
 	void 사전결제객체_생성() throws Exception {
 		//given
-		final BeanPayDto.Request.PreCharge request = new BeanPayDto.Request.PreCharge(1, 10_000);
+		final BeanPayDetailDto.Request.PreCharge request = new BeanPayDetailDto.Request.PreCharge(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
 		final BeanPayDetail entity = beanPay.preCharge(10000);
-		final BeanPayDto dto = BeanPayMapper.INSTANCE.toDto(entity);
+		final BeanPayDetailDto dto = BeanPayDetailMapper.INSTANCE.toDto(entity);
 
 		when(beanPayService.preChargeBeanPay(request)).thenReturn(dto);
-		final Response<BeanPayDto> response = new Response<>(200, dto);
+		final Response<BeanPayDetailDto> response = new Response<>(200, dto);
 
 		//when
-		MvcResult mvcResult = mvc.perform(post("/api/beanpay/v1").contentType(MediaType.APPLICATION_JSON)
-			.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult =
+			mvc.perform(post("/api/external/beanpay/v1/charge").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
 
 		//then
 		String actual = mvcResult.getResponse().getContentAsString();
@@ -96,6 +98,7 @@ class BeanPayControllerTest {
 			final UUID orderId = UUID.randomUUID();
 			final String paymentKey = "paymentKey";
 			final Integer userId = 1;
+			final Role role = USER;
 			final String paymentType = "카드";
 
 			final Integer amount = 1000;
@@ -103,16 +106,16 @@ class BeanPayControllerTest {
 
 			final TossDto.Request.TossPayment request = new TossDto.Request.TossPayment(paymentType, paymentKey,
 				orderId, amount);
-			final BeanPayDto response = new BeanPayDto(orderId, paymentKey, userId,
+			final BeanPayDetailDto response = new BeanPayDetailDto(orderId, paymentKey, userId,
 				amount, paymentType, null, null,
 				BeanPayStatus.DEPOSIT, ProcessStatus.COMPLETED, LocalDateTime.now(),
 				BeanPayTimeFormatUtil.stringToDateTime(approveDateTime));
-			final Response<BeanPayDto> result = new Response<>(200, response);
+			final Response<BeanPayDetailDto> result = new Response<>(200, response);
 
-			when(beanPayService.validTossCharge(request)).thenReturn(response);
+			when(beanPayService.validTossCharge(request, userId, role)).thenReturn(response);
 
 			//when
-			MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/success")
+			MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/success")
 					.contentType(MediaType.APPLICATION_JSON)
 					.param("orderId", String.valueOf(request.orderId()))
 					.param("paymentKey", request.paymentKey())
@@ -138,20 +141,20 @@ class BeanPayControllerTest {
 		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 		final String errorCode = "PAY_PROCESS_CANCELED";
 
-		final BeanPayDto.Request.TossFail request = new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+		final BeanPayDetailDto.Request.TossFail request = new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 		final BeanPayDetail entity = new BeanPayDetail(orderId, getBeanPay(), null, userId,
 			amount, null,	null, errorMessage,
 			BeanPayStatus.DEPOSIT, ProcessStatus.FAILED, LocalDateTime.now(), null);
 
-		final BeanPayDto response = BeanPayMapper.INSTANCE.toDto(entity);
+		final BeanPayDetailDto response = BeanPayDetailMapper.INSTANCE.toDto(entity);
 
-		final Response<BeanPayDto> result = new Response<>(200, response);
+		final Response<BeanPayDetailDto> result = new Response<>(200, response);
 
 		when(beanPayService.failTossCharge(request)).thenReturn(response);
 
 		//when
-		MvcResult mvcResult = mvc.perform(get("/api/beanpay/v1/fail")
+		MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/fail")
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("orderId", String.valueOf(request.orderId()))
 				.param("errorCode", request.errorCode())

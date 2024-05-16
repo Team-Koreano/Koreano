@@ -32,7 +32,7 @@ class BeanPayDetailDtoTest {
 		Integer amount = 10000;
 
 		//when
-		BeanPayDto.Request.PreCharge preCharge = new BeanPayDto.Request.PreCharge(userId, amount);
+		BeanPayDetailDto.Request.PreCharge preCharge = new BeanPayDetailDto.Request.PreCharge(userId, amount);
 
 		//then
 		assertEquals(preCharge.userId(), userId);
@@ -52,8 +52,8 @@ class BeanPayDetailDtoTest {
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
 			//when
-			final BeanPayDto.Request.TossFail request =
-				new BeanPayDto.Request.TossFail(orderId, errorCode, errorMessage);
+			final BeanPayDetailDto.Request.TossFail request =
+				new BeanPayDetailDto.Request.TossFail(orderId, errorCode, errorMessage);
 
 			//then
 			assertEquals(orderId, request.orderId());
@@ -68,11 +68,11 @@ class BeanPayDetailDtoTest {
 			final String errorCode = "";
 
 			//when
-			final BeanPayDto.Request.TossFail request =
-				new BeanPayDto.Request.TossFail(orderId, errorMessage, errorCode);
+			final BeanPayDetailDto.Request.TossFail request =
+				new BeanPayDetailDto.Request.TossFail(orderId, errorMessage, errorCode);
 
 			//then
-			Set<ConstraintViolation<BeanPayDto.Request.TossFail>> violations =
+			Set<ConstraintViolation<BeanPayDetailDto.Request.TossFail>> violations =
 				validator.validate(request);
 
 			assertEquals(3, violations.size());

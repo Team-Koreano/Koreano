@@ -1,7 +1,10 @@
 package org.ecommerce.paymentapi.entity;
 
+import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
+
 import java.time.LocalDateTime;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -43,6 +46,8 @@ public class BeanPay {
 
 	private Integer amount = 0;
 
+
+
 	@CreationTimestamp
 	@Column(updatable = false)
 	private LocalDateTime createDateTime;
@@ -55,11 +60,39 @@ public class BeanPay {
 		beanPay.role = role;
 		return beanPay;
 	}
+
 	public BeanPayDetail preCharge(Integer amount) {
 		return BeanPayDetail.ofCreate(this, this.userId, amount);
 	}
 
 	public void chargeBeanPayDetail(Integer amount) {
+		increaseBeanPay(amount);
+	}
+
+	private void increaseBeanPay(Integer amount) {
 		this.amount += amount;
+	}
+	private void decreaseBeanPay(Integer amount) {
+		this.amount -= amount;
+	}
+
+	public void payment(Integer amount, BeanPay sellerBeanPay) {
+		int remainAmount = this.getAmount() - amount;
+
+		if(remainAmount < 0)
+			throw new CustomException(INSUFFICIENT_AMOUNT);
+
+		this.decreaseBeanPay(amount);
+		sellerBeanPay.increaseBeanPay(amount);
+	}
+
+	public void rollbackPayment(Integer amount, BeanPay sellerBeanPay) {
+		int remainAmount = sellerBeanPay.getAmount() - amount;
+
+		if(remainAmount < 0)
+			throw new CustomException(INSUFFICIENT_AMOUNT);
+
+		sellerBeanPay.decreaseBeanPay(amount);
+		this.increaseBeanPay(amount);
 	}
 }
