@@ -13,8 +13,6 @@ import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.entity.OrderItem;
 import org.ecommerce.orderapi.entity.Stock;
 import org.ecommerce.orderapi.entity.enumerated.StockOperationResult;
-import org.ecommerce.orderapi.repository.OrderItemRepository;
-import org.ecommerce.orderapi.repository.StockHistoryRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 public class StockDomainService {
 
 	private final StockRepository stockRepository;
-	private final StockHistoryRepository stockHistoryRepository;
-	private final OrderItemRepository orderItemRepository;
 
 	/**
-	 * 재고를 차감하는 메소드입니다.
+	 * 재고를 감소 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param orderItems- 변수 설명 텍스트

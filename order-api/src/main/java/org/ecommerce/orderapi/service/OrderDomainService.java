@@ -78,7 +78,7 @@ public class OrderDomainService {
 	}
 
 	/**
-	 * 주문 생성 전 재고를 검증하는 메소드입니다.
+	 * 재고를 검증하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param quantityMap- 상품 수량

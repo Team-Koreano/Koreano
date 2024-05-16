@@ -114,6 +114,18 @@ public class OrderItem {
 		return orderItem;
 	}
 
+	void completedOrderItem() {
+		changeStatus(CLOSED, null);
+		orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, CLOSED));
+	}
+
+	void approve() {
+		changeStatus(APPROVE, COMPLETE_PAYMENT);
+		orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, APPROVE));
+	}
+
 	void cancel() {
 		changeStatus(CANCELLED, REFUND);
 		orderStatusHistories.add(
@@ -140,18 +152,6 @@ public class OrderItem {
 
 	boolean isCompletedOrderItem() {
 		return this.status == CLOSED;
-	}
-
-	void completedOrderItem() {
-		changeStatus(CLOSED, null);
-		orderStatusHistories.add(
-				OrderStatusHistory.ofRecord(this, CLOSED));
-	}
-
-	void approve() {
-		changeStatus(APPROVE, COMPLETE_PAYMENT);
-		orderStatusHistories.add(
-				OrderStatusHistory.ofRecord(this, APPROVE));
 	}
 
 	private void changeStatus(

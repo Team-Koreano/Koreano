@@ -33,6 +33,13 @@ public class StockHelper {
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
 
+	/**
+	 * 재고 증가 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderId- 주문 번호
+	 * @return - 재고
+	 */
 	@StockLock
 	public List<StockDto> decreaseStocks(final Long orderId) {
 		final Order order = getOrder(orderId);
@@ -58,13 +65,20 @@ public class StockHelper {
 	 */
 	@StockLock
 	public StockDto increaseStock(final Long orderId, final Long orderItemId) {
-		Order order = getOrder(orderId);
-		OrderItem orderItem = order.getOrderItemByOrderItemId(orderItemId);
-		Stock stock = getStock(orderItem.getId());
+		final Order order = getOrder(orderId);
+		final OrderItem orderItem = order.getOrderItemByOrderItemId(orderItemId);
+		final Stock stock = getStock(orderItem.getId());
 		stockDomainService.increaseStock(orderItem, stock);
 		return StockMapper.INSTANCE.toStockDto(stock);
 	}
 
+	/**
+	 * 주문을 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderId- 주문 번호
+	 * @return - 주문
+	 */
 	@VisibleForTesting
 	public Order getOrder(final Long orderId) {
 		final Order order = orderRepository.findOrderById(orderId)
@@ -75,6 +89,13 @@ public class StockHelper {
 		return order;
 	}
 
+	/**
+	 * 주문 항목 리스트를 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param order- 주문
+	 * @return - 주문 항목 리스트
+	 */
 	@VisibleForTesting
 	public List<OrderItem> getOrderItems(final Order order) {
 		final List<OrderItem> orderItems = order.getOrderItems();
@@ -84,6 +105,13 @@ public class StockHelper {
 		return orderItems;
 	}
 
+	/**
+	 * 재고 맵을 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productIds- 상품 번호 리스트
+	 * @return - 재고 맵
+	 */
 	@VisibleForTesting
 	public Map<Integer, Stock> getStockMap(final List<Integer> productIds) {
 		final Map<Integer, Stock> stockMap = stockRepository.findStocksByProductIdIn(
@@ -94,6 +122,13 @@ public class StockHelper {
 		return stockMap;
 	}
 
+	/**
+	 * 재고를 가져오는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderItemId- 주문 항목 번호
+	 * @return - 재고
+	 */
 	@VisibleForTesting
 	public Stock getStock(final Long orderItemId) {
 		return stockRepository.findStockByOrderItemId(orderItemId)

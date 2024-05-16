@@ -43,7 +43,7 @@ public class OrderHelper {
 	 *
 	 * @param userId- 회원 번호
 	 * @param request- 주문 요청 정보
-	 * @return - 반환 값 설명 텍스트
+	 * @return - 주문
 	 */
 	public OrderDto createOrder(
 			final Integer userId,
@@ -66,21 +66,37 @@ public class OrderHelper {
 		return OrderMapper.INSTANCE.OrderToDto(orderRepository.save(order));
 	}
 
+	/**
+	 * 주문을 취소하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param orderId- 주문 번호
+	 * @param orderItemId- 주문 항목 번호
+	 * @return - 주문
+	 */
 	public OrderDto cancelOrder(
 			final Integer userId,
 			final Long orderId,
 			final Long orderItemId
 	) {
 		final User user = getUser(userId);
-		Order order = orderRepository.findOrderByIdAndUserId(
+		final Order order = orderRepository.findOrderByIdAndUserId(
 						user.getId(), orderId)
 				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
 		orderDomainService.cancelOrder(order, orderItemId);
 		return OrderMapper.INSTANCE.OrderToDto(order);
 	}
 
+	/**
+	 * 주문을 승인하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderId- 주문 번호
+	 * @return - 주문
+	 */
 	public OrderDto approveOrder(final Long orderId) {
-		Order order = orderRepository.findOrderById(orderId).orElseThrow(
+		final Order order = orderRepository.findOrderById(orderId).orElseThrow(
 				() -> new CustomException(NOT_FOUND_ORDER_ID));
 		orderDomainService.approveOrder(order);
 		return OrderMapper.INSTANCE.OrderToDto(order);
@@ -91,7 +107,7 @@ public class OrderHelper {
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
-	 * @return - 유저
+	 * @return - 회원
 	 */
 	@VisibleForTesting
 	public User getUser(final Integer userId) {
@@ -104,7 +120,7 @@ public class OrderHelper {
 	 * 장바구니 유효성 검사 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param userId-    회원 번호
+	 * @param userId- 회원 번호
 	 * @param bucketIds- 장바구니 번호 리스트
 	 *
 	 * @return - 장바구니 리스트
@@ -150,7 +166,7 @@ public class OrderHelper {
 		// 				AVAILABLE
 		// 		)
 		// );
-		List<Product> products = productServiceClient.getProducts(productIds)
+		final List<Product> products = productServiceClient.getProducts(productIds)
 				.stream()
 				.map(ProductMapper.INSTANCE::responseToEntity)
 				.filter(Product::isAvailableStatus)

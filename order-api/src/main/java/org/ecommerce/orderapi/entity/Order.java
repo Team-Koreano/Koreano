@@ -107,7 +107,7 @@ public class Order {
 	) {
 		validateOrder(products.size());
 		addOrderItems(products, quantities);
-		status = OPEN;
+		changeStatus(OPEN);
 	}
 
 	public void cancelItem(final Long orderItemId) {
