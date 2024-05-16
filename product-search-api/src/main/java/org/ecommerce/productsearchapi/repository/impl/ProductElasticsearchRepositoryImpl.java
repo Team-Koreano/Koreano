@@ -2,6 +2,7 @@ package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.enumerated.ProductDocumentField;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchCustomRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
@@ -64,7 +65,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		if (!search.keyword().trim().isEmpty()) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("name")
+				.field(ProductDocumentField.NAME.getTitle())
 				.query(search.keyword())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
@@ -72,7 +73,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		if (search.isDecaf() != null) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field("isDecaf")
+				.field(ProductDocumentField.IS_DECAF.getTitle())
 				.value(search.isDecaf())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
@@ -80,7 +81,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		if (search.category() != null) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field("category")
+				.field(ProductDocumentField.CATEGORY.getTitle())
 				.value(search.category().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
@@ -88,7 +89,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		if (search.bean() != null) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field("bean")
+				.field(ProductDocumentField.BEAN.getTitle())
 				.value(search.bean().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
@@ -96,7 +97,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		if (search.acidity() != null) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field("acidity")
+				.field(ProductDocumentField.ACIDITY.getTitle())
 				.value(search.acidity().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
