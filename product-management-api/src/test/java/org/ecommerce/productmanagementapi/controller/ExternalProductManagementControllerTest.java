@@ -157,16 +157,16 @@ class ExternalProductManagementControllerTest {
 			.andDo(print());
 
 		resultActions
-			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
-			.andExpect(jsonPath("$.result.price").value(expectedResponse.price()))
-			.andExpect(jsonPath("$.result.stock").value(expectedResponse.stock()))
-			.andExpect(jsonPath("$.result.acidity").value(expectedResponse.acidity()))
-			.andExpect(jsonPath("$.result.bean").value(expectedResponse.bean()))
-			.andExpect(jsonPath("$.result.category").value(expectedResponse.category()))
-			.andExpect(jsonPath("$.result.information").value(expectedResponse.information()))
-			.andExpect(jsonPath("$.result.status").value(expectedResponse.status()))
-			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.isCrush()))
-			.andExpect(jsonPath("$.result.bizName").value(expectedResponse.bizName()))
+			.andExpect(jsonPath("$.result.name").value(product.getName()))
+			.andExpect(jsonPath("$.result.price").value(product.getPrice()))
+			.andExpect(jsonPath("$.result.stock").value(product.getStock()))
+			.andExpect(jsonPath("$.result.acidity").value(product.getAcidity().getCode()))
+			.andExpect(jsonPath("$.result.bean").value(product.getBean().getCode()))
+			.andExpect(jsonPath("$.result.category").value(product.getCategory().getCode()))
+			.andExpect(jsonPath("$.result.information").value(product.getInformation()))
+			.andExpect(jsonPath("$.result.status").value(product.getStatus().getCode()))
+			.andExpect(jsonPath("$.result.isCrush").value(product.getIsCrush()))
+			.andExpect(jsonPath("$.result.bizName").value(product.getSellerRep().getBizName()))
 			.andDo(print());
 	}
 
@@ -237,9 +237,9 @@ class ExternalProductManagementControllerTest {
 			"수정된", "커피", null, true);
 
 		final Product expectedEntity = new Product(
-			productId, dto.category(), dto.price(), null, null, null, dto.isDecaf(),
+			productId, dto.category(), dto.price(), 50, test, 0, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), null, null, null, null, null
+			dto.isCrush(), "20 * 50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
