@@ -148,6 +148,12 @@ public class OrderItem {
 				OrderStatusHistory.ofRecord(this, CLOSED));
 	}
 
+	void approve() {
+		changeStatus(APPROVE, COMPLETE_PAYMENT);
+		orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, APPROVE));
+	}
+
 	private void changeStatus(
 			final OrderStatus changeStatus,
 			final OrderStatusReason changeStatusReason

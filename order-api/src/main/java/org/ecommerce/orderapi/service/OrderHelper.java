@@ -79,6 +79,13 @@ public class OrderHelper {
 		return OrderMapper.INSTANCE.OrderToDto(order);
 	}
 
+	public OrderDto approveOrder(final Long orderId) {
+		Order order = orderRepository.findOrderById(orderId).orElseThrow(
+				() -> new CustomException(NOT_FOUND_ORDER_ID));
+		orderDomainService.approveOrder(order);
+		return OrderMapper.INSTANCE.OrderToDto(order);
+	}
+
 	/**
 	 * 회원 유효성 검사 internal API를 호출하는 메소드입니다.
 	 * @author ${Juwon}

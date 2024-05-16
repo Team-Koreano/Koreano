@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderDomainService {
 
 	private final StockRepository stockRepository;
-	// TODO payment-service 결제 과정 : payment-service 구축 이후
 
 	/**
 	 * 주문을 생성하는 메소드입니다.
@@ -65,7 +64,17 @@ public class OrderDomainService {
 	 * @param orderItemIds- 완료될 주문 항목 번호
 	 */
 	public void completeOrder(final Order order, final Set<Long> orderItemIds) {
-		order.completeOrder(orderItemIds);
+		order.complete(orderItemIds);
+	}
+
+	/**
+	 * 주문을 승인하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param order- 주문
+	 */
+	public void approveOrder(final Order order) {
+		order.approve();
 	}
 
 	/**

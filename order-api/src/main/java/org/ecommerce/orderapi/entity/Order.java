@@ -68,6 +68,10 @@ public class Order {
 	private OrderStatus status;
 
 	@Column
+	@CreationTimestamp
+	private LocalDateTime statusDatetime;
+
+	@Column
 	private LocalDateTime paymentDatetime;
 
 	@CreationTimestamp
@@ -112,18 +116,23 @@ public class Order {
 		orderItem.cancel();
 	}
 
-	public void completeOrder(final Set<Long> successfulDecreaseStockOrderItemIds) {
+	public void complete(final Set<Long> successfulDecreaseStockOrderItemIds) {
 		orderItems.stream()
 				.filter(orderItem ->
 						successfulDecreaseStockOrderItemIds.contains(orderItem.getId()))
 				.forEach(OrderItem::completedOrderItem);
 		if (isCompletedAllOrderItems()) {
-			status = CLOSED;
+			changeStatus(CLOSED);
 		}
 	}
 
+	public void approve() {
+		orderItems.forEach(OrderItem::approve);
+		changeStatus(APPROVE);
+	}
+
 	public boolean isStockOperationProcessableOrder() {
-		return status == ACCEPTED || status == CANCELLED;
+		return status == APPROVE || status == CANCELLED;
 	}
 
 	public OrderItem getOrderItemByOrderItemId(final Long orderItemId) {
@@ -210,6 +219,11 @@ public class Order {
 
 	private boolean isCompletedAllOrderItems() {
 		return orderItems.stream().allMatch(OrderItem::isCompletedOrderItem);
+	}
+
+	private void changeStatus(final OrderStatus changeStatus) {
+		status = changeStatus;
+		statusDatetime = LocalDateTime.now();
 	}
 
 }

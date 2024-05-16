@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,6 +73,19 @@ public class OrderController {
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.OrderDtoToResponse(
 						orderEventHandler.cancelOrder(USER_ID, orderId, orderItemId)
+				)
+		);
+	}
+
+	@PutMapping("/{orderId}")
+	public Response<OrderDto.Response> approveOrder(
+			@PathVariable("orderId") final Long orderId
+	) {
+
+		return new Response<>(
+				HttpStatus.OK.value(),
+				OrderMapper.INSTANCE.OrderDtoToResponse(
+						orderEventHandler.approveOrder(orderId)
 				)
 		);
 	}
