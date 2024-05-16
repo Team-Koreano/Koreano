@@ -15,6 +15,7 @@ import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
 import org.ecommerce.productmanagementapi.repository.SellerRepository;
+import org.ecommerce.productmanagementapi.util.ProductFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,20 +48,10 @@ public class ProductManagementService {
 	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product,
 		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
-		final Product createProduct = Product.ofCreate(
-			product.category(),
-			product.price(),
-			product.stock(),
-			product.name(),
-			product.bean(),
-			product.acidity(),
-			product.information(),
-			product.isCrush(),
-			product.isDecaf(),
-			seller
-		);
+		final Product createdProduct = ProductFactory.getFactory(product.category())
+			.createProduct(product, seller);
 
-		final Product savedProduct = productRepository.save(createProduct);
+		final Product savedProduct = productRepository.save(createdProduct);
 
 		saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), savedProduct);
 
@@ -100,7 +91,9 @@ public class ProductManagementService {
 	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+
 		product.increaseStock(stock.requestStock());
+
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
@@ -117,9 +110,11 @@ public class ProductManagementService {
 	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
 		Product product = productRepository.findById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+
 		if (!product.checkStock(stock.requestStock())) {
 			throw new CustomException(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
 		}
+
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
@@ -142,16 +137,7 @@ public class ProductManagementService {
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
-		product.toModify(
-			modifyProduct.category(),
-			modifyProduct.price(),
-			modifyProduct.name(),
-			modifyProduct.bean(),
-			modifyProduct.acidity(),
-			modifyProduct.information(),
-			modifyProduct.isCrush(),
-			modifyProduct.isDecaf()
-		);
+		ProductFactory.getFactory(modifyProduct.category()).modifyProduct(product, modifyProduct);
 
 		if (thumbnailImage != null || images != null) {
 			deleteImages(product.getImages().stream().map(Image::getId).collect(Collectors.toList()), product);
@@ -160,22 +146,40 @@ public class ProductManagementService {
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
-	@VisibleForTesting
-	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
-		if (imagesRequest.isEmpty()) {
-			return;
+	/**
+	 * 여러 상품의 상태를 한번에 변경하는 메서드 입니다
+	 * @author Hong
+	 *
+	 * @param bulkStatus - RequestDto 입니다.
+	 * @return List<ProductManagementDto>
+	 */
+	public List<ProductManagementDto> bulkModifyStatus(
+		final ProductManagementDto.Request.BulkStatus bulkStatus
+	) {
+
+		List<Product> products = productRepository.findProductById(bulkStatus.productId());
+
+		if (products.isEmpty()) {
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
 		}
 
-		List<Image> images = imagesRequest.stream()
-			.map(imageResponse -> Image.ofCreate(
-				imageResponse.imageUrl(),
-				imageResponse.isThumbnail(),
-				imageResponse.sequenceNumber(),
-				product
-			))
-			.toList();
+		products.forEach(product -> product.toModifyStatus(bulkStatus.productStatus()));
 
-		product.getImages().addAll(images);
+		return ProductManagementMapper.INSTANCE.productsToDtos(products);
+	}
+
+	@VisibleForTesting
+	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
+		if (!imagesRequest.isEmpty()) {
+			product.getImages().addAll(imagesRequest.stream()
+				.map(imageResponse -> Image.ofCreate(
+					imageResponse.imageUrl(),
+					imageResponse.isThumbnail(),
+					imageResponse.sequenceNumber(),
+					product
+				))
+				.toList());
+		}
 	}
 
 	@VisibleForTesting

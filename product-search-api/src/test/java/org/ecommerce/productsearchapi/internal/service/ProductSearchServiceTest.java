@@ -57,7 +57,7 @@ public class ProductSearchServiceTest {
 		final List<Image> images = List.of(
 			new Image(1, null, "http://image1.com", true, (short)1, false, TEST_DATE_TIME, TEST_DATE_TIME),
 			new Image(2, null, "http://image2.com", false, (short)2, false, TEST_DATE_TIME, TEST_DATE_TIME)
-			);
+		);
 
 		return new Product(
 			1,
@@ -72,6 +72,7 @@ public class ProductSearchServiceTest {
 			Acidity.MEDIUM,
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
+			"testSize",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
