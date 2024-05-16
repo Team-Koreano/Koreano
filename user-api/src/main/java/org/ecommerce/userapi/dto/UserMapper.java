@@ -8,6 +8,11 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 	UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
-	UserDto toDto(Users seller);
-	UserDto fromAccessToken(String accessToken);
+
+	UserDto userToDto(Users users);
+
+	UserDto accessTokenToDto(String accessToken);
+
+	UserDto.Response.Register userDtoToResponse(UserDto userDto);
+
 }

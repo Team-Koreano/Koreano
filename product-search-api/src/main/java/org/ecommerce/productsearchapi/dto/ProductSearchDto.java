@@ -6,10 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.ecommerce.common.aop.ValidEnum;
 import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productsearchapi.enumerated.ProductSortType;
+import org.ecommerce.productsearchapi.exception.ProductSearchErrorMessages;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -57,10 +60,32 @@ public class ProductSearchDto {
 		private Boolean isDeleted;
 	}
 
-
 	public static class Request {
+		public record Search(
+			String keyword,
+			Boolean isDecaf,
+			@ValidEnum(enumClass = ProductCategory.class,
+				nullable = true,
+				message = ProductSearchErrorMessages.NOT_FOUND_CATEGORY)
+			ProductCategory category,
 
+			@ValidEnum(enumClass = Bean.class,
+				nullable = true,
+				message = ProductSearchErrorMessages.NOT_FOUND_BEAN)
+			Bean bean,
+
+			@ValidEnum(enumClass = Acidity.class,
+				nullable = true,
+				message = ProductSearchErrorMessages.NOT_FOUND_ACIDITY)
+			Acidity acidity,
+
+			@ValidEnum(enumClass = ProductSortType.class,
+			nullable = true,
+			message = ProductSearchErrorMessages.NOT_FOUND_SORT)
+			ProductSortType sortType
+		){}
 	}
+
 	public static class Response {
 		public record Detail(
 			Integer id,
@@ -79,7 +104,7 @@ public class ProductSearchDto {
 			Integer favoriteCount,
 			LocalDateTime createDatetime,
 			LinkedList<ImageDto> imageDtoList
-		){
+		) {
 			public static Detail of(final ProductSearchDto productSearchDto) {
 				return new Detail(
 					productSearchDto.getId(),
@@ -104,6 +129,7 @@ public class ProductSearchDto {
 				);
 			}
 		}
+
 		public record SavedProduct(
 			Integer id,
 			String category,
@@ -119,7 +145,7 @@ public class ProductSearchDto {
 			String information,
 			String thumbnailUrl,
 			LocalDateTime createDatetime
-		){
+		) {
 			@VisibleForTesting
 			public static String getThumbnailUrl(List<ImageDto> images) {
 				return images.stream()
@@ -128,7 +154,6 @@ public class ProductSearchDto {
 					.map(ImageDto::getImageUrl)
 					.orElse(null);
 			}
-
 
 			public static SavedProduct of(final ProductSearchDto productSearchDto) {
 				return new SavedProduct(
@@ -144,6 +169,52 @@ public class ProductSearchDto {
 					productSearchDto.getAcidity().getTitle(),
 					productSearchDto.getBean().getTitle(),
 					productSearchDto.getInformation(),
+					productSearchDto.getThumbnailUrl(),
+					productSearchDto.getCreateDatetime()
+				);
+			}
+		}
+
+		public record SuggestedProducts(
+			Integer id,
+			String name
+		) {
+			public static SuggestedProducts of(final ProductSearchDto productSearchDto) {
+				return new SuggestedProducts(
+					productSearchDto.getId(),
+					productSearchDto.getName()
+				);
+			}
+		}
+
+		public record Search(
+			Integer id,
+			String name,
+			String category,
+			Integer price,
+			Integer stock,
+			Integer sellerId,
+			String sellerName,
+			Integer favoriteCount,
+			Boolean isDecaf,
+			String acidity,
+			String bean,
+			String thumbnailUrl,
+			LocalDateTime createDatetime
+		) {
+			public static Search of(final ProductSearchDto productSearchDto) {
+				return new Search(
+					productSearchDto.getId(),
+					productSearchDto.getName(),
+					productSearchDto.getCategory().getTitle(),
+					productSearchDto.getPrice(),
+					productSearchDto.getStock(),
+					productSearchDto.getSellerRep().getId(),
+					productSearchDto.getSellerRep().getBizName(),
+					productSearchDto.getFavoriteCount(),
+					productSearchDto.getIsDecaf(),
+					productSearchDto.getAcidity().getTitle(),
+					productSearchDto.getBean().getTitle(),
 					productSearchDto.getThumbnailUrl(),
 					productSearchDto.getCreateDatetime()
 				);

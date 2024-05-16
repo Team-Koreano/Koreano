@@ -50,6 +50,11 @@ public class SellerAccount {
 		sellerAccount.seller = seller;
 		sellerAccount.bankName = bankName;
 		sellerAccount.number = number;
+		seller.getSellerAccounts().add(sellerAccount);
 		return sellerAccount;
+	}
+
+	public void delete() {
+		this.isDeleted = true;
 	}
 }

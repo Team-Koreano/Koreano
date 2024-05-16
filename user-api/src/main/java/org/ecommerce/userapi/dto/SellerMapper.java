@@ -9,7 +9,9 @@ import org.mapstruct.factory.Mappers;
 public interface SellerMapper {
 	SellerMapper INSTANCE = Mappers.getMapper(SellerMapper.class);
 
-	SellerDto toDto(Seller users);
+	SellerDto sellerToDto(Seller users);
 
-	SellerDto fromAccessToken(String accessToken);
+	SellerDto accessTokenToDto(String accessToken);
+
+	SellerDto.Response.Register sellerDtoToResponse(SellerDto sellerDto);
 }

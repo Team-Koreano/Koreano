@@ -57,7 +57,7 @@ public class Product {
 	@Column()
 	private Integer favoriteCount = 0;
 
-	@Column(nullable = false)
+	@Column()
 	private Boolean isDecaf;
 
 	@Column(nullable = false)
@@ -74,8 +74,11 @@ public class Product {
 	@Column()
 	private String information;
 
-	@Column(nullable = false)
+	@Column()
 	private Boolean isCrush;
+
+	@Column()
+	private String size;
 
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -92,7 +95,7 @@ public class Product {
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	public static Product ofCreate(ProductCategory category, Integer price, Integer stock, String name, Bean bean
+	public static Product createBean(ProductCategory category, Integer price, Integer stock, String name, Bean bean
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep test) {
 		Product product = new Product();
 		product.category = category;
@@ -108,9 +111,21 @@ public class Product {
 		return product;
 	}
 
+	public static Product createDefault(ProductCategory category, Integer price, Integer stock, String name
+		, String information, String size, SellerRep test) {
+		Product product = new Product();
+		product.category = category;
+		product.price = price;
+		product.stock = stock;
+		product.name = name;
+		product.information = information;
+		product.sellerRep = test;
+		product.size = size;
+		return product;
+	}
 
 	public void toModify(ProductCategory category, Integer price, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size) {
 		this.category = category;
 		this.price = price;
 		this.name = name;
@@ -119,6 +134,7 @@ public class Product {
 		this.information = information;
 		this.isCrush = isCrush;
 		this.isDecaf = isDecaf;
+		this.size = size;
 	}
 
 	public void toModifyStatus(ProductStatus productStatus) {
@@ -145,7 +161,7 @@ public class Product {
 		return this.stock >= requiredQuantity;
 	}
 
-  public String getThumbnailUrl() {
+	public String getThumbnailUrl() {
 		return images.stream()
 			.filter(Image::getIsThumbnail)
 			.findFirst()

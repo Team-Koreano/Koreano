@@ -7,6 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthDetails {
 	private Integer id;
-	private String email;
 	private String roll;
 }
