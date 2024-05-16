@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.exception.UserErrorCode;
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,28 +17,26 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JwtProvider implements AuthenticationProvider {
+public class CustomAuthProvider implements AuthenticationProvider {
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		String email = (String)authentication.getPrincipal();
 		String bearerToken = (String)authentication.getCredentials();
 
-		String parseEmail = jwtUtils.getEmail(bearerToken);
-		String parseRole = jwtUtils.getRoll(bearerToken);
-		Integer parseId = jwtUtils.getId(bearerToken);
+		String parseRole = jwtProvider.getRoll(bearerToken);
+		Integer parseId = jwtProvider.getId(bearerToken);
 
-		AuthDetails authDetails = new AuthDetails(parseId, parseEmail, parseRole);
+		AuthDetails authDetails = new AuthDetails(parseId, parseRole);
 
 		SimpleGrantedAuthority parsedGrant = new SimpleGrantedAuthority(parseRole);
 
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 		authorities.add(parsedGrant);
 
-		if (!authDetails.getEmail().equals(email) ||
+		if (!authDetails.getId().equals(authentication.getPrincipal()) ||
 			!authentication.getAuthorities().contains(parsedGrant)) {
 			throw new CustomException(UserErrorCode.AUTHENTICATION_FAILED);
 		}

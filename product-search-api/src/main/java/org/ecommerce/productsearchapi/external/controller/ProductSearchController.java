@@ -1,22 +1,27 @@
 package org.ecommerce.productsearchapi.external.controller;
 
+import java.util.List;
+
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController("externalProductSearchController")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/external/product/v1")
 public class ProductSearchController {
 
 	private final ProductSearchService productSearchService;
+	private final ElasticSearchService elasticSearchService;
 
 	@GetMapping("/{productId}")
 	public Response<ProductSearchDto.Response.Detail> getProductById(
@@ -25,6 +30,35 @@ public class ProductSearchController {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductSearchDto.Response.Detail.of(productSearchService.getProductById(productId))
 		);
+	}
+
+	@GetMapping("/suggest")
+	public Response<List<ProductSearchDto.Response.SuggestedProducts>> suggestSearchKeyword(
+		@RequestParam(value = "keyword") final String keyword) {
+
+		final List<ProductSearchDto> suggestedProducts = elasticSearchService.suggestSearchKeyword(keyword);
+
+		return new Response<>(HttpStatus.OK.value(),
+			suggestedProducts.stream()
+				.map(ProductSearchDto.Response.SuggestedProducts::of)
+				.toList());
+	}
+
+	@GetMapping("/search")
+	public Response<List<ProductSearchDto.Response.Search>> searchProducts(
+		ProductSearchDto.Request.Search request,
+		@RequestParam(required = false, defaultValue = "0", name = "pageNumber")
+		Integer pageNumber,
+		@RequestParam(required = false, defaultValue = "10", name = "pageSize")
+		Integer pageSize
+		) {
+
+		final List<ProductSearchDto> searchProducts = elasticSearchService.searchProducts(request, pageNumber, pageSize);
+
+		return new Response<>(HttpStatus.OK.value(),
+			searchProducts.stream()
+				.map(ProductSearchDto.Response.Search::of)
+				.toList());
 	}
 
 }

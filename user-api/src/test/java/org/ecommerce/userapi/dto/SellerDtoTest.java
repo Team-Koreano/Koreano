@@ -3,6 +3,7 @@ package org.ecommerce.userapi.dto;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
@@ -24,15 +25,16 @@ class SellerDtoTest {
 		false,
 		null,
 		0L,
-		UserStatus.GENERAL
+		UserStatus.GENERAL,
+		new ArrayList<>()
 	);
 
 	@Test
 	void 셀러_응답() {
 		//given
-		final SellerDto sellerDto = SellerMapper.INSTANCE.toDto(SELLER);
+		final SellerDto sellerDto = SellerMapper.INSTANCE.sellerToDto(SELLER);
 		//when
-		final SellerDto.Response.Register register = SellerDto.Response.Register.of(sellerDto);
+		final SellerDto.Response.Register register = SellerMapper.INSTANCE.sellerDtoToResponse(sellerDto);
 		//then
 		assertThat(register.email()).isEqualTo(SELLER.getEmail());
 		assertThat(register.name()).isEqualTo(SELLER.getName());

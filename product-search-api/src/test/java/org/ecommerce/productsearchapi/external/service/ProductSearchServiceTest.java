@@ -35,7 +35,7 @@ public class ProductSearchServiceTest {
 
 	@Test
 	void 단일_상품_조회() {
-		
+
 		// given
 		final Product product = getProduct();
 
@@ -63,18 +63,28 @@ public class ProductSearchServiceTest {
 		assertEquals(product.getUpdateDatetime(), productSearchDto.getUpdateDatetime());
 		assertEquals(product.getImages().get(0).getId(), productSearchDto.getImageDtoList().get(0).getId());
 		assertEquals(product.getImages().get(0).getImageUrl(), productSearchDto.getImageDtoList().get(0).getImageUrl());
-		assertEquals(product.getImages().get(0).getIsThumbnail(), productSearchDto.getImageDtoList().get(0).getIsThumbnail());
-		assertEquals(product.getImages().get(0).getSequenceNumber(), productSearchDto.getImageDtoList().get(0).getSequenceNumber());
-		assertEquals(product.getImages().get(0).getIsDeleted(), productSearchDto.getImageDtoList().get(0).getIsDeleted());
-		assertEquals(product.getImages().get(0).getCreateDatetime(), productSearchDto.getImageDtoList().get(0).getCreateDatetime());
-		assertEquals(product.getImages().get(0).getUpdateDatetime(), productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
+		assertEquals(product.getImages().get(0).getIsThumbnail(),
+			productSearchDto.getImageDtoList().get(0).getIsThumbnail());
+		assertEquals(product.getImages().get(0).getSequenceNumber(),
+			productSearchDto.getImageDtoList().get(0).getSequenceNumber());
+		assertEquals(product.getImages().get(0).getIsDeleted(),
+			productSearchDto.getImageDtoList().get(0).getIsDeleted());
+		assertEquals(product.getImages().get(0).getCreateDatetime(),
+			productSearchDto.getImageDtoList().get(0).getCreateDatetime());
+		assertEquals(product.getImages().get(0).getUpdateDatetime(),
+			productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
 		assertEquals(product.getImages().get(1).getId(), productSearchDto.getImageDtoList().get(1).getId());
 		assertEquals(product.getImages().get(1).getImageUrl(), productSearchDto.getImageDtoList().get(1).getImageUrl());
-		assertEquals(product.getImages().get(1).getIsThumbnail(), productSearchDto.getImageDtoList().get(1).getIsThumbnail());
-		assertEquals(product.getImages().get(1).getSequenceNumber(), productSearchDto.getImageDtoList().get(1).getSequenceNumber());
-		assertEquals(product.getImages().get(1).getIsDeleted(), productSearchDto.getImageDtoList().get(1).getIsDeleted());
-		assertEquals(product.getImages().get(1).getCreateDatetime(), productSearchDto.getImageDtoList().get(1).getCreateDatetime());
-		assertEquals(product.getImages().get(1).getUpdateDatetime(), productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
+		assertEquals(product.getImages().get(1).getIsThumbnail(),
+			productSearchDto.getImageDtoList().get(1).getIsThumbnail());
+		assertEquals(product.getImages().get(1).getSequenceNumber(),
+			productSearchDto.getImageDtoList().get(1).getSequenceNumber());
+		assertEquals(product.getImages().get(1).getIsDeleted(),
+			productSearchDto.getImageDtoList().get(1).getIsDeleted());
+		assertEquals(product.getImages().get(1).getCreateDatetime(),
+			productSearchDto.getImageDtoList().get(1).getCreateDatetime());
+		assertEquals(product.getImages().get(1).getUpdateDatetime(),
+			productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
 	}
 
 	@Test
@@ -93,7 +103,7 @@ public class ProductSearchServiceTest {
 		final List<Image> images = List.of(
 			new Image(1, null, "http://image1.com", true, (short)1, false, TEST_DATE_TIME, TEST_DATE_TIME),
 			new Image(2, null, "http://image2.com", false, (short)2, false, TEST_DATE_TIME, TEST_DATE_TIME)
-			);
+		);
 
 		return new Product(
 			1,
@@ -108,6 +118,7 @@ public class ProductSearchServiceTest {
 			Acidity.MEDIUM,
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
+			"testSize",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,

@@ -45,6 +45,15 @@ public class ProductManagementController {
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
+	@PutMapping("/status")
+	public Response<List<ProductManagementDto.Response>> bulkModifyStatus(
+		@RequestBody final ProductManagementDto.Request.BulkStatus bulkStatus
+	) {
+		final List<ProductManagementDto> productManagementDto = productManagementService.bulkModifyStatus(bulkStatus);
+		return new Response<>(HttpStatus.OK.value(),
+			ProductManagementMapper.INSTANCE.dtosToResponses(productManagementDto));
+	}
+
 	@PutMapping("/stock/increase")
 	public Response<ProductManagementDto.Response> increaseToStock(
 		@Valid @RequestBody final ProductManagementDto.Request.Stock stock
