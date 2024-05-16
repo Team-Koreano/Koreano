@@ -18,6 +18,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -70,33 +71,33 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 		}
 
 		if (search.isDecaf() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
+			QueryVariant matchQuery = new TermQuery.Builder()
 				.field("isDecaf")
-				.query(search.isDecaf())
+				.value(search.isDecaf())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
 		if (search.category() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
+			QueryVariant matchQuery = new TermQuery.Builder()
 				.field("category")
-				.query(search.category().getCode())
+				.value(search.category().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
 		if (search.bean() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
+			QueryVariant matchQuery = new TermQuery.Builder()
 				.field("bean")
-				.query(search.bean().getCode())
+				.value(search.bean().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
 		if (search.acidity() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
+			QueryVariant matchQuery = new TermQuery.Builder()
 				.field("acidity")
-				.query(search.acidity().getTitle())
+				.value(search.acidity().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
