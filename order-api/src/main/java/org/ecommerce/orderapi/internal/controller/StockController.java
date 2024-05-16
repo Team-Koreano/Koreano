@@ -3,11 +3,9 @@ package org.ecommerce.orderapi.internal.controller;
 import java.util.List;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.orderapi.dto.OrderItemDto;
-import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
-import org.ecommerce.orderapi.service.StockService;
+import org.ecommerce.orderapi.handler.StockEventHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,20 +19,17 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/internal/stocks/v1")
 public class StockController {
 
-	private final StockService stockService;
-
-	// todo jwt 도입 후 로직 변경
-	private final static Integer USER_ID = 1;
+	private final StockEventHandler stockEventHandler;
 
 	@PutMapping("/decrease/orders/{orderId}")
-	public Response<List<OrderItemDto.Response>> decreaseStocks(
+	public Response<List<StockDto.Response>> decreaseStocks(
 			@PathVariable("orderId") final Long orderId
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				stockService.decreaseStocks(orderId).stream()
-						.map(OrderMapper.INSTANCE::orderItemDtoToResponse)
+				stockEventHandler.decreaseStocks(orderId).stream()
+						.map(StockMapper.INSTANCE::toResponse)
 						.toList()
 		);
 	}
@@ -48,7 +43,7 @@ public class StockController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				StockMapper.INSTANCE.toResponse(
-						stockService.increaseStock(orderItemId)
+						stockEventHandler.increaseStock(orderId, orderItemId)
 				)
 		);
 	}

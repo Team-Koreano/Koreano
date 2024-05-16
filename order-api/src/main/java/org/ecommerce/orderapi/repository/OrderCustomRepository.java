@@ -11,4 +11,6 @@ public interface OrderCustomRepository {
 			final Pageable pageable);
 
 	Optional<Order> findOrderByIdAndUserId(final Integer userId, final Long orderId);
+
+	Optional<Order> findOrderById(final Long orderId);
 }

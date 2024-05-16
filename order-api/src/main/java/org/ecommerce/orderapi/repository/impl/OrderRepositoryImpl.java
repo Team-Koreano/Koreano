@@ -60,8 +60,17 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(order)
 				.leftJoin(order.orderItems).fetchJoin()
 				.where(order.id.eq(orderId),
-						order.userId.eq(userId))
+						userIdEq(userId))
 				.fetchFirst());
+	}
+
+	@Override
+	public Optional<Order> findOrderById(Long orderId) {
+		return findOrderByIdAndUserId(null, orderId);
+	}
+
+	private BooleanExpression userIdEq(final Integer userId) {
+		return userId == null ? null : order.userId.eq(userId);
 	}
 
 	private BooleanExpression generateDateCondition(final Integer year) {

@@ -9,8 +9,7 @@ import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.handler.OrderEventHandler;
 import org.ecommerce.orderapi.handler.OrderQueryHandler;
-import org.ecommerce.orderapi.service.OrderDomainService;
-import org.ecommerce.orderapi.service.StockService;
+import org.ecommerce.orderapi.service.StockDomainService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +28,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/orders/v1")
 public class OrderController {
 
-	private final OrderDomainService orderDomainService;
 	private final OrderEventHandler orderEventHandler;
 	private final OrderQueryHandler orderQueryHandler;
-	private final StockService stockService;
+	private final StockDomainService stockDomainService;
 
 	// todo jwt 도입 후 로직 변경
 	private final static Integer USER_ID = 1;
@@ -86,13 +84,13 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				StockMapper.INSTANCE.toResponse(
-						stockService.getMockData(productId)
+						stockDomainService.getMockData(productId)
 				)
 		);
 	}
 
 	@PostMapping("/mocks")
 	public void saveMockData() {
-		stockService.saveMock();
+		stockDomainService.saveMock();
 	}
 }

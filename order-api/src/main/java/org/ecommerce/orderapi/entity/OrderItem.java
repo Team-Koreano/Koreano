@@ -120,15 +120,6 @@ public class OrderItem {
 				OrderStatusHistory.ofRecord(this, CANCELLED));
 	}
 
-	public void changeStatus(
-			final OrderStatus changeStatus,
-			final OrderStatusReason changeStatusReason
-	) {
-		status = changeStatus;
-		statusReason = changeStatusReason;
-		statusDatetime = LocalDateTime.now();
-	}
-
 	boolean isCancelableStatus() {
 		return this.status == CLOSED;
 	}
@@ -139,7 +130,30 @@ public class OrderItem {
 		return duration.toDays() <= ORDER_CANCELLABLE_DATE;
 	}
 
-	public boolean isRefundedOrder() {
-		return this.status == CANCELLED && this.statusReason == REFUND;
+	boolean isRefundedOrderStatus() {
+		return status == CANCELLED;
+	}
+
+	boolean isRefundedStatusReason() {
+		return statusReason == REFUND;
+	}
+
+	boolean isCompletedOrderItem() {
+		return this.status == CLOSED;
+	}
+
+	void completedOrderItem() {
+		changeStatus(CLOSED, null);
+		orderStatusHistories.add(
+				OrderStatusHistory.ofRecord(this, CLOSED));
+	}
+
+	private void changeStatus(
+			final OrderStatus changeStatus,
+			final OrderStatusReason changeStatusReason
+	) {
+		status = changeStatus;
+		statusReason = changeStatusReason;
+		statusDatetime = LocalDateTime.now();
 	}
 }

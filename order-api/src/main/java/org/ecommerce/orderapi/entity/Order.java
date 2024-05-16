@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.entity.enumerated.OrderStatus;
@@ -106,12 +107,30 @@ public class Order {
 	}
 
 	public void cancelItem(final Long orderItemId) {
-		OrderItem orderItem = orderItems.stream()
-				.filter(item -> item.getId().equals(orderItemId))
-				.findFirst()
-				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM_ID));
+		OrderItem orderItem = getOrderItemByOrderItemId(orderItemId);
 		isCancelableOrderItem(orderItem);
 		orderItem.cancel();
+	}
+
+	public void completeOrder(final Set<Long> successfulDecreaseStockOrderItemIds) {
+		orderItems.stream()
+				.filter(orderItem ->
+						successfulDecreaseStockOrderItemIds.contains(orderItem.getId()))
+				.forEach(OrderItem::completedOrderItem);
+		if (isCompletedAllOrderItems()) {
+			status = CLOSED;
+		}
+	}
+
+	public boolean isStockOperationProcessableOrder() {
+		return status == ACCEPTED || status == CANCELLED;
+	}
+
+	public OrderItem getOrderItemByOrderItemId(final Long orderItemId) {
+		return orderItems.stream()
+				.filter(orderItem -> orderItem.getId().equals(orderItemId))
+				.findFirst()
+				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM_ID));
 	}
 
 	private void validateOrder(final int productCount) {
@@ -187,6 +206,10 @@ public class Order {
 		if (!orderItem.isCancellableOrderDate()) {
 			throw new CustomException(TOO_OLD_ORDER_TO_CANCEL);
 		}
+	}
+
+	private boolean isCompletedAllOrderItems() {
+		return orderItems.stream().allMatch(OrderItem::isCompletedOrderItem);
 	}
 
 }

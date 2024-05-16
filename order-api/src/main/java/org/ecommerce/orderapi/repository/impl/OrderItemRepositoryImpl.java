@@ -43,10 +43,7 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 
 	@Override
 	public OrderItem findOrderItemById(Long orderItemId) {
-		return jpaQueryFactory.selectFrom(orderItem)
-				.leftJoin(orderItem.orderStatusHistories).fetchJoin()
-				.where(orderItem.id.eq(orderItemId))
-				.fetchFirst();
+		return findOrderItemByIdAndUserId(orderItemId, null);
 	}
 
 	private BooleanExpression userIdEq(final Integer userId) {

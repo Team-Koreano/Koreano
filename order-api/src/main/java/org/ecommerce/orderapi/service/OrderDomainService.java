@@ -4,6 +4,7 @@ import static org.ecommerce.orderapi.exception.OrderErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.entity.Order;
@@ -54,6 +55,17 @@ public class OrderDomainService {
 	 */
 	public void cancelOrder(final Order order, final Long orderItemId) {
 		order.cancelItem(orderItemId);
+	}
+
+	/**
+	 * 주문을 완료하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param order- 주문
+	 * @param orderItemIds- 완료될 주문 항목 번호
+	 */
+	public void completeOrder(final Order order, final Set<Long> orderItemIds) {
+		order.completeOrder(orderItemIds);
 	}
 
 	/**

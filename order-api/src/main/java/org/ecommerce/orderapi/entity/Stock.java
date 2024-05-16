@@ -1,11 +1,15 @@
 package org.ecommerce.orderapi.entity;
 
+import static org.ecommerce.orderapi.entity.enumerated.StockOperationResult.*;
 import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
+import static org.ecommerce.orderapi.exception.StockErrorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ecommerce.common.error.CustomException;
+import org.ecommerce.orderapi.entity.enumerated.StockOperationResult;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.CascadeType;
@@ -54,38 +58,71 @@ public class Stock {
 		stock.productId = productId;
 		stock.total = total;
 		stock.stockHistories.add(
-				StockHistory.ofRecord(stock, null, INCREASE));
+				StockHistory.ofRecord(stock, null, INCREASE, SUCCESS));
 		return stock;
 	}
 
-	public void decreaseTotalStock(
-			final Integer quantity,
-			final OrderItem orderItem
-	) {
-		this.total -= quantity;
-		this.stockHistories = new ArrayList<>(this.stockHistories);
-		this.stockHistories.add(
-				StockHistory.ofRecord(
-						this,
-						orderItem,
-						DECREASE
-				));
+	public StockOperationResult decreaseTotal(final OrderItem orderItem) {
+
+		if (!hasStock(orderItem.getQuantity())) {
+			stockHistories.add(
+					StockHistory.ofRecord(this, orderItem, DECREASE, TOTAL_LIMIT)
+			);
+			return TOTAL_LIMIT;
+		}
+
+		total -= orderItem.getQuantity();
+		stockHistories.add(
+				StockHistory.ofRecord(this, orderItem, DECREASE, SUCCESS)
+		);
+		return SUCCESS;
 	}
 
-	public void increaseTotalStock(
-			final OrderItem orderItem
-	) {
-		this.total += orderItem.getQuantity();
-		this.stockHistories = new ArrayList<>(this.stockHistories);
-		this.stockHistories.add(
+	public void increaseTotal(final OrderItem orderItem) {
+		validateOrderItem(orderItem);
+		validateStockHistory(orderItem);
+
+		total += orderItem.getQuantity();
+		stockHistories.add(
 				StockHistory.ofRecord(
 						this,
 						orderItem,
-						INCREASE
+						INCREASE,
+						SUCCESS
 				));
 	}
 
 	public boolean hasStock(Integer quantity) {
 		return this.total >= quantity;
+	}
+
+	private void validateOrderItem(final OrderItem orderItem) {
+		if (!orderItem.isRefundedOrderStatus()) {
+			throw new CustomException(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK);
+		}
+
+		if (!orderItem.isRefundedStatusReason()) {
+			throw new CustomException(MUST_REFUND_REASON_TO_INCREASE_STOCK);
+		}
+
+	}
+
+	private void validateStockHistory(final OrderItem orderItem) {
+		StockHistory stockHistory = getStockHistoryByOrderItem(orderItem);
+		if (!stockHistory.isOperationTypeDecrease()) {
+			throw new CustomException(
+					MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK);
+		}
+
+		if (!stockHistory.isOperationResultSuccess()) {
+			throw new CustomException(MUST_SUCCESS_OPERATION_RESULT_TO_INCREASE_STOCK);
+		}
+	}
+
+	private StockHistory getStockHistoryByOrderItem(final OrderItem orderItem) {
+		return stockHistories.stream()
+				.filter(stockHistory -> orderItem.equals(stockHistory.getOrderItem()))
+				.findFirst()
+				.orElseThrow(() -> new CustomException(NOT_FOUND_STOCK_HISTORY));
 	}
 }
