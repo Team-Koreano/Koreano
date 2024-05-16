@@ -10,6 +10,7 @@ import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorMessages;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -31,17 +32,19 @@ public class ProductManagementDto {
 	private String information;
 	private Boolean isCrush;
 	private ProductStatus status;
+	private String size;
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
 	private List<Image> images;
 
 	public static class Request {
 		public record Register(
-			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
+			@Min(value = 0, message = ProductManagementErrorMessages.isCanNotBeBelowZero)
 			Integer price,
 			@NotNull(message = ProductManagementErrorMessages.stockNotNull)
+			@Min(value = 0, message = ProductManagementErrorMessages.isCanNotBeBelowZero)
 			Integer stock,
 			Acidity acidity,
 			Bean bean,
@@ -50,22 +53,23 @@ public class ProductManagementDto {
 			String information,
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
-			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
-			Boolean isCrush
+			Boolean isCrush,
+			String size
 		) {
 		}
 
 		public record Stock(
 			Integer productId,
 			@NotNull(message = ProductManagementErrorMessages.stockNotNull)
+			@Min(value = 0, message = ProductManagementErrorMessages.isCanNotBeBelowZero)
 			Integer requestStock
 		) {
 		}
 
 		public record Modify(
-			@NotNull(message = ProductManagementErrorMessages.isDecafNotNull)
 			Boolean isDecaf,
 			@NotNull(message = ProductManagementErrorMessages.priceNotNull)
+			@Min(value = 0, message = ProductManagementErrorMessages.isCanNotBeBelowZero)
 			Integer price,
 			Acidity acidity,
 			Bean bean,
@@ -74,7 +78,7 @@ public class ProductManagementDto {
 			String information,
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
-			@NotNull(message = ProductManagementErrorMessages.isCrashNotNull)
+			String size,
 			Boolean isCrush
 		) {
 		}
@@ -88,30 +92,68 @@ public class ProductManagementDto {
 				return new Image(imageUrl, sequenceNumber, isThumbnail);
 			}
 		}
+
+		public record BulkStatus(
+			List<Integer> productId,
+			ProductStatus productStatus
+		) {
+		}
 	}
 
-	public record Response(
-		Integer id,
-		Boolean isDecaf,
-		Integer price,
-		String bizName,
-		Integer stock,
-		Integer favoriteCount,
-		String acidity,
-		String bean,
-		String category,
-		String information,
-		String name,
-		String status,
-		LocalDateTime createDatetime,
-		Boolean isCrush,
-		List<Image> images
-	) {
+	@Getter
+	@AllArgsConstructor
+	public static class Response {
+		private Integer id;
+		private Integer price;
+		private String bizName;
+		private Integer stock;
+		private Integer favoriteCount;
+		private String category;
+		private String name;
+		private String status;
+		private String information;
+		private LocalDateTime createDatetime;
+		private List<Image> images;
+
+		@Getter
+		public static class BeanProductResponse extends Response {
+			private final Boolean isDecaf;
+			private final String acidity;
+			private final String bean;
+			private final Boolean isCrush;
+
+			public BeanProductResponse(Integer id, Integer price, String bizName, Integer stock, Integer favoriteCount,
+				String category, String name, String status, String information, LocalDateTime createDatetime,
+				List<Image> images,
+				Boolean isDecaf, String acidity, String bean, Boolean isCrush) {
+				super(id, price, bizName, stock, favoriteCount, category, name, status, information, createDatetime,
+					images);
+				this.isDecaf = isDecaf;
+				this.acidity = acidity;
+				this.bean = bean;
+				this.isCrush = isCrush;
+			}
+		}
+
+		@Getter
+		public static class DefaultProductResponse extends Response {
+			private final String size;
+
+			public DefaultProductResponse(Integer id, Integer price, String bizName, Integer stock,
+				Integer favoriteCount, String category, String name, String status, String information,
+				LocalDateTime createDatetime,
+				List<Image> images, String size) {
+				super(id, price, bizName, stock, favoriteCount, category, name, status, information, createDatetime,
+					images);
+				this.size = size;
+			}
+		}
 	}
 
 	public record Image(
 		String imageUrl,
 		Short sequenceNumber,
-		boolean isThumbnail) {
+		boolean isThumbnail
+	) {
 	}
 }

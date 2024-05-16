@@ -2,8 +2,8 @@ package org.ecommerce.userapi.security.custom;
 
 import java.util.Objects;
 
+import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.security.AuthDetails;
-import org.ecommerce.userapi.security.JwtUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final JwtUtils jwtUtils;
+	private final JwtProvider jwtProvider;
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -28,14 +28,13 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 	@Override
 	public AuthDetails resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 		NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-		String bearerToken = jwtUtils.resolveToken(
+		String bearerToken = jwtProvider.resolveToken(
 			Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class)));
 		if (bearerToken != null) {
-			Integer userId = jwtUtils.getId(bearerToken);
-			String email = jwtUtils.getEmail(bearerToken);
-			String role = jwtUtils.getRoll(bearerToken);
-			return new AuthDetails(userId, email, role);
+			Integer userId = jwtProvider.getId(bearerToken);
+			String role = jwtProvider.getRoll(bearerToken);
+			return new AuthDetails(userId, role);
 		}
-		return new AuthDetails(null, null, null);
+		return new AuthDetails(null, null);
 	}
 }

@@ -2,12 +2,15 @@ package org.ecommerce.userapi.external.controller;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
+import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
+import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.security.AuthDetails;
 import org.ecommerce.userapi.security.custom.CurrentUser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/sellers/v1")
+@RequestMapping("/api/external/sellers/v1")
 public class SellerController {
 
 	// TODO : 계좌, 주소 테이블 생성 로직 구현
@@ -33,7 +36,7 @@ public class SellerController {
 	@PostMapping()
 	public Response<SellerDto.Response.Register> register(@RequestBody final SellerDto.Request.Register seller) {
 		final SellerDto responseSeller = sellerService.registerRequest(seller);
-		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Register.of(responseSeller));
+		return new Response<>(HttpStatus.OK.value(), SellerMapper.INSTANCE.sellerDtoToResponse(responseSeller));
 	}
 
 	@PostMapping("/login")
@@ -55,8 +58,8 @@ public class SellerController {
 	public Response<AccountDto.Response.Register> account(
 		@CurrentUser final AuthDetails authDetails,
 		@RequestBody @Valid final AccountDto.Request.Register account) {
-		AccountDto accountDto = sellerService.registerAccount(authDetails, account);
-		return new Response<>(HttpStatus.OK.value(), AccountDto.Response.Register.of(accountDto));
+		final AccountDto accountDto = sellerService.registerAccount(authDetails, account);
+		return new Response<>(HttpStatus.OK.value(), AccountMapper.INSTANCE.accountDtoToResponse(accountDto));
 	}
 
 	@PostMapping("/reissue")
@@ -64,7 +67,16 @@ public class SellerController {
 		@RequestHeader(HttpHeaders.AUTHORIZATION) final String bearerToken,
 		HttpServletResponse response
 	) {
-		SellerDto sellerDto = sellerService.reissueAccessToken(bearerToken, response);
+		final SellerDto sellerDto = sellerService.reissueAccessToken(bearerToken, response);
 		return new Response<>(HttpStatus.OK.value(), SellerDto.Response.Login.of(sellerDto));
+	}
+
+	@DeleteMapping()
+	public Response<String> withdrawSeller(
+		@CurrentUser final AuthDetails authDetails,
+		@Valid @RequestBody final SellerDto.Request.Withdrawal withdrawal
+	) {
+		sellerService.withdrawSeller(withdrawal, authDetails);
+		return new Response<>(HttpStatus.OK.value(), "탈퇴에 성공하였습니다");
 	}
 }

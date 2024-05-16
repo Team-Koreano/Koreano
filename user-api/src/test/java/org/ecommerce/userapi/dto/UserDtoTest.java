@@ -3,6 +3,7 @@ package org.ecommerce.userapi.dto;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.enumerated.Gender;
@@ -26,15 +27,17 @@ class UserDtoTest {
 		false,
 		null,
 		0L,
-		UserStatus.GENERAL
+		UserStatus.GENERAL,
+		new ArrayList<>(),
+		new ArrayList<>()
 	);
 
 	@Test
 	void 회원_응답() {
 		//given
-		final UserDto userDto = UserMapper.INSTANCE.toDto(USERS);
+		final UserDto userDto = UserMapper.INSTANCE.userToDto(USERS);
 		//when
-		final UserDto.Response.Register register = UserDto.Response.Register.of(userDto);
+		final UserDto.Response.Register register = UserMapper.INSTANCE.userDtoToResponse(userDto);
 		//then
 		assertThat(register.age()).isEqualTo(USERS.getAge());
 		assertThat(register.email()).isEqualTo(USERS.getEmail());
