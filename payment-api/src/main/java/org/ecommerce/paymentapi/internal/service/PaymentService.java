@@ -1,5 +1,6 @@
 package org.ecommerce.paymentapi.internal.service;
 
+import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
 import java.util.LinkedList;
@@ -42,10 +43,10 @@ public class PaymentService {
 	 * @return - 반환 값 설명 텍스트
 	 */
 	@DistributedLock(
-		// name = "BEANPAY",
+		lockName = BEANPAY,
 		key = {
-			"#paymentPrice.userId().concat('USER')",
-			"#paymentPrice.paymentDetails()"
+			"#paymentPrice.userId() + 'USER'",
+			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}
 	)
 	public PaymentDto paymentPrice(final PaymentPrice paymentPrice) {

@@ -10,11 +10,11 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
 @Getter
+@AllArgsConstructor
 public class PaymentDto {
 	private Long id;
 	private Long orderId;
