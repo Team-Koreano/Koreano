@@ -7,11 +7,11 @@ import org.ecommerce.paymentapi.exception.BeanPayErrorMessage;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
 @Getter
+@AllArgsConstructor
 public class BeanPayDto {
 	private Integer id;
 	private Integer userId;
