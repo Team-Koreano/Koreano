@@ -44,11 +44,21 @@ public class PaymentDetail {
 	@JoinColumn(nullable = false)
 	private Payment payment;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(
+		fetch = FetchType.LAZY,
+		cascade = {
+			CascadeType.PERSIST,
+			CascadeType.MERGE
+	})
 	@JoinColumn(name = "beanpay_detail_user_id", nullable = false)
 	private BeanPayDetail userBeanPayDetail;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(
+		fetch = FetchType.LAZY,
+		cascade = {
+			CascadeType.PERSIST,
+			CascadeType.MERGE
+		})
 	@JoinColumn(name = "beanpay_detail_seller_id", nullable = false)
 	private BeanPayDetail sellerBeanPayDetail;
 

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorMessages;
-import org.ecommerce.userapi.security.JwtUtils;
+import org.ecommerce.userapi.provider.JwtProvider;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -51,6 +51,17 @@ public class SellerDto {
 			String password
 		) {
 		}
+
+		public record Withdrawal(
+			@Email
+			@NotBlank(message = UserErrorMessages.emailNotBlank)
+			String email,
+			@NotBlank(message = UserErrorMessages.passwordNotBlank)
+			String password,
+			@NotBlank(message = UserErrorMessages.phoneNumberNotBlank)
+			String phoneNumber
+		) {
+		}
 	}
 
 	public static class Response {
@@ -61,22 +72,13 @@ public class SellerDto {
 			String address,
 			String phoneNumber
 		) {
-			public static Register of(final SellerDto seller) {
-				return new Register(
-					seller.getEmail(),
-					seller.getName(),
-					seller.getAddress(),
-					seller.getPhoneNumber()
-				);
-			}
-
 		}
 
 		public record Login(
 			String accessToken
 		) {
 			public static Login of(final SellerDto sellerDto) {
-				return new Login(JwtUtils.prefix(sellerDto.getAccessToken()));
+				return new Login(JwtProvider.prefix(sellerDto.getAccessToken()));
 			}
 		}
 	}

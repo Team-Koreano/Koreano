@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @Import(MockS3Config.class)
-class ProductManagementControllerTest {
+class ExternalProductManagementControllerTest {
 
 	private static final SellerRep test = new SellerRep(2, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.
@@ -102,9 +102,10 @@ class ProductManagementControllerTest {
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
 				false
+				, "20 * 50"
 			);
 
-		final Product product = Product.ofCreate(
+		final Product product = Product.createBean(
 			productDtos.category(),
 			productDtos.price(),
 			productDtos.stock(),
@@ -156,16 +157,16 @@ class ProductManagementControllerTest {
 			.andDo(print());
 
 		resultActions
-			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
-			.andExpect(jsonPath("$.result.price").value(expectedResponse.price()))
-			.andExpect(jsonPath("$.result.stock").value(expectedResponse.stock()))
-			.andExpect(jsonPath("$.result.acidity").value(expectedResponse.acidity()))
-			.andExpect(jsonPath("$.result.bean").value(expectedResponse.bean()))
-			.andExpect(jsonPath("$.result.category").value(expectedResponse.category()))
-			.andExpect(jsonPath("$.result.information").value(expectedResponse.information()))
-			.andExpect(jsonPath("$.result.status").value(expectedResponse.status()))
-			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.isCrush()))
-			.andExpect(jsonPath("$.result.bizName").value(expectedResponse.bizName()))
+			.andExpect(jsonPath("$.result.name").value(product.getName()))
+			.andExpect(jsonPath("$.result.price").value(product.getPrice()))
+			.andExpect(jsonPath("$.result.stock").value(product.getStock()))
+			.andExpect(jsonPath("$.result.acidity").value(product.getAcidity().getCode()))
+			.andExpect(jsonPath("$.result.bean").value(product.getBean().getCode()))
+			.andExpect(jsonPath("$.result.category").value(product.getCategory().getCode()))
+			.andExpect(jsonPath("$.result.information").value(product.getInformation()))
+			.andExpect(jsonPath("$.result.status").value(product.getStatus().getCode()))
+			.andExpect(jsonPath("$.result.isCrush").value(product.getIsCrush()))
+			.andExpect(jsonPath("$.result.bizName").value(product.getSellerRep().getBizName()))
 			.andDo(print());
 	}
 
@@ -178,7 +179,7 @@ class ProductManagementControllerTest {
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, status, testTime, testTime, null
+			true, "20*50", status, testTime, testTime, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
@@ -206,13 +207,12 @@ class ProductManagementControllerTest {
 		final Product originalEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
-
 		final Product expectedEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
@@ -234,12 +234,12 @@ class ProductManagementControllerTest {
 		final Integer productId = 1;
 		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", true);
+			"수정된", "커피", null, true);
 
 		final Product expectedEntity = new Product(
-			productId, dto.category(), dto.price(), null, null, null, dto.isDecaf(),
+			productId, dto.category(), dto.price(), 50, test, 0, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), null, null, null, null
+			dto.isCrush(), "20 * 50", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -282,6 +282,44 @@ class ProductManagementControllerTest {
 			.andExpect(jsonPath("$.result.information").value(expectedResponse.getInformation()))
 			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.getIsCrush()))
 			.andExpect(jsonPath("$.result.isDecaf").value(expectedResponse.getIsDecaf()));
+	}
+
+	@Test
+	void 상품_여러개_상태_변경() throws Exception {
+		// Given
+		final List<Integer> list = List.of(1, 2);
+		final ProductStatus status = ProductStatus.DISCONTINUED;
+		final ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(list,
+			status);
+
+		final Product entity1 = new Product(
+			1, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, "20*50", status, null, null, null
+		);
+
+		final Product entity2 = new Product(
+			2, ProductCategory.BEAN, 1000, 50, test, 0, false,
+			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
+			true, "20*50", status, null, null, null
+		);
+
+		List<Product> products = List.of(entity1, entity2);
+		final List<ProductManagementDto> productManagementDtos = ProductManagementMapper.INSTANCE.productsToDtos(
+			products);
+
+		when(productManagementService.bulkModifyStatus(eq(request)))
+			.thenReturn(productManagementDtos);
+
+		// when, then
+		mockMvc.perform(put("/api/external/product/v1/status")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.result[0].id").value(entity1.getId()))
+			.andExpect(jsonPath("$.result[0].status").value(status.name()))
+			.andExpect(jsonPath("$.result[1].id").value(entity2.getId()))
+			.andExpect(jsonPath("$.result[1].status").value(status.name()));
 	}
 
 	private void verifyImages(List<Image> images, int index,

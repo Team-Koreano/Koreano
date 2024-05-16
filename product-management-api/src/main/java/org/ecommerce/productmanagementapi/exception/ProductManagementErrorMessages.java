@@ -7,4 +7,5 @@ public class ProductManagementErrorMessages {
 	public static final String informationNotBlank = "정보를 적어주세요";
 	public static final String nameNotBlank = "상품명을 입력해 주세요";
 	public static final String isCrashNotNull = "분쇄 가능 여부를 입력해 주세요";
+	public static final String isCanNotBeBelowZero = "1 이상의 값을 기입해 주세요";
 }
