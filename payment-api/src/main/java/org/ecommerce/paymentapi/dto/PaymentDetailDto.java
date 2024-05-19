@@ -1,27 +1,63 @@
 package org.ecommerce.paymentapi.dto;
 
+import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.*;
+import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.NOT_BLANK_ERROR_CODE;
+import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.NOT_BLANK_ERROR_MESSAGE;
 import static org.ecommerce.paymentapi.exception.PaymentDetailErrorMessage.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
+import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 public class PaymentDetailDto {
-	private Integer id;
+	private UUID id;
+	private Long paymentId;
 	private Integer userId;
 	private Integer sellerId;
-	private Integer totalAmount;
-	private String orderName;
+	private Long orderItemId;
+	private Integer deliveryFee;
+	private Integer paymentAmount;
+	private Integer quantity;
+	private String paymentName;
+	private String cancelReason;
+	private String failReason;
+	private String paymentKey;
+	private String payType;
+	private PaymentStatus paymentStatus;
+	private ProcessStatus processStatus;
+	private LocalDateTime approveDateTime;
 	private LocalDateTime createDateTime;
 	private LocalDateTime updateDateTime;
 
 
 	public static class Request {
+
+		public record PreCharge(
+			Integer userId,
+			Integer amount
+		) {
+		}
+
+		public record TossFail(
+			@NotNull(message = NOT_BLANK_ORDER_ID)
+			UUID orderId,
+			@NotBlank(message = NOT_BLANK_ERROR_CODE)
+			String errorCode,
+			@NotBlank(message = NOT_BLANK_ERROR_MESSAGE)
+			String errorMessage
+		) {
+		}
+
 		public record PaymentDetailPrice(
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
 			Long orderDetailId,
