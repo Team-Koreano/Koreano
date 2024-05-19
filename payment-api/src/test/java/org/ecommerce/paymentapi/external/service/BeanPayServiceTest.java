@@ -67,7 +67,7 @@ class BeanPayServiceTest {
 		final PreCharge request = new PreCharge(1, 10_000);
 		final BeanPay beanPay = getUserBeanPay();
 		final PaymentDetail entity = beanPay.beforeCharge(beanPay.getAmount());
-		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.toDto(entity);
+		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.entityToDto(entity);
 
 		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
 		given(paymentDetailRepository.save(any())).willReturn(entity);

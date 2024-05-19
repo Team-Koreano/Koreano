@@ -9,6 +9,9 @@ import org.mapstruct.factory.Mappers;
 public interface BeanPayMapper {
 
 	BeanPayMapper INSTANCE = Mappers.getMapper(BeanPayMapper.class);
-	BeanPayDto toDto(BeanPay beanPay);
+
+	BeanPayDto entityToDto(BeanPay beanPay);
+	BeanPayDto.Response dtoToResponse(BeanPayDto beanPayDto);
+
 
 }

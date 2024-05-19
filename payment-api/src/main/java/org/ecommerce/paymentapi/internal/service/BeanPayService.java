@@ -38,7 +38,7 @@ public class BeanPayService {
 		if (beanPay.isPresent())
 			throw new CustomException(BeanPayErrorCode.ALREADY_EXISTS);
 
-		return BeanPayMapper.INSTANCE.toDto(
+		return BeanPayMapper.INSTANCE.entityToDto(
 			beanPayRepository.save(
 				BeanPay.ofCreate(createBeanPay.userId(), createBeanPay.role())));
 	}

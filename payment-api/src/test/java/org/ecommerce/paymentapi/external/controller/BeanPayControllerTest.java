@@ -76,10 +76,11 @@ class BeanPayControllerTest {
 		final PreCharge request = new PreCharge(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
 		final PaymentDetail entity = beanPay.beforeCharge(10000);
-		final PaymentDetailDto dto = PaymentDetailMapper.INSTANCE.toDto(entity);
+		final PaymentDetailDto dto = PaymentDetailMapper.INSTANCE.entityToDto(entity);
 
 		when(beanPayService.beforeCharge(request)).thenReturn(dto);
-		final Response<PaymentDetailDto> response = new Response<>(200, dto);
+		final Response<PaymentDetailDto.Response> response = new Response<>(200,
+			PaymentDetailMapper.INSTANCE.dtoToResponse(dto));
 
 		//when
 		MvcResult mvcResult =
@@ -127,7 +128,8 @@ class BeanPayControllerTest {
 				null,
 				null
 			);
-			final Response<PaymentDetailDto> result = new Response<>(200, response);
+			final Response<PaymentDetailDto.Response> result = new Response<>(200,
+				PaymentDetailMapper.INSTANCE.dtoToResponse(response));
 
 			when(beanPayService.validTossCharge(request, userId, role)).thenReturn(response);
 
@@ -161,9 +163,10 @@ class BeanPayControllerTest {
 		final TossFail request = new TossFail(orderId, errorCode, errorMessage);
 		final BeanPay beanPay = getBeanPay();
 		PaymentDetail paymentDetail = beanPay.beforeCharge(amount);
-		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
+		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
 
-		final Response<PaymentDetailDto> result = new Response<>(200, response);
+		final Response<PaymentDetailDto.Response> result = new Response<>(200,
+			PaymentDetailMapper.INSTANCE.dtoToResponse(response));
 
 		when(beanPayService.failTossCharge(request)).thenReturn(response);
 

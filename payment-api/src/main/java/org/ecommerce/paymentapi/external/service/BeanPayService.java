@@ -53,7 +53,7 @@ public class BeanPayService {
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
 		PaymentDetail paymentDetail = beanPay.beforeCharge(request.amount());
 
-		return PaymentDetailMapper.INSTANCE.toDto(
+		return PaymentDetailMapper.INSTANCE.entityToDto(
 			paymentDetailRepository.save(paymentDetail)
 		);
 
@@ -86,7 +86,7 @@ public class BeanPayService {
 		} catch (CustomException e) {
 			handleException(beanPayDetail, e.getErrorMessage());
 		}
-		return PaymentDetailMapper.INSTANCE.toDto(beanPayDetail);
+		return PaymentDetailMapper.INSTANCE.entityToDto(beanPayDetail);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class BeanPayService {
 		PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
 		handleException(paymentDetail, request.errorMessage());
 
-		return PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
+		return PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
 	}
 
 	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
@@ -164,7 +164,7 @@ public class BeanPayService {
 		if (beanPay.isPresent())
 			throw new CustomException(BeanPayErrorCode.ALREADY_EXISTS);
 
-		return BeanPayMapper.INSTANCE.toDto(
+		return BeanPayMapper.INSTANCE.entityToDto(
 			beanPayRepository.save(
 				BeanPay.ofCreate(createBeanPay.userId(), createBeanPay.role())));
 	}

@@ -30,6 +30,11 @@ public class BeanPayDto {
 	}
 
 	public record Response(
+		Integer id,
+		Integer userId,
+		Role role,
+		Integer amount,
+		LocalDateTime createDateTime
 	) {
 	}
 }

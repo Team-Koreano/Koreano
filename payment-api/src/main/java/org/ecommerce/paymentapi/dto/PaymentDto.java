@@ -56,6 +56,15 @@ public class PaymentDto {
 		}
 	}
 
-	public record Response() {
+	public record Response(
+		 Long id,
+		 Long orderId,
+		 Integer userId,
+		 Integer totalAmount,
+		 String orderName,
+		 ProcessStatus processStatus,
+		 LocalDateTime createDateTime,
+		 Boolean isVisible
+	) {
 	}
 }

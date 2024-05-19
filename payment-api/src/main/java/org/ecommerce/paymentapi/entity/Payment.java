@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.util.Pair;
@@ -53,9 +52,8 @@ public class Payment {
 	@JoinColumn(name = "beanpay_user_id", nullable = false)
 	private BeanPay userBeanPay;
 
-	@ColumnDefault("0")
 	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount;
+	private Integer totalAmount = 0;
 
 	@Column(name = "order_name", nullable = false)
 	private String orderName;

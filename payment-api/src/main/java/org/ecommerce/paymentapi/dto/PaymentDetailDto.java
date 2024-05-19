@@ -78,6 +78,25 @@ public class PaymentDetailDto {
 		}
 	}
 
-	public record Response() {
+	public record Response(
+		UUID id,
+		Long paymentId,
+		Integer userId,
+		Integer sellerId,
+		Long orderItemId,
+		Integer deliveryFee,
+		Integer paymentAmount,
+		Integer quantity,
+		String paymentName,
+		String cancelReason,
+		String failReason,
+		String paymentKey,
+		String payType,
+		PaymentStatus paymentStatus,
+		ProcessStatus processStatus,
+		LocalDateTime approveDateTime,
+		LocalDateTime createDateTime,
+		LocalDateTime updateDateTime
+	) {
 	}
 }
