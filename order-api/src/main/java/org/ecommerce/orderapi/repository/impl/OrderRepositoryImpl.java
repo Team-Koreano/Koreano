@@ -4,6 +4,7 @@ import static org.ecommerce.orderapi.entity.QOrder.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.repository.OrderCustomRepository;
@@ -34,7 +35,7 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	) {
 		List<Order> content = jpaQueryFactory
 				.selectFrom(order)
-				.leftJoin(order.orderDetails).fetchJoin()
+				.leftJoin(order.orderItems).fetchJoin()
 				.where(order.userId.eq(userId),
 						generateDateCondition(year))
 				.orderBy(order.orderDatetime.desc())
@@ -49,6 +50,27 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 						generateDateCondition(year));
 
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Optional<Order> findOrderByIdAndUserId(
+			final Integer userId,
+			final Long orderId
+	) {
+		return Optional.ofNullable(jpaQueryFactory.selectFrom(order)
+				.leftJoin(order.orderItems).fetchJoin()
+				.where(order.id.eq(orderId),
+						userIdEq(userId))
+				.fetchFirst());
+	}
+
+	@Override
+	public Optional<Order> findOrderById(Long orderId) {
+		return findOrderByIdAndUserId(null, orderId);
+	}
+
+	private BooleanExpression userIdEq(final Integer userId) {
+		return userId == null ? null : order.userId.eq(userId);
 	}
 
 	private BooleanExpression generateDateCondition(final Integer year) {

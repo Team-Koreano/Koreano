@@ -9,6 +9,8 @@ import org.mapstruct.factory.Mappers;
 public interface StockMapper {
 
 	StockMapper INSTANCE = Mappers.getMapper(StockMapper.class);
+
 	StockDto toStockDto(Stock stock);
+
 	StockDto.Response toResponse(StockDto stockDto);
 }

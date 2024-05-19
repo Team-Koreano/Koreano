@@ -1,10 +1,10 @@
 package org.ecommerce.orderapi.repository;
 
-import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderDetailRepository
-		extends JpaRepository<OrderDetail, Long>, OrderDetailCustomRepository {
+public interface OrderItemRepository
+		extends JpaRepository<OrderItem, Long>, OrderItemCustomRepository {
 }

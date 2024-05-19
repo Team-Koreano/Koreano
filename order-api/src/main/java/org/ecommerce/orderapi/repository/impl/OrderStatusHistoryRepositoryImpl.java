@@ -1,6 +1,6 @@
 package org.ecommerce.orderapi.repository.impl;
 
-import static org.ecommerce.orderapi.entity.QOrderDetail.*;
+import static org.ecommerce.orderapi.entity.QOrderItem.*;
 import static org.ecommerce.orderapi.entity.QOrderStatusHistory.*;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public class OrderStatusHistoryRepositoryImpl implements
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<OrderStatusHistory> findAllByOrderDetailId(Long orderDetailId) {
+	public List<OrderStatusHistory> findAllByOrderItemId(Long orderItemId) {
 		return jpaQueryFactory.selectFrom(orderStatusHistory)
-				.where(orderDetail.id.eq(orderDetailId))
+				.where(orderItem.id.eq(orderItemId))
 				.orderBy(orderStatusHistory.statusChangeDatetime.asc())
 				.fetch();
 	}

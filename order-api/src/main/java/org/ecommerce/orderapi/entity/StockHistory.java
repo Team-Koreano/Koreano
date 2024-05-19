@@ -1,7 +1,11 @@
 package org.ecommerce.orderapi.entity;
 
+import static org.ecommerce.orderapi.entity.enumerated.StockOperationResult.*;
+import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
+
 import java.time.LocalDateTime;
 
+import org.ecommerce.orderapi.entity.enumerated.StockOperationResult;
 import org.ecommerce.orderapi.entity.enumerated.StockOperationType;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -38,11 +42,15 @@ public class StockHistory {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn
-	private OrderDetail orderDetail;
+	private OrderItem orderItem;
 
 	@Column
 	@Enumerated(EnumType.STRING)
 	private StockOperationType operationType;
+
+	@Column
+	@Enumerated(EnumType.STRING)
+	private StockOperationResult operationResult;
 
 	@CreationTimestamp
 	@Column
@@ -50,17 +58,23 @@ public class StockHistory {
 
 	static StockHistory ofRecord(
 			final Stock stock,
-			final OrderDetail orderDetail,
-			final StockOperationType operationType
+			final OrderItem orderItem,
+			final StockOperationType operationType,
+			final StockOperationResult operationResult
 	) {
 		final StockHistory stockHistory = new StockHistory();
 		stockHistory.stock = stock;
-		stockHistory.orderDetail = orderDetail;
+		stockHistory.orderItem = orderItem;
 		stockHistory.operationType = operationType;
+		stockHistory.operationResult = operationResult;
 		return stockHistory;
 	}
 
-	public boolean isOperationTypeDecrease() {
-		return this.operationType == StockOperationType.DECREASE;
+	boolean isOperationTypeDecrease() {
+		return this.operationType == DECREASE;
+	}
+
+	boolean isOperationResultSuccess() {
+		return this.operationResult == SUCCESS;
 	}
 }

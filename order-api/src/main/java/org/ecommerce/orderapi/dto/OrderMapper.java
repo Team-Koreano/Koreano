@@ -1,7 +1,7 @@
 package org.ecommerce.orderapi.dto;
 
 import org.ecommerce.orderapi.entity.Order;
-import org.ecommerce.orderapi.entity.OrderDetail;
+import org.ecommerce.orderapi.entity.OrderItem;
 import org.ecommerce.orderapi.entity.OrderStatusHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,19 +12,28 @@ import org.mapstruct.factory.Mappers;
 public interface OrderMapper {
 	OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-	@Mapping(source = "order.orderDetails", target = "orderDetailDtos")
+	@Mapping(source = "order.orderItems", target = "orderItemDtos")
 	OrderDto OrderToDto(Order order);
 
-	@Mapping(source = "orderDto.orderDetailDtos", target = "orderDetailResponses")
+	@Mapping(source = "orderDto.orderItemDtos", target = "orderItemResponses")
 	OrderDto.Response OrderDtoToResponse(OrderDto orderDto);
 
-	OrderDetailDto orderDetailToDto(OrderDetail orderDetail);
+	OrderItemDto orderItemToDto(OrderItem orderItem);
 
-	OrderDetailDto.Response orderDetailDtoToResponse(OrderDetailDto orderDetailDto);
+	OrderItemDto.Response orderItemDtoToResponse(OrderItemDto orderItemDto);
 
 	OrderStatusHistoryDto orderStatusHistoryToDto(
 			OrderStatusHistory orderStatusHistory);
 
 	OrderStatusHistoryDto.Response orderStatusHistoryDtotoResponse(
 			OrderStatusHistoryDto orderStatusHistoryDto);
+
+	@Mapping(source = "orderItem.orderStatusHistories", target = "orderStatusHistoryDtos")
+	OrderItemStatusHistoryDto orderItemToOrderItemStatusHistoryDto(
+			OrderItem orderItem);
+
+	@Mapping(source = "orderItemStatusHistoryDto.orderStatusHistoryDtos", target = "orderStatusHistoryResponses")
+	OrderItemStatusHistoryDto.Response orderItemStatusHistoryDtotoResponse(
+			OrderItemStatusHistoryDto orderItemStatusHistoryDto
+	);
 }
