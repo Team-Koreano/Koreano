@@ -1,8 +1,5 @@
 package org.ecommerce.paymentapi.dto;
 
-import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.*;
-import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.NOT_BLANK_ERROR_CODE;
-import static org.ecommerce.paymentapi.exception.BeanPayDetailErrorMessage.NOT_BLANK_ERROR_MESSAGE;
 import static org.ecommerce.paymentapi.exception.PaymentDetailErrorMessage.*;
 
 import java.time.LocalDateTime;
@@ -43,13 +40,15 @@ public class PaymentDetailDto {
 	public static class Request {
 
 		public record PreCharge(
+			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
+			@Min(value = 0, message = NOT_UNDER_ZERO_CHARGE_AMOUNT)
 			Integer amount
 		) {
 		}
 
 		public record TossFail(
-			@NotNull(message = NOT_BLANK_ORDER_ID)
+			@NotNull(message = NOT_BLANK_CHARGE_ID)
 			UUID orderId,
 			@NotBlank(message = NOT_BLANK_ERROR_CODE)
 			String errorCode,
@@ -73,7 +72,7 @@ public class PaymentDetailDto {
 			Integer deliveryFee,
 			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId,
-			@NotBlank(message = BLANK_PRODUCT_NAME)
+			@NotBlank(message = NOT_BLANK_PRODUCT_NAME)
 			String productName
 		) {
 		}
