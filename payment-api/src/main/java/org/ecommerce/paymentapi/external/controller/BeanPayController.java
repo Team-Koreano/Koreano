@@ -4,9 +4,9 @@ import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
-import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.TossFail;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PreCharge;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
 import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
 import org.springframework.http.HttpStatus;
@@ -29,22 +29,22 @@ public class BeanPayController {
 	private final BeanPayService beanPayService;
 
 	@PostMapping("/charge")
-	public Response<BeanPayDetailDto> beforeCharge(@RequestBody final PreCharge request) {
-		final BeanPayDetailDto response = beanPayService.preChargeBeanPay(request);
+	public Response<PaymentDetailDto> beforeCharge(@RequestBody final PreCharge request) {
+		final PaymentDetailDto response = beanPayService.preCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/success")
-	public Response<BeanPayDetailDto> validCharge(@Valid final TossPayment request) {
+	public Response<PaymentDetailDto> validCharge(@Valid final TossPayment request) {
 		//TODO: Id, Role 적용 예정
-		final BeanPayDetailDto response = beanPayService.validTossCharge(request, 1, USER);
+		final PaymentDetailDto response = beanPayService.validTossCharge(request, 1, USER);
 		if(response.getProcessStatus() == FAILED) return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 
 	@GetMapping("/fail")
-	public Response<BeanPayDetailDto> failCharge(@Valid final TossFail request) {
-		final BeanPayDetailDto response = beanPayService.failTossCharge(request);
+	public Response<PaymentDetailDto> failCharge(@Valid final TossFail request) {
+		final PaymentDetailDto response = beanPayService.failTossCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 

@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
@@ -34,9 +33,6 @@ public class LockTestServiceTest {
 
 	@Autowired
 	private BeanPayRepository beanPayRepository;
-
-	@Autowired
-	private BeanPayDetailRepository beanPayDetailRepository;
 
 	@Autowired
 	private PaymentRepository paymentRepository;
@@ -73,7 +69,6 @@ public class LockTestServiceTest {
 	public void after() {
 		paymentDetailRepository.deleteAll();
 		paymentRepository.deleteAll();
-		beanPayDetailRepository.deleteAll();
 		beanPayRepository.deleteAll();
 	}
 

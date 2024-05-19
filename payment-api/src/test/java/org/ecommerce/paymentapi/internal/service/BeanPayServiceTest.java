@@ -15,7 +15,6 @@ import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,9 +31,6 @@ class BeanPayServiceTest {
 
 	@Mock
 	private BeanPayRepository beanPayRepository;
-
-	@Mock
-	private BeanPayDetailRepository beanPayDetailRepository;
 
 
 	@Nested

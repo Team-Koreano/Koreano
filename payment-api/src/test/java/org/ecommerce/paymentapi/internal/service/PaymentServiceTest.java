@@ -60,19 +60,19 @@ class PaymentServiceTest {
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
 			final Integer[] sellerIds = new Integer[] {1, 2};
-			final Integer totalAmount = 15000;
+			final Integer paymentAmount = 15000;
 			final String orderName = "orderName";
 
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				totalAmount,
+				paymentAmount,
 				userBeanPay.getUserId(),
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderId,
-						5000,
 						2000,
+						5000,
 						1000,
 						3,
 						0,
@@ -81,8 +81,8 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						2L,
-						5000,
 						2000,
+						5000,
 						1000,
 						3,
 						0,
@@ -91,8 +91,8 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						1L,
-						5000,
 						2000,
+						5000,
 						1000,
 						3,
 						0,
@@ -107,7 +107,7 @@ class PaymentServiceTest {
 			Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				totalAmount,
+				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -123,19 +123,19 @@ class PaymentServiceTest {
 			//then
 			assertEquals(orderId, paymentDto.getOrderId());
 			assertEquals(userBeanPay.getUserId(), paymentDto.getUserId());
-			assertEquals(totalAmount, paymentDto.getTotalAmount());
+			assertEquals(paymentAmount, paymentDto.getTotalAmount());
 			assertEquals(paymentPrice.orderName(), paymentDto.getOrderName());
 			assertEquals(COMPLETED, paymentDto.getProcessStatus());
 			assertEquals(TRUE, paymentDto.getIsVisible());
 			assertEquals(COMPLETED, paymentDto.getProcessStatus());
-			assertEquals(startAmount - totalAmount * 2, userBeanPay.getAmount());
+			assertEquals(startAmount - paymentAmount * 2, userBeanPay.getAmount());
 		}
 
 		@Test
 		void 결제_금액부족() {
 			//given
 			final Long orderId = 1L;
-			final Integer startAmount = 20_000;
+			final Integer startAmount = 10_000;
 			final BeanPay userBeanPay = new BeanPay(1, 1, USER, startAmount, LocalDateTime.now());
 			final List<BeanPay> sellerBeanPays = List.of(
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
@@ -423,8 +423,7 @@ class PaymentServiceTest {
 				PaymentDetailPrice detailPrice = paymentPrice.paymentDetails().get(i);
 				assertEquals(detail.getPayment(), payment);
 				assertEquals(detail.getQuantity(), detailPrice.quantity());
-				assertEquals(detail.getOrderDetailId(), detailPrice.orderDetailId());
-				assertEquals(detail.getTotalPrice(), detailPrice.totalPrice());
+				assertEquals(detail.getOrderItemId(), detailPrice.orderDetailId());
 				assertEquals(detail.getDeliveryFee(), detailPrice.deliveryFee());
 				assertEquals(detail.getPaymentAmount(), detailPrice.paymentAmount());
 				assertEquals(detail.getPaymentStatusHistories().size(), 2);

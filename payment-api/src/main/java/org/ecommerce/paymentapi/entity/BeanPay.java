@@ -61,8 +61,8 @@ public class BeanPay {
 		return beanPay;
 	}
 
-	public BeanPayDetail preCharge(Integer amount) {
-		return BeanPayDetail.ofCreate(this, this.userId, amount);
+	public PaymentDetail preCharge(Integer amount) {
+		return PaymentDetail.ofPreCharge(this, amount);
 	}
 
 	public void chargeBeanPayDetail(Integer amount) {

@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "payment",
 	indexes = {
-		@Index(name = "idx_orderId", columnList = "orderId"),
+		@Index(name = "idx_order_id", columnList = "orderId"),
 	}
 )
 public class Payment {
@@ -107,7 +107,6 @@ public class Payment {
 					payment,
 					sellerBeanPay,
 					paymentDetailPrice.orderDetailId(),
-					paymentDetailPrice.totalPrice(),
 					paymentDetailPrice.deliveryFee(),
 					paymentDetailPrice.paymentAmount(),
 					paymentDetailPrice.quantity(),
