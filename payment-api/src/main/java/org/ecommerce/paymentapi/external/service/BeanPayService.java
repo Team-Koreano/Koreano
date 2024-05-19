@@ -48,10 +48,10 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public PaymentDetailDto preCharge(final PreCharge request) {
+	public PaymentDetailDto beforeCharge(final PreCharge request) {
 
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
-		PaymentDetail paymentDetail = beanPay.preCharge(request.amount());
+		PaymentDetail paymentDetail = beanPay.beforeCharge(request.amount());
 
 		return PaymentDetailMapper.INSTANCE.toDto(
 			paymentDetailRepository.save(paymentDetail)

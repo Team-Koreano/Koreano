@@ -30,7 +30,7 @@ public class BeanPayController {
 
 	@PostMapping("/charge")
 	public Response<PaymentDetailDto> beforeCharge(@RequestBody final PreCharge request) {
-		final PaymentDetailDto response = beanPayService.preCharge(request);
+		final PaymentDetailDto response = beanPayService.beforeCharge(request);
 		return new Response<>(HttpStatus.OK.value(), response);
 	}
 

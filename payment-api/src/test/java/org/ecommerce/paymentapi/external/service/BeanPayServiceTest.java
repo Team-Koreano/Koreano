@@ -66,7 +66,7 @@ class BeanPayServiceTest {
 		//given
 		final PreCharge request = new PreCharge(1, 10_000);
 		final BeanPay beanPay = getUserBeanPay();
-		final PaymentDetail entity = beanPay.preCharge(beanPay.getAmount());
+		final PaymentDetail entity = beanPay.beforeCharge(beanPay.getAmount());
 		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.toDto(entity);
 
 		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
@@ -74,7 +74,7 @@ class BeanPayServiceTest {
 
 
 		//when
-		final PaymentDetailDto actual = beanPayService.preCharge(request);
+		final PaymentDetailDto actual = beanPayService.beforeCharge(request);
 
 		//then
 		assertThat(actual).usingRecursiveComparison().isEqualTo(response);

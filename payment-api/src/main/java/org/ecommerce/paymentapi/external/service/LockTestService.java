@@ -36,7 +36,7 @@ public class LockTestService {
 	public void useDistributeLock(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		PaymentDetail paymentDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
 		paymentDetailRepository.save(paymentDetail);
 		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
@@ -53,7 +53,7 @@ public class LockTestService {
 
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		PaymentDetail paymentDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
 		paymentDetailRepository.save(paymentDetail);
 		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
@@ -63,7 +63,7 @@ public class LockTestService {
 	public void notUseLockTest(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		PaymentDetail paymentDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
 		paymentDetailRepository.save(paymentDetail);
 		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
@@ -74,7 +74,7 @@ public class LockTestService {
 		BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRoleUseBetaLock(1,
 			Role.USER);
 
-		PaymentDetail paymentDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
 		paymentDetailRepository.save(paymentDetail);
 		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
@@ -93,7 +93,7 @@ public class LockTestService {
 			aopForTransaction.proceed(() -> {
 				final BeanPay beanPay = getBeanPay(1,Role.USER);
 
-				PaymentDetail paymentDetail = beanPay.preCharge(5000);
+				PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
 				paymentDetailRepository.save(paymentDetail);
 				beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());

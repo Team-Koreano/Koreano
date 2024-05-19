@@ -121,7 +121,7 @@ public class PaymentDetail {
 	@Column(name = "is_visible")
 	private Boolean isVisible = TRUE;
 
-	protected static PaymentDetail ofPreCharge(BeanPay userBeanPay, Integer chargeAmount){
+	protected static PaymentDetail ofBeforeCharge(BeanPay userBeanPay, Integer chargeAmount){
 		PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.userBeanPay = userBeanPay;
 		paymentDetail.paymentAmount = chargeAmount;
