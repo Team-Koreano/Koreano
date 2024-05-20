@@ -55,7 +55,7 @@ public class PaymentService {
 		// 판매자들 BeanPay 가져오기
 		final List<BeanPay> sellerBeanPays =
 			beanPayRepository.findBeanPayByUserIdsAndRole(
-			paymentPrice.getSellerIds(),
+			paymentPrice.extractSellerIds(),
 			SELLER
 		);
 

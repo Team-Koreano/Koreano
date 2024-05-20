@@ -63,6 +63,7 @@ public class PaymentDto {
 		 Integer userId,
 		 Integer totalAmount,
 		 String orderName,
+		 List<PaymentDetailDto.Response> paymentDetails,
 		 ProcessStatus processStatus,
 		 LocalDateTime createDateTime,
 		 Boolean isVisible
