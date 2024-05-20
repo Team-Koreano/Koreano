@@ -61,7 +61,7 @@ public class Seller {
 	private LocalDateTime updateDatetime;
 
 	@Column()
-	private Long beanPayId;
+	private Integer beanPayId;
 
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
@@ -95,5 +95,9 @@ public class Seller {
 	public boolean isValidStatus() {
 		return this.userStatus == UserStatus.GENERAL &&
 			!this.isDeleted;
+	}
+
+	public void registerBeanPayId(Integer id) {
+		this.beanPayId = id;
 	}
 }

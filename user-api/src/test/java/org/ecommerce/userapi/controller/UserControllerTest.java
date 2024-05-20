@@ -160,14 +160,14 @@ public class UserControllerTest {
 		final UserDto.Request.Login login = new UserDto.Request.Login(email, password);
 		final String content = objectMapper.writeValueAsString(login);
 
-		String mockAccessToken = "mocked_access_token";
+		final String mockAccessToken = "mocked_access_token";
 
-		UserDto mocking = UserMapper.INSTANCE.accessTokenToDto(mockAccessToken);
+		final UserDto mocking = UserMapper.INSTANCE.accessTokenToDto(mockAccessToken);
 
 		when(userService.loginRequest(any(UserDto.Request.Login.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
 
-		UserDto.Response.Login expectedResponse = UserDto.Response.Login.of(mocking);
+		final UserDto.Response.Login expectedResponse = UserDto.Response.Login.of(mocking);
 
 		// when
 		final ResultActions resultActions = performLoginRequest(content);
@@ -193,7 +193,7 @@ public class UserControllerTest {
 		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
 			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
 
-		Users users = Users.ofRegister(
+		final Users users = Users.ofRegister(
 			"test@example.com",
 			"Jane Smith",
 			"test",
@@ -202,10 +202,10 @@ public class UserControllerTest {
 			"01087654321"
 		);
 
-		Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
+		final Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
+		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
 
 		final AddressDto.Response.Register expectedResponse = AddressMapper.INSTANCE.addressDtoToResponse(dto);
 
@@ -243,7 +243,7 @@ public class UserControllerTest {
 
 		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.number());
 
-		AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
 
 		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
 

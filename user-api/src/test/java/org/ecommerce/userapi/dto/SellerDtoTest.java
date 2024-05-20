@@ -24,7 +24,7 @@ class SellerDtoTest {
 		CREATE_DATE,
 		false,
 		null,
-		0L,
+		0,
 		UserStatus.GENERAL,
 		new ArrayList<>()
 	);

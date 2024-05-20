@@ -1,4 +1,3 @@
-
 package org.ecommerce.paymentapi.internal.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
@@ -7,8 +6,6 @@ import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.time.LocalDateTime;
 
 import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
@@ -72,8 +69,8 @@ class BeanPayControllerTest {
 					.content(mapper.writeValueAsString(request)))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.userId").value(userId))
-				.andExpect(jsonPath("$.result.role").value(role.toString()));
+				.andExpect(jsonPath("$.userId").value(userId))
+				.andExpect(jsonPath("$.role").value(role.toString()));
 		}
 	}
 

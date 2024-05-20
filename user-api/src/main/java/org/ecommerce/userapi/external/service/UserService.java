@@ -3,10 +3,12 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.client.UserServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
 import org.ecommerce.userapi.dto.AddressMapper;
+import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.entity.Address;
@@ -45,6 +47,8 @@ public class UserService {
 	private final UsersAccountRepository usersAccountRepository;
 
 	private final RedisProvider redisProvider;
+
+	private final UserServiceClient userServiceClient;
 	//TODO : 유저에 관한 RUD API 개발
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
@@ -63,11 +67,12 @@ public class UserService {
 
 		checkDuplicatedPhoneNumberOrEmail(register.email(), register.phoneNumber());
 
-		final Users users = Users.ofRegister(register.email(), register.name(),
+		Users users = userRepository.save(Users.ofRegister(register.email(), register.name(),
 			passwordEncoder.encode(register.password()),
-			register.gender(), register.age(), register.phoneNumber());
+			register.gender(), register.age(), register.phoneNumber()));
 
-		userRepository.save(users);
+		users.registerBeanPayId(userServiceClient.createBeanPay(
+			new BeanPayDto.Request.CreateBeanPay(users.getId(), Role.USER)).getId());
 
 		return UserMapper.INSTANCE.userToDto(users);
 	}
