@@ -19,3 +19,5 @@ jwt:
   secret: ${SECRET_KEY_SOURCE}
 
 
+payment-service:
+  url: http://localhost:8085/api/internal/beanpay/v1

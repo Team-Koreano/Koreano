@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class OrderDetailDto {
+public class OrderItemDto {
 
 	private Long id;
 	private Integer productId;

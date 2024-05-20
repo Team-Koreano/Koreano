@@ -19,10 +19,10 @@ public class StockHistoryRepositoryImpl implements StockHistoryCustomRepository 
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public StockHistory findStockHistoryByOrderDetailId(final Long orderDetailId) {
+	public StockHistory findStockHistoryByOrderItemId(final Long orderItemId) {
 		return jpaQueryFactory.selectFrom(stockHistory)
 				.leftJoin(stockHistory.stock).fetchJoin()
-				.where(stockHistory.orderDetail.id.eq(orderDetailId))
+				.where(stockHistory.orderItem.id.eq(orderItemId))
 				.fetchOne();
 	}
 }

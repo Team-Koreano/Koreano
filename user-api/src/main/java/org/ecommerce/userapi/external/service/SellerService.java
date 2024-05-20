@@ -3,8 +3,10 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.client.SellerServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
@@ -40,6 +42,7 @@ public class SellerService {
 
 	private final SellerAccountRepository sellerAccountRepository;
 
+	private final SellerServiceClient sellerServiceClient;
 	//TODO : 셀러에 관한 RUD API 개발
 	//TODO : 계좌에 관한 RUD API 개발
 
@@ -53,11 +56,15 @@ public class SellerService {
 
 		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(), requestSeller.phoneNumber());
 
-		final Seller seller = Seller.ofRegister(requestSeller.email(), requestSeller.name(),
+		Seller seller = sellerRepository.save(Seller.ofRegister(requestSeller.email(), requestSeller.name(),
 			passwordEncoder.encode(requestSeller.password()),
-			requestSeller.address(), requestSeller.phoneNumber());
+			requestSeller.address(), requestSeller.phoneNumber()));
 
-		sellerRepository.save(seller);
+		seller.registerBeanPayId(
+			sellerServiceClient.createBeanPay(
+					new BeanPayDto.Request.CreateBeanPay(seller.getId(), Role.SELLER)
+				)
+				.getId());
 
 		return SellerMapper.INSTANCE.sellerToDto(seller);
 	}

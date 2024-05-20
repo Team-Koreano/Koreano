@@ -7,6 +7,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,13 +26,14 @@ public class OrderDto {
 	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
-	private List<OrderDetailDto> orderDetailDtos;
+	private List<OrderItemDto> orderItemDtos;
 
 	public static class Request {
 
 		public record Place(
 
 				@NotNull(message = BUCKET_IDS_NOT_NULL)
+				@Size(min = 1, max = 15, message = INVALID_BUCKET_SIZE)
 				List<Long> bucketIds,
 
 				@NotBlank(message = RECEIVE_NAME_NOT_BLANK)
@@ -63,7 +65,7 @@ public class OrderDto {
 			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
 			LocalDateTime orderDatetime,
-			List<OrderDetailDto.Response> orderDetailResponses
+			List<OrderItemDto.Response> orderItemResponses
 	) {
 	}
 }

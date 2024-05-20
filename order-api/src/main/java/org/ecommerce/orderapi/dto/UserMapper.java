@@ -10,5 +10,5 @@ public interface UserMapper {
 
 	UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-	User responseToEntity(UserDto.Response response);
+	User responseToUser(UserDto.Response response);
 }

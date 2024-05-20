@@ -1,9 +1,11 @@
 package org.ecommerce.orderapi.repository.impl;
 
 import static org.ecommerce.orderapi.entity.QStock.*;
+import static org.ecommerce.orderapi.entity.QStockHistory.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,5 +34,15 @@ public class StockRepositoryImpl implements StockCustomRepository {
 
 		return stocks.stream()
 				.collect(Collectors.toMap(Stock::getProductId, Function.identity()));
+	}
+
+	@Override
+	public Optional<Stock> findStockByOrderItemId(Long orderItemId) {
+		return Optional.ofNullable(jpaQueryFactory.select(stock)
+				.from(stockHistory)
+				.leftJoin(stockHistory.stock).fetchJoin()
+				.leftJoin(stockHistory.orderItem).fetchJoin()
+				.where(stockHistory.orderItem.id.eq(orderItemId))
+				.fetchFirst());
 	}
 }

@@ -3,15 +3,20 @@ package org.ecommerce.userapi.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.client.SellerServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
+import org.ecommerce.userapi.entity.enumerated.Role;
+import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.provider.JwtProvider;
@@ -45,6 +50,9 @@ class SellerServiceTest {
 
 	@Mock
 	private JwtProvider jwtProvider;
+
+	@Mock
+	private SellerServiceClient sellerServiceClient;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -102,6 +110,30 @@ class SellerServiceTest {
 			//when
 			when(sellerRepository.existsByEmailOrPhoneNumber(newSellerReqeust.email(),
 				newSellerReqeust.phoneNumber())).thenReturn(false);
+			final Seller entity = new Seller(
+				1,
+				newSellerReqeust.email(),
+				newSellerReqeust.name(),
+				newSellerReqeust.password(),
+				newSellerReqeust.address(),
+				newSellerReqeust.phoneNumber(),
+				LocalDateTime.now(),
+				false,
+				LocalDateTime.now(),
+				null,
+				UserStatus.GENERAL,
+				null
+			);
+
+			when(sellerRepository.save(any(Seller.class))).thenReturn(entity);
+			when(sellerServiceClient.createBeanPay(any(BeanPayDto.Request.CreateBeanPay.class))).thenReturn(
+				new BeanPayDto(
+					1,
+					entity.getId(),
+					Role.SELLER,
+					0,
+					null
+				));
 
 			final SellerDto result = sellerService.registerRequest(newSellerReqeust);
 

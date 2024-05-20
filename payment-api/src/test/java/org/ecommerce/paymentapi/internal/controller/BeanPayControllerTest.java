@@ -72,8 +72,8 @@ class BeanPayControllerTest {
 					.content(mapper.writeValueAsString(request)))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.userId").value(userId))
-				.andExpect(jsonPath("$.result.role").value(role.toString()));
+				.andExpect(jsonPath("$.userId").value(userId))
+				.andExpect(jsonPath("$.role").value(role.toString()));
 		}
 	}
 

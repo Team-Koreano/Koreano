@@ -85,20 +85,20 @@ class SellerControllerTest {
 	@Test
 	void 셀러_등록() throws Exception {
 		//given
-		SellerDto.Request.Register registerRequest = new SellerDto.Request.Register(
+		final SellerDto.Request.Register registerRequest = new SellerDto.Request.Register(
 			"test@example.com",
 			"Test User",
 			"password",
 			"homeTown",
 			"010-0000-0000");
 
-		SellerDto.Response.Register expectedResponse = new SellerDto.Response.Register(
+		final SellerDto.Response.Register expectedResponse = new SellerDto.Response.Register(
 			registerRequest.email(),
 			registerRequest.name(),
 			registerRequest.address(),
 			registerRequest.phoneNumber());
 
-		Seller seller = Seller.ofRegister(
+		final Seller seller = Seller.ofRegister(
 			registerRequest.email(),
 			registerRequest.name(),
 			registerRequest.password(),
@@ -136,9 +136,9 @@ class SellerControllerTest {
 
 		final String content = objectMapper.writeValueAsString(login);
 
-		String mockAccessToken = "mocked_access_token";
+		final String mockAccessToken = "mocked_access_token";
 
-		SellerDto mocking = SellerMapper.INSTANCE.accessTokenToDto(mockAccessToken);
+		final SellerDto mocking = SellerMapper.INSTANCE.accessTokenToDto(mockAccessToken);
 
 		when(sellerService.loginRequest(any(SellerDto.Request.Login.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
@@ -159,7 +159,7 @@ class SellerControllerTest {
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
 			.andReturn();
 
-		SellerDto.Response.Login result = objectMapper.readValue(
+		final SellerDto.Response.Login result = objectMapper.readValue(
 			mvcResult.getResponse().getContentAsString(),
 			new TypeReference<Response<SellerDto.Response.Login>>() {
 			}
@@ -184,7 +184,7 @@ class SellerControllerTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
 		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
 

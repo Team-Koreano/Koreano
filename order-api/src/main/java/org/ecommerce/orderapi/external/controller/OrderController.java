@@ -3,15 +3,15 @@ package org.ecommerce.orderapi.external.controller;
 import java.util.List;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.orderapi.dto.OrderDetailDto;
 import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
-import org.ecommerce.orderapi.dto.OrderStatusHistoryDto;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
-import org.ecommerce.orderapi.service.OrderService;
-import org.ecommerce.orderapi.service.StockService;
+import org.ecommerce.orderapi.handler.OrderEventHandler;
+import org.ecommerce.orderapi.handler.OrderQueryHandler;
+import org.ecommerce.orderapi.service.StockDomainService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,8 +29,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/orders/v1")
 public class OrderController {
 
-	private final OrderService orderService;
-	private final StockService stockService;
+	private final OrderEventHandler orderEventHandler;
+	private final OrderQueryHandler orderQueryHandler;
+	private final StockDomainService stockDomainService;
 
 	// todo jwt 도입 후 로직 변경
 	private final static Integer USER_ID = 1;
@@ -43,7 +44,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.OrderDtoToResponse(
-						orderService.placeOrder(USER_ID, placeRequest)
+						orderEventHandler.createOrder(USER_ID, placeRequest)
 				)
 		);
 	}
@@ -56,34 +57,35 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderService.getOrders(USER_ID, year, pageNumber).stream()
+				orderQueryHandler.getOrders(USER_ID, year, pageNumber).stream()
 						.map(OrderMapper.INSTANCE::OrderDtoToResponse)
 						.toList()
 		);
 	}
 
-	@GetMapping("/{orderDetailId}/statusHistory")
-	public Response<List<OrderStatusHistoryDto.Response>> getAllOrderStatusHistory(
-			@PathVariable("orderDetailId") final Long orderDetailId
+	@DeleteMapping("/{orderId}/orderItems/{orderItemId}")
+	public Response<OrderDto.Response> cancelOrder(
+			@PathVariable("orderId") final Long orderId,
+			@PathVariable("orderItemId") final Long orderItemId
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderService.getOrderStatusHistory(orderDetailId).stream()
-						.map(OrderMapper.INSTANCE::orderStatusHistoryDtotoResponse)
-						.toList()
+				OrderMapper.INSTANCE.OrderDtoToResponse(
+						orderEventHandler.cancelOrder(USER_ID, orderId, orderItemId)
+				)
 		);
 	}
 
-	@PutMapping("{orderDetailId}")
-	public Response<OrderDetailDto.Response> cancelOrder(
-			@PathVariable("orderDetailId") final Long orderDetailId
+	@PutMapping("/{orderId}")
+	public Response<OrderDto.Response> approveOrder(
+			@PathVariable("orderId") final Long orderId
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.orderDetailDtoToResponse(
-						orderService.cancelOrder(USER_ID, orderDetailId)
+				OrderMapper.INSTANCE.OrderDtoToResponse(
+						orderEventHandler.approveOrder(orderId)
 				)
 		);
 	}
@@ -96,13 +98,13 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				StockMapper.INSTANCE.toResponse(
-						stockService.getMockData(productId)
+						stockDomainService.getMockData(productId)
 				)
 		);
 	}
 
 	@PostMapping("/mocks")
 	public void saveMockData() {
-		stockService.saveMock();
+		stockDomainService.saveMock();
 	}
 }
