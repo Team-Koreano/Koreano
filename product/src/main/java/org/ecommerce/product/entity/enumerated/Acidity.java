@@ -14,7 +14,9 @@ public enum Acidity implements EnumMapperType {
 	CITY("시티"),
 	FULL_CITY("풀 시티"),
 	FRENCH("프렌치"),
-	ITALIAN("이탈리안");
+	ITALIAN("이탈리안"),
+	NONE("NONE");
+	;
 
 	private final String title;
 
