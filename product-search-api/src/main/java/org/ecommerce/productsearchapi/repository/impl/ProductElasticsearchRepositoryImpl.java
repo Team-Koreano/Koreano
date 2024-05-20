@@ -61,7 +61,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 				.field(search.sortType().getField())
 				.order(SortOrder.valueOf(search.sortType().getOrderBy())));
 		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
-		if (search.validKeyword()) {
+		if (Boolean.TRUE.equals(search.validKeyword())) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
 				.field(ProductDocumentField.NAME.getField())
 				.query(search.keyword())
@@ -69,7 +69,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.validIsDecaf()) {
+		if (Boolean.TRUE.equals(search.validIsDecaf())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.IS_DECAF.getField())
 				.value(search.isDecaf())
@@ -77,7 +77,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.validCategory()) {
+		if (Boolean.TRUE.equals(search.validCategory())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.CATEGORY.getField())
 				.value(search.category().getTitle())
@@ -85,7 +85,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.validBean()) {
+		if (Boolean.TRUE.equals(search.validBean())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.BEAN.getField())
 				.value(search.bean().getTitle())
@@ -93,7 +93,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.validAcidity()) {
+		if (Boolean.TRUE.equals(search.validAcidity())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.ACIDITY.getField())
 				.value(search.acidity().getTitle())
