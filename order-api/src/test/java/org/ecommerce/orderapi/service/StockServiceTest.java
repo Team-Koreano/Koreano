@@ -2,8 +2,8 @@
 //
 // import static org.ecommerce.orderapi.entity.enumerated.OrderStatus.*;
 // import static org.ecommerce.orderapi.entity.enumerated.OrderStatusReason.*;
-// import static org.ecommerce.orderapi.entity.enumerated.StockOperationType.*;
-// import static org.ecommerce.orderapi.exception.StockErrorCode.*;
+// import static org.ecommerce.orderapi.stock.entity.enumerated.StockOperationType.*;
+// import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 // import static org.junit.jupiter.api.Assertions.*;
 // import static org.mockito.ArgumentMatchers.*;
 // import static org.mockito.BDDMockito.*;
@@ -14,14 +14,14 @@
 // import java.util.Map;
 //
 // import org.ecommerce.common.error.CustomException;
-// import org.ecommerce.orderapi.dto.StockDto;
+// import org.ecommerce.orderapi.stock.dto.StockDto;
 // import org.ecommerce.orderapi.entity.OrderItem;
 // import org.ecommerce.orderapi.entity.OrderStatusHistory;
-// import org.ecommerce.orderapi.entity.Stock;
-// import org.ecommerce.orderapi.entity.StockHistory;
+// import org.ecommerce.orderapi.stock.entity.Stock;
+// import org.ecommerce.orderapi.stock.entity.StockHistory;
 // import org.ecommerce.orderapi.repository.OrderItemRepository;
-// import org.ecommerce.orderapi.repository.StockHistoryRepository;
-// import org.ecommerce.orderapi.repository.StockRepository;
+// import org.ecommerce.orderapi.stock.repository.StockHistoryRepository;
+// import org.ecommerce.orderapi.stock.repository.StockRepository;
 // import org.junit.jupiter.api.Test;
 // import org.junit.jupiter.api.extension.ExtendWith;
 // import org.mockito.InjectMocks;

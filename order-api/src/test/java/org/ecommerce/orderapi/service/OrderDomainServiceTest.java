@@ -28,10 +28,10 @@
 // import org.ecommerce.orderapi.entity.OrderItem;
 // import org.ecommerce.orderapi.entity.OrderStatusHistory;
 // import org.ecommerce.orderapi.entity.Product;
-// import org.ecommerce.orderapi.entity.Stock;
+// import org.ecommerce.orderapi.stock.entity.Stock;
 // import org.ecommerce.orderapi.repository.OrderItemRepository;
 // import org.ecommerce.orderapi.repository.OrderRepository;
-// import org.ecommerce.orderapi.repository.StockRepository;
+// import org.ecommerce.orderapi.stock.repository.StockRepository;
 // import org.junit.jupiter.api.Test;
 // import org.junit.jupiter.api.extension.ExtendWith;
 // import org.mockito.ArgumentCaptor;

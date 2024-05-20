@@ -1,12 +1,13 @@
 package org.ecommerce.orderapi.service;
 
-import static org.ecommerce.orderapi.exception.StockErrorCode.*;
+import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.concurrent.TimeUnit;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.orderapi.order.service.LockService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

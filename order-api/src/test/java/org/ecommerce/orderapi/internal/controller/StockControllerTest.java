@@ -10,7 +10,7 @@
 // import java.util.List;
 //
 // import org.ecommerce.orderapi.dto.OrderItemDto;
-// import org.ecommerce.orderapi.dto.StockDto;
+// import org.ecommerce.orderapi.stock.dto.StockDto;
 // import org.ecommerce.orderapi.service.StockService;
 // import org.junit.jupiter.api.Test;
 // import org.springframework.beans.factory.annotation.Autowired;
