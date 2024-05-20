@@ -80,10 +80,32 @@ public class ProductSearchDto {
 			Acidity acidity,
 
 			@ValidEnum(enumClass = ProductSortType.class,
-			nullable = true,
-			message = ProductSearchErrorMessages.NOT_FOUND_SORT)
+				nullable = true,
+				message = ProductSearchErrorMessages.NOT_FOUND_SORT)
 			ProductSortType sortType
-		){}
+		) {
+
+			public Boolean validKeyword() {
+				return !this.keyword.trim().isEmpty();
+			}
+
+			public Boolean validIsDecaf() {
+				return this.isDecaf != null;
+			}
+
+			public Boolean validCategory() {
+				return this.category != null;
+			}
+
+			public Boolean validBean() {
+				return this.bean != null;
+			}
+
+			public Boolean validAcidity() {
+				return this.acidity != null;
+			}
+
+		}
 	}
 
 	public static class Response {
@@ -219,6 +241,7 @@ public class ProductSearchDto {
 					productSearchDto.getCreateDatetime()
 				);
 			}
+
 		}
 	}
 }
