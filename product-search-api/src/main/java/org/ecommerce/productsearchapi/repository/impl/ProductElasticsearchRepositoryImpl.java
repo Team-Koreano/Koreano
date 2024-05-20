@@ -61,6 +61,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 				.field(search.sortType().getField())
 				.order(SortOrder.valueOf(search.sortType().getOrderBy())));
 		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
+
 		if (Boolean.TRUE.equals(search.validKeyword())) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
 				.field(ProductDocumentField.NAME.getField())
@@ -80,7 +81,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 		if (Boolean.TRUE.equals(search.validCategory())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.CATEGORY.getField())
-				.value(search.category().getTitle())
+				.value(search.category().getCode().toLowerCase())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
@@ -88,7 +89,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 		if (Boolean.TRUE.equals(search.validBean())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.BEAN.getField())
-				.value(search.bean().getTitle())
+				.value(search.bean().getCode().toLowerCase())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
@@ -96,7 +97,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 		if (Boolean.TRUE.equals(search.validAcidity())) {
 			QueryVariant matchQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.ACIDITY.getField())
-				.value(search.acidity().getTitle())
+				.value(search.acidity().getCode().toLowerCase())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
