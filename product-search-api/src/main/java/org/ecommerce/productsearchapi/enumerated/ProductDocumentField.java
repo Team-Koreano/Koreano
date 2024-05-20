@@ -1,11 +1,9 @@
 package org.ecommerce.productsearchapi.enumerated;
 
-import org.ecommerce.common.utils.mapper.EnumMapperType;
-
 import lombok.Getter;
 
 @Getter
-public enum ProductDocumentField implements EnumMapperType {
+public enum ProductDocumentField {
 	ID("id"),
 	CATEGORY("category"),
 	PRICE("price"),
@@ -21,15 +19,10 @@ public enum ProductDocumentField implements EnumMapperType {
 	THUMBNAIL_URL("thumbnailUrl"),
 	;
 
-	private final String title;
+	private final String field;
 
-	ProductDocumentField(String title) {
-		this.title = title;
-	}
-
-	@Override
-	public String getCode() {
-		return name();
+	ProductDocumentField(String field) {
+		this.field = field;
 	}
 
 }

@@ -33,7 +33,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		// name 에 가중치를 둬서 일치할수록 score 를 높이는 쿼리
 		QueryVariant matchQueryBoostedKeyword = new MatchQuery.Builder()
-			.field("name")
+			.field(ProductDocumentField.NAME.getField())
 			.query(keyword)
 			.boost(2f)
 			.build();
@@ -58,46 +58,44 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
-				.field(search.sortType().getTitle())
-				.order(SortOrder.Desc));
-
+				.field(search.sortType().getField())
+				.order(SortOrder.valueOf(search.sortType().getOrderBy())));
 		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
-
-		if (!search.keyword().trim().isEmpty()) {
+		if (search.validKeyword()) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field(ProductDocumentField.NAME.getTitle())
+				.field(ProductDocumentField.NAME.getField())
 				.query(search.keyword())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.isDecaf() != null) {
+		if (search.validIsDecaf()) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field(ProductDocumentField.IS_DECAF.getTitle())
+				.field(ProductDocumentField.IS_DECAF.getField())
 				.value(search.isDecaf())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.category() != null) {
+		if (search.validCategory()) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field(ProductDocumentField.CATEGORY.getTitle())
+				.field(ProductDocumentField.CATEGORY.getField())
 				.value(search.category().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.bean() != null) {
+		if (search.validBean()) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field(ProductDocumentField.BEAN.getTitle())
+				.field(ProductDocumentField.BEAN.getField())
 				.value(search.bean().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.acidity() != null) {
+		if (search.validAcidity()) {
 			QueryVariant matchQuery = new TermQuery.Builder()
-				.field(ProductDocumentField.ACIDITY.getTitle())
+				.field(ProductDocumentField.ACIDITY.getField())
 				.value(search.acidity().getTitle())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
