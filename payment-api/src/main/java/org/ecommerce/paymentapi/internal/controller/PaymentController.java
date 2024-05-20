@@ -1,10 +1,12 @@
 package org.ecommerce.paymentapi.internal.controller;
 
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,15 +24,15 @@ public class PaymentController {
 	private final PaymentService paymentService;
 
 	@PostMapping
-	public PaymentDto.Response paymentPrice(@RequestBody PaymentPrice paymentRequest) {
+	public PaymentDto.Response paymentPrice(@RequestBody final PaymentPrice paymentRequest) {
 		return PaymentMapper.INSTANCE.paymentDtoToResponse(
 			paymentService.paymentPrice(paymentRequest)
 		);
 	}
 
-	@PostMapping("/cancel")
+	@DeleteMapping
 	public PaymentDetailDto.Response paymentDetailCancel(
-		@RequestBody PaymentDetailDto.Request.PaymentCancel paymentCancel) {
+		@RequestBody final PaymentCancel paymentCancel) {
 		return PaymentMapper.INSTANCE.paymentDetailDtoToResponse(
 			paymentService.cancelPaymentDetail(paymentCancel)
 		);

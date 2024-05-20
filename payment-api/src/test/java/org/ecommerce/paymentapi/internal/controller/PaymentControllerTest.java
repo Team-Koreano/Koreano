@@ -235,7 +235,7 @@ class PaymentControllerTest {
 			when(paymentService.cancelPaymentDetail(request)).thenReturn(dto);
 
 			//when
-			mvc.perform(post("/api/internal/payment/v1/cancel")
+			mvc.perform(delete("/api/internal/payment/v1")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(mapper.writeValueAsString(request))
 				).andDo(print())
