@@ -35,8 +35,7 @@ public class PaymentService {
 	private final BeanPayRepository beanPayRepository;
 
 	/**
-	 결제 이벤트 발생시 결제 진행
-	 * TODO: 이벤트 리스너 추가 예정
+	 결제 진행
 	 * @author 이우진
 	 *
 	 * @param - PaymentPrice 주문 결제 요청 객체
@@ -70,7 +69,7 @@ public class PaymentService {
 		);
 
 		Payment save = paymentRepository.save(payment);
-		return PaymentMapper.INSTANCE.toDto(save);
+		return PaymentMapper.INSTANCE.paymentToDto(save);
 	}
 
 	@VisibleForTesting
@@ -113,7 +112,7 @@ public class PaymentService {
 	) {
 		final Payment payment = getPayment(orderId);
 		//TODO: FailReason 추가 예정
-		return PaymentMapper.INSTANCE.toDto(
+		return PaymentMapper.INSTANCE.paymentToDto(
 			payment.cancelPayment("fail Reason"));
 	}
 

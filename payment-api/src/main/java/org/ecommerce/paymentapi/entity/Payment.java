@@ -104,7 +104,7 @@ public class Payment {
 				PaymentDetail.ofPayment(
 					payment,
 					sellerBeanPay,
-					paymentDetailPrice.orderDetailId(),
+					paymentDetailPrice.orderItemId(),
 					paymentDetailPrice.deliveryFee(),
 					paymentDetailPrice.paymentAmount(),
 					paymentDetailPrice.quantity(),

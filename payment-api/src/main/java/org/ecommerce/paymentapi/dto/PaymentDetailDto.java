@@ -59,9 +59,7 @@ public class PaymentDetailDto {
 
 		public record PaymentDetailPrice(
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
-			Long orderDetailId,
-			@Min(value = 0, message = NOT_UNDER_ZERO_TOTAL_AMOUNT)
-			Integer totalPrice,
+			Long orderItemId,
 			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
 			Integer paymentAmount,
 			@Min(value = 0, message = NOT_UNDER_ZERO_PRICE)

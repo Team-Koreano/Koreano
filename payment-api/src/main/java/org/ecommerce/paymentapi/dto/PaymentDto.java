@@ -21,6 +21,7 @@ public class PaymentDto {
 	private Integer userId;
 	private Integer totalAmount;
 	private String orderName;
+	private List<PaymentDetailDto> paymentDetails;
 	private ProcessStatus processStatus;
 	private LocalDateTime createDateTime;
 	private Boolean isVisible;
@@ -38,7 +39,7 @@ public class PaymentDto {
 			String orderName,
 			List<PaymentDetailPrice> paymentDetails
 		) {
-			public List<Integer> getSellerIds() {
+			public List<Integer> extractSellerIds() {
 				return paymentDetails.stream()
 					.map(PaymentDetailPrice::sellerId)
 					.toList();
