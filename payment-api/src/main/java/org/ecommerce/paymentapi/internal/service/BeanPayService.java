@@ -29,7 +29,7 @@ public class BeanPayService {
 	 * @param - CreateBeanPay createBeanPay
 	 * @return - BeanPayDto
 	 */
-	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
+	public BeanPayDto createBeanPay(final CreateBeanPay createBeanPay) {
 		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
 			createBeanPay.userId(),
 			createBeanPay.role()

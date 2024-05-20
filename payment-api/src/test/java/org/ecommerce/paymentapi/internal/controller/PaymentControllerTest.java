@@ -116,17 +116,17 @@ class PaymentControllerTest {
 				)
 			);
 
-			List<Pair<BeanPay, PaymentDetailDto.Request.PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailDto.Request.PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				request, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
-			PaymentDto paymentDto = PaymentMapper.INSTANCE.paymentToDto(payment);
-			PaymentDto.Response response = PaymentMapper.INSTANCE.paymentDtoToResponse(paymentDto);
+			final PaymentDto paymentDto = PaymentMapper.INSTANCE.paymentToDto(payment);
+			final PaymentDto.Response response = PaymentMapper.INSTANCE.paymentDtoToResponse(paymentDto);
 			when(paymentService.paymentPrice(request)).thenReturn(paymentDto);
 
 			//when

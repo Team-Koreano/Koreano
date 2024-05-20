@@ -51,7 +51,7 @@ public class BeanPayService {
 	public PaymentDetailDto beforeCharge(final PreCharge request) {
 
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
-		PaymentDetail paymentDetail = beanPay.beforeCharge(request.amount());
+		final PaymentDetail paymentDetail = beanPay.beforeCharge(request.amount());
 
 		return PaymentDetailMapper.INSTANCE.entityToDto(
 			paymentDetailRepository.save(paymentDetail)
@@ -118,7 +118,8 @@ public class BeanPayService {
 	 */
 	private void processApproval(final PaymentDetail paymentDetail,
 		final TossPayment request) throws CustomException {
-		ResponseEntity<TossDto.Response.TossPayment> response = tossServiceClient.approvePayment(
+		final ResponseEntity<TossDto.Response.TossPayment> response =
+			tossServiceClient.approvePayment(
 			tossKey.getAuthorizationKey(), request);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
@@ -149,13 +150,13 @@ public class BeanPayService {
 	@Transactional
 	public PaymentDetailDto failTossCharge(final TossFail request) {
 
-		PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
+		final PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
 		handleException(paymentDetail, request.errorMessage());
 
 		return PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
 	}
 
-	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
+	public BeanPayDto createBeanPay(final CreateBeanPay createBeanPay) {
 		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
 			createBeanPay.userId(),
 			createBeanPay.role()

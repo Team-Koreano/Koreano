@@ -114,9 +114,9 @@ class PaymentServiceTest {
 				)
 			);
 
-			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
@@ -130,7 +130,7 @@ class PaymentServiceTest {
 			when(beanPayRepository.findBeanPayByUserIdsAndRole(paymentPrice.extractSellerIds()
 				, SELLER)).thenReturn(sellerBeanPays);
 			when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-			PaymentDto paymentDto = paymentService.paymentPrice(paymentPrice);
+			final PaymentDto paymentDto = paymentService.paymentPrice(paymentPrice);
 
 			//then
 			assertEquals(orderId, paymentDto.getOrderId());
@@ -214,9 +214,9 @@ class PaymentServiceTest {
 				)
 			);
 
-			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
@@ -301,7 +301,7 @@ class PaymentServiceTest {
 				, SELLER)).thenReturn(sellerBeanPays);
 
 			//then
-			CustomException actual = assertThrows(CustomException.class, () -> {
+			final CustomException actual = assertThrows(CustomException.class, () -> {
 				paymentService.paymentPrice(paymentPrice);
 			});
 			assertEquals(actual.getErrorCode(), NOT_FOUND_SELLER_ID);
@@ -366,7 +366,7 @@ class PaymentServiceTest {
 		);
 
 		//when
-		List<Pair<BeanPay, PaymentDetailPrice>> pairs = paymentService.mappedBeanPayPaymentDetailPrice(
+		final List<Pair<BeanPay, PaymentDetailPrice>> pairs = paymentService.mappedBeanPayPaymentDetailPrice(
 			paymentPrice, sellerBeanPays);
 
 		//then
@@ -437,17 +437,17 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
-			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			PaymentCancel request = new PaymentCancel(
+			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				paymentDetail.getOrderItemId(),
@@ -457,8 +457,8 @@ class PaymentServiceTest {
 			//when
 			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
 				.thenReturn(Optional.of(paymentDetail));
-			Integer beforeSellerAmount = paymentDetail.getSellerBeanPay().getAmount();
-			PaymentDetailDto dto = paymentService.cancelPaymentDetail(request);
+			final Integer beforeSellerAmount = paymentDetail.getSellerBeanPay().getAmount();
+			final PaymentDetailDto dto = paymentService.cancelPaymentDetail(request);
 
 			//then
 			assertEquals(userBeanPay.getAmount(),
@@ -531,17 +531,17 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
-			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			PaymentCancel request = new PaymentCancel(
+			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				paymentDetail.getOrderItemId(),
@@ -553,7 +553,7 @@ class PaymentServiceTest {
 				.thenReturn(Optional.ofNullable(null));
 
 			//then
-			CustomException actual = assertThrows(CustomException.class, () -> {
+			final CustomException actual = assertThrows(CustomException.class, () -> {
 				paymentService.cancelPaymentDetail(request);
 			});
 			assertEquals(actual.getErrorCode(), NOT_EXIST);
@@ -607,17 +607,18 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice =
+				PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
-			Payment payment = Payment.ofPayment(
+			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
 				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
-			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			PaymentCancel request = new PaymentCancel(
+			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				paymentDetail.getOrderItemId(),
@@ -630,7 +631,7 @@ class PaymentServiceTest {
 			paymentDetail.cancelPaymentDetail(cancelReason);
 
 			//then
-			CustomException actual = assertThrows(CustomException.class, () -> {
+			final CustomException actual = assertThrows(CustomException.class, () -> {
 				paymentService.cancelPaymentDetail(request);
 			});
 			assertEquals(actual.getErrorCode(), INSUFFICIENT_AMOUNT);

@@ -80,13 +80,13 @@ public class PaymentService {
 
 	@VisibleForTesting
 	public static List<Pair<BeanPay, PaymentDetailPrice>> mappedBeanPayPaymentDetailPrice(
-		PaymentPrice paymentPrice,
-		List<BeanPay> sellerBeanPays
+		final PaymentPrice paymentPrice,
+		final List<BeanPay> sellerBeanPays
 	) {
 		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap =
 			new LinkedList<>();
 
-		for (PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
+		for (final PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
 			beanPayPaymentDetailPriceMap.add(
 				Pair.of(
 					sellerBeanPays.stream()
@@ -124,7 +124,7 @@ public class PaymentService {
 		);
 	}
 
-	private PaymentDetail getPaymentDetail(Long orderItemId) {
+	private PaymentDetail getPaymentDetail(final Long orderItemId) {
 		return paymentDetailRepository.findPaymentDetailByOrderItemId(orderItemId)
 			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_EXIST));
 	}
