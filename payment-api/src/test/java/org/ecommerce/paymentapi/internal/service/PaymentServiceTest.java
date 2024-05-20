@@ -5,17 +5,20 @@ import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
+import static org.ecommerce.paymentapi.exception.PaymentDetailErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
@@ -23,6 +26,7 @@ import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
+import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,6 +47,9 @@ class PaymentServiceTest {
 
 	@Mock
 	private PaymentRepository paymentRepository;
+
+	@Mock
+	private PaymentDetailRepository paymentDetailRepository;
 
 	@Mock
 	private BeanPayRepository beanPayRepository;
@@ -372,18 +379,19 @@ class PaymentServiceTest {
 
 
 	@Nested
-	class 결제취소 {
+	class 결제_단건_취소 {
 		@Test
 		void 성공() {
 			//given
 			final Long orderId = 1L;
 			final Integer startAmount = 100_000;
 			final Integer userId = 1;
+			final String cancelReason = "사용자 단순 변심";
 			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
-			final Integer paymentAmount = 15000;
 			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -438,34 +446,194 @@ class PaymentServiceTest {
 				orderName,
 				beanPayPaymentPrice
 			);
-
+			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			PaymentCancel request = new PaymentCancel(
+				userId,
+				paymentDetail.getSellerBeanPay().getUserId(),
+				paymentDetail.getOrderItemId(),
+				cancelReason
+			);
 
 			//when
-			when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(payment));
-			PaymentDto paymentDto = paymentService.paymentPriceCancel(orderId);
+			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
+				.thenReturn(Optional.of(paymentDetail));
+			Integer beforeSellerAmount = paymentDetail.getSellerBeanPay().getAmount();
+			PaymentDetailDto dto = paymentService.cancelPaymentDetail(request);
 
 			//then
-			assertEquals(paymentDto.getTotalAmount(), paymentAmount);
-			assertEquals(paymentDto.getOrderId(), orderId);
-			assertEquals(paymentDto.getOrderName(), orderName);
-			assertEquals(paymentDto.getUserId(), userBeanPay.getUserId());
-			assertEquals(paymentDto.getProcessStatus(), CANCELLED);
-			assertEquals(userBeanPay.getAmount(), startAmount);
-			for(BeanPay sellerBeanPay: sellerBeanPays) {
-				assertEquals(sellerBeanPay.getAmount(), 0);
-			}
-			IntStream.range(0, payment.getPaymentDetails().size()).forEach(i ->{
-				PaymentDetail detail = payment.getPaymentDetails().get(i);
-				PaymentDetailPrice detailPrice = paymentPrice.paymentDetails().get(i);
-				assertEquals(detail.getPayment(), payment);
-				assertEquals(detail.getQuantity(), detailPrice.quantity());
-				assertEquals(detail.getOrderItemId(), detailPrice.orderItemId());
-				assertEquals(detail.getDeliveryFee(), detailPrice.deliveryFee());
-				assertEquals(detail.getPaymentAmount(), detailPrice.paymentAmount());
-				assertEquals(detail.getPaymentStatusHistories().size(), 2);
-				assertEquals(detail.getPaymentStatus(), PAYMENT);
-				assertEquals(detail.getProcessStatus(), CANCELLED);
+			assertEquals(userBeanPay.getAmount(),
+				startAmount - (paymentAmount - paymentDetail.getPaymentAmount()));
+			assertEquals(paymentDetail.getSellerBeanPay().getAmount(),
+				beforeSellerAmount - paymentDetail.getPaymentAmount());
+			assertEquals(paymentDetail.getPaymentStatus(), REFUND);
+			assertEquals(paymentDetail.getProcessStatus(), CANCELLED);
+			assertEquals(paymentDetail.getCancelReason(), cancelReason);
+			assertEquals(paymentDetail.getPaymentStatusHistories().get(1).getPaymentStatus(),
+				REFUND);
+			assertEquals(paymentDetail.getPaymentStatusHistories().size(), 2);
+
+		}
+
+		@Test
+		void 주문아이템번호_존재X() {
+			//given
+			final Long orderId = 1L;
+			final Integer startAmount = 100_000;
+			final Integer userId = 1;
+			final String cancelReason = "사용자 단순 변심";
+			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
+			final Integer[] sellerIds = new Integer[] {1, 2};
+			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
+			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
+			final Integer[] deliveryFees = {0, 0, 0};
+			final String orderName = "orderName";
+			final Integer[] quantity = {3, 3, 3};
+			final Integer[] prices = {1000, 1000, 1000};
+			final String[] productNames = new String[]{"product1", "product2",
+				"product3"};
+			final List<BeanPay> sellerBeanPays = List.of(
+				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
+				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
+			);
+			final PaymentPrice paymentPrice = new PaymentPrice(
+				1L,
+				paymentAmount,
+				userBeanPay.getUserId(),
+				orderName,
+				List.of(
+					new PaymentDetailPrice(
+						orderItemIds[0],
+						amounts[0],
+						prices[0],
+						quantity[0],
+						deliveryFees[0],
+						sellerIds[0],
+						productNames[0]
+					),
+					new PaymentDetailPrice(
+						orderItemIds[1],
+						amounts[1],
+						prices[1],
+						quantity[1],
+						deliveryFees[1],
+						sellerIds[1],
+						productNames[1]
+					),
+					new PaymentDetailPrice(
+						orderItemIds[2],
+						amounts[2],
+						prices[2],
+						quantity[2],
+						deliveryFees[2],
+						sellerIds[0],
+						productNames[2]
+					)
+				)
+			);
+			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+				paymentPrice, sellerBeanPays);
+			Payment payment = Payment.ofPayment(
+				userBeanPay,
+				orderId,
+				paymentAmount,
+				orderName,
+				beanPayPaymentPrice
+			);
+			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			PaymentCancel request = new PaymentCancel(
+				userId,
+				paymentDetail.getSellerBeanPay().getUserId(),
+				paymentDetail.getOrderItemId(),
+				cancelReason
+			);
+
+			//when
+			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
+				.thenReturn(Optional.ofNullable(null));
+
+			//then
+			CustomException actual = assertThrows(CustomException.class, () -> {
+				paymentService.cancelPaymentDetail(request);
 			});
+			assertEquals(actual.getErrorCode(), NOT_EXIST);
+		}
+
+		@Test
+		void 반환할_빈페이_부족() {
+			//given
+			final Long orderId = 1L;
+			final Integer startAmount = 100_000;
+			final Integer userId = 1;
+			final String cancelReason = "사용자 단순 변심";
+			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
+			final Integer[] sellerIds = new Integer[] {1, 2};
+			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
+			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
+			final Integer[] deliveryFees = {0, 0, 0};
+			final String orderName = "orderName";
+			final Integer[] quantity = {3, 3, 3};
+			final Integer[] prices = {1000, 1000, 1000};
+			final String[] productNames = new String[]{"product1", "product2",
+				"product3"};
+			final List<BeanPay> sellerBeanPays = List.of(
+				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
+				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
+			);
+			final PaymentPrice paymentPrice = new PaymentPrice(
+				1L,
+				paymentAmount,
+				userBeanPay.getUserId(),
+				orderName,
+				List.of(
+					new PaymentDetailPrice(
+						orderItemIds[0],
+						amounts[0],
+						prices[0],
+						quantity[0],
+						deliveryFees[0],
+						sellerIds[0],
+						productNames[0]
+					),
+					new PaymentDetailPrice(
+						orderItemIds[1],
+						amounts[1],
+						prices[1],
+						quantity[1],
+						deliveryFees[1],
+						sellerIds[1],
+						productNames[1]
+					)
+				)
+			);
+			List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+				paymentPrice, sellerBeanPays);
+			Payment payment = Payment.ofPayment(
+				userBeanPay,
+				orderId,
+				paymentAmount,
+				orderName,
+				beanPayPaymentPrice
+			);
+			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
+			PaymentCancel request = new PaymentCancel(
+				userId,
+				paymentDetail.getSellerBeanPay().getUserId(),
+				paymentDetail.getOrderItemId(),
+				cancelReason
+			);
+
+			//when
+			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
+				.thenReturn(Optional.of(paymentDetail));
+			paymentDetail.cancelPaymentDetail(cancelReason);
+
+			//then
+			CustomException actual = assertThrows(CustomException.class, () -> {
+				paymentService.cancelPaymentDetail(request);
+			});
+			assertEquals(actual.getErrorCode(), INSUFFICIENT_AMOUNT);
 		}
 	}
 
