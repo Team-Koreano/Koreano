@@ -58,7 +58,7 @@ public class PaymentDetailDto {
 		}
 
 		public record PaymentDetailPrice(
-			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ITEM_ID)
 			Long orderItemId,
 			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
 			Integer paymentAmount,
@@ -72,6 +72,18 @@ public class PaymentDetailDto {
 			Integer sellerId,
 			@NotBlank(message = NOT_BLANK_PRODUCT_NAME)
 			String productName
+		) {
+		}
+
+		public record PaymentCancel(
+			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
+			Integer userId,
+			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
+			Integer sellerId,
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ITEM_ID)
+			Long orderItemId,
+			@NotBlank(message = NOT_BLANK_CANCEL_REASON)
+			String cancelReason
 		) {
 		}
 	}

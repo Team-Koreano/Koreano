@@ -171,13 +171,15 @@ public class PaymentDetail {
 	 * @param - String message
 	 * @return - void
 	 */
-	public void cancelPayment(final String message) {
+	public PaymentDetail cancelPaymentDetail(final String message) {
 		changeProcessStatus(CANCELLED);
-		this.failReason = message;
+		changePaymentStatus(REFUND);
+		this.cancelReason = message;
 		this.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(this)
 		);
-		this.userBeanPay.rollbackPayment(getPaymentAmount(), this.sellerBeanPay);
+		this.userBeanPay.cancelPayment(getPaymentAmount(), this.sellerBeanPay);
+		return this;
 	}
 
 	public boolean validCharge(UUID orderId, Integer amount) {
@@ -213,4 +215,8 @@ public class PaymentDetail {
 	private void changeProcessStatus(final ProcessStatus status) {
 		this.processStatus = status;
 	}
+	private void changePaymentStatus(PaymentStatus status) {
+		this.paymentStatus = status;
+	}
+
 }

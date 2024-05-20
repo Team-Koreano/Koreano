@@ -1,5 +1,6 @@
 package org.ecommerce.paymentapi.internal.controller;
 
+import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
@@ -24,6 +25,14 @@ public class PaymentController {
 	public PaymentDto.Response paymentPrice(@RequestBody PaymentPrice paymentRequest) {
 		return PaymentMapper.INSTANCE.paymentDtoToResponse(
 			paymentService.paymentPrice(paymentRequest)
+		);
+	}
+
+	@PostMapping("/cancel")
+	public PaymentDetailDto.Response paymentDetailCancel(
+		@RequestBody PaymentDetailDto.Request.PaymentCancel paymentCancel) {
+		return PaymentMapper.INSTANCE.paymentDetailDtoToResponse(
+			paymentService.cancelPaymentDetail(paymentCancel)
 		);
 	}
 

@@ -86,7 +86,7 @@ public class BeanPay {
 		sellerBeanPay.increaseBeanPay(amount);
 	}
 
-	public void rollbackPayment(Integer amount, BeanPay sellerBeanPay) {
+	public void cancelPayment(Integer amount, BeanPay sellerBeanPay) {
 		int remainAmount = sellerBeanPay.getAmount() - amount;
 
 		if(remainAmount < 0)

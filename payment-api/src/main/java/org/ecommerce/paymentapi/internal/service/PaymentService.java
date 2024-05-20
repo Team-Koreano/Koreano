@@ -8,16 +8,21 @@ import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.dto.PaymentDto;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
+import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
+import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final BeanPayRepository beanPayRepository;
+	private final PaymentDetailRepository paymentDetailRepository;
 
 	/**
 	 결제 진행
@@ -96,24 +102,31 @@ public class PaymentService {
 	}
 
 	/**
-	 결제 이벤트 발생시 결제 진행
-	 * TODO: 이벤트 리스너 추가 예정
+	 결제 개별 취소
 	 * @author 이우진
 	 *
 	 * @param - PaymentPrice 주문 결제 요청 객체
 	 * @return - 반환 값 설명 텍스트
 	 */
-	@DistributedLock(key = {
-		"'BEANPAY'.concat(#userId).concat('SELLER')",
-		"'BEANPAY'.concat(#sellerId).concat('USER')",
+	@DistributedLock(
+		lockName = BEANPAY,
+		uniqueKey = {
+		"paymentCancel.sellerId() + 'SELLER'",
+		"paymentCancel.userId() + 'USER'",
 	})
-	public PaymentDto paymentPriceCancel(
-		final Long orderId
+	public PaymentDetailDto cancelPaymentDetail(
+		final PaymentCancel paymentCancel
 	) {
-		final Payment payment = getPayment(orderId);
-		//TODO: FailReason 추가 예정
-		return PaymentMapper.INSTANCE.paymentToDto(
-			payment.cancelPayment("fail Reason"));
+		final PaymentDetail paymentDetail = getPaymentDetail(paymentCancel.orderItemId());
+
+		return PaymentMapper.INSTANCE.paymentDetailToDto(
+			paymentDetail.cancelPaymentDetail(paymentCancel.cancelReason())
+		);
+	}
+
+	private PaymentDetail getPaymentDetail(Long orderItemId) {
+		return paymentDetailRepository.findPaymentDetailByOrderItemId(orderItemId)
+			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_EXIST));
 	}
 
 	private Payment getPayment(final Long orderId) {
