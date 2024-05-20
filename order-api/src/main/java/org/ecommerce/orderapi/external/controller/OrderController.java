@@ -9,13 +9,13 @@ import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
 import org.ecommerce.orderapi.handler.OrderEventHandler;
 import org.ecommerce.orderapi.handler.OrderQueryHandler;
+import org.ecommerce.orderapi.service.OrderDomainService;
 import org.ecommerce.orderapi.service.StockDomainService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,19 +32,20 @@ public class OrderController {
 	private final OrderEventHandler orderEventHandler;
 	private final OrderQueryHandler orderQueryHandler;
 	private final StockDomainService stockDomainService;
+	private final OrderDomainService orderDomainService;
 
 	// todo jwt 도입 후 로직 변경
 	private final static Integer USER_ID = 1;
 
 	@PostMapping
 	public Response<OrderDto.Response> createOrder(
-			@RequestBody @Valid final OrderDto.Request.Place placeRequest
+			@RequestBody @Valid final OrderDto.Request.Create createRequest
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.OrderDtoToResponse(
-						orderEventHandler.createOrder(USER_ID, placeRequest)
+						orderDomainService.createOrder(USER_ID, createRequest)
 				)
 		);
 	}
@@ -73,19 +74,6 @@ public class OrderController {
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.OrderDtoToResponse(
 						orderEventHandler.cancelOrder(USER_ID, orderId, orderItemId)
-				)
-		);
-	}
-
-	@PutMapping("/{orderId}")
-	public Response<OrderDto.Response> approveOrder(
-			@PathVariable("orderId") final Long orderId
-	) {
-
-		return new Response<>(
-				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.OrderDtoToResponse(
-						orderEventHandler.approveOrder(orderId)
 				)
 		);
 	}

@@ -30,7 +30,7 @@ public class OrderDto {
 
 	public static class Request {
 
-		public record Place(
+		public record Create(
 
 				@NotNull(message = BUCKET_IDS_NOT_NULL)
 				@Size(min = 1, max = 15, message = INVALID_BUCKET_SIZE)

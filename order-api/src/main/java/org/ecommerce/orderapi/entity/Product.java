@@ -2,13 +2,19 @@ package org.ecommerce.orderapi.entity;
 
 import org.ecommerce.orderapi.entity.enumerated.ProductStatus;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @Getter
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
-
+	@Id
 	private Integer id;
 	private String name;
 	private Integer price;

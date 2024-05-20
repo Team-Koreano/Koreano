@@ -65,7 +65,7 @@ public class Order {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private OrderStatus status;
+	private OrderStatus status = OPEN;
 
 	@Column
 	@CreationTimestamp
@@ -81,15 +81,18 @@ public class Order {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> orderItems = new ArrayList<>();
 
-	public static Order of(
+	public static Order ofCreate(
 			final Integer userId,
 			final String userName,
 			final String receiveName,
 			final String phoneNumber,
 			final String address1,
 			final String address2,
-			final String deliveryComment
+			final String deliveryComment,
+			final List<Product> products,
+			final Map<Integer, Integer> quantities
 	) {
+		validateOrderLimit(products.size());
 		final Order order = new Order();
 		order.userId = userId;
 		order.userName = userName;
@@ -98,21 +101,13 @@ public class Order {
 		order.address1 = address1;
 		order.address2 = address2;
 		order.deliveryComment = deliveryComment;
+		addOrderItems(order, products, quantities);
 		return order;
-	}
-
-	public void place(
-			final List<Product> products,
-			final Map<Integer, Integer> quantities
-	) {
-		validateOrder(products.size());
-		addOrderItems(products, quantities);
-		changeStatus(OPEN);
 	}
 
 	public void cancelItem(final Long orderItemId) {
 		OrderItem orderItem = getOrderItemByOrderItemId(orderItemId);
-		isCancelableOrderItem(orderItem);
+		validateCancelableOrderItem(orderItem);
 		orderItem.cancel();
 	}
 
@@ -126,8 +121,18 @@ public class Order {
 		}
 	}
 
-	public void approve() {
-		orderItems.forEach(OrderItem::approve);
+	public void approve(
+			final Integer totalPaymentAmount,
+			final LocalDateTime paymentDatetime,
+			final Map<Long, PaymentDetail> paymentDetails
+
+	) {
+		if (!isApprovableOrderStatus()) {
+			throw new CustomException(MUST_OPEN_ORDER_TO_APPROVE);
+		}
+		approveOrderItems(paymentDetails);
+		this.totalPaymentAmount = totalPaymentAmount;
+		this.paymentDatetime = paymentDatetime;
 		changeStatus(APPROVE);
 	}
 
@@ -142,25 +147,7 @@ public class Order {
 				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM_ID));
 	}
 
-	private void validateOrder(final int productCount) {
-		validateInitialOrder();
-		validateInitialOrderItems();
-		validateOrderLimit(productCount);
-	}
-
-	private void validateInitialOrder() {
-		if (status != null || id != null) {
-			throw new CustomException(NOT_CORRECT_STATUS_TO_PLACE);
-		}
-	}
-
-	private void validateInitialOrderItems() {
-		if (!orderItems.isEmpty()) {
-			throw new CustomException(NOT_CORRECT_STATUS_TO_ADD);
-		}
-	}
-
-	private void validateOrderLimit(final int productCount) {
+	private static void validateOrderLimit(final int productCount) {
 		if (productCount > MAXIMUM_ORDER_ITEMS) {
 			throw new CustomException(TOO_MANY_PRODUCTS_ON_ORDER);
 		}
@@ -170,34 +157,31 @@ public class Order {
 		}
 	}
 
-	private void addOrderItems(
+	private static void addOrderItems(
+			final Order order,
 			final List<Product> products,
 			final Map<Integer, Integer> quantities
 	) {
-
-		// TODO : 배송비 우선 무료로 고정, 추후 seller에서 정책 설정
-		Integer DELIVERY_FEE = 0;
-		orderItems = new ArrayList<>();
+		order.orderItems = new ArrayList<>();
 		products.forEach(
 				product -> {
 					validateQuantity(quantities.get(product.getId()));
-					OrderItem orderItem = OrderItem.ofAdd(
-							this,
-							product.getId(),
-							product.getName(),
-							product.getPrice(),
-							quantities.get(product.getId()),
-							DELIVERY_FEE,
-							product.getSellerId(),
-							product.getSellerName()
+					order.orderItems.add(
+							OrderItem.ofAdd(
+									order,
+									product.getId(),
+									product.getName(),
+									product.getPrice(),
+									quantities.get(product.getId()),
+									product.getSellerId(),
+									product.getSellerName()
+							)
 					);
-					orderItems.add(orderItem);
-					totalPaymentAmount += orderItem.getPaymentAmount();
 				}
 		);
 	}
 
-	private void validateQuantity(final Integer quantity) {
+	private static void validateQuantity(final Integer quantity) {
 		if (quantity > MAXIMUM_PRODUCT_QUANTITY) {
 			throw new CustomException(TOO_MANY_QUANTITY_ON_ORDER);
 		}
@@ -207,7 +191,7 @@ public class Order {
 		}
 	}
 
-	private void isCancelableOrderItem(final OrderItem orderItem) {
+	private void validateCancelableOrderItem(final OrderItem orderItem) {
 		if (!orderItem.isCancelableStatus()) {
 			throw new CustomException(MUST_CLOSED_ORDER_TO_CANCEL);
 		}
@@ -221,9 +205,27 @@ public class Order {
 		return orderItems.stream().allMatch(OrderItem::isCompletedOrderItem);
 	}
 
+	private boolean isApprovableOrderStatus() {
+		return status == OPEN;
+	}
+
 	private void changeStatus(final OrderStatus changeStatus) {
 		status = changeStatus;
 		statusDatetime = LocalDateTime.now();
 	}
 
+	private void approveOrderItems(final Map<Long, PaymentDetail> paymentDetails) {
+		orderItems.forEach(orderItem -> {
+			if (!orderItem.isApprovableOrderItem()) {
+				throw new CustomException(MUST_OPEN_ORDER_ITEM_TO_APPROVE);
+			}
+			PaymentDetail paymentDetail = paymentDetails.get(orderItem.getId());
+			orderItem.approve(
+					paymentDetail.getTotalPrice(),
+					paymentDetail.getDeliveryFee(),
+					paymentDetail.getPaymentAmount(),
+					paymentDetail.getPaymentDatetime()
+			);
+		});
+	}
 }

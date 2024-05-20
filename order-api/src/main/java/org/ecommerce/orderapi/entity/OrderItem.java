@@ -59,13 +59,13 @@ public class OrderItem {
 	private Integer quantity;
 
 	@Column(nullable = false)
-	private Integer totalPrice;
+	private Integer totalPrice = 0;
 
 	@Column(nullable = false)
-	private Integer deliveryFee;
+	private Integer deliveryFee = 0;
 
 	@Column(nullable = false)
-	private Integer paymentAmount;
+	private Integer paymentAmount = 0;
 
 	@Column(nullable = false)
 	private Integer sellerId;
@@ -85,6 +85,9 @@ public class OrderItem {
 	@CreationTimestamp
 	private LocalDateTime statusDatetime;
 
+	@Column
+	private LocalDateTime paymentDatetime;
+
 	@OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
@@ -94,7 +97,6 @@ public class OrderItem {
 			final String productName,
 			final Integer price,
 			final Integer quantity,
-			final Integer deliveryFee,
 			final Integer sellerId,
 			final String sellerName
 	) {
@@ -104,9 +106,6 @@ public class OrderItem {
 		orderItem.productName = productName;
 		orderItem.price = price;
 		orderItem.quantity = quantity;
-		orderItem.totalPrice = price * quantity;
-		orderItem.deliveryFee = deliveryFee;
-		orderItem.paymentAmount = price * quantity + deliveryFee;
 		orderItem.sellerId = sellerId;
 		orderItem.sellerName = sellerName;
 		orderItem.orderStatusHistories = new ArrayList<>();
@@ -120,7 +119,16 @@ public class OrderItem {
 				OrderStatusHistory.ofRecord(this, CLOSED));
 	}
 
-	void approve() {
+	void approve(
+			final Integer totalPrice,
+			final Integer deliveryFee,
+			final Integer paymentAmount,
+			final LocalDateTime paymentDatetime
+	) {
+		this.totalPrice = totalPrice;
+		this.deliveryFee = deliveryFee;
+		this.paymentAmount = paymentAmount;
+		this.paymentDatetime = paymentDatetime;
 		changeStatus(APPROVE, COMPLETE_PAYMENT);
 		orderStatusHistories.add(
 				OrderStatusHistory.ofRecord(this, APPROVE));
@@ -152,6 +160,10 @@ public class OrderItem {
 
 	boolean isCompletedOrderItem() {
 		return this.status == CLOSED;
+	}
+
+	boolean isApprovableOrderItem() {
+		return this.status == OPEN;
 	}
 
 	private void changeStatus(
