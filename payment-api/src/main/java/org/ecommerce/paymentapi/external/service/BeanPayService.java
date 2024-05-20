@@ -71,7 +71,7 @@ public class BeanPayService {
 	 */
 	@DistributedLock(
 		lockName = BEANPAY,
-		key = "#userId + #role")
+		uniqueKey = "#userId + #role")
 	public PaymentDetailDto validTossCharge(
 		final TossPayment request,
 		final Integer userId,

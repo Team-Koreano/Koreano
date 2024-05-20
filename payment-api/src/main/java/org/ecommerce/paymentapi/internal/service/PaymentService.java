@@ -43,7 +43,7 @@ public class PaymentService {
 	 */
 	@DistributedLock(
 		lockName = BEANPAY,
-		key = {
+		uniqueKey = {
 			"#paymentPrice.userId() + 'USER'",
 			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}
