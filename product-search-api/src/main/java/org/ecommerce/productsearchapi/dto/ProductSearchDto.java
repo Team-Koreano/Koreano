@@ -86,6 +86,9 @@ public class ProductSearchDto {
 		) {
 
 			public Boolean validKeyword() {
+				if (this.keyword == null) {
+					return false;
+				}
 				return !this.keyword.trim().isEmpty();
 			}
 
