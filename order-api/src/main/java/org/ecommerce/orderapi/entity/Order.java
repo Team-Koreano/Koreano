@@ -105,10 +105,11 @@ public class Order {
 		return order;
 	}
 
-	public void cancelItem(final Long orderItemId) {
+	public Order cancelItem(final Long orderItemId) {
 		OrderItem orderItem = getOrderItemByOrderItemId(orderItemId);
 		validateCancelableOrderItem(orderItem);
 		orderItem.cancel();
+		return this;
 	}
 
 	public void complete(final Set<Long> successfulDecreaseStockOrderItemIds) {

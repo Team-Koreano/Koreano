@@ -20,6 +20,7 @@ import org.ecommerce.orderapi.entity.Order;
 import org.ecommerce.orderapi.entity.Payment;
 import org.ecommerce.orderapi.entity.Product;
 import org.ecommerce.orderapi.entity.Stock;
+import org.ecommerce.orderapi.event.OrderCanceledEvent;
 import org.ecommerce.orderapi.event.OrderCreatedEvent;
 import org.ecommerce.orderapi.repository.OrderRepository;
 import org.ecommerce.orderapi.repository.StockRepository;
@@ -61,7 +62,9 @@ public class OrderDomainService {
 		final List<Product> products = getProducts(bucketSummary.getProductIds());
 
 		validateStock(bucketSummary.getQuantityMap());
-		final Order order = saveOrder(userId, request, products, bucketSummary.getQuantityMap());
+		final Order order = saveOrder(
+				userId, request, products, bucketSummary.getQuantityMap());
+
 		paymentOrder(order);
 		applicationEventPublisher.publishEvent(new OrderCreatedEvent(order.getId()));
 		return OrderMapper.INSTANCE.OrderToDto(order);
@@ -71,11 +74,23 @@ public class OrderDomainService {
 	 * 주문을 취소하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param order- 주문
+	 * @param userId- 회원 번호
+	 * @param orderId- 주문 번호
 	 * @param orderItemId- 주문 항목 번호
 	 */
-	public void cancelOrder(final Order order, final Long orderItemId) {
-		order.cancelItem(orderItemId);
+	public OrderDto cancelOrder(
+			final Integer userId,
+			final Long orderId,
+			final Long orderItemId
+	) {
+		final Order order = orderRepository.findOrderByIdAndUserId(userId, orderId)
+				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
+
+		// TODO 결제 취소 Kafka Event 추가
+		applicationEventPublisher.publishEvent(new OrderCanceledEvent(order.getId()));
+		return OrderMapper.INSTANCE.OrderToDto(
+				order.cancelItem(orderItemId)
+		);
 	}
 
 	/**

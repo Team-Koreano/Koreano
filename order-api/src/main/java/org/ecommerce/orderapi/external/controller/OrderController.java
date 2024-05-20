@@ -7,7 +7,6 @@ import org.ecommerce.orderapi.dto.OrderDto;
 import org.ecommerce.orderapi.dto.OrderMapper;
 import org.ecommerce.orderapi.dto.StockDto;
 import org.ecommerce.orderapi.dto.StockMapper;
-import org.ecommerce.orderapi.handler.OrderEventHandler;
 import org.ecommerce.orderapi.handler.OrderQueryHandler;
 import org.ecommerce.orderapi.service.OrderDomainService;
 import org.ecommerce.orderapi.service.StockDomainService;
@@ -29,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/orders/v1")
 public class OrderController {
 
-	private final OrderEventHandler orderEventHandler;
 	private final OrderQueryHandler orderQueryHandler;
 	private final StockDomainService stockDomainService;
 	private final OrderDomainService orderDomainService;
@@ -73,7 +71,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.OrderDtoToResponse(
-						orderEventHandler.cancelOrder(USER_ID, orderId, orderItemId)
+						orderDomainService.cancelOrder(USER_ID, orderId, orderItemId)
 				)
 		);
 	}
