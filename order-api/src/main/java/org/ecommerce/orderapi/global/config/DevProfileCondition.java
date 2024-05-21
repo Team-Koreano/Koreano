@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.config;
+package org.ecommerce.orderapi.global.config;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;

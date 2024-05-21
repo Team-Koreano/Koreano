@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.service;
+package org.ecommerce.orderapi.stock.service;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

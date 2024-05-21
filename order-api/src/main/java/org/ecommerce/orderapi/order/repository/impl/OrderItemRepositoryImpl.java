@@ -2,6 +2,8 @@ package org.ecommerce.orderapi.order.repository.impl;
 
 import static org.ecommerce.orderapi.order.entity.QOrderItem.*;
 
+import java.util.Optional;
+
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.repository.OrderItemCustomRepository;
 import org.springframework.stereotype.Repository;
@@ -32,8 +34,8 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	}
 
 	@Override
-	public OrderItem findOrderItemById(Long orderItemId) {
-		return findOrderItemByIdAndUserId(orderItemId, null);
+	public Optional<OrderItem> findOrderItemById(Long orderItemId) {
+		return Optional.ofNullable(findOrderItemByIdAndUserId(orderItemId, null));
 	}
 
 	private BooleanExpression userIdEq(final Integer userId) {

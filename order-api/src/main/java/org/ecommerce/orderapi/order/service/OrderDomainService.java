@@ -51,7 +51,7 @@ public class OrderDomainService {
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 주문
-	 * @param request- 상품 리스트
+	 * @param request- 주문 요청 정보
 	 *
 	 */
 	public OrderDto createOrder(
@@ -97,11 +97,13 @@ public class OrderDomainService {
 	 * 주문을 완료하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param order- 주문
-	 * @param orderItemIds- 완료될 주문 항목 번호
+	 * @param orderId- 주문 번호
+	 * @param orderItemIds- 주문 항목 번호 Set
 	 */
-	public void completeOrder(final Order order, final Set<Long> orderItemIds) {
-		order.complete(orderItemIds);
+	public void completeOrder(final Long orderId, final Set<Long> orderItemIds) {
+		orderRepository.findOrderById(orderId)
+				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID))
+				.complete(orderItemIds);
 	}
 
 	@VisibleForTesting
@@ -190,6 +192,16 @@ public class OrderDomainService {
 		);
 	}
 
+	/**
+	 * 주문을 결제하는 메소드입니다.
+	 * <p>
+	 * FeignClient로 주문과 결제를 동기적으로 처리합니다.
+	 * 결제가 완료되면 결제 정보를 저장합니다.
+	 * <p>
+	 * @author ${Juwon}
+	 *
+	 * @param order- 주문
+	 */
 	@VisibleForTesting
 	public void paymentOrder(final Order order) {
 		Payment payment = PaymentMapper.INSTANCE.paymentResponseToEntity(

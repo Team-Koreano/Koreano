@@ -1,9 +1,20 @@
 package org.ecommerce.orderapi.stock.event;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 
+import lombok.Getter;
+
+@Getter
 public class StockDecreasedEvent extends StockEvent {
-	public StockDecreasedEvent(final Integer stockId, final LocalDateTime createdAt) {
-		super(stockId, createdAt);
+	private final Long orderId;
+	private final Set<Long> orderItemIds;
+
+	public StockDecreasedEvent(
+			final Long orderId,
+			final Set<Long> orderItemIds
+	) {
+		super(null);
+		this.orderId = orderId;
+		this.orderItemIds = orderItemIds;
 	}
 }

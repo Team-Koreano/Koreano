@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.config;
+package org.ecommerce.orderapi.global.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

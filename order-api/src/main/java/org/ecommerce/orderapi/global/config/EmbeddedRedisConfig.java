@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.config;
+package org.ecommerce.orderapi.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

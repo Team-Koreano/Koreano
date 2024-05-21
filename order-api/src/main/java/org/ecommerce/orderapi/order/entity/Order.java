@@ -111,10 +111,10 @@ public class Order {
 		return this;
 	}
 
-	public void complete(final Set<Long> successfulDecreaseStockOrderItemIds) {
+	public void complete(final Set<Long> OrderItemIds) {
 		orderItems.stream()
 				.filter(orderItem ->
-						successfulDecreaseStockOrderItemIds.contains(orderItem.getId()))
+						OrderItemIds.contains(orderItem.getId()))
 				.forEach(OrderItem::completedOrderItem);
 		if (isCompletedAllOrderItems()) {
 			changeStatus(OrderStatus.CLOSED);

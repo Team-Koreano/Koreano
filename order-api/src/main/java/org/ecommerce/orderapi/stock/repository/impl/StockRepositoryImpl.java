@@ -41,8 +41,7 @@ public class StockRepositoryImpl implements StockCustomRepository {
 		return Optional.ofNullable(jpaQueryFactory.select(stock)
 				.from(stockHistory)
 				.leftJoin(stockHistory.stock).fetchJoin()
-				.leftJoin(stockHistory.orderItem).fetchJoin()
-				.where(stockHistory.orderItem.id.eq(orderItemId))
+				.where(stockHistory.orderItemId.eq(orderItemId))
 				.fetchFirst());
 	}
 }

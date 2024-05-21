@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.stock.entity.enumerated.StockOperationResult;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -63,53 +62,45 @@ public class Stock {
 		return stock;
 	}
 
-	public StockOperationResult decreaseTotal(final OrderItem orderItem) {
+	public StockOperationResult decreaseTotal(
+			final Long orderItemId,
+			final Integer quantity
+	) {
 
-		if (!hasStock(orderItem.getQuantity())) {
+		if (!hasStock(quantity)) {
 			stockHistories.add(
-					StockHistory.ofRecord(this, orderItem, DECREASE, TOTAL_LIMIT)
+					StockHistory.ofRecord(this, orderItemId, DECREASE, TOTAL_LIMIT)
 			);
 			return TOTAL_LIMIT;
 		}
 
-		total -= orderItem.getQuantity();
+		total -= quantity;
 		stockHistories.add(
-				StockHistory.ofRecord(this, orderItem, DECREASE, SUCCESS)
+				StockHistory.ofRecord(this, orderItemId, DECREASE, SUCCESS)
 		);
 		return SUCCESS;
 	}
 
-	public void increaseTotal(final OrderItem orderItem) {
-		validateOrderItem(orderItem);
-		validateStockHistory(orderItem);
+	public void increaseTotal(final Long orderItemId, final Integer quantity) {
+		validateStockHistory(orderItemId);
 
-		total += orderItem.getQuantity();
+		total += quantity;
 		stockHistories.add(
 				StockHistory.ofRecord(
 						this,
-						orderItem,
+						orderItemId,
 						INCREASE,
 						SUCCESS
-				));
+				)
+		);
 	}
 
 	public boolean hasStock(Integer quantity) {
 		return this.total >= quantity;
 	}
 
-	private void validateOrderItem(final OrderItem orderItem) {
-		if (!orderItem.isRefundedOrderStatus()) {
-			throw new CustomException(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK);
-		}
-
-		if (!orderItem.isRefundedStatusReason()) {
-			throw new CustomException(MUST_REFUND_REASON_TO_INCREASE_STOCK);
-		}
-
-	}
-
-	private void validateStockHistory(final OrderItem orderItem) {
-		StockHistory stockHistory = getStockHistoryByOrderItem(orderItem);
+	private void validateStockHistory(final Long orderItemId) {
+		StockHistory stockHistory = getStockHistoryByOrderItemId(orderItemId);
 		if (!stockHistory.isOperationTypeDecrease()) {
 			throw new CustomException(
 					MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK);
@@ -120,9 +111,9 @@ public class Stock {
 		}
 	}
 
-	private StockHistory getStockHistoryByOrderItem(final OrderItem orderItem) {
+	private StockHistory getStockHistoryByOrderItemId(final Long orderItemId) {
 		return stockHistories.stream()
-				.filter(stockHistory -> orderItem.equals(stockHistory.getOrderItem()))
+				.filter(stockHistory -> stockHistory.getOrderItemId().equals(orderItemId))
 				.findFirst()
 				.orElseThrow(() -> new CustomException(NOT_FOUND_STOCK_HISTORY));
 	}

@@ -41,9 +41,8 @@ public class StockHistory {
 	@JoinColumn(nullable = false)
 	private Stock stock;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn
-	private OrderItem orderItem;
+	@Column(nullable = false)
+	private Long orderItemId;
 
 	@Column
 	@Enumerated(EnumType.STRING)
@@ -59,13 +58,13 @@ public class StockHistory {
 
 	static StockHistory ofRecord(
 			final Stock stock,
-			final OrderItem orderItem,
+			final Long orderItemId,
 			final StockOperationType operationType,
 			final StockOperationResult operationResult
 	) {
 		final StockHistory stockHistory = new StockHistory();
 		stockHistory.stock = stock;
-		stockHistory.orderItem = orderItem;
+		stockHistory.orderItemId = orderItemId;
 		stockHistory.operationType = operationType;
 		stockHistory.operationResult = operationResult;
 		return stockHistory;

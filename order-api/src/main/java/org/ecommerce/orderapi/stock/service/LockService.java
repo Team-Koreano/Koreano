@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.service;
+package org.ecommerce.orderapi.stock.service;
 
 import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 
