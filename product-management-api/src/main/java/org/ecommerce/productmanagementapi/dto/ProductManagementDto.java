@@ -33,6 +33,7 @@ public class ProductManagementDto {
 	private Boolean isCrush;
 	private ProductStatus status;
 	private String size;
+	private String capacity;
 	private LocalDateTime createDatetime;
 	private LocalDateTime updateDatetime;
 	private List<Image> images;
@@ -54,7 +55,8 @@ public class ProductManagementDto {
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
 			Boolean isCrush,
-			String size
+			String size,
+			String capacity
 		) {
 		}
 
@@ -79,6 +81,7 @@ public class ProductManagementDto {
 			@NotBlank(message = ProductManagementErrorMessages.nameNotBlank)
 			String name,
 			String size,
+			String capacity,
 			Boolean isCrush
 		) {
 		}
@@ -138,14 +141,16 @@ public class ProductManagementDto {
 		@Getter
 		public static class DefaultProductResponse extends Response {
 			private final String size;
+			private final String capacity;
 
 			public DefaultProductResponse(Integer id, Integer price, String bizName, Integer stock,
 				Integer favoriteCount, String category, String name, String status, String information,
 				LocalDateTime createDatetime,
-				List<Image> images, String size) {
+				List<Image> images, String size, String capacity) {
 				super(id, price, bizName, stock, favoriteCount, category, name, status, information, createDatetime,
 					images);
 				this.size = size;
+				this.capacity = capacity;
 			}
 		}
 	}

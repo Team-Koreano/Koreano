@@ -52,16 +52,18 @@ public class S3Provider {
 		}
 	}
 
-	public void deleteFile(String fileUrl) {
-		try {
-			URL url = new URL(fileUrl);
-			String path = url.getPath();
-			String filename = path.substring(path.lastIndexOf('/') + 1);
+	public void deleteFile(List<String> fileUrls) {
+		for (String fileUrl : fileUrls) {
+			try {
+				URL url = new URL(fileUrl);
+				String path = url.getPath();
+				String filename = path.substring(path.lastIndexOf('/') + 1);
 
-			amazonS3Client.deleteObject(bucket, filename);
+				amazonS3Client.deleteObject(bucket, filename);
 
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -78,6 +80,9 @@ public class S3Provider {
 	public List<ProductManagementDto.Request.Image> uploadImageFiles(MultipartFile thumbnailImage,
 		List<MultipartFile> files) {
 
+		validateImageFile(thumbnailImage);
+		validateImageFiles(files);
+		
 		final int numberOfThreads = (files != null ? files.size() : 0) + (thumbnailImage != null ? 1 : 0);
 
 		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(numberOfThreads,
@@ -151,7 +156,6 @@ public class S3Provider {
 	}
 
 	private String upload(MultipartFile file) throws IOException {
-		log.info("now ThreadName = {}", Thread.currentThread().getName());
 		ObjectMetadata meta = new ObjectMetadata();
 		meta.setContentType(file.getContentType());
 		meta.setContentLength(file.getSize());
