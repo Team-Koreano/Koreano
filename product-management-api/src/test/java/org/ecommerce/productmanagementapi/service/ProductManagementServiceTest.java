@@ -24,7 +24,6 @@ import org.ecommerce.productmanagementapi.external.ProductManagementService;
 import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
-import org.ecommerce.productmanagementapi.util.ProductFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,15 +74,24 @@ public class ProductManagementServiceTest {
 					"정말 맛있는 원두 단돈 천원",
 					"부산 진구 유명가수가 좋아하는 원두",
 					false,
+					null,
 					null
 				);
 
-			final Product product = ProductFactory
-				.getFactory(productDtos.category())
-				.createProduct(
-					productDtos, seller
-				);
-
+			final Product product = Product.createProduct(
+				productDtos.category(),
+				productDtos.price(),
+				productDtos.stock(),
+				productDtos.name(),
+				productDtos.bean(),
+				productDtos.acidity(),
+				productDtos.information(),
+				productDtos.isCrush(),
+				productDtos.isDecaf(),
+				productDtos.size(),
+				productDtos.capacity(),
+				seller
+			);
 			given(productRepository.save(any(Product.class))).willReturn(
 				product
 			);
@@ -99,6 +107,8 @@ public class ProductManagementServiceTest {
 				"multipart/form-data",
 				"test file2".getBytes(StandardCharsets.UTF_8));
 			mockMultipartFiles.add(mockMultipartFile);
+
+			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
 			final ProductManagementDto productManagementDto = productManagementService.productRegister(productDtos,
 				mockThumbnailImage,
@@ -139,19 +149,28 @@ public class ProductManagementServiceTest {
 					"잘 갈리는 블렌더",
 					"잘 블",
 					null,
-					"20 * 60 500ml"
+					"20 * 60",
+					"500ml"
 				);
 
-			ProductFactory factory = ProductFactory
-				.getFactory(productDtos.category());
-			final Product product = factory
-				.createProduct(
-					productDtos, seller
-				);
-
+			final Product product = Product.createProduct(
+				productDtos.category(),
+				productDtos.price(),
+				productDtos.stock(),
+				productDtos.name(),
+				productDtos.bean(),
+				productDtos.acidity(),
+				productDtos.information(),
+				productDtos.isCrush(),
+				productDtos.isDecaf(),
+				productDtos.size(),
+				productDtos.capacity(),
+				seller
+			);
 			given(productRepository.save(any(Product.class))).willReturn(
 				product
 			);
+
 			final ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
 
 			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
@@ -164,6 +183,8 @@ public class ProductManagementServiceTest {
 				"multipart/form-data",
 				"test file2".getBytes(StandardCharsets.UTF_8));
 			mockMultipartFiles.add(mockMultipartFile);
+
+			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
 			final ProductManagementDto productManagementDto = productManagementService.productRegister(productDtos,
 				mockThumbnailImage,
@@ -195,7 +216,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
@@ -218,18 +239,18 @@ public class ProductManagementServiceTest {
 			final Product entity1 = new Product(
 				1, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			final Product entity2 = new Product(
 				2, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			List<Product> products = List.of(entity1, entity2);
 
-			given(productRepository.findProductById(productIds)).willReturn(products);
+			given(productRepository.findProductsById(productIds)).willReturn(products);
 			given(productRepository.saveAll(products)).willReturn(products);
 
 			ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(productIds,
@@ -259,7 +280,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
@@ -285,7 +306,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
@@ -300,11 +321,18 @@ public class ProductManagementServiceTest {
 
 	@Test
 	void 상품_수정() {
+
+		final List<ProductManagementDto.Request.Image> imageDtos = List.of(
+			new ProductManagementDto.Request.Image("image1.jpg", (short)1, true),
+			new ProductManagementDto.Request.Image("image2.jpg", (short)2, false),
+			new ProductManagementDto.Request.Image("image3.jpg", (short)3, false)
+		);
+
 		final Integer productId = 1;
 
 		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", null, true);
+			"수정된", "커피", null, null, true);
 
 		final Image image = Image.ofCreate(
 			"test",
@@ -319,7 +347,7 @@ public class ProductManagementServiceTest {
 		Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 30, seller, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, null, ProductStatus.AVAILABLE, testTime, testTime, mockImages
+			true, null, null, ProductStatus.AVAILABLE, testTime, testTime, mockImages
 		);
 
 		entity.getImages().add(image);
@@ -336,6 +364,8 @@ public class ProductManagementServiceTest {
 			"test file2".getBytes(StandardCharsets.UTF_8));
 
 		mockMultipartFiles.add(mockMultipartFile);
+
+		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
 		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto, mockThumbnailImage,
 			mockMultipartFiles);
