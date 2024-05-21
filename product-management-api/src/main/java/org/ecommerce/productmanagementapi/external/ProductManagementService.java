@@ -1,10 +1,8 @@
 package org.ecommerce.productmanagementapi.external;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
@@ -12,15 +10,11 @@ import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
 import org.ecommerce.productmanagementapi.provider.S3Provider;
-import org.ecommerce.productmanagementapi.repository.ImageRepository;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
 import org.ecommerce.productmanagementapi.repository.SellerRepository;
-import org.ecommerce.productmanagementapi.util.ProductFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +26,6 @@ public class ProductManagementService {
 	// TODO : 향후 Replication 후 삭제
 	private static final SellerRep seller = new SellerRep(1, "TEST");
 	private final ProductRepository productRepository;
-	private final ImageRepository imageRepository;
 	private final SellerRepository sellerRepository;
 	private final S3Provider s3Provider;
 
@@ -48,12 +41,26 @@ public class ProductManagementService {
 	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product,
 		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
-		final Product createdProduct = ProductFactory.getFactory(product.category())
-			.createProduct(product, seller);
+		final Product createdProduct = Product.createProduct(
+			product.category(),
+			product.price(),
+			product.stock(),
+			product.name(),
+			product.bean(),
+			product.acidity(),
+			product.information(),
+			product.isCrush(),
+			product.isDecaf(),
+			product.size(),
+			product.capacity(),
+			seller
+		);
 
 		final Product savedProduct = productRepository.save(createdProduct);
 
-		saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), savedProduct);
+		s3Provider.uploadImageFiles(thumbnailImage, images).forEach(
+			image -> savedProduct.saveImage(image.imageUrl(), image.isThumbnail(), image.sequenceNumber())
+		);
 
 		return ProductManagementMapper.INSTANCE.toDto(savedProduct);
 	}
@@ -137,11 +144,26 @@ public class ProductManagementService {
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
-		ProductFactory.getFactory(modifyProduct.category()).modifyProduct(product, modifyProduct);
+		product.toModify(
+			modifyProduct.category(),
+			modifyProduct.price(),
+			modifyProduct.name(),
+			modifyProduct.bean(),
+			modifyProduct.acidity(),
+			modifyProduct.information(),
+			modifyProduct.isCrush(),
+			modifyProduct.isDecaf(),
+			modifyProduct.size(),
+			modifyProduct.capacity()
+		);
 
 		if (thumbnailImage != null || images != null) {
-			deleteImages(product.getImages().stream().map(Image::getId).collect(Collectors.toList()), product);
-			saveImages(s3Provider.uploadImageFiles(thumbnailImage, images), product);
+			s3Provider.deleteFile(product.getImagesUrl());
+			product.deleteImages();
+			s3Provider.uploadImageFiles(thumbnailImage, images).forEach(
+				image -> product.saveImage(image.imageUrl(), image.isThumbnail(), image.sequenceNumber())
+			);
+
 		}
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
@@ -157,7 +179,7 @@ public class ProductManagementService {
 		final ProductManagementDto.Request.BulkStatus bulkStatus
 	) {
 
-		List<Product> products = productRepository.findProductById(bulkStatus.productId());
+		List<Product> products = productRepository.findProductsById(bulkStatus.productId());
 
 		if (products.isEmpty()) {
 			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
@@ -166,37 +188,5 @@ public class ProductManagementService {
 		products.forEach(product -> product.toModifyStatus(bulkStatus.productStatus()));
 
 		return ProductManagementMapper.INSTANCE.productsToDtos(products);
-	}
-
-	@VisibleForTesting
-	public void saveImages(List<ProductManagementDto.Request.Image> imagesRequest, Product product) {
-		if (!imagesRequest.isEmpty()) {
-			product.getImages().addAll(imagesRequest.stream()
-				.map(imageResponse -> Image.ofCreate(
-					imageResponse.imageUrl(),
-					imageResponse.isThumbnail(),
-					imageResponse.sequenceNumber(),
-					product
-				))
-				.toList());
-		}
-	}
-
-	@VisibleForTesting
-	public void deleteImagesFromS3(List<Image> imagesToDelete) {
-		for (Image image : imagesToDelete) {
-			s3Provider.deleteFile(image.getImageUrl());
-		}
-	}
-
-	@VisibleForTesting
-	public void deleteImages(List<Integer> imageIdList, Product product) {
-		List<Image> imagesToDelete = product.getImages().stream()
-			.filter(image -> imageIdList.contains(image.getId()))
-			.collect(Collectors.toList());
-
-		deleteImagesFromS3(imagesToDelete);
-		product.getImages().removeAll(imagesToDelete);
-		imageRepository.deleteAll(imagesToDelete);
 	}
 }
