@@ -157,8 +157,9 @@ public class OrderControllerTest {
 										"seller1",
 										OPEN,
 										null,
+										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
-								)
+										)
 						)
 				)
 		);
@@ -204,7 +205,8 @@ public class OrderControllerTest {
 				"sellerName1",
 				CANCELLED,
 				OrderStatusReason.REFUND,
-				LocalDateTime.of(2024, 5, 8, 0, 0)
+				LocalDateTime.of(2024, 5, 8, 0, 0),
+				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 		);
 		OrderDto orderDto = new OrderDto(
 				1L,
