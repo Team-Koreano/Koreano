@@ -173,10 +173,8 @@ public class Product {
 			.orElse(null);
 	}
 
-	public void saveImage(String imageUrl, boolean isThumbnail, Short sequenceNumber) {
-		this.images.add(
-			Image.ofCreate(imageUrl, isThumbnail, sequenceNumber, this)
-		);
+	public void saveImages(List<Image> images) {
+		this.images.addAll(images);
 	}
 
 	public List<String> getImagesUrl() {

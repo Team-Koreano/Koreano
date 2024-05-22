@@ -3,6 +3,7 @@ package org.ecommerce.productmanagementapi.external;
 import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
@@ -58,9 +59,9 @@ public class ProductManagementService {
 
 		final Product savedProduct = productRepository.save(createdProduct);
 
-		s3Provider.uploadImageFiles(thumbnailImage, images).forEach(
-			image -> savedProduct.saveImage(image.imageUrl(), image.isThumbnail(), image.sequenceNumber())
-		);
+		savedProduct.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
+			.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(), savedProduct))
+			.toList());
 
 		return ProductManagementMapper.INSTANCE.toDto(savedProduct);
 	}
@@ -77,7 +78,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto modifyToStatus(final Integer productId, final ProductStatus status) {
-		Product product = productRepository.findById(productId)
+		Product product = productRepository.findProductById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		product.toModifyStatus(status);
@@ -96,7 +97,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
-		Product product = productRepository.findById(stock.productId())
+		Product product = productRepository.findProductById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		product.increaseStock(stock.requestStock());
@@ -115,7 +116,7 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
-		Product product = productRepository.findById(stock.productId())
+		Product product = productRepository.findProductById(stock.productId())
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		if (!product.checkStock(stock.requestStock())) {
@@ -141,7 +142,7 @@ public class ProductManagementService {
 		List<MultipartFile> images
 	) {
 
-		Product product = productRepository.findById(productId)
+		Product product = productRepository.findProductById(productId)
 			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
 		product.toModify(
@@ -159,11 +160,13 @@ public class ProductManagementService {
 
 		if (thumbnailImage != null || images != null) {
 			s3Provider.deleteFile(product.getImagesUrl());
-			product.deleteImages();
-			s3Provider.uploadImageFiles(thumbnailImage, images).forEach(
-				image -> product.saveImage(image.imageUrl(), image.isThumbnail(), image.sequenceNumber())
-			);
 
+			product.deleteImages();
+
+			product.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
+				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(),
+					product))
+				.toList());
 		}
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
