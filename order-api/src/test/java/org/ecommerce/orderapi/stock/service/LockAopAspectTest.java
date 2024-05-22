@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.service;
+package org.ecommerce.orderapi.stock.service;
 
 import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,8 +6,6 @@ import static org.mockito.BDDMockito.*;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.stock.service.LockAopAspect;
-import org.ecommerce.orderapi.stock.service.LockService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

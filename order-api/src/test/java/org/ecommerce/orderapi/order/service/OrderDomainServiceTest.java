@@ -30,7 +30,6 @@ import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.order.entity.PaymentDetail;
-import org.ecommerce.orderapi.order.repository.OrderItemRepository;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.ecommerce.orderapi.stock.entity.Stock;
 import org.ecommerce.orderapi.stock.repository.StockRepository;
@@ -51,9 +50,6 @@ public class OrderDomainServiceTest {
 
 	@Mock
 	private OrderRepository orderRepository;
-
-	@Mock
-	private OrderItemRepository orderItemRepository;
 
 	@Mock
 	private StockRepository stockRepository;
