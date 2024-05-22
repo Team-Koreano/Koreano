@@ -110,16 +110,10 @@ class BeanPayServiceTest {
 				deliveryFee,
 				amount,
 				quantity,
-				"paymentName",
+				orderName,
 				null,
 				null,
-				new ChargeInfo(
-					1L,
-					null,
-					"paymentKey",
-					"payType",
-					LocalDateTime.now()
-				),
+				null,
 				DEPOSIT,
 				PENDING,
 				List.of(),
@@ -133,14 +127,15 @@ class BeanPayServiceTest {
 				Optional.of(response));
 
 			//when
-			when(paymentDetailRepository.findById(request.orderId())).thenReturn(Optional.of(entity));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(entity));
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossResponse);
 
 			//then
 			PaymentDetailDto actual = assertDoesNotThrow(
 				() -> beanPayService.validTossCharge(request, userId, role));
+
 			assertEquals(actual.getId(), id);
-			assertEquals(actual.getPaymentId(), entity.getPayment().getId());
+			assertEquals(actual.getPaymentDetailId(), entity.getPayment().getId());
 			assertEquals(actual.getUserId(), entity.getUserBeanPay().getUserId());
 			assertEquals(actual.getSellerId(), entity.getSellerBeanPay().getUserId());
 			assertEquals(actual.getOrderItemId(), orderItemId);
@@ -148,8 +143,8 @@ class BeanPayServiceTest {
 			assertEquals(actual.getPaymentAmount(), amount);
 			assertEquals(actual.getQuantity(), quantity);
 			assertEquals(actual.getPaymentName(), orderName);
-			assertEquals(actual.getCancelReason(), null);
-			assertEquals(actual.getFailReason(), null);
+			assertNull(actual.getCancelReason());
+			assertNull(actual.getFailReason());
 			assertEquals(actual.getPaymentStatus(), DEPOSIT);
 			assertEquals(actual.getProcessStatus(), COMPLETED);
 			assertEquals(actual.getApproveDateTime(),
@@ -171,14 +166,14 @@ class BeanPayServiceTest {
 				orderId, amount);
 
 			//when
-			when(paymentDetailRepository.findById(request.orderId())).thenThrow(
-				new CustomException(NOT_EXIST));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenThrow(
+				new CustomException(NOT_FOUND_ID));
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
 				beanPayService.validTossCharge(request, userId, role);
 			});
-			assertEquals(returnException.getErrorCode(), NOT_EXIST);
+			assertEquals(returnException.getErrorCode(), NOT_FOUND_ID);
 		}
 
 		@Test
@@ -222,9 +217,9 @@ class BeanPayServiceTest {
 			);
 
 			//when
-			when(paymentDetailRepository.findById(request.orderId())).thenReturn(Optional.of(paymentDetail));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
 			Optional<PaymentDetail> optionalBeanPay =
-				paymentDetailRepository.findById(request.orderId());
+				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
@@ -280,10 +275,10 @@ class BeanPayServiceTest {
 				.body(response);
 
 			//when
-			when(paymentDetailRepository.findById(request.orderId())).thenReturn(Optional.of(paymentDetail));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossFailResponse);
 			Optional<PaymentDetail> optionalPaymentDetail =
-				paymentDetailRepository.findById(request.orderId());
+				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
@@ -336,9 +331,9 @@ class BeanPayServiceTest {
 			);
 
 			//when
-			when(paymentDetailRepository.findById(request.orderId())).thenReturn(Optional.of(paymentDetail));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
 			Optional<PaymentDetail> optionalPaymentDetail =
-				paymentDetailRepository.findById(request.orderId());
+				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.failTossCharge(request));
@@ -357,14 +352,13 @@ class BeanPayServiceTest {
 		final TossFail request = new TossFail(orderId, errorCode, errorMessage);
 
 		//when
-		when(paymentDetailRepository.findById(request.orderId())).thenThrow(
-			new CustomException(NOT_EXIST));
+		when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.ofNullable(null));
 
 		//then
 		CustomException returnException = assertThrows(CustomException.class, () -> {
 			beanPayService.failTossCharge(request);
 		});
-		assertEquals(returnException.getErrorCode(), NOT_EXIST);
+		assertEquals(returnException.getErrorCode(), NOT_FOUND_ID);
 	}
 
 	private BeanPay getUserBeanPay() {

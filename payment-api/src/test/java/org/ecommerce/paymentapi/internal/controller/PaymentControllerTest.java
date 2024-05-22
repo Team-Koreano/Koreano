@@ -249,6 +249,8 @@ class PaymentControllerTest {
 				.andExpect(jsonPath("$.paymentName").value(paymentDetail.getPaymentName()))
 				.andExpect(jsonPath("$.cancelReason").value(paymentDetail.getCancelReason()))
 				.andExpect(jsonPath("$.failReason").value(paymentDetail.getFailReason()))
+				.andExpect(jsonPath("$.paymentKey").doesNotExist())
+				.andExpect(jsonPath("$.payType").doesNotExist())
 				.andExpect(jsonPath("$.paymentStatus").value(paymentDetail.getPaymentStatus().name()))
 				.andExpect(jsonPath("$.processStatus").value(paymentDetail.getProcessStatus().name()))
 				.andExpect(jsonPath("$.createDateTime").value(paymentDetail.getCreateDateTime()))
