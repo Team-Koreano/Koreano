@@ -1,8 +1,10 @@
 package org.ecommerce.orderapi.stock.service;
 
 import static org.ecommerce.orderapi.order.entity.enumerated.OrderStatus.*;
+import static org.ecommerce.orderapi.order.entity.enumerated.OrderStatusReason.*;
 import static org.ecommerce.orderapi.stock.entity.enumerated.StockOperationResult.*;
 import static org.ecommerce.orderapi.stock.entity.enumerated.StockOperationType.*;
+import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
@@ -14,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.entity.OrderItem;
+import org.ecommerce.orderapi.order.entity.OrderStatusHistory;
 import org.ecommerce.orderapi.order.repository.OrderItemRepository;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.ecommerce.orderapi.stock.entity.Stock;
@@ -295,120 +299,164 @@ public class StockDomainServiceTest {
 		assertEquals(TOTAL_LIMIT, stockHistories2.get(1).getOperationResult());
 	}
 
-	// @Test
-	// void 재고_증가() {
-	// 	// given
-	// 	final List<OrderStatusHistory> orderStatusHistories = List.of(
-	// 			new OrderStatusHistory(
-	// 					1L,
-	// 					null,
-	// 					OPEN,
-	// 					LocalDateTime.of(2024, 5, 9, 0, 0)
-	// 			)
-	// 	);
-	// 	final OrderItem orderItem = new OrderItem(
-	// 			1L,
-	// 			null,
-	// 			101,
-	// 			"productName1",
-	// 			10000,
-	// 			1,
-	// 			10000,
-	// 			0,
-	// 			10000,
-	// 			1,
-	// 			"sellerName",
-	// 			CANCELLED,
-	// 			REFUND,
-	// 			LocalDateTime.of(2024, 5, 9, 0, 0),
-	// 			orderStatusHistories
-	// 	);
-	// 	final Stock stock = spy(new Stock(
-	// 			1,
-	// 			101,
-	// 			9,
-	// 			LocalDateTime.of(2024, 5, 9, 0, 0),
-	// 			List.of(
-	// 					new StockHistory(
-	// 							1L,
-	// 							null,
-	// 							orderItem,
-	// 							DECREASE,
-	// 							LocalDateTime.of(2024, 5, 9, 0, 0)
-	// 					)
-	// 			)
-	// 	));
-	// 	final StockHistory stockHistory = new StockHistory(
-	// 			1L,
-	// 			stock,
-	// 			orderItem,
-	// 			DECREASE,
-	// 			LocalDateTime.of(2024, 5, 9, 0, 0)
-	// 	);
-	// 	given(orderItemRepository.findOrderItemById(anyLong(), isNull()))
-	// 			.willReturn(orderItem);
-	// 	given(stockHistoryRepository.findStockHistoryByOrderItemId(anyLong()))
-	// 			.willReturn(stockHistory);
-	// 	final int previousStockHistoriesSize = stock.getStockHistories().size();
-	// 	final int previousStockTotal = stock.getTotal();
-	// 	// when
-	// 	StockDto stockDto = stockService.increaseStock(orderItem.getId());
-	//
-	// 	// then
-	// 	verify(stock, Mockito.times(1))
-	// 			.increaseTotalStock(orderItem);
-	// 	List<StockHistory> stockHistories = stock.getStockHistories();
-	// 	assertEquals(previousStockHistoriesSize + 1, stockHistories.size());
-	// 	assertEquals(previousStockTotal + orderItem.getQuantity(), stockDto.getTotal());
-	// 	assertEquals(INCREASE, stockHistories.get(1).getOperationType());
-	// }
-	//
-	// @Test
-	// void 잘못된_주문상태_재고증가_실패() {
-	// 	// given
-	// 	final OrderItem orderItem = spy(new OrderItem(
-	// 			1L,
-	// 			null,
-	// 			101,
-	// 			"productName1",
-	// 			10000,
-	// 			1,
-	// 			10000,
-	// 			0,
-	// 			10000,
-	// 			1,
-	// 			"sellerName",
-	// 			OPEN,
-	// 			null,
-	// 			LocalDateTime.of(2024, 5, 9, 0, 0),
-	// 			null
-	// 	));
-	// 	// when
-	// 	CustomException exception = assertThrows(CustomException.class,
-	// 			() -> stockService.validateOrderItem(orderItem));
-	//
-	// 	// then
-	// 	verify(orderItem, Mockito.times(1)).isRefundedOrder();
-	// 	assertEquals(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK, exception.getErrorCode());
-	// }
-	//
-	// @Test
-	// void 잘못된_재고이력_재고증가_실패() {
-	// 	// given
-	// 	StockHistory stockHistory = spy(new StockHistory(
-	// 			1L,
-	// 			null,
-	// 			null,
-	// 			INCREASE,
-	// 			LocalDateTime.of(2024, 5, 9, 0, 0)
-	// 	));
-	// 	// when
-	// 	CustomException exception = assertThrows(CustomException.class,
-	// 			() -> stockService.validateStockHistory(stockHistory));
-	//
-	// 	// then
-	// 	verify(stockHistory, Mockito.times(1)).isOperationTypeDecrease();
-	// 	assertEquals(MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK,
-	// 			exception.getErrorCode());
-	// }
+	@Test
+	void 재고_증가() {
+		// given
+		final List<OrderStatusHistory> orderStatusHistories = List.of(
+				new OrderStatusHistory(
+						1L,
+						null,
+						OPEN,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		final OrderItem orderItem = new OrderItem(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName",
+				CANCELLED,
+				REFUND,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
+				orderStatusHistories
+		);
+		List<StockHistory> stockHistories = new ArrayList<>();
+		stockHistories.add(
+				new StockHistory(
+						1L,
+						null,
+						orderItem.getId(),
+						DECREASE,
+						SUCCESS,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		final Stock stock = spy(new Stock(
+				1,
+				101,
+				9,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				stockHistories
+		));
+
+		given(orderItemRepository.findOrderItemById(anyLong()))
+				.willReturn(Optional.of(orderItem));
+		given(stockRepository.findStockByOrderItemId(anyLong()))
+				.willReturn(Optional.of(stock));
+		final int previousStockHistoriesSize = stock.getStockHistories().size();
+		final int previousStockTotal = stock.getTotal();
+		// when
+		stockDomainService.increaseStock(orderItem.getId());
+
+		// then
+		verify(stock, times(1))
+				.increaseTotal(orderItem.getId(), orderItem.getQuantity());
+		assertEquals(previousStockTotal + orderItem.getQuantity(), stock.getTotal());
+		assertEquals(previousStockHistoriesSize + 1, stockHistories.size());
+		assertEquals(INCREASE, stockHistories.get(1).getOperationType());
+		assertEquals(SUCCESS, stockHistories.get(1).getOperationResult());
+	}
+
+	@Test
+	void 잘못된_주문상태_재고증가_실패() {
+		// given
+		final OrderItem orderItem = spy(
+				new OrderItem(
+						1L,
+						null,
+						101,
+						"productName1",
+						10000,
+						1,
+						10000,
+						0,
+						10000,
+						1,
+						"sellerName",
+						CLOSED,
+						REFUND,
+						LocalDateTime.of(2024, 5, 9, 0, 0),
+						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
+						new ArrayList<>()
+				)
+		);
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> stockDomainService.validateOrderItem(orderItem));
+
+		// then
+		verify(orderItem, times(1)).isRefundedOrderStatus();
+		assertEquals(MUST_CANCELLED_ORDER_TO_INCREASE_STOCK, exception.getErrorCode());
+	}
+
+	@Test
+	void 잘못된_재고이력_재고증가_실패() {
+		// given
+		final List<OrderStatusHistory> orderStatusHistories = List.of(
+				new OrderStatusHistory(
+						1L,
+						null,
+						OPEN,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		final OrderItem orderItem = new OrderItem(
+				1L,
+				null,
+				101,
+				"productName1",
+				10000,
+				1,
+				10000,
+				0,
+				10000,
+				1,
+				"sellerName",
+				CANCELLED,
+				REFUND,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
+				orderStatusHistories
+		);
+		List<StockHistory> stockHistories = new ArrayList<>();
+		stockHistories.add(
+				new StockHistory(
+						1L,
+						null,
+						orderItem.getId(),
+						INCREASE,
+						SUCCESS,
+						LocalDateTime.of(2024, 5, 9, 0, 0)
+				)
+		);
+		final Stock stock = spy(new Stock(
+				1,
+				101,
+				9,
+				LocalDateTime.of(2024, 5, 9, 0, 0),
+				stockHistories
+		));
+
+		given(orderItemRepository.findOrderItemById(anyLong()))
+				.willReturn(Optional.of(orderItem));
+		given(stockRepository.findStockByOrderItemId(anyLong()))
+				.willReturn(Optional.of(stock));
+		// when
+		CustomException exception = assertThrows(CustomException.class,
+				() -> stockDomainService.increaseStock(anyLong()));
+
+		// then
+		verify(stock, times(1))
+				.increaseTotal(orderItem.getId(), orderItem.getQuantity());
+		assertEquals(MUST_DECREASE_STOCK_OPERATION_TYPE_TO_INCREASE_STOCK,
+				exception.getErrorCode());
+	}
 }

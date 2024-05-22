@@ -84,7 +84,7 @@ public class StockDomainService {
 		OrderItem orderItem = getOrderItem(orderItemId);
 		validateOrderItem(orderItem);
 		Stock stock = getStock(orderItemId);
-		stock.increaseTotal(orderItemId, orderItem.getQuantity());
+		stock.increaseTotal(orderItem.getId(), orderItem.getQuantity());
 		// TODO : Kafka ProductManagement increaseStock Event
 	}
 
