@@ -32,7 +32,7 @@ public class LockTestService {
 	private final AopForTransaction aopForTransaction;
 	private final PaymentDetailRepository paymentDetailRepository;
 
-	@DistributedLock(key = "#lockName + #userId")
+	@DistributedLock(uniqueKey = "#lockName + #userId")
 	public void useDistributeLock(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
@@ -44,7 +44,7 @@ public class LockTestService {
 
 	@DistributedLock(
 		lockName = BEANPAY,
-		key = {
+		uniqueKey = {
 			"#paymentPrice.userId() + 'USER'",
 			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}

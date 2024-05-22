@@ -41,7 +41,7 @@ public class TossDtoTest {
 			//then
 			assertEquals(orderId, request.orderId());
 			assertEquals(paymentKey, request.paymentKey());
-			assertEquals(amount, request.amount());
+			assertEquals(amount, request.chargeAmount());
 			assertEquals(paymentType, request.paymentType());
 		}
 		@Test

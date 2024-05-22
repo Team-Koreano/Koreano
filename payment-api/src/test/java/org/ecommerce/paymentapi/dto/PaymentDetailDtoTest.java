@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.ChargeInfo;
@@ -68,7 +69,7 @@ class PaymentDetailDtoTest {
 		PaymentDetailDto dto =
 			PaymentDetailMapper.INSTANCE.entityToDto(entity);
 		assertEquals(dto.getId(), entity.getId());
-		assertEquals(dto.getPaymentId(), entity.getPayment().getId());
+		assertEquals(dto.getPaymentDetailId(), entity.getPayment().getId());
 		assertEquals(dto.getUserId(), entity.getUserBeanPay().getUserId());
 		assertEquals(dto.getSellerId(), entity.getSellerBeanPay().getUserId());
 		assertEquals(dto.getOrderItemId(), entity.getOrderItemId());
@@ -115,6 +116,27 @@ class PaymentDetailDtoTest {
 
 			assertEquals(3, violations.size());
 		}
+	}
+
+	@Test
+	void PaymentDetailPrice_테스트() {
+		//given
+		PaymentDetailPrice request = new PaymentDetailPrice(
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			""
+		);
+
+		//when
+		Set<ConstraintViolation<PaymentDetailPrice>> violations =
+			validator.validate(request);
+
+		//then
+		assertEquals(7, violations.size());
 	}
 
 }

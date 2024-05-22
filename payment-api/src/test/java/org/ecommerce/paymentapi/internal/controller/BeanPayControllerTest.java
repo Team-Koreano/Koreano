@@ -60,7 +60,7 @@ class BeanPayControllerTest {
 			final Role role = USER;
 			final CreateBeanPay request = new CreateBeanPay(userId, role);
 			final BeanPay beanPay = BeanPay.ofCreate(userId, role);
-			BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.entityToDto(beanPay);
+			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.entityToDto(beanPay);
 
 			//when
 			when(beanPayService.createBeanPay(request))

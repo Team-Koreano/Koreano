@@ -118,7 +118,7 @@ public class Payment {
 	public Payment cancelPayment(String message) {
 		changeProcessStatus(CANCELLED);
 		this.paymentDetails.forEach( paymentDetail ->
-			paymentDetail.cancelPayment(message)
+			paymentDetail.cancelPaymentDetail(message)
 		);
 		return this;
 	}

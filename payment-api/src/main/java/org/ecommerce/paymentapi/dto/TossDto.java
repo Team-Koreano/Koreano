@@ -16,18 +16,19 @@ public class TossDto {
 	public static class Request{
 
 		public record TossPayment(
-			@NotBlank(message = paymentTypeBlank)
+			@NotBlank(message = NOT_BLANK_PAYMENT_TYPE)
 			String paymentType,
 
-			@NotBlank(message = paymentKeyBlank)
-			@Size(min = 6, message = paymentKeySize)
+			@NotBlank(message = NOT_BLANK_PAYMENT_KEY)
+			@Size(min = 6, message = PAYMENT_KEY_TOO_SHORT)
 			String paymentKey,
 
-			@NotNull(message = orderIdBlank)
+			@NotNull(message = NOT_NULL_ORDER_ID)
 			UUID orderId,
 
-			@Min(value = 0, message = amountMinMessage)
-			Integer amount
+			@NotNull(message = NOT_NULL_AMOUNT)
+			@Min(value = 0, message = NOT_UNDER_ZERO_AMOUNT)
+			Integer chargeAmount
 		) {
 		}
 	}

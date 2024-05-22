@@ -98,8 +98,8 @@ public class LockTestServiceTest {
 		//then
 		Long endTime = System.currentTimeMillis();
 		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total amount : {}", beanPay.getAmount());
-		log.info("expect total amount : {}", totalAmount);
+		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
 		assertNotEquals(totalAmount, beanPay.getAmount());
 
@@ -132,8 +132,8 @@ public class LockTestServiceTest {
 		//then
 		Long endTime = System.currentTimeMillis();
 		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total amount : {}", beanPay.getAmount());
-		log.info("expect total amount : {}", totalAmount);
+		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
 		assertEquals(totalAmount, beanPay.getAmount());
 	}
@@ -170,8 +170,8 @@ public class LockTestServiceTest {
 		//then
 		Long endTime = System.currentTimeMillis();
 		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total amount : {}", beanPay.getAmount());
-		log.info("expect total amount : {}", totalAmount);
+		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
 		assertEquals(totalAmount, beanPay.getAmount());
 	}
@@ -202,8 +202,8 @@ public class LockTestServiceTest {
 		//then
 		Long endTime = System.currentTimeMillis();
 		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total amount : {}", beanPay.getAmount());
-		log.info("expect total amount : {}", totalAmount);
+		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
 		assertEquals(totalAmount, beanPay.getAmount());
 
@@ -235,8 +235,8 @@ public class LockTestServiceTest {
 		//then
 		Long endTime = System.currentTimeMillis();
 		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total amount : {}", beanPay.getAmount());
-		log.info("expect total amount : {}", totalAmount);
+		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
 		assertEquals(totalAmount, beanPay.getAmount());
 

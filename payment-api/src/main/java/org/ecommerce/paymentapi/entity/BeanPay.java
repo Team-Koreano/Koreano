@@ -72,26 +72,20 @@ public class BeanPay {
 	private void increaseBeanPay(Integer amount) {
 		this.amount += amount;
 	}
+
 	private void decreaseBeanPay(Integer amount) {
+		int remainAmount = this.amount - amount;
+		if(remainAmount < 0)
+			throw new CustomException(INSUFFICIENT_AMOUNT);
 		this.amount -= amount;
 	}
 
 	public void payment(Integer amount, BeanPay sellerBeanPay) {
-		int remainAmount = this.getAmount() - amount;
-
-		if(remainAmount < 0)
-			throw new CustomException(INSUFFICIENT_AMOUNT);
-
 		this.decreaseBeanPay(amount);
 		sellerBeanPay.increaseBeanPay(amount);
 	}
 
-	public void rollbackPayment(Integer amount, BeanPay sellerBeanPay) {
-		int remainAmount = sellerBeanPay.getAmount() - amount;
-
-		if(remainAmount < 0)
-			throw new CustomException(INSUFFICIENT_AMOUNT);
-
+	public void cancelPayment(Integer amount, BeanPay sellerBeanPay) {
 		sellerBeanPay.decreaseBeanPay(amount);
 		this.increaseBeanPay(amount);
 	}

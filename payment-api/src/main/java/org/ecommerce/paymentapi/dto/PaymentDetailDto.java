@@ -18,7 +18,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PaymentDetailDto {
 	private UUID id;
-	private Long paymentId;
+	private Long paymentDetailId;
 	private Integer userId;
 	private Integer sellerId;
 	private Long orderItemId;
@@ -40,10 +40,12 @@ public class PaymentDetailDto {
 	public static class Request {
 
 		public record PreCharge(
+			@NotNull(message = NOT_NULL_USER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
+			@NotNull(message = NOT_NULL_CHARGE_AMOUNT)
 			@Min(value = 0, message = NOT_UNDER_ZERO_CHARGE_AMOUNT)
-			Integer amount
+			Integer chargeAmount
 		) {
 		}
 
@@ -58,27 +60,49 @@ public class PaymentDetailDto {
 		}
 
 		public record PaymentDetailPrice(
-			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_DETAIL_ID)
+
+			@NotNull(message = NOT_NULL_ORDER_ITEM_ID)
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ITEM_ID)
 			Long orderItemId,
+			@NotNull(message = NOT_NULL_PAYMENT_AMOUNT)
 			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
 			Integer paymentAmount,
+			@NotNull(message = NOT_NULL_PRICE)
 			@Min(value = 0, message = NOT_UNDER_ZERO_PRICE)
 			Integer price,
+			@NotNull(message = NOT_NULL_QUANTITY)
 			@Min(value = 0, message = NOT_UNDER_ZERO_QUANTITY)
 			Integer quantity,
+			@NotNull(message = NOT_NULL_DELIVERY_FEE)
 			@Min(value = 0, message = NOT_UNDER_ZERO_DELIVERY_FEE)
 			Integer deliveryFee,
+			@NotNull(message = NOT_NULL_SELLER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId,
 			@NotBlank(message = NOT_BLANK_PRODUCT_NAME)
 			String productName
 		) {
 		}
+
+		public record PaymentCancel(
+			@NotNull(message = NOT_NULL_USER_ID)
+			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
+			Integer userId,
+			@NotNull(message = NOT_NULL_SELLER_ID)
+			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
+			Integer sellerId,
+			@NotNull(message = NOT_NULL_ORDER_ITEM_ID)
+			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ITEM_ID)
+			Long orderItemId,
+			@NotBlank(message = NOT_BLANK_CANCEL_REASON)
+			String cancelReason
+		) {
+		}
 	}
 
 	public record Response(
 		UUID id,
-		Long paymentId,
+		Long paymentDetailId,
 		Integer userId,
 		Integer sellerId,
 		Long orderItemId,

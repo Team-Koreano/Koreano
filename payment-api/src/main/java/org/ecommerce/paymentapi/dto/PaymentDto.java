@@ -10,6 +10,7 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -29,10 +30,13 @@ public class PaymentDto {
 
 	public static class Request {
 		public record PaymentPrice(
+			@NotNull(message = NOT_NULL_ORDER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ID)
 			Long orderId,
+			@NotNull(message = NOT_NULL_TOTAL_AMOUNT)
 			@Min(value = 0, message = NOT_UNDER_ZERO_AMOUNT)
 			Integer totalAmount,
+			@NotNull(message = NOT_NULL_USER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
 			@NotBlank(message = NOT_BLANK_ORDER_NAME)
@@ -47,10 +51,13 @@ public class PaymentDto {
 		}
 
 		public record PaymentRollBack(
+			@NotNull(message = NOT_NULL_ORDER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ID)
 			Long orderId,
+			@NotNull(message = NOT_NULL_USER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
 			Integer userId,
+			@NotNull(message = NOT_NULL_SELLER_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_SELLER_ID)
 			Integer sellerId
 		) {
@@ -58,15 +65,15 @@ public class PaymentDto {
 	}
 
 	public record Response(
-		 Long id,
-		 Long orderId,
-		 Integer userId,
-		 Integer totalAmount,
-		 String orderName,
-		 List<PaymentDetailDto.Response> paymentDetails,
-		 ProcessStatus processStatus,
-		 LocalDateTime createDateTime,
-		 Boolean isVisible
+		Long id,
+		Long orderId,
+		Integer userId,
+		Integer totalAmount,
+		String orderName,
+		List<PaymentDetailDto.Response> paymentDetails,
+		ProcessStatus processStatus,
+		LocalDateTime createDateTime,
+		Boolean isVisible
 	) {
 	}
 }
