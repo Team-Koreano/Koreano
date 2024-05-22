@@ -126,7 +126,7 @@ public class PaymentService {
 
 	private PaymentDetail getPaymentDetail(final Long orderItemId) {
 		return paymentDetailRepository.findPaymentDetailByOrderItemId(orderItemId)
-			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_EXIST));
+			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID));
 	}
 
 	private Payment getPayment(final Long orderId) {

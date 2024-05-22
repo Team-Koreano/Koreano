@@ -9,9 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -28,6 +30,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -62,7 +65,7 @@ public class PaymentDetail {
 	@JoinColumn(name = "beanpay_seller_id")
 	private BeanPay sellerBeanPay;
 
-	@Column
+	@Column(unique = true)
 	private Long orderItemId;
 
 	@Column
@@ -83,7 +86,8 @@ public class PaymentDetail {
 	@Column
 	private String failReason;
 
-	@ManyToOne(
+	@OneToOne(
+		mappedBy = "paymentDetail",
 		fetch = FetchType.LAZY,
 		cascade = {
 			CascadeType.PERSIST,
@@ -189,7 +193,11 @@ public class PaymentDetail {
 	}
 
 	public void chargeComplete(TossDto.Response.TossPayment response) {
+		if(this.chargeInfo != null)
+			throw new CustomException(PaymentDetailErrorCode.DUPLICATE_API_CALL);
+
 		this.chargeInfo = ChargeInfo.ofCharge(
+			this,
 			response.paymentKey(),
 			response.approveDateTime());
 		this.paymentName = response.orderName();
