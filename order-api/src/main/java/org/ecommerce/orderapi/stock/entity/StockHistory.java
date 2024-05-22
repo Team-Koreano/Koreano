@@ -41,7 +41,7 @@ public class StockHistory {
 	@JoinColumn(nullable = false)
 	private Stock stock;
 
-	@Column(nullable = false)
+	@Column
 	private Long orderItemId;
 
 	@Column

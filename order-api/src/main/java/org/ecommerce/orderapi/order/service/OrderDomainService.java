@@ -208,6 +208,31 @@ public class OrderDomainService {
 				paymentServiceClient.paymentOrder(
 						OrderMapper.INSTANCE.OrderToDto(order)
 				)
+				// (POST MAN CODE)
+				// new PaymentDto.Response(
+				// 		1L,
+				// 		50000,
+				// 		LocalDateTime.now(),
+				// 		List.of(
+				// 				new PaymentDetailDto.Response(
+				// 						UUID.randomUUID(),
+				// 						1L,
+				// 						0,
+				// 						10000,
+				// 						10000,
+				// 						LocalDateTime.now()
+				// 				),
+				// 				new PaymentDetailDto.Response(
+				// 						UUID.randomUUID(),
+				// 						2L,
+				// 						0,
+				// 						40000,
+				// 						40000,
+				// 						LocalDateTime.now()
+				// 				)
+				// 		)
+				//
+				// )
 		);
 
 		order.approve(

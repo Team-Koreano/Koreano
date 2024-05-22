@@ -56,13 +56,13 @@ public class OrderItem {
 	@Column(nullable = false)
 	private Integer quantity;
 
-	@Column(nullable = false)
+	@Column
 	private Integer totalPrice = 0;
 
-	@Column(nullable = false)
+	@Column
 	private Integer deliveryFee = 0;
 
-	@Column(nullable = false)
+	@Column
 	private Integer paymentAmount = 0;
 
 	@Column(nullable = false)

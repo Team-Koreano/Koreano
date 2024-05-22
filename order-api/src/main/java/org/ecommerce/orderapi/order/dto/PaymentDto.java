@@ -11,13 +11,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PaymentDto {
 	private Long id;
-	private Integer totalAmount;
+	private Integer totalPaymentAmount;
 	private LocalDateTime paymentDatetime;
 	private Map<Long, PaymentDetailDto> paymentDetailDtoMap;
 
 	public record Response(
 			Long id,
-			Integer totalAmount,
+			Integer totalPaymentAmount,
 			LocalDateTime paymentDatetime,
 			List<PaymentDetailDto.Response> paymentDetailResponses
 	) {

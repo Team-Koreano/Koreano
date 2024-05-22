@@ -24,13 +24,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "orders", indexes = {
 		@Index(name = "idx_order_datetime", columnList = "orderDatetime"),
 		@Index(name = "idx_order_user_id", columnList = "userId")
 })
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Order {
 
@@ -140,7 +145,7 @@ public class Order {
 		return status == OrderStatus.APPROVE || status == OrderStatus.CANCELLED;
 	}
 
-	public OrderItem getOrderItemByOrderItemId(final Long orderItemId) {
+	private OrderItem getOrderItemByOrderItemId(final Long orderItemId) {
 		return orderItems.stream()
 				.filter(orderItem -> orderItem.getId().equals(orderItemId))
 				.findFirst()
