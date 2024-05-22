@@ -23,7 +23,10 @@ public class LocalRedisConfig{
 
 	@PostConstruct
 	public void startRedis() {
-		this.redisServer.start();
+		try{
+			this.redisServer.start();
+		}catch (Exception ignore){
+		}
 	}
 
 	@PreDestroy
