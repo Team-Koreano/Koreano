@@ -9,11 +9,11 @@ import org.ecommerce.paymentapi.aop.AopForTransaction;
 import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.entity.BeanPay;
-import org.ecommerce.paymentapi.entity.BeanPayDetail;
+import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
+import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -28,23 +28,23 @@ import lombok.extern.slf4j.Slf4j;
 public class LockTestService {
 
 	private final BeanPayRepository beanPayRepository;
-	private final BeanPayDetailRepository beanPayDetailRepository;
 	private final RedissonClient redissonClient;
 	private final AopForTransaction aopForTransaction;
+	private final PaymentDetailRepository paymentDetailRepository;
 
-	@DistributedLock(key = "#lockName + #userId")
+	@DistributedLock(uniqueKey = "#lockName + #userId")
 	public void useDistributeLock(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
-		beanPayDetailRepository.save(beanPayDetail);
-		beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
+		paymentDetailRepository.save(paymentDetail);
+		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
 	}
 
 	@DistributedLock(
 		lockName = BEANPAY,
-		key = {
+		uniqueKey = {
 			"#paymentPrice.userId() + 'USER'",
 			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}
@@ -53,20 +53,20 @@ public class LockTestService {
 
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
-		beanPayDetailRepository.save(beanPayDetail);
-		beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
+		paymentDetailRepository.save(paymentDetail);
+		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
 	}
 
 	@Transactional
 	public void notUseLockTest(String lockName, Integer userId) {
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 
-		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
-		beanPayDetailRepository.save(beanPayDetail);
-		beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
+		paymentDetailRepository.save(paymentDetail);
+		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
 	}
 
 	@Transactional
@@ -74,12 +74,10 @@ public class LockTestService {
 		BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRoleUseBetaLock(1,
 			Role.USER);
 
-		BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+		PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
-		final BeanPayDetail createBeanPayDetail = beanPayDetailRepository.save(
-			beanPayDetail
-		);
-		beanPay.chargeBeanPayDetail(createBeanPayDetail.getAmount());
+		paymentDetailRepository.save(paymentDetail);
+		beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
 	}
 
 	@Transactional
@@ -95,10 +93,11 @@ public class LockTestService {
 			aopForTransaction.proceed(() -> {
 				final BeanPay beanPay = getBeanPay(1,Role.USER);
 
-				BeanPayDetail beanPayDetail = beanPay.preCharge(5000);
+				PaymentDetail paymentDetail = beanPay.beforeCharge(5000);
 
-				beanPayDetailRepository.save(beanPayDetail);
-				beanPay.chargeBeanPayDetail(beanPayDetail.getAmount());
+				paymentDetailRepository.save(paymentDetail);
+				beanPay.chargeBeanPayDetail(paymentDetail.getPaymentAmount());
+
 				log.info("빈페이 총액: {}", beanPay.getAmount());
 			});
 		} catch (InterruptedException e) {

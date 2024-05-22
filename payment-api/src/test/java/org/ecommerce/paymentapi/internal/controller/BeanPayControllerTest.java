@@ -1,3 +1,4 @@
+
 package org.ecommerce.paymentapi.internal.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
@@ -7,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
@@ -58,10 +60,11 @@ class BeanPayControllerTest {
 			final Role role = USER;
 			final CreateBeanPay request = new CreateBeanPay(userId, role);
 			final BeanPay beanPay = BeanPay.ofCreate(userId, role);
+			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.entityToDto(beanPay);
 
 			//when
 			when(beanPayService.createBeanPay(request))
-				.thenReturn(BeanPayMapper.INSTANCE.toDto(beanPay));
+				.thenReturn(beanPayDto);
 
 			//then
 			mvc.perform(post("/api/internal/beanpay/v1")

@@ -14,8 +14,6 @@ import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
-import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,9 +31,6 @@ class BeanPayServiceTest {
 	@Mock
 	private BeanPayRepository beanPayRepository;
 
-	@Mock
-	private BeanPayDetailRepository beanPayDetailRepository;
-
 
 	@Nested
 	class 빈페이_생성 {
@@ -46,8 +41,8 @@ class BeanPayServiceTest {
 			final Role role = USER;
 			final Integer amount = 0;
 			final LocalDateTime createDateTime = LocalDateTime.now();
-			CreateBeanPay request = new CreateBeanPay(userId, role);
-			BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
+			final CreateBeanPay request = new CreateBeanPay(userId, role);
+			final BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
@@ -67,14 +62,14 @@ class BeanPayServiceTest {
 			//given
 			final Integer userId = 1;
 			final Role role = USER;
-			CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPay request = new CreateBeanPay(userId, role);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
 				request.role())).thenReturn(Optional.ofNullable(mock(BeanPay.class)));
 
 			//then
-			CustomException actual = assertThrows(CustomException.class, () -> {
+			final CustomException actual = assertThrows(CustomException.class, () -> {
 				beanPayService.createBeanPay(request);
 			});
 			assertEquals(actual.getErrorCode(), ALREADY_EXISTS);

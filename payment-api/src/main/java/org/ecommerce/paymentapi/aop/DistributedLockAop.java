@@ -32,7 +32,7 @@ public class DistributedLockAop {
 
 
 	@Around("@annotation(org.ecommerce.paymentapi.aop.DistributedLock)")
-	public void lock(final ProceedingJoinPoint joinPoint) throws Throwable {
+	public Object lock(final ProceedingJoinPoint joinPoint) throws Throwable {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		Method method = signature.getMethod();
 
@@ -40,10 +40,9 @@ public class DistributedLockAop {
 		String[] keys = getKeys(joinPoint, signature, distributedLock);
 
 		if(isSingle(keys)) {
-			singleLock(keys, joinPoint, distributedLock);
-			return;
+			return singleLock(keys, joinPoint, distributedLock);
 		}
-		multiLock(keys, joinPoint, distributedLock);
+		return multiLock(keys, joinPoint, distributedLock);
 	}
 
 	private static boolean isSingle(String[] keys) {
@@ -56,12 +55,12 @@ public class DistributedLockAop {
 		DistributedLock distributedLock
 	) {
 		Set<String> keys = new HashSet<>();
-		IntStream.range(0, distributedLock.key().length).forEach(i -> {
+		IntStream.range(0, distributedLock.uniqueKey().length).forEach(i -> {
 			Arrays.stream(CustomSpringELParser.getDynamicValue(
-				signature.getParameterNames(),
-				joinPoint.getArgs(),
-				distributedLock.key()[i]
-			)).map(value -> distributedLock.lockName().name()
+					signature.getParameterNames(),
+					joinPoint.getArgs(),
+					distributedLock.uniqueKey()[i]
+				)).map(value -> distributedLock.lockName().name()
 					.concat(REDISSON_LOCK_PREFIX)
 					.concat((String) value))
 				.forEach(keys::add);
@@ -69,7 +68,7 @@ public class DistributedLockAop {
 		return keys.toArray(String[]::new);
 	}
 
-	private void singleLock(
+	private Object singleLock(
 		String[] keys,
 		ProceedingJoinPoint joinPoint,
 		DistributedLock distributedLock
@@ -77,6 +76,7 @@ public class DistributedLockAop {
 
 		String key = keys[0];
 		RLock rLock = redissonClient.getLock(key);
+		Object result = null;
 
 		try {
 			boolean available = rLock.tryLock(
@@ -87,11 +87,11 @@ public class DistributedLockAop {
 
 			if (!available) {
 				log.info("분산락 획득 실패 : {}", key);
-				return;
+				return result;
 			}
 
 			log.info("분산락 시작: {}", key);
-			aopForTransaction.proceed(joinPoint);  // (3)
+			result = aopForTransaction.proceed(joinPoint);  // (3)
 		} catch (InterruptedException ignored) {
 		} finally {
 			try {
@@ -100,9 +100,10 @@ public class DistributedLockAop {
 			} catch (IllegalMonitorStateException e) {
 			}
 		}
+		return result;
 	}
 
-	private void multiLock(
+	private Object multiLock(
 		String[] keys,
 		ProceedingJoinPoint joinPoint,
 		DistributedLock distributedLock
@@ -110,13 +111,14 @@ public class DistributedLockAop {
 
 		StringBuilder sb = new StringBuilder();
 		String totalKey = null;
+		Object result = null;
 
 		RLock multiLock = redissonClient.getMultiLock(
 			Arrays.stream(keys).map((key) -> {
-				sb.append(key + ' ');
-				return redissonClient.getLock(key);
-			})
-			.toArray(RLock[]::new));
+					sb.append(key + ' ');
+					return redissonClient.getLock(key);
+				})
+				.toArray(RLock[]::new));
 
 		totalKey = sb.toString();
 
@@ -129,10 +131,10 @@ public class DistributedLockAop {
 
 			if (!available) {
 				log.info("분산락 획득 실패 : {}", totalKey);
-				return;
+				return null;
 			}
 			log.info("분산락 시작: {}", totalKey);
-			aopForTransaction.proceed(joinPoint);
+			result = aopForTransaction.proceed(joinPoint);
 
 		} catch (Throwable ignored) {
 		} finally {
@@ -143,5 +145,7 @@ public class DistributedLockAop {
 
 			}
 		}
+		return result;
+
 	}
 }

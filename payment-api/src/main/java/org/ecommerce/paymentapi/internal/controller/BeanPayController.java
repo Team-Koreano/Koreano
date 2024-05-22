@@ -2,6 +2,7 @@ package org.ecommerce.paymentapi.internal.controller;
 
 import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +21,10 @@ public class BeanPayController {
 	private final BeanPayService beanPayService;
 
 	@PostMapping
-	public BeanPayDto createBeanPay(@RequestBody final CreateBeanPay createBeanPay) {
-		return beanPayService.createBeanPay(createBeanPay);
+	public BeanPayDto.Response createBeanPay(@RequestBody final CreateBeanPay createBeanPay) {
+		return BeanPayMapper.INSTANCE.dtoToResponse(
+			beanPayService.createBeanPay(createBeanPay)
+		);
 	}
 
 }

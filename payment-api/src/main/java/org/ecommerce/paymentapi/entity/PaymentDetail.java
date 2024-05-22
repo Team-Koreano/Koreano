@@ -1,15 +1,21 @@
 package org.ecommerce.paymentapi.entity;
 
+import static java.lang.Boolean.*;
 import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
+import org.ecommerce.common.error.CustomException;
+import org.ecommerce.paymentapi.dto.TossDto;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.CascadeType;
@@ -19,11 +25,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,52 +40,45 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Entity
-@Table(name = "payment_detail")
+@Table(name = "payment_detail",
+	indexes = {
+		@Index(name = "idx_order_item_id", columnList = "orderItemId"),
+	}
+)
 public class PaymentDetail {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@GeneratedValue(generator = "uuid2")
+	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	@Column(columnDefinition = "BINARY(16)")
+	private UUID id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = false)
+	@JoinColumn(name = "payment_id")
 	private Payment payment;
 
-	@ManyToOne(
-		fetch = FetchType.LAZY,
-		cascade = {
-			CascadeType.PERSIST,
-			CascadeType.MERGE
-	})
-	@JoinColumn(name = "beanpay_detail_user_id", nullable = false)
-	private BeanPayDetail userBeanPayDetail;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "beanpay_user_id", nullable = false)
+	private BeanPay userBeanPay;
 
-	@ManyToOne(
-		fetch = FetchType.LAZY,
-		cascade = {
-			CascadeType.PERSIST,
-			CascadeType.MERGE
-		})
-	@JoinColumn(name = "beanpay_detail_seller_id", nullable = false)
-	private BeanPayDetail sellerBeanPayDetail;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "beanpay_seller_id")
+	private BeanPay sellerBeanPay;
 
-	@Column(nullable = false)
-	private Long orderDetailId;
+	@Column(unique = true)
+	private Long orderItemId;
 
-	@Column(nullable = false)
-	private Integer totalPrice = 0;
-
-	@Column(nullable = false)
+	@Column
 	private Integer deliveryFee = 0;
 
 	@Column(nullable = false)
 	private Integer paymentAmount = 0;
 
-	@Column(nullable = false)
+	@Column
 	private Integer quantity = 0;
 
-	@Column(nullable = false)
-	private String productName;
+	@Column
+	private String paymentName;
 
 	@Column
 	private String cancelReason;
@@ -86,14 +86,24 @@ public class PaymentDetail {
 	@Column
 	private String failReason;
 
+	@OneToOne(
+		mappedBy = "paymentDetail",
+		fetch = FetchType.LAZY,
+		cascade = {
+			CascadeType.PERSIST,
+			CascadeType.MERGE
+		}
+	)
+	@JoinColumn(name = "charge_info")
+	private ChargeInfo chargeInfo;
 
 	@Column
 	@Enumerated(EnumType.STRING)
-	private PaymentStatus paymentStatus = PAYMENT;
+	private PaymentStatus paymentStatus;
 
 	@Column
 	@Enumerated(EnumType.STRING)
-	private ProcessStatus processStatus = CANCELLED;
+	private ProcessStatus processStatus = PENDING;
 
 	@OneToMany(
 		mappedBy = "paymentDetail",
@@ -112,14 +122,21 @@ public class PaymentDetail {
 	@Column(name = "update_datetime", insertable = false)
 	private LocalDateTime updateDateTime;
 
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Column(name = "is_visible")
+	private Boolean isVisible = TRUE;
 
-	public static PaymentDetail ofPayment(
+	protected static PaymentDetail ofBeforeCharge(BeanPay userBeanPay, Integer chargeAmount){
+		PaymentDetail paymentDetail = new PaymentDetail();
+		paymentDetail.userBeanPay = userBeanPay;
+		paymentDetail.paymentAmount = chargeAmount;
+		paymentDetail.paymentStatus = DEPOSIT;
+		return paymentDetail;
+	}
+
+	protected static PaymentDetail ofPayment(
 		final Payment payment,
 		final BeanPay sellerBeanPay,
 		final Long orderDetailId,
-		final Integer totalPrice,
 		final Integer deliveryFee,
 		final Integer paymentAmount,
 		final Integer quantity,
@@ -129,26 +146,21 @@ public class PaymentDetail {
 
 		final PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.payment = payment;
-		paymentDetail.userBeanPayDetail = BeanPayDetail.ofPayment(
-			userBeanPay,
-			paymentAmount
-		);
-		paymentDetail.sellerBeanPayDetail = BeanPayDetail.ofReceive(
-			sellerBeanPay,
-			paymentAmount
-		);
-		paymentDetail.orderDetailId = orderDetailId;
-		paymentDetail.totalPrice = totalPrice;
+		paymentDetail.userBeanPay = userBeanPay;
+		paymentDetail.sellerBeanPay = sellerBeanPay;
+		paymentDetail.orderItemId = orderDetailId;
 		paymentDetail.deliveryFee = deliveryFee;
 		paymentDetail.paymentAmount = paymentAmount;
 		paymentDetail.quantity = quantity;
-		paymentDetail.productName = productName;
+		paymentDetail.paymentName = productName;
+		paymentDetail.paymentStatus = PAYMENT;
 
 		paymentDetail.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(paymentDetail)
 		);
 		// 각 결제 디테일 계산
-		userBeanPay.payment(totalPrice, sellerBeanPay);
+		userBeanPay.payment(paymentAmount, sellerBeanPay);
+		paymentDetail.changeProcessStatus(COMPLETED);
 
 		return paymentDetail;
 	}
@@ -163,20 +175,56 @@ public class PaymentDetail {
 	 * @param - String message
 	 * @return - void
 	 */
-	public void cancelPayment(final String message) {
+	public PaymentDetail cancelPaymentDetail(final String message) {
 		changeProcessStatus(CANCELLED);
-		this.failReason = message;
+		changePaymentStatus(REFUND);
+		this.cancelReason = message;
 		this.paymentStatusHistories.add(
 			PaymentStatusHistory.ofRecord(this)
 		);
-		this.userBeanPayDetail.rollbackPayment(
-			this.getTotalPrice(),
-			this.sellerBeanPayDetail.getBeanPay(),
-			failReason
-		);
+		this.userBeanPay.cancelPayment(getPaymentAmount(), this.sellerBeanPay);
+		return this;
 	}
+
+	public boolean validCharge(UUID orderId, Integer amount) {
+		beginValidProcess();
+		return this.getId().equals(orderId) &&
+			this.getPaymentAmount().equals(amount);
+	}
+
+	public void chargeComplete(TossDto.Response.TossPayment response) {
+		if(this.chargeInfo != null)
+			throw new CustomException(PaymentDetailErrorCode.DUPLICATE_API_CALL);
+
+		this.chargeInfo = ChargeInfo.ofCharge(
+			this,
+			response.paymentKey(),
+			response.approveDateTime());
+		this.paymentName = response.orderName();
+		changeProcessStatus(COMPLETED);
+		this.userBeanPay.chargeBeanPayDetail(response.totalAmount());
+	}
+
+	public void chargeFail(String message) {
+		this.failReason = message;
+		changeProcessStatus(ProcessStatus.FAILED);
+	}
+
+	public void chargeCancel(String message) {
+		this.cancelReason = message;
+		changeProcessStatus(ProcessStatus.CANCELLED);
+	}
+
+	private void beginValidProcess() {
+		this.processStatus = ProcessStatus.IN_PROGRESS;
+	}
+
 
 	private void changeProcessStatus(final ProcessStatus status) {
 		this.processStatus = status;
 	}
+	private void changePaymentStatus(PaymentStatus status) {
+		this.paymentStatus = status;
+	}
+
 }
