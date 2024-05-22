@@ -370,7 +370,7 @@ public class ProductManagementServiceTest {
 		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto, mockThumbnailImage,
 			mockMultipartFiles);
 
-		verify(productRepository).findProductById((productId);
+		verify(productRepository).findProductById((productId));
 
 		assertThat(resultDto.getAcidity()).isEqualTo(dto.acidity());
 		assertThat(resultDto.getBean()).isEqualTo(dto.bean());
