@@ -24,6 +24,7 @@ public class OrderItemDto {
 	private OrderStatus status;
 	private OrderStatusReason statusReason;
 	private LocalDateTime statusDatetime;
+	private LocalDateTime paymentDatetime;
 
 	public record Response(
 			Long id,
@@ -37,7 +38,8 @@ public class OrderItemDto {
 			String sellerName,
 			OrderStatus status,
 			OrderStatusReason statusReason,
-			LocalDateTime statusDatetime
+			LocalDateTime statusDatetime,
+			LocalDateTime paymentDatetime
 	) {
 	}
 }

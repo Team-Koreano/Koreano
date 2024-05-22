@@ -27,7 +27,7 @@ public class OrderDto {
 	private String deliveryComment;
 	private Integer totalPaymentAmount;
 	private OrderStatus status;
-	private LocalDateTime statusDateTime;
+	private LocalDateTime statusDatetime;
 	private LocalDateTime paymentDatetime;
 	private LocalDateTime orderDatetime;
 	private List<OrderItemDto> orderItemDtos;
@@ -68,7 +68,7 @@ public class OrderDto {
 			String deliveryComment,
 			Integer totalPaymentAmount,
 			OrderStatus status,
-			LocalDateTime statusDateTime,
+			LocalDateTime statusDatetime,
 			LocalDateTime paymentDatetime,
 			LocalDateTime orderDatetime,
 			List<OrderItemDto.Response> orderItemResponses

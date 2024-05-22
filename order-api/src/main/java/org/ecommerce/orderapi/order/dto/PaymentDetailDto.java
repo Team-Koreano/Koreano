@@ -14,7 +14,7 @@ public class PaymentDetailDto {
 	private Integer deliveryFee;
 	private Integer totalPrice;
 	private Integer paymentAmount;
-	private LocalDateTime statusDatetime;
+	private LocalDateTime paymentDatetime;
 
 	public record Response(
 			UUID id,
@@ -22,7 +22,7 @@ public class PaymentDetailDto {
 			Integer deliveryFee,
 			Integer totalPrice,
 			Integer paymentAmount,
-			LocalDateTime statusDatetime
+			LocalDateTime paymentDatetime
 	) {
 	}
 }

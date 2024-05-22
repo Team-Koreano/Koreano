@@ -38,10 +38,11 @@ public class StockRepositoryImpl implements StockCustomRepository {
 
 	@Override
 	public Optional<Stock> findStockByOrderItemId(Long orderItemId) {
-		return Optional.ofNullable(jpaQueryFactory.select(stock)
-				.from(stockHistory)
-				.leftJoin(stockHistory.stock).fetchJoin()
-				.where(stockHistory.orderItemId.eq(orderItemId))
-				.fetchFirst());
+		return Optional.ofNullable(
+				jpaQueryFactory.selectFrom(stock)
+						.leftJoin(stock.stockHistories, stockHistory).fetchJoin()
+						.where(stockHistory.orderItemId.eq(orderItemId))
+						.fetchFirst()
+		);
 	}
 }

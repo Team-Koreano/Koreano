@@ -78,8 +78,8 @@ public class Order {
 	@Column
 	private LocalDateTime paymentDatetime;
 
-	@CreationTimestamp
 	@Column
+	@CreationTimestamp
 	private LocalDateTime orderDatetime;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

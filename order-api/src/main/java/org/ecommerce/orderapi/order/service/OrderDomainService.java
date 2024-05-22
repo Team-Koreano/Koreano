@@ -87,7 +87,7 @@ public class OrderDomainService {
 				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
 
 		// TODO 결제 취소 Kafka Event 추가
-		applicationEventPublisher.publishEvent(new OrderCanceledEvent(order.getId()));
+		applicationEventPublisher.publishEvent(new OrderCanceledEvent(orderItemId));
 		return OrderMapper.INSTANCE.OrderToDto(
 				order.cancelItem(orderItemId)
 		);
