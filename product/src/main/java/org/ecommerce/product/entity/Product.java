@@ -103,12 +103,14 @@ public class Product {
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity,
 		SellerRep seller) {
 		return category == ProductCategory.BEAN
-			? createBean(category, price, stock, name, bean, acidity, information, isCrush, isDecaf, seller)
-			: createDefault(category, price, stock, name, information, size, capacity, seller);
+			? createBean(category, price, stock, name, bean, acidity, information, isCrush, isDecaf, seller, null, null)
+			: createBean(category, price, stock, name, Bean.NONE, Acidity.NONE, information, null, null, seller, size,
+			capacity);
 	}
 
 	private static Product createBean(ProductCategory category, Integer price, Integer stock, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep test) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep sellerRep, String size,
+		String capacity) {
 		Product product = new Product();
 		product.category = category;
 		product.price = price;
@@ -119,25 +121,7 @@ public class Product {
 		product.information = information;
 		product.isCrush = isCrush;
 		product.isDecaf = isDecaf;
-		product.sellerRep = test;
-		product.size = null;
-		product.capacity = null;
-		return product;
-	}
-
-	private static Product createDefault(ProductCategory category, Integer price, Integer stock, String name
-		, String information, String size, String capacity, SellerRep test) {
-		Product product = new Product();
-		product.category = category;
-		product.price = price;
-		product.stock = stock;
-		product.name = name;
-		product.bean = Bean.NONE;
-		product.acidity = Acidity.NONE;
-		product.information = information;
-		product.isCrush = null;
-		product.isDecaf = null;
-		product.sellerRep = test;
+		product.sellerRep = sellerRep;
 		product.size = size;
 		product.capacity = capacity;
 		return product;
