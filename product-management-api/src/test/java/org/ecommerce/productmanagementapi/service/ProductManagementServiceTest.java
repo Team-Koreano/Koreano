@@ -220,7 +220,7 @@ public class ProductManagementServiceTest {
 			);
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById((productId))).thenReturn(Optional.of(entity));
 
 			entity.toModifyStatus(newStatus);
 
@@ -285,7 +285,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
 
 			ProductManagementDto result = productManagementService.increaseToStock(request);
 
@@ -311,7 +311,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
 
 			assertThatThrownBy(() -> productManagementService.decreaseToStock(request))
 				.isInstanceOf(CustomException.class)
@@ -352,7 +352,7 @@ public class ProductManagementServiceTest {
 
 		entity.getImages().add(image);
 
-		when(productRepository.findById(productId)).thenReturn(Optional.of(entity));
+		when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
 
 		final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
 			"multipart/form-data",
@@ -370,7 +370,7 @@ public class ProductManagementServiceTest {
 		ProductManagementDto resultDto = productManagementService.modifyToProduct(productId, dto, mockThumbnailImage,
 			mockMultipartFiles);
 
-		verify(productRepository).findById(productId);
+		verify(productRepository).findProductById((productId);
 
 		assertThat(resultDto.getAcidity()).isEqualTo(dto.acidity());
 		assertThat(resultDto.getBean()).isEqualTo(dto.bean());
