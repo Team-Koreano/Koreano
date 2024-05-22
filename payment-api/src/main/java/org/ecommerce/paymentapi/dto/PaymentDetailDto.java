@@ -50,7 +50,7 @@ public class PaymentDetailDto {
 		}
 
 		public record TossFail(
-			@NotBlank(message = NOT_BLANK_CHARGE_ID)
+			@NotNull(message = NOT_BLANK_CHARGE_ID)
 			UUID orderId,
 			@NotBlank(message = NOT_BLANK_ERROR_CODE)
 			String errorCode,

@@ -5,7 +5,6 @@ import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.exception.BeanPayErrorCode.*;
-import static org.ecommerce.paymentapi.exception.PaymentDetailErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +24,7 @@ import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
@@ -556,7 +556,7 @@ class PaymentServiceTest {
 			final CustomException actual = assertThrows(CustomException.class, () -> {
 				paymentService.cancelPaymentDetail(request);
 			});
-			assertEquals(actual.getErrorCode(), NOT_EXIST);
+			assertEquals(actual.getErrorCode(), PaymentDetailErrorCode.NOT_FOUND_ID);
 		}
 
 		@Test
