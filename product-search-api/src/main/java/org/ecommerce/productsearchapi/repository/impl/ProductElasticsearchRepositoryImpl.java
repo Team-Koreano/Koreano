@@ -104,11 +104,20 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
+		//todo 전체 개수 반환 로직 추가 필요
+
+		Long totalCount = elasticsearchTemplate.count(
+			NativeQuery.builder()
+				.withQuery(boolQueryBuilder.build()._toQuery())
+				.build()
+			, ProductDocument.class);
+
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
 			.withSort(sortOptions)
 			.withPageable(pageable)
 			.build();
+
 
 		return elasticsearchTemplate.search(query, ProductDocument.class);
 	}
