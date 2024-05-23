@@ -16,6 +16,7 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.enumerated.ProductSortType;
 import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
@@ -167,6 +168,51 @@ public class ProductSearchControllerTest {
 			.andExpect(jsonPath("$.result[0].name").value(suggestedProducts.get(0).getName()))
 			.andExpect(jsonPath("$.result[1].id").value(suggestedProducts.get(1).getId()))
 			.andExpect(jsonPath("$.result[1].name").value(suggestedProducts.get(1).getName()))
+			.andExpect(status().isOk())
+			.andDo(print());
+	}
+
+	@Test
+	void 상품_리스트_검색() throws Exception {
+		// given
+		final List<ProductSearchDto.Response.Search> searchProducts = List.of(
+			new ProductSearchDto.Response.Search(
+				1,
+				"아메리카노",
+				ProductCategory.BEAN.getTitle(),
+				30000,
+				100,
+				1,
+				"커피왕",
+				10,
+				false,
+				Acidity.MEDIUM.getTitle(),
+				Bean.ARABICA.getTitle(),
+				"IMG1.COM",
+				TEST_DATE_TIME
+			),
+			new ProductSearchDto.Response.Search(
+				2,
+				"아메리카노2",
+				ProductCategory.BEAN.getTitle(),
+				30000,
+				100,
+				1,
+				"커피왕",
+				10,
+				false,
+				Acidity.MEDIUM.getTitle(),
+				Bean.ARABICA.getTitle(),
+				"IMG2.COM",
+				TEST_DATE_TIME
+			)
+		);
+		// when
+		when(elasticSearchService.searchProducts(any(ProductSearchDto.Request.Search.class), 0, 2))
+			.thenReturn(List.of());
+		// then
+		mockMvc.perform(get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
+			.andExpect(jsonPath("$.result[0].id").value(searchProducts.get(0).id()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
