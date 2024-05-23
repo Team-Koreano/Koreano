@@ -1,12 +1,8 @@
 package org.ecommerce.productmanagementapi.provider;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -18,6 +14,7 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.productmanagementapi.aop.TimeCheck;
 import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
+import org.ecommerce.productmanagementapi.util.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,52 +38,33 @@ public class S3Provider {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
-	private void validateFileExtension(String fileName) {
-		try {
-			String extension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-			if (validateImageExtension(extension)) return;
-
-			throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
-		} catch (StringIndexOutOfBoundsException e) {
-			throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
-		}
-	}
-
 	public void deleteFile(List<String> fileUrls) {
 		for (String fileUrl : fileUrls) {
 			try {
-				URL url = new URL(fileUrl);
-				String path = url.getPath();
-				String filename = path.substring(path.lastIndexOf('/') + 1);
-
+				String filename = FileUtils.extractFileNameFromUrl(fileUrl);
 				amazonS3Client.deleteObject(bucket, filename);
-
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
+			} catch (CustomException e) {
+				log.error("Invalid file URL: {}", fileUrl, e);
 			}
 		}
 	}
 
 	public String uploadImageFile(MultipartFile file) throws IOException {
-		if (!validateImageFile(file)) throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
+		if (!FileUtils.validateImageFile(file))
+			throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
 		return upload(file);
-	}
-
-	private boolean validateImageFile(MultipartFile file) {
-		return validateImageExtension(parseExtension(file));
 	}
 
 	@TimeCheck
 	public List<ProductManagementDto.Request.Image> uploadImageFiles(MultipartFile thumbnailImage,
 		List<MultipartFile> files) {
 
-		validateImageFile(thumbnailImage);
-		validateImageFiles(files);
-		
+		FileUtils.validateImageFile(thumbnailImage);
+		FileUtils.validateImageFiles(files);
+
 		final int numberOfThreads = (files != null ? files.size() : 0) + (thumbnailImage != null ? 1 : 0);
 
-		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(numberOfThreads,
-			4));
+		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(numberOfThreads, 4));
 
 		List<CompletableFuture<ProductManagementDto.Request.Image>> tasks = new ArrayList<>(numberOfThreads);
 
@@ -94,8 +72,6 @@ public class S3Provider {
 		boolean hasThumbnail = false;
 
 		if (thumbnailImage != null) {
-			if (!validateImageFile(thumbnailImage))
-				throw new CustomException(ProductManagementErrorCode.IS_INVALID_FILE_OPTION);
 			count++;
 			final short index = count;
 			hasThumbnail = true;
@@ -136,23 +112,6 @@ public class S3Provider {
 		return tasks.stream()
 			.map(CompletableFuture::join)
 			.collect(Collectors.toList());
-	}
-
-	private boolean validateImageFiles(Collection<MultipartFile> files) {
-		Objects.requireNonNull(files);
-
-		return files.stream()
-			.map(this::parseExtension)
-			.allMatch(this::validateImageExtension);
-	}
-
-	private String parseExtension(MultipartFile file) {
-		String fileName = Objects.requireNonNull(file.getOriginalFilename());
-		return fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-	}
-
-	private Boolean validateImageExtension(String extension) {
-		return ALLOWED_IMAGE_EXTENSIONS.contains(extension);
 	}
 
 	private String upload(MultipartFile file) throws IOException {
