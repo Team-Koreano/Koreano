@@ -8,7 +8,6 @@ import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.repository.SellerCustomRepository;
 import org.springframework.stereotype.Repository;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +23,8 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 		return jpaQueryFactory
 			.selectFrom(seller)
 			.where(
-				emailEq(email)
-					.or(phoneNumberEq(phoneNumber))
+				seller.email.eq(email)
+					.or(seller.phoneNumber.eq(phoneNumber))
 			).fetchFirst() != null;
 	}
 
@@ -33,7 +32,7 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 	public Optional<Seller> findSellerByEmailAndIsDeletedIsFalse(String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(seller)
-				.where(emailEq(email),
+				.where(seller.email.eq(email),
 					seller.isDeleted.eq(false))
 				.fetchFirst()
 		);
@@ -43,21 +42,9 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 	public Optional<Seller> findSellerByIdAndIsDeletedIsFalse(Integer sellerId) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(seller)
-				.where(idEq(sellerId),
+				.where(seller.id.eq(sellerId),
 					seller.isDeleted.eq(false))
 				.fetchFirst()
 		);
-	}
-
-	private BooleanExpression emailEq(final String email) {
-		return email != null ? seller.email.eq(email) : null;
-	}
-
-	private BooleanExpression idEq(final Integer sellerId) {
-		return sellerId != null ? seller.id.eq(sellerId) : null;
-	}
-
-	private BooleanExpression phoneNumberEq(final String phoneNumber) {
-		return phoneNumber != null ? seller.password.eq(phoneNumber) : null;
 	}
 }

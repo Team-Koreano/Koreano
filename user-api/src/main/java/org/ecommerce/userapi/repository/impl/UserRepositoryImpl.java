@@ -8,7 +8,6 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.repository.UserCustomRepository;
 import org.springframework.stereotype.Repository;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +23,8 @@ public class UserRepositoryImpl implements UserCustomRepository {
 		return jpaQueryFactory
 			.selectFrom(users)
 			.where(
-				emailEq(email)
-					.or(phoneNumberEq(phoneNumber))
+				users.email.eq(email)
+					.or(users.phoneNumber.eq(phoneNumber))
 			).fetchFirst() != null;
 	}
 
@@ -33,7 +32,7 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	public Optional<Users> findUsersByEmailAndIsDeletedIsFalse(final String email) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
-				.where(emailEq(email)
+				.where(users.email.eq(email)
 					, users.isDeleted.isFalse())
 				.fetchFirst()
 		);
@@ -43,21 +42,9 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	public Optional<Users> findUsersByIdAndIsDeletedIsFalse(Integer userId) {
 		return Optional.ofNullable(
 			jpaQueryFactory.selectFrom(users)
-				.where(idEq(userId)
+				.where(users.id.eq(userId)
 					, users.isDeleted.isFalse())
 				.fetchFirst()
 		);
-	}
-
-	private BooleanExpression emailEq(final String email) {
-		return email != null ? users.email.eq(email) : null;
-	}
-
-	private BooleanExpression phoneNumberEq(final String phoneNumber) {
-		return phoneNumber != null ? users.phoneNumber.eq(phoneNumber) : null;
-	}
-
-	private BooleanExpression idEq(final Integer userId) {
-		return userId != null ? users.id.eq(userId) : null;
 	}
 }
