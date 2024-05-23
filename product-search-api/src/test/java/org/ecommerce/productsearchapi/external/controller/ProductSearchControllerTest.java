@@ -175,44 +175,62 @@ public class ProductSearchControllerTest {
 	@Test
 	void 상품_리스트_검색() throws Exception {
 		// given
-		final List<ProductSearchDto.Response.Search> searchProducts = List.of(
-			new ProductSearchDto.Response.Search(
+		final List<ProductSearchDto> searchDtoList = List.of(
+			new ProductSearchDto(
 				1,
+				ProductCategory.BEAN,
+				30000,
+				100,
+				new ProductSearchDto.SellerRep(1, "커피천국"),
+				10,
+				false,
 				"아메리카노",
-				ProductCategory.BEAN.getTitle(),
-				30000,
-				100,
-				1,
-				"커피왕",
-				10,
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
 				false,
-				Acidity.MEDIUM.getTitle(),
-				Bean.ARABICA.getTitle(),
-				"IMG1.COM",
-				TEST_DATE_TIME
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null,
+				"size",
+				"capacity"
 			),
-			new ProductSearchDto.Response.Search(
+			new ProductSearchDto(
 				2,
-				"아메리카노2",
-				ProductCategory.BEAN.getTitle(),
+				ProductCategory.BEAN,
 				30000,
 				100,
-				1,
-				"커피왕",
+				new ProductSearchDto.SellerRep(1, "커피천국"),
 				10,
 				false,
-				Acidity.MEDIUM.getTitle(),
-				Bean.ARABICA.getTitle(),
-				"IMG2.COM",
-				TEST_DATE_TIME
+				"아메아메아메",
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
+				false,
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null,
+				"size",
+				"capacity"
 			)
 		);
+
 		// when
-		when(elasticSearchService.searchProducts(any(ProductSearchDto.Request.Search.class), 0, 2))
-			.thenReturn(List.of());
+		when(elasticSearchService.searchProducts(any(ProductSearchDto.Request.Search.class), eq(0), eq(2)))
+			.thenReturn(searchDtoList);
 		// then
 		mockMvc.perform(get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
-			.andExpect(jsonPath("$.result[0].id").value(searchProducts.get(0).id()))
+			.andExpect(jsonPath("$.result[0].id").value(searchDtoList.get(0).getId()))
+			.andExpect(jsonPath("$.result[0].name").value(searchDtoList.get(0).getName()))
+			.andExpect(jsonPath("$.result[0].favoriteCount").value(searchDtoList.get(1).getFavoriteCount()))
+			.andExpect(jsonPath("$.result[1].id").value(searchDtoList.get(1).getId()))
+			.andExpect(jsonPath("$.result[1].name").value(searchDtoList.get(1).getName()))
+			.andExpect(jsonPath("$.result[1].favoriteCount").value(searchDtoList.get(1).getFavoriteCount()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
