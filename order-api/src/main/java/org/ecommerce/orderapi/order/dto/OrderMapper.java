@@ -13,27 +13,25 @@ public interface OrderMapper {
 	OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
 	@Mapping(source = "order.orderItems", target = "orderItemDtos")
-	OrderDto OrderToDto(Order order);
+	OrderDto toDto(Order order);
 
 	@Mapping(source = "orderDto.orderItemDtos", target = "orderItemResponses")
-	OrderDto.Response OrderDtoToResponse(OrderDto orderDto);
+	OrderDto.Response toResponse(OrderDto orderDto);
 
-	OrderItemDto orderItemToDto(OrderItem orderItem);
+	OrderItemDto toDto(OrderItem orderItem);
 
-	OrderItemDto.Response orderItemDtoToResponse(OrderItemDto orderItemDto);
+	OrderItemDto.Response toResponse(OrderItemDto orderItemDto);
 
-	OrderStatusHistoryDto orderStatusHistoryToDto(
-			OrderStatusHistory orderStatusHistory);
+	OrderStatusHistoryDto toDto(OrderStatusHistory orderStatusHistory);
 
-	OrderStatusHistoryDto.Response orderStatusHistoryDtotoResponse(
+	OrderStatusHistoryDto.Response toResponse(
 			OrderStatusHistoryDto orderStatusHistoryDto);
 
 	@Mapping(source = "orderItem.orderStatusHistories", target = "orderStatusHistoryDtos")
-	OrderItemStatusHistoryDto orderItemToOrderItemStatusHistoryDto(
-			OrderItem orderItem);
+	OrderItemStatusHistoryDto toOrderItemStatusHistoryDto(OrderItem orderItem);
 
 	@Mapping(source = "orderItemStatusHistoryDto.orderStatusHistoryDtos", target = "orderStatusHistoryResponses")
-	OrderItemStatusHistoryDto.Response orderItemStatusHistoryDtotoResponse(
+	OrderItemStatusHistoryDto.Response toResponse(
 			OrderItemStatusHistoryDto orderItemStatusHistoryDto
 	);
 }

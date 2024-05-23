@@ -67,7 +67,7 @@ public class OrderDomainService {
 
 		paymentOrder(order);
 		applicationEventPublisher.publishEvent(new OrderCreatedEvent(order.getId()));
-		return OrderMapper.INSTANCE.OrderToDto(order);
+		return OrderMapper.INSTANCE.toDto(order);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class OrderDomainService {
 
 		// TODO 결제 취소 Kafka Event 추가
 		applicationEventPublisher.publishEvent(new OrderCanceledEvent(orderItemId));
-		return OrderMapper.INSTANCE.OrderToDto(
+		return OrderMapper.INSTANCE.toDto(
 				order.cancelItem(orderItemId)
 		);
 	}
@@ -206,7 +206,7 @@ public class OrderDomainService {
 	public void paymentOrder(final Order order) {
 		Payment payment = PaymentMapper.INSTANCE.paymentResponseToEntity(
 				paymentServiceClient.paymentOrder(
-						OrderMapper.INSTANCE.OrderToDto(order)
+						OrderMapper.INSTANCE.toDto(order)
 				)
 				// (POST MAN CODE)
 				// new PaymentDto.Response(

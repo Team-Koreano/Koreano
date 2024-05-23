@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.order.handler;
 
+import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
+
 import java.util.List;
 
 import org.ecommerce.orderapi.order.dto.OrderDto;
@@ -37,8 +39,9 @@ public class OrderQueryHandler {
 			final Integer pageNumber
 	) {
 		return orderRepository.findOrdersByUserId(
-						userId, year, PageRequest.of(pageNumber, 5)).stream()
-				.map(OrderMapper.INSTANCE::OrderToDto)
+						userId, year, PageRequest.of(pageNumber, ORDER_INQUIRY_PAGE_SIZE))
+				.stream()
+				.map(OrderMapper.INSTANCE::toDto)
 				.toList();
 	}
 }

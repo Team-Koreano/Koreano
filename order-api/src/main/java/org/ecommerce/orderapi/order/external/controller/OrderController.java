@@ -42,7 +42,7 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.OrderDtoToResponse(
+				OrderMapper.INSTANCE.toResponse(
 						orderDomainService.createOrder(USER_ID, createRequest)
 				)
 		);
@@ -57,7 +57,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				orderQueryHandler.getOrders(USER_ID, year, pageNumber).stream()
-						.map(OrderMapper.INSTANCE::OrderDtoToResponse)
+						.map(OrderMapper.INSTANCE::toResponse)
 						.toList()
 		);
 	}
@@ -70,7 +70,7 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.OrderDtoToResponse(
+				OrderMapper.INSTANCE.toResponse(
 						orderDomainService.cancelOrder(USER_ID, orderId, orderItemId)
 				)
 		);
