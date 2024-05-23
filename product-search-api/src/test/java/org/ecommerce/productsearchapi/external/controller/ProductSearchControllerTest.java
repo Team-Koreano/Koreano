@@ -67,7 +67,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				imageDtoList,
-				null
+				null,
+				"size",
+				"capacity"
 			);
 		// when
 		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
@@ -131,7 +133,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null
+				null,
+				"size",
+				"capacity"
 			),
 			new ProductSearchDto(
 				2,
@@ -150,7 +154,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null
+				null,
+				"size",
+				"capacity"
 			)
 		);
 		// when
@@ -185,6 +191,7 @@ public class ProductSearchControllerTest {
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
 			"testSize",
+			"testCapacity",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,

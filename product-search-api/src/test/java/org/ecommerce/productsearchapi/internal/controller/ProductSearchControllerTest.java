@@ -69,7 +69,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				imageDtoList,
-				"http://image1.com"
+				"http://image1.com",
+				"testSize",
+				"testCapacity"
 			);
 
 		String productJsonBody = objectMapper.writeValueAsString(getProduct());
@@ -121,6 +123,7 @@ public class ProductSearchControllerTest {
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
 			"testSize",
+			"testCapacity",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,

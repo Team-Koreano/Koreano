@@ -56,6 +56,8 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	@Override
 	public SearchHits<ProductDocument> searchProducts(ProductSearchDto.Request.Search search, Pageable pageable) {
 
+		// TODO  .toLowerCase() 를 es 설정으로 ABC 토큰나이저 사용 안하게 변경해야함.
+
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
 				.field(search.sortType().getField())

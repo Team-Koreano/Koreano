@@ -62,6 +62,9 @@ public class ProductDocument {
 	@Field(type = FieldType.Text)
 	private String size;
 
+	@Field(type = FieldType.Text)
+	private String capacity;
+
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	private LocalDateTime createDatetime;
 
@@ -82,6 +85,7 @@ public class ProductDocument {
 		productDocument.createDatetime = product.getCreateDatetime();
 		productDocument.thumbnailUrl = product.getThumbnailUrl();
 		productDocument.size = product.getSize();
+		productDocument.capacity = product.getCapacity();
 		return productDocument;
 	}
 

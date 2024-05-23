@@ -80,6 +80,9 @@ public class Product {
 	@Column()
 	private String size;
 
+	@Column()
+	private String capacity;
+
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private ProductStatus status = ProductStatus.AVAILABLE;

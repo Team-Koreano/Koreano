@@ -40,6 +40,8 @@ public class ProductSearchDto {
 	private LocalDateTime updateDatetime;
 	private List<ImageDto> imageDtoList;
 	private String thumbnailUrl;
+	private String size;
+	private String capacity;
 
 	@Getter
 	@AllArgsConstructor
@@ -169,6 +171,8 @@ public class ProductSearchDto {
 			String bean,
 			String information,
 			String thumbnailUrl,
+			String size,
+			String capacity,
 			LocalDateTime createDatetime
 		) {
 			@VisibleForTesting
@@ -195,6 +199,8 @@ public class ProductSearchDto {
 					productSearchDto.getBean().getTitle(),
 					productSearchDto.getInformation(),
 					productSearchDto.getThumbnailUrl(),
+					productSearchDto.getSize(),
+					productSearchDto.getCapacity(),
 					productSearchDto.getCreateDatetime()
 				);
 			}
