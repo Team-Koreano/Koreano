@@ -73,35 +73,35 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 		}
 
 		if (Boolean.TRUE.equals(search.validIsDecaf())) {
-			QueryVariant matchQuery = new TermQuery.Builder()
+			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.IS_DECAF.getField())
 				.value(search.isDecaf())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
 		if (Boolean.TRUE.equals(search.validCategory())) {
-			QueryVariant matchQuery = new TermQuery.Builder()
+			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.CATEGORY.getField())
 				.value(search.category().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
 		if (Boolean.TRUE.equals(search.validBean())) {
-			QueryVariant matchQuery = new TermQuery.Builder()
+			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.BEAN.getField())
 				.value(search.bean().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
 		if (Boolean.TRUE.equals(search.validAcidity())) {
-			QueryVariant matchQuery = new TermQuery.Builder()
+			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.ACIDITY.getField())
 				.value(search.acidity().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
 		NativeQuery query = NativeQuery.builder()
