@@ -29,6 +29,13 @@ public class BeanPayDto {
 			Role role
 		) {
 		}
+
+		public record DeleteBeanPay(
+			@NotNull(message = UserErrorMessages.userIdNotNull)
+			@Min(value = 1, message = UserErrorMessages.IsCanNotBeBelowZero)
+			Integer beanPayId
+		) {
+		}
 	}
 
 }

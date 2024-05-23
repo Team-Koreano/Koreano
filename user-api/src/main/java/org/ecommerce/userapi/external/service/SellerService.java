@@ -173,6 +173,8 @@ public class SellerService {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
 		}
 		seller.withdrawal();
+		sellerServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(seller.getBeanPayId()));
+
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {

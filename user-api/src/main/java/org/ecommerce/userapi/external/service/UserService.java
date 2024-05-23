@@ -201,6 +201,8 @@ public class UserService {
 		}
 
 		user.withdrawal();
+		userServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(user.getBeanPayId()));
+
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
