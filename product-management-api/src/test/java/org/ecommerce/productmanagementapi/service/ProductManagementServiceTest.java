@@ -195,7 +195,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
@@ -218,13 +218,13 @@ public class ProductManagementServiceTest {
 			final Product entity1 = new Product(
 				1, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			final Product entity2 = new Product(
 				2, ProductCategory.BEAN, 1000, 50, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			List<Product> products = List.of(entity1, entity2);
@@ -259,7 +259,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
@@ -285,7 +285,7 @@ public class ProductManagementServiceTest {
 			final Product entity = new Product(
 				productId, ProductCategory.BEAN, 1000, existStock, seller, 0, false,
 				"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-				true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, null
+				true, null, ProductStatus.AVAILABLE, testTime, testTime, null
 			);
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
@@ -319,7 +319,7 @@ public class ProductManagementServiceTest {
 		Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 30, seller, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, null, "capacity", ProductStatus.AVAILABLE, testTime, testTime, mockImages
+			true, null, ProductStatus.AVAILABLE, testTime, testTime, mockImages
 		);
 
 		entity.getImages().add(image);
