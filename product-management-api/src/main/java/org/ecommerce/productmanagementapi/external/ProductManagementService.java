@@ -78,8 +78,10 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto modifyToStatus(final Integer productId, final ProductStatus status) {
-		Product product = productRepository.findProductById(productId)
-			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+		Product product = productRepository.findProductById(productId);
+		if (product == null) {
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
+		}
 
 		product.toModifyStatus(status);
 
@@ -97,9 +99,12 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
-		Product product = productRepository.findProductById(stock.productId())
-			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
+		Product product = productRepository.findProductById(stock.productId());
+
+		if (product == null) {
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
+		}
 		product.increaseStock(stock.requestStock());
 
 		return ProductManagementMapper.INSTANCE.toDto(product);
@@ -116,12 +121,13 @@ public class ProductManagementService {
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
-		Product product = productRepository.findProductById(stock.productId())
-			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
 
-		if (!product.checkStock(stock.requestStock())) {
+		Product product = productRepository.findProductById(stock.productId());
+
+		if (product == null)
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
+		if (!product.checkStock(stock.requestStock()))
 			throw new CustomException(ProductManagementErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
-		}
 
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
@@ -142,8 +148,22 @@ public class ProductManagementService {
 		List<MultipartFile> images
 	) {
 
-		Product product = productRepository.findProductById(productId)
-			.orElseThrow(() -> new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT));
+		Product product = productRepository.findProductById(productId);
+
+		if (product == null)
+			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
+
+		if (thumbnailImage != null || images != null) {
+
+			s3Provider.deleteFile(product.getImagesUrl());
+
+			product.deleteImages();
+
+			product.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
+				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(),
+					product))
+				.toList());
+		}
 
 		product.toModify(
 			modifyProduct.category(),
@@ -158,16 +178,6 @@ public class ProductManagementService {
 			modifyProduct.capacity()
 		);
 
-		if (thumbnailImage != null || images != null) {
-			s3Provider.deleteFile(product.getImagesUrl());
-
-			product.deleteImages();
-
-			product.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
-				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(),
-					product))
-				.toList());
-		}
 		return ProductManagementMapper.INSTANCE.toDto(product);
 	}
 
@@ -182,7 +192,7 @@ public class ProductManagementService {
 		final ProductManagementDto.Request.BulkStatus bulkStatus
 	) {
 
-		List<Product> products = productRepository.findProductsById(bulkStatus.productId());
+		List<Product> products = productRepository.findProductsByIds(bulkStatus.productId());
 
 		if (products.isEmpty()) {
 			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.product.entity.Image;
@@ -220,7 +219,7 @@ public class ProductManagementServiceTest {
 			);
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById((productId))).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById((productId))).thenReturn(entity);
 
 			entity.toModifyStatus(newStatus);
 
@@ -250,7 +249,7 @@ public class ProductManagementServiceTest {
 
 			List<Product> products = List.of(entity1, entity2);
 
-			given(productRepository.findProductsById(productIds)).willReturn(products);
+			given(productRepository.findProductsByIds(productIds)).willReturn(products);
 			given(productRepository.saveAll(products)).willReturn(products);
 
 			ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(productIds,
@@ -285,7 +284,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById((productId))).thenReturn(entity);
 
 			ProductManagementDto result = productManagementService.increaseToStock(request);
 
@@ -311,7 +310,7 @@ public class ProductManagementServiceTest {
 
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
-			when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
+			when(productRepository.findProductById((productId))).thenReturn(entity);
 
 			assertThatThrownBy(() -> productManagementService.decreaseToStock(request))
 				.isInstanceOf(CustomException.class)
@@ -352,8 +351,8 @@ public class ProductManagementServiceTest {
 
 		entity.getImages().add(image);
 
-		when(productRepository.findProductById(productId)).thenReturn(Optional.of(entity));
-
+		when(productRepository.findProductById((productId))).thenReturn(entity);
+		
 		final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
 			"multipart/form-data",
 			"test file".getBytes(StandardCharsets.UTF_8));
