@@ -23,5 +23,6 @@ public class PaymentDetailErrorMessage {
 	public static final String NOT_NULL_SELLER_ID = "판매자 ID를 전달해주세요";
 	public static final String NOT_NULL_USER_ID = "유저 ID를 전달해주세요";
 	public static final String NOT_NULL_CHARGE_AMOUNT = "충전 금액을 전달해주세요";
-
+	public static final String NOT_NULL_ORDER_ID = "주문 ID를 전달해주세요";
+	public static final String NOT_UNDER_ONE_ORDER_ID = "1이상의 주문 ID를 전달해주세요";
 }

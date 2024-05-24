@@ -1,13 +1,16 @@
 package org.ecommerce.paymentapi.entity;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
+import static org.ecommerce.paymentapi.exception.PaymentErrorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.util.Pair;
@@ -125,5 +128,22 @@ public class Payment {
 
 	private void changeProcessStatus(ProcessStatus status) {
 		this.status = status;
+	}
+
+	public PaymentDetail cancelPaymentDetail(Long orderItemId, String message) {
+		PaymentDetail cancelPaymentDetail = this.paymentDetails.stream()
+			.filter(paymentDetail ->
+				paymentDetail.getOrderItemId().equals(orderItemId))
+			.findFirst()
+			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID))
+			.cancelPaymentDetail(message);
+		decreaseTotalAmount(cancelPaymentDetail.getPaymentAmount());
+		return cancelPaymentDetail;
+	}
+
+	private void decreaseTotalAmount(Integer amount) {
+		if(this.totalAmount - amount < 0)
+			throw new CustomException(INVALID_AMOUNT);
+		this.totalAmount -= amount;
 	}
 }

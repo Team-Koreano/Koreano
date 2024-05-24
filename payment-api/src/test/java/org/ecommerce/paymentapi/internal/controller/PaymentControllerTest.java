@@ -226,10 +226,11 @@ class PaymentControllerTest {
 			PaymentCancel request = new PaymentCancel(
 				paymentDetail.getUserBeanPay().getUserId(),
 				paymentDetail.getSellerBeanPay().getUserId(),
+				orderId,
 				paymentDetail.getOrderItemId(),
 				cancelReason
 			);
-			paymentDetail.cancelPaymentDetail(cancelReason);
+			payment.cancelPaymentDetail(request.orderItemId(), request.cancelReason());
 			PaymentDetailDto dto = PaymentMapper.INSTANCE.paymentDetailToDto(
 				paymentDetail);
 			when(paymentService.cancelPaymentDetail(request)).thenReturn(dto);

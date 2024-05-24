@@ -449,13 +449,13 @@ class PaymentServiceTest {
 			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
+				orderId,
 				paymentDetail.getOrderItemId(),
 				cancelReason
 			);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(paymentDetail);
+			when(paymentRepository.findByOrderId(orderId)).thenReturn(payment);
 			final Integer beforeSellerAmount = paymentDetail.getSellerBeanPay().getAmount();
 			final PaymentDetailDto dto = paymentService.cancelPaymentDetail(request);
 
@@ -483,6 +483,7 @@ class PaymentServiceTest {
 			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
+			final Long difOrderItemId = 10_000L;
 			final Integer[] amounts = {5000, 5000, 5000};
 			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
 			final Integer[] deliveryFees = {0, 0, 0};
@@ -543,13 +544,13 @@ class PaymentServiceTest {
 			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
-				paymentDetail.getOrderItemId(),
+				orderId,
+				difOrderItemId,
 				cancelReason
 			);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(null);
+			when(paymentRepository.findByOrderId(orderId)).thenReturn(payment);
 
 			//then
 			final CustomException actual = assertThrows(CustomException.class, () -> {
@@ -620,13 +621,13 @@ class PaymentServiceTest {
 			final PaymentCancel request = new PaymentCancel(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
+				orderId,
 				paymentDetail.getOrderItemId(),
 				cancelReason
 			);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(paymentDetail);
+			when(paymentRepository.findByOrderId(orderId)).thenReturn(payment);
 			paymentDetail.cancelPaymentDetail(cancelReason);
 
 			//then

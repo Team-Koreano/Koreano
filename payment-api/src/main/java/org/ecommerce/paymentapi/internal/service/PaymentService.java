@@ -117,10 +117,10 @@ public class PaymentService {
 	public PaymentDetailDto cancelPaymentDetail(
 		final PaymentCancel paymentCancel
 	) {
-		final PaymentDetail paymentDetail = getPaymentDetail(paymentCancel.orderItemId());
+		final Payment payment = getPayment(paymentCancel.orderId());
 
 		return PaymentMapper.INSTANCE.paymentDetailToDto(
-			paymentDetail.cancelPaymentDetail(paymentCancel.cancelReason())
+			payment.cancelPaymentDetail(paymentCancel.orderItemId(), paymentCancel.cancelReason())
 		);
 	}
 
