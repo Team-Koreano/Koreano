@@ -113,6 +113,7 @@ public class Order {
 		OrderItem orderItem = getOrderItemByOrderItemId(orderItemId);
 		validateCancelableOrderItem(orderItem);
 		orderItem.cancel();
+		totalPaymentAmount -= orderItem.getPaymentAmount();
 		return this;
 	}
 
