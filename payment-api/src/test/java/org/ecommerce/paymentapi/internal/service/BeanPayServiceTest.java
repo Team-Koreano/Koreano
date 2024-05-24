@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
@@ -46,7 +45,7 @@ class BeanPayServiceTest {
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
-				request.role())).thenReturn(Optional.empty());
+				request.role())).thenReturn(null);
 			when(beanPayRepository.save(any(BeanPay.class))).thenReturn(beanPay);
 			BeanPayDto actual = beanPayService.createBeanPay(request);
 
@@ -66,7 +65,7 @@ class BeanPayServiceTest {
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
-				request.role())).thenReturn(Optional.ofNullable(mock(BeanPay.class)));
+				request.role())).thenReturn(mock(BeanPay.class));
 
 			//then
 			final CustomException actual = assertThrows(CustomException.class, () -> {

@@ -117,7 +117,10 @@ public class LockTestService {
 	}
 
 	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		return beanPayRepository.findBeanPayByUserIdAndRole(userId, role)
-			.orElseThrow(() -> new CustomException(BeanPayErrorCode.NOT_FOUND_ID));
+		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+			userId, role);
+		if(beanPay == null)
+			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
+		return beanPay;
 	}
 }

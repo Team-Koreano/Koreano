@@ -12,7 +12,6 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.ecommerce.common.error.CustomException;
@@ -126,7 +125,7 @@ class PaymentServiceTest {
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(userBeanPay.getUserId(), USER))
-				.thenReturn(Optional.of(userBeanPay));
+				.thenReturn(userBeanPay);
 			when(beanPayRepository.findBeanPayByUserIdsAndRole(paymentPrice.extractSellerIds()
 				, SELLER)).thenReturn(sellerBeanPays);
 			when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
@@ -226,7 +225,7 @@ class PaymentServiceTest {
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(userBeanPay.getUserId(), USER))
-				.thenReturn(Optional.of(userBeanPay));
+				.thenReturn(userBeanPay);
 			when(beanPayRepository.findBeanPayByUserIdsAndRole(paymentPrice.extractSellerIds()
 				, SELLER)).thenReturn(sellerBeanPays);
 
@@ -296,7 +295,7 @@ class PaymentServiceTest {
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(userBeanPay.getUserId(), USER))
-				.thenReturn(Optional.of(userBeanPay));
+				.thenReturn(userBeanPay);
 			when(beanPayRepository.findBeanPayByUserIdsAndRole(paymentPrice.extractSellerIds()
 				, SELLER)).thenReturn(sellerBeanPays);
 
@@ -456,7 +455,7 @@ class PaymentServiceTest {
 
 			//when
 			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(Optional.of(paymentDetail));
+				.thenReturn(paymentDetail);
 			final Integer beforeSellerAmount = paymentDetail.getSellerBeanPay().getAmount();
 			final PaymentDetailDto dto = paymentService.cancelPaymentDetail(request);
 
@@ -550,7 +549,7 @@ class PaymentServiceTest {
 
 			//when
 			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(Optional.ofNullable(null));
+				.thenReturn(null);
 
 			//then
 			final CustomException actual = assertThrows(CustomException.class, () -> {
@@ -627,7 +626,7 @@ class PaymentServiceTest {
 
 			//when
 			when(paymentDetailRepository.findPaymentDetailByOrderItemId(orderId))
-				.thenReturn(Optional.of(paymentDetail));
+				.thenReturn(paymentDetail);
 			paymentDetail.cancelPaymentDetail(cancelReason);
 
 			//then

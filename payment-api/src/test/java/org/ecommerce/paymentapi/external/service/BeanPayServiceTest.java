@@ -69,7 +69,7 @@ class BeanPayServiceTest {
 		final PaymentDetail entity = beanPay.beforeCharge(beanPay.getAmount());
 		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.entityToDto(entity);
 
-		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(Optional.of(beanPay));
+		given(beanPayRepository.findBeanPayByUserIdAndRole(any(), any(Role.class))).willReturn(beanPay);
 		given(paymentDetailRepository.save(any())).willReturn(entity);
 
 
@@ -127,7 +127,7 @@ class BeanPayServiceTest {
 				Optional.of(response));
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(entity));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(entity);
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossResponse);
 
 			//then
@@ -217,15 +217,15 @@ class BeanPayServiceTest {
 			);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
-			Optional<PaymentDetail> optionalBeanPay =
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(paymentDetail);
+			PaymentDetail findPaymentDetail =
 				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
-			assertTrue(optionalBeanPay.isPresent());
-			assertEquals(optionalBeanPay.get().getFailReason(), VERIFICATION_FAIL.getMessage());
-			assertEquals(ProcessStatus.FAILED, optionalBeanPay.get().getProcessStatus());
+			assertNotNull(findPaymentDetail);
+			assertEquals(findPaymentDetail.getFailReason(), VERIFICATION_FAIL.getMessage());
+			assertEquals(ProcessStatus.FAILED, findPaymentDetail.getProcessStatus());
 		}
 
 		@Test
@@ -275,17 +275,16 @@ class BeanPayServiceTest {
 				.body(response);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(paymentDetail);
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request)).thenReturn(tossFailResponse);
-			Optional<PaymentDetail> optionalPaymentDetail =
-				paymentDetailRepository.findPaymentDetailById(request.orderId());
+			PaymentDetail findPaymentDetail = paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId, role));
-			assertTrue(optionalPaymentDetail.isPresent());
-			assertEquals(optionalPaymentDetail.get().getFailReason(),
+			assertNotNull(findPaymentDetail);
+			assertEquals(findPaymentDetail.getFailReason(),
 				TOSS_RESPONSE_FAIL.getMessage());
-			assertEquals(ProcessStatus.FAILED, optionalPaymentDetail.get().getProcessStatus());
+			assertEquals(ProcessStatus.FAILED, findPaymentDetail.getProcessStatus());
 		}
 
 	}
@@ -331,15 +330,15 @@ class BeanPayServiceTest {
 			);
 
 			//when
-			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.of(paymentDetail));
-			Optional<PaymentDetail> optionalPaymentDetail =
+			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(paymentDetail);
+			PaymentDetail findPaymentDetail =
 				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
 			assertDoesNotThrow(() -> beanPayService.failTossCharge(request));
-			assertTrue(optionalPaymentDetail.isPresent());
-			assertEquals(optionalPaymentDetail.get().getFailReason(), errorMessage);
-			assertEquals(ProcessStatus.FAILED, optionalPaymentDetail.get().getProcessStatus());
+			assertNotNull(findPaymentDetail);
+			assertEquals(findPaymentDetail.getFailReason(), errorMessage);
+			assertEquals(ProcessStatus.FAILED, findPaymentDetail.getProcessStatus());
 		}
 	}
 	@Test
@@ -352,7 +351,7 @@ class BeanPayServiceTest {
 		final TossFail request = new TossFail(orderId, errorCode, errorMessage);
 
 		//when
-		when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(Optional.ofNullable(null));
+		when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenReturn(null);
 
 		//then
 		CustomException returnException = assertThrows(CustomException.class, () -> {
