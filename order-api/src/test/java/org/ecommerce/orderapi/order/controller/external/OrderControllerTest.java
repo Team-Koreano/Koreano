@@ -16,7 +16,7 @@ import org.ecommerce.orderapi.order.dto.OrderDto;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
 import org.ecommerce.orderapi.order.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.order.external.controller.OrderController;
-import org.ecommerce.orderapi.order.handler.OrderQueryHandler;
+import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.order.service.OrderDomainService;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ public class OrderControllerTest {
 	private OrderDomainService orderDomainService;
 
 	@MockBean
-	private OrderQueryHandler orderQueryHandler;
+	private OrderReadService orderReadService;
 
 	@MockBean
 	private StockDomainService stockDomainService;
@@ -163,7 +163,7 @@ public class OrderControllerTest {
 						)
 				)
 		);
-		given(orderQueryHandler.getOrders(userId, year, pageNumber))
+		given(orderReadService.getOrders(userId, year, pageNumber))
 				.willReturn(orderDtos);
 
 		// when

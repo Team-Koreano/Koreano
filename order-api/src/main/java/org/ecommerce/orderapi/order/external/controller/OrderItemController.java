@@ -6,7 +6,7 @@ import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
 import org.ecommerce.orderapi.order.dto.OrderItemStatusHistoryDto;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
-import org.ecommerce.orderapi.order.handler.OrderItemQueryHandler;
+import org.ecommerce.orderapi.order.service.OrderItemReadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/orderItems/v1")
 public class OrderItemController {
 
-	private final OrderItemQueryHandler orderItemQueryHandler;
+	private final OrderItemReadService orderItemReadService;
 
 	private final static Integer SELLER_ID = 1;
 
@@ -33,7 +33,7 @@ public class OrderItemController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderItemQueryHandler.getOrderItems(SELLER_ID, month, pageNumber).stream()
+				orderItemReadService.getOrderItems(SELLER_ID, month, pageNumber).stream()
 						.map(OrderMapper.INSTANCE::toResponse)
 						.toList()
 		);
@@ -47,7 +47,7 @@ public class OrderItemController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toResponse(
-						orderItemQueryHandler.getOrderItemStatusHistories(orderItemId)
+						orderItemReadService.getOrderItemStatusHistories(orderItemId)
 				)
 		);
 	}

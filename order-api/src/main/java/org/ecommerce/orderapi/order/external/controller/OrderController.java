@@ -7,7 +7,7 @@ import org.ecommerce.orderapi.order.dto.OrderDto;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.stock.dto.StockDto;
 import org.ecommerce.orderapi.stock.dto.StockMapper;
-import org.ecommerce.orderapi.order.handler.OrderQueryHandler;
+import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.order.service.OrderDomainService;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
 import org.springframework.http.HttpStatus;
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/external/orders/v1")
 public class OrderController {
 
-	private final OrderQueryHandler orderQueryHandler;
+	private final OrderReadService orderReadService;
 	private final StockDomainService stockDomainService;
 	private final OrderDomainService orderDomainService;
 
@@ -56,7 +56,7 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderQueryHandler.getOrders(USER_ID, year, pageNumber).stream()
+				orderReadService.getOrders(USER_ID, year, pageNumber).stream()
 						.map(OrderMapper.INSTANCE::toResponse)
 						.toList()
 		);

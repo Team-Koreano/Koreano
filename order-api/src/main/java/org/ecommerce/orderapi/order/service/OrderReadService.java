@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.handler;
+package org.ecommerce.orderapi.order.service;
 
 import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
 
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class OrderQueryHandler {
+public class OrderReadService {
 
 	private final OrderRepository orderRepository;
 
