@@ -1,6 +1,10 @@
 package org.ecommerce.paymentapi.dto;
 
 import static java.lang.Boolean.*;
+import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
+import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
+import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
+import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -14,9 +18,6 @@ import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.ChargeInfo;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
-import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
-import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,31 +41,49 @@ class PaymentDetailDtoTest {
 
 	@Test
 	void PaymentDetail_PaymentDetailDto_변환() {
-		PaymentDetail entity = new PaymentDetail(
-			UUID.randomUUID(),
+		//given
+		final UUID id = UUID.randomUUID();
+		final Long orderItemId = 1L;
+		final String paymentKey = "paymentKey";
+		final String orderName = "orderName";
+		final String paymentType = "카드";
+		final Integer price = 0;
+		final Integer quantity = 0;
+		final Integer deliveryFee = 0;
+		final Integer totalAmount = 0;
+		final Integer paymentAmount = 1000;
+		final String approveDateTime = "2024-04-14T17:41:52+09:00";
+
+
+
+		final PaymentDetail entity = new PaymentDetail(
+			id,
 			new Payment(),
-			new BeanPay(1, 1, Role.USER, 0, LocalDateTime.now()),
-			new BeanPay(2, 1, Role.SELLER, 0, LocalDateTime.now()),
-			1L,
-			0,
-			0,
-			0,
-			"paymentName",
+			getUserBeanPay(),
+			getSellerBeanPay(),
+			orderItemId,
+			price,
+			quantity,
+			deliveryFee,
+			totalAmount,
+			paymentAmount,
+			orderName,
 			null,
 			null,
 			new ChargeInfo(
 				1L,
-				"paymentKey",
-				"payType",
-				LocalDateTime.now()
+				paymentKey,
+				paymentType,
+				stringToDateTime(approveDateTime)
 			),
-			PaymentStatus.PAYMENT,
-			ProcessStatus.PENDING,
+			DEPOSIT,
+			PENDING,
 			List.of(),
 			LocalDateTime.now(),
 			null,
 			TRUE
 		);
+
 		PaymentDetailDto dto =
 			PaymentDetailMapper.INSTANCE.entityToDto(entity);
 		assertEquals(dto.getId(), entity.getId());
@@ -126,7 +145,6 @@ class PaymentDetailDtoTest {
 			null,
 			null,
 			null,
-			null,
 			""
 		);
 
@@ -135,7 +153,13 @@ class PaymentDetailDtoTest {
 			validator.validate(request);
 
 		//then
-		assertEquals(7, violations.size());
+		assertEquals(6, violations.size());
+	}
+	private BeanPay getUserBeanPay() {
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
+	}
+	private BeanPay getSellerBeanPay() {
+		return new BeanPay(2, 1, SELLER, 0, LocalDateTime.now());
 	}
 
 }

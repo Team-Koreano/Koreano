@@ -66,10 +66,10 @@ class PaymentServiceTest {
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
-			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
-			final Integer[] quantity = {3, 3, 3};
+			final Integer[] quantity = {5, 5, 5};
 			final Integer[] prices = {1000, 1000, 1000};
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
@@ -79,13 +79,11 @@ class PaymentServiceTest {
 			);
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
 				userBeanPay.getUserId(),
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -94,7 +92,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -103,7 +100,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -118,7 +114,6 @@ class PaymentServiceTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -134,20 +129,19 @@ class PaymentServiceTest {
 			//then
 			assertEquals(orderId, paymentDto.getOrderId());
 			assertEquals(userBeanPay.getUserId(), paymentDto.getUserId());
-			assertEquals(paymentAmount, paymentDto.getTotalAmount());
+			assertEquals(paymentAmount, paymentDto.getTotalPaymentAmount());
 			assertEquals(paymentPrice.orderName(), paymentDto.getOrderName());
 			assertEquals(COMPLETED, paymentDto.getProcessStatus());
 			assertEquals(TRUE, paymentDto.getIsVisible());
 			assertEquals(COMPLETED, paymentDto.getProcessStatus());
 			assertEquals(startAmount - paymentAmount * 2, userBeanPay.getAmount());
-			IntStream.range(0, paymentDto.getPaymentDetails().size()).forEach((i) -> {
-				PaymentDetailDto dto = paymentDto.getPaymentDetails().get(i);
+			IntStream.range(0, paymentDto.getPaymentDetailDtos().size()).forEach((i) -> {
+				PaymentDetailDto dto = paymentDto.getPaymentDetailDtos().get(i);
 				PaymentDetailPrice detailPrice = paymentPrice.paymentDetails().get(i);
 				assertEquals(userBeanPay.getUserId(), dto.getUserId());
 				assertEquals(detailPrice.sellerId(), dto.getSellerId());
 				assertEquals(detailPrice.orderItemId(), dto.getOrderItemId());
 				assertEquals(detailPrice.deliveryFee(), dto.getDeliveryFee());
-				assertEquals(detailPrice.paymentAmount(), dto.getPaymentAmount());
 				assertEquals(detailPrice.quantity(), dto.getQuantity());
 				assertEquals(detailPrice.productName(), dto.getPaymentName());
 				assertEquals(PAYMENT, dto.getPaymentStatus());
@@ -165,10 +159,10 @@ class PaymentServiceTest {
 			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
-			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
-			final Integer[] quantity = {3, 3, 3};
+			final Integer[] quantity = {5, 5, 5};
 			final Integer[] prices = {1000, 1000, 1000};
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
@@ -179,13 +173,11 @@ class PaymentServiceTest {
 
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
-				userBeanPay.getUserId(),
+				userId,
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -194,7 +186,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -203,7 +194,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -218,7 +208,6 @@ class PaymentServiceTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -246,7 +235,7 @@ class PaymentServiceTest {
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
-			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -258,13 +247,11 @@ class PaymentServiceTest {
 			);
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
-				userBeanPay.getUserId(),
+				userId,
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -273,7 +260,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -282,7 +268,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -317,7 +302,7 @@ class PaymentServiceTest {
 		final Integer[] sellerIds = new Integer[] {1, 2};
 		final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 		final Integer paymentAmount = 15000;
-		final Integer[] amounts = {5000, 5000, 5000};
+		final Integer[] paymentAmounts = {5000, 5000, 5000};
 		final Integer[] deliveryFees = {0, 0, 0};
 		final String orderName = "orderName";
 		final Integer[] quantity = {3, 3, 3};
@@ -330,13 +315,11 @@ class PaymentServiceTest {
 		);
 		final PaymentPrice paymentPrice = new PaymentPrice(
 			1L,
-			paymentAmount,
-			userBeanPay.getUserId(),
+			userId,
 			orderName,
 			List.of(
 				new PaymentDetailPrice(
 					orderItemIds[0],
-					amounts[0],
 					prices[0],
 					quantity[0],
 					deliveryFees[0],
@@ -345,7 +328,6 @@ class PaymentServiceTest {
 				),
 				new PaymentDetailPrice(
 					orderItemIds[1],
-					amounts[1],
 					prices[1],
 					quantity[1],
 					deliveryFees[1],
@@ -354,7 +336,6 @@ class PaymentServiceTest {
 				),
 				new PaymentDetailPrice(
 					orderItemIds[2],
-					amounts[2],
 					prices[2],
 					quantity[2],
 					deliveryFees[2],
@@ -389,9 +370,9 @@ class PaymentServiceTest {
 			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
-			final Integer[] amounts = {5000, 5000, 5000};
-			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
-			final Integer[] deliveryFees = {0, 0, 0};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
+			final Integer totalPaymentAmount = Arrays.stream(paymentAmounts).mapToInt(i -> i).sum();
+			final Integer[] deliveryFees = {2000, 2000, 2000};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
 			final Integer[] prices = {1000, 1000, 1000};
@@ -403,13 +384,11 @@ class PaymentServiceTest {
 			);
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
-				userBeanPay.getUserId(),
+				userId,
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -418,7 +397,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -427,7 +405,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -441,7 +418,6 @@ class PaymentServiceTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -461,7 +437,7 @@ class PaymentServiceTest {
 
 			//then
 			assertEquals(userBeanPay.getAmount(),
-				startAmount - (paymentAmount - paymentDetail.getPaymentAmount()));
+				startAmount - (totalPaymentAmount - paymentDetail.getPaymentAmount()));
 			assertEquals(paymentDetail.getSellerBeanPay().getAmount(),
 				beforeSellerAmount - paymentDetail.getPaymentAmount());
 			assertEquals(paymentDetail.getPaymentStatus(), REFUND);
@@ -484,8 +460,8 @@ class PaymentServiceTest {
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Long difOrderItemId = 10_000L;
-			final Integer[] amounts = {5000, 5000, 5000};
-			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
+			final Integer paymentAmount = Arrays.stream(paymentAmounts).mapToInt(i -> i).sum();
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -498,13 +474,11 @@ class PaymentServiceTest {
 			);
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
-				userBeanPay.getUserId(),
+				userId,
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -513,7 +487,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -522,7 +495,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -536,7 +508,6 @@ class PaymentServiceTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -569,8 +540,8 @@ class PaymentServiceTest {
 			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
-			final Integer[] amounts = {5000, 5000, 5000};
-			final Integer paymentAmount = Arrays.stream(amounts).mapToInt(i -> i).sum();
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
+			final Integer paymentAmount = Arrays.stream(paymentAmounts).mapToInt(i -> i).sum();
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -583,13 +554,11 @@ class PaymentServiceTest {
 			);
 			final PaymentPrice paymentPrice = new PaymentPrice(
 				1L,
-				paymentAmount,
-				userBeanPay.getUserId(),
+				userId,
 				orderName,
 				List.of(
 					new PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -598,7 +567,6 @@ class PaymentServiceTest {
 					),
 					new PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -613,7 +581,6 @@ class PaymentServiceTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
