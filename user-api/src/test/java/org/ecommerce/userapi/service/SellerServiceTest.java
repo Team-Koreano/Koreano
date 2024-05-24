@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.client.SellerServiceClient;
@@ -86,8 +85,7 @@ class SellerServiceTest {
 
 		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
 
-		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-			java.util.Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(seller);
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then
@@ -203,9 +201,9 @@ class SellerServiceTest {
 
 			final SellerDto.Request.Login loginRequest = new SellerDto.Request.Login(email, password);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
-			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
-			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(seller);
 			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
+			when(sellerService.checkIsMatchedPassword(password, seller.getPassword())).thenReturn(true);
 
 			// when
 			final SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
@@ -226,7 +224,7 @@ class SellerServiceTest {
 			// then
 			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -242,11 +240,11 @@ class SellerServiceTest {
 				incorrectPassword);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 
-			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(seller);
 			// then
 			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 	}
 
@@ -266,9 +264,9 @@ class SellerServiceTest {
 			final SellerAccount account = SellerAccount.ofRegister(seller, "1234567890", "KEB하나은행");
 
 			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId()))
-				.thenReturn(Optional.of(seller));
+				.thenReturn(seller);
+			when(sellerService.checkIsMatchedPassword(password, seller.getPassword())).thenReturn(true);
 
-			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 			// when
 			sellerService.withdrawSeller(withdrawalRequest, authDetails);
 
@@ -293,7 +291,7 @@ class SellerServiceTest {
 			// then
 			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -302,20 +300,20 @@ class SellerServiceTest {
 			final String email = "user1@example.com";
 			final String phoneNumber = "01012345678";
 			final String incorrectPassword = "incorrectPassword";
-
+			final String correctPassword = "correctPassword";
 			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email,
 				incorrectPassword, phoneNumber);
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
-			final Seller seller = Seller.ofRegister(email, "John Doe", incorrectPassword, "어쩌구 저쩌구", phoneNumber);
+			final Seller seller = Seller.ofRegister(email, "John Doe", correctPassword, "어쩌구 저쩌구", phoneNumber);
 
 			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-				Optional.of(seller));
-
+				seller);
+			when(sellerService.checkIsMatchedPassword(incorrectPassword, seller.getPassword())).thenReturn(false);
 			// then
 			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 	}
 }

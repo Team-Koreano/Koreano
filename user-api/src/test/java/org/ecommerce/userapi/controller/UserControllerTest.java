@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
@@ -279,7 +278,7 @@ public class UserControllerTest {
 			phoneNumber
 		);
 
-		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(user));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(user);
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/external/users/v1")
 			.with(csrf())

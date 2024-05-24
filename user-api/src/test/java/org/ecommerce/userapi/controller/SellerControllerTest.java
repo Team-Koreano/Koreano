@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
@@ -219,7 +218,7 @@ class SellerControllerTest {
 			"01087654321"
 		);
 
-		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(seller);
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/external/sellers/v1")
 			.with(csrf())
