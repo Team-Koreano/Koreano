@@ -69,8 +69,8 @@ public class BeanPayIntegrationServiceTest {
 
 	@AfterEach
 	public void 사후() {
-		chargeInfoRepository.deleteAllInBatch();
 		paymentDetailRepository.deleteAllInBatch();
+		chargeInfoRepository.deleteAllInBatch();
 		beanPayRepository.deleteAllInBatch();
 	}
 

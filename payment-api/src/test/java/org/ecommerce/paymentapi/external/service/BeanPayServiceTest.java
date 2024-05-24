@@ -203,7 +203,6 @@ class BeanPayServiceTest {
 				null,
 				new ChargeInfo(
 					1L,
-					null,
 					"paymentKey",
 					"payType",
 					LocalDateTime.now()
@@ -257,7 +256,6 @@ class BeanPayServiceTest {
 				null,
 				new ChargeInfo(
 					1L,
-					null,
 					"paymentKey",
 					"payType",
 					LocalDateTime.now()
@@ -316,7 +314,6 @@ class BeanPayServiceTest {
 				null,
 				new ChargeInfo(
 					1L,
-					null,
 					"paymentKey",
 					"payType",
 					LocalDateTime.now()

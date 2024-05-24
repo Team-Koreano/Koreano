@@ -87,7 +87,6 @@ public class PaymentDetail {
 	private String failReason;
 
 	@OneToOne(
-		mappedBy = "paymentDetail",
 		fetch = FetchType.LAZY,
 		cascade = {
 			CascadeType.PERSIST,
@@ -197,7 +196,6 @@ public class PaymentDetail {
 			throw new CustomException(PaymentDetailErrorCode.DUPLICATE_API_CALL);
 
 		this.chargeInfo = ChargeInfo.ofCharge(
-			this,
 			response.paymentKey(),
 			response.approveDateTime());
 		this.paymentName = response.orderName();
