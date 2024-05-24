@@ -294,8 +294,8 @@ public class StockDomainServiceTest {
 				.decreaseTotal(orderItem2.getId(), orderItem2.getQuantity());
 		assertEquals(DECREASE, stockHistories1.get(1).getOperationType());
 		assertEquals(DECREASE, stockHistories2.get(1).getOperationType());
-		assertEquals(TOTAL_LIMIT, stockHistories1.get(1).getOperationResult());
-		assertEquals(TOTAL_LIMIT, stockHistories2.get(1).getOperationResult());
+		assertEquals(SOLD_OUT, stockHistories1.get(1).getOperationResult());
+		assertEquals(SOLD_OUT, stockHistories2.get(1).getOperationResult());
 	}
 
 	@Test

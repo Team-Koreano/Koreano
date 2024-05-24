@@ -1,11 +1,9 @@
 package org.ecommerce.orderapi.order.handler;
 
-import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
 import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
 
 import java.util.List;
 
-import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
 import org.ecommerce.orderapi.order.dto.OrderItemStatusHistoryDto;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
@@ -33,7 +31,6 @@ public class OrderItemQueryHandler {
 	public OrderItemStatusHistoryDto getOrderItemStatusHistories(final Long orderItemId) {
 		return OrderMapper.INSTANCE.toOrderItemStatusHistoryDto(
 				orderItemRepository.findOrderItemById(orderItemId)
-						.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM_ID))
 		);
 	}
 
