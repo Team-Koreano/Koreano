@@ -13,6 +13,7 @@ public interface PaymentMapper {
 	PaymentMapper INSTANCE = Mappers.getMapper(PaymentMapper.class);
 
 	@Mapping(source = "userBeanPay.userId", target = "userId")
+	@Mapping(source = "paymentDetails", target = "paymentDetailDtos")
 	@Mapping(source = "status", target = "processStatus")
 	PaymentDto paymentToDto(Payment payment);
 

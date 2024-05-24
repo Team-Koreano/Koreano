@@ -19,9 +19,8 @@ public class PaymentRepositoryImpl implements PaymentCustomRepository {
 	public Payment findByOrderId(Long orderId) {
 		return jpaQueryFactory.selectFrom(payment)
 			.where(payment.orderId.eq(orderId))
+			.leftJoin(payment.paymentDetails, paymentDetail).fetchJoin()
 			.leftJoin(payment.userBeanPay).fetchJoin()
-			.leftJoin(payment.paymentDetails).fetchJoin()
-			.leftJoin(paymentDetail.userBeanPay).fetchJoin()
 			.leftJoin(paymentDetail.sellerBeanPay).fetchJoin()
 			.fetchFirst();
 	}

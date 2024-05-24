@@ -56,7 +56,7 @@ public class Payment {
 	private BeanPay userBeanPay;
 
 	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount = 0;
+	private Integer totalPaymentAmount = 0;
 
 	@Column(name = "order_name", nullable = false)
 	private String orderName;
@@ -87,14 +87,12 @@ public class Payment {
 	public static Payment ofPayment(
 		final BeanPay userBeanPay,
 		final Long orderId,
-		final Integer totalAmount,
 		final String orderName,
 		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
 		payment.userBeanPay = userBeanPay;
-		payment.totalAmount = totalAmount;
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
 
@@ -109,8 +107,8 @@ public class Payment {
 					sellerBeanPay,
 					paymentDetailPrice.orderItemId(),
 					paymentDetailPrice.deliveryFee(),
-					paymentDetailPrice.paymentAmount(),
 					paymentDetailPrice.quantity(),
+					paymentDetailPrice.price(),
 					paymentDetailPrice.productName()
 				)
 			);
@@ -142,8 +140,12 @@ public class Payment {
 	}
 
 	private void decreaseTotalAmount(Integer amount) {
-		if(this.totalAmount - amount < 0)
+		if(this.totalPaymentAmount - amount < 0)
 			throw new CustomException(INVALID_AMOUNT);
-		this.totalAmount -= amount;
+		this.totalPaymentAmount -= amount;
+	}
+
+	protected void increaseTotalAmount(Integer amount) {
+		this.totalPaymentAmount += amount;
 	}
 }

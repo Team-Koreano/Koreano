@@ -8,6 +8,9 @@ import java.util.UUID;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -59,14 +62,12 @@ public class PaymentDetailDto {
 		) {
 		}
 
+		@JsonIgnoreProperties(ignoreUnknown = true)
 		public record PaymentDetailPrice(
-
+			@JsonProperty("id")
 			@NotNull(message = NOT_NULL_ORDER_ITEM_ID)
 			@Min(value = 1, message = NOT_UNDER_ONE_ORDER_ITEM_ID)
 			Long orderItemId,
-			@NotNull(message = NOT_NULL_PAYMENT_AMOUNT)
-			@Min(value = 0, message = NOT_UNDER_ZERO_PAYMENT_AMOUNT)
-			Integer paymentAmount,
 			@NotNull(message = NOT_NULL_PRICE)
 			@Min(value = 0, message = NOT_UNDER_ZERO_PRICE)
 			Integer price,

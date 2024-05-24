@@ -69,7 +69,6 @@ public class PaymentService {
 		final Payment payment = Payment.ofPayment(
 			userBeanPay,
 			paymentPrice.orderId(),
-			paymentPrice.totalAmount(),
 			paymentPrice.orderName(),
 			mappedBeanPayPaymentDetailPrice(paymentPrice, sellerBeanPays)
 		);
@@ -111,8 +110,8 @@ public class PaymentService {
 	@DistributedLock(
 		lockName = BEANPAY,
 		uniqueKey = {
-		"paymentCancel.sellerId() + 'SELLER'",
-		"paymentCancel.userId() + 'USER'",
+		"#paymentCancel.sellerId() + 'SELLER'",
+		"#paymentCancel.userId() + 'USER'",
 	})
 	public PaymentDetailDto cancelPaymentDetail(
 		final PaymentCancel paymentCancel
