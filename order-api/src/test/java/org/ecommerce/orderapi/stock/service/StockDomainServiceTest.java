@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.order.entity.Order;
@@ -153,7 +152,7 @@ public class StockDomainServiceTest {
 		productToToStockMap.put(stock1.getProductId(), stock1);
 		productToToStockMap.put(stock2.getProductId(), stock2);
 		given(orderRepository.findOrderById(anyLong()))
-				.willReturn(Optional.of(order));
+				.willReturn(order);
 		given(stockRepository.findStocksByProductIdIn(anyList()))
 				.willReturn(productToToStockMap);
 
@@ -279,7 +278,7 @@ public class StockDomainServiceTest {
 		productToToStockMap.put(stock1.getProductId(), stock1);
 		productToToStockMap.put(stock2.getProductId(), stock2);
 		given(orderRepository.findOrderById(anyLong()))
-				.willReturn(Optional.of(order));
+				.willReturn(order);
 		given(stockRepository.findStocksByProductIdIn(anyList()))
 				.willReturn(productToToStockMap);
 
@@ -348,9 +347,9 @@ public class StockDomainServiceTest {
 		));
 
 		given(orderItemRepository.findOrderItemById(anyLong()))
-				.willReturn(Optional.of(orderItem));
+				.willReturn(orderItem);
 		given(stockRepository.findStockByOrderItemId(anyLong()))
-				.willReturn(Optional.of(stock));
+				.willReturn(stock);
 		final int previousStockHistoriesSize = stock.getStockHistories().size();
 		final int previousStockTotal = stock.getTotal();
 		// when
@@ -446,9 +445,9 @@ public class StockDomainServiceTest {
 		));
 
 		given(orderItemRepository.findOrderItemById(anyLong()))
-				.willReturn(Optional.of(orderItem));
+				.willReturn(orderItem);
 		given(stockRepository.findStockByOrderItemId(anyLong()))
-				.willReturn(Optional.of(stock));
+				.willReturn(stock);
 		// when
 		CustomException exception = assertThrows(CustomException.class,
 				() -> stockDomainService.increaseStock(anyLong()));

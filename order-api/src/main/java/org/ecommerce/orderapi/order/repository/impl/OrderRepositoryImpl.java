@@ -4,7 +4,6 @@ import static org.ecommerce.orderapi.order.entity.QOrder.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.repository.OrderCustomRepository;
@@ -53,19 +52,19 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	}
 
 	@Override
-	public Optional<Order> findOrderByIdAndUserId(
+	public Order findOrderByIdAndUserId(
 			final Integer userId,
 			final Long orderId
 	) {
-		return Optional.ofNullable(jpaQueryFactory.selectFrom(order)
+		return jpaQueryFactory.selectFrom(order)
 				.leftJoin(order.orderItems).fetchJoin()
 				.where(order.id.eq(orderId),
 						userIdEq(userId))
-				.fetchFirst());
+				.fetchFirst();
 	}
 
 	@Override
-	public Optional<Order> findOrderById(Long orderId) {
+	public Order findOrderById(Long orderId) {
 		return findOrderByIdAndUserId(null, orderId);
 	}
 

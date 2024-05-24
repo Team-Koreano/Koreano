@@ -337,7 +337,7 @@ public class OrderDomainServiceTest {
 		));
 
 		given(orderRepository.findOrderByIdAndUserId(anyInt(), anyLong()))
-				.willReturn(Optional.of(order));
+				.willReturn(order);
 		int previousSize = orderItem.getOrderStatusHistories().size();
 
 		// when
@@ -406,7 +406,7 @@ public class OrderDomainServiceTest {
 				List.of(orderItem)
 		));
 		given(orderRepository.findOrderByIdAndUserId(anyInt(), anyLong()))
-				.willReturn(Optional.of(order));
+				.willReturn(order);
 		// when
 		CustomException exception = assertThrows(CustomException.class,
 				() -> orderDomainService.cancelOrder(userId, orderId, orderItemId));
@@ -467,7 +467,7 @@ public class OrderDomainServiceTest {
 				List.of(orderItem)
 		));
 		given(orderRepository.findOrderByIdAndUserId(anyInt(), anyLong()))
-				.willReturn(Optional.of(order));
+				.willReturn(order);
 		// when
 		CustomException exception = assertThrows(CustomException.class,
 				() -> orderDomainService.cancelOrder(userId, orderId, orderItemId));

@@ -6,7 +6,6 @@ import static org.ecommerce.orderapi.order.entity.QOrderItem.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.repository.OrderItemCustomRepository;
@@ -30,13 +29,11 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<OrderItem> findOrderItemById(final Long orderItemId) {
-		return Optional.ofNullable(
-				jpaQueryFactory.selectFrom(orderItem)
-						.leftJoin(orderItem.orderStatusHistories).fetchJoin()
-						.where(orderItem.id.eq(orderItemId))
-						.fetchFirst()
-		);
+	public OrderItem findOrderItemById(final Long orderItemId) {
+		return jpaQueryFactory.selectFrom(orderItem)
+				.leftJoin(orderItem.orderStatusHistories).fetchJoin()
+				.where(orderItem.id.eq(orderItemId))
+				.fetchFirst();
 	}
 
 	@Override

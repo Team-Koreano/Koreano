@@ -118,8 +118,7 @@ public class StockDomainService {
 	 */
 	@VisibleForTesting
 	public List<OrderItem> getOrderItems(final Long orderId) {
-		final Order order = orderRepository.findOrderById(orderId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
+		Order order = getOrder(orderId);
 		if (!order.isStockOperationProcessableOrder()) {
 			throw new CustomException(MUST_ORDER_ITEM_STATUS_APPROVE_TO_DECREASE_STOCK);
 		}
@@ -175,8 +174,11 @@ public class StockDomainService {
 	 */
 	@VisibleForTesting
 	public Stock getStock(final Long orderItemId) {
-		return stockRepository.findStockByOrderItemId(orderItemId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_STOCK));
+		Stock stock = stockRepository.findStockByOrderItemId(orderItemId);
+		if (stock == null) {
+			throw new CustomException(NOT_FOUND_STOCK);
+		}
+		return stock;
 	}
 
 	/**
@@ -187,7 +189,19 @@ public class StockDomainService {
 	 * @return - 주문 항목
 	 */
 	public OrderItem getOrderItem(final Long orderItemId) {
-		return orderItemRepository.findOrderItemById(orderItemId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ITEM));
+		OrderItem orderItem = orderItemRepository.findOrderItemById(orderItemId);
+		if (orderItem == null) {
+			throw new CustomException(NOT_FOUND_ORDER_ITEM);
+		}
+		return orderItem;
+	}
+
+	@VisibleForTesting
+	public Order getOrder(final Long orderId) {
+		final Order order = orderRepository.findOrderById(orderId);
+		if (order == null) {
+			throw new CustomException(NOT_FOUND_ORDER_ID);
+		}
+		return order;
 	}
 }

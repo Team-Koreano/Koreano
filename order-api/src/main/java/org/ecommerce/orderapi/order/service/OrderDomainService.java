@@ -50,7 +50,7 @@ public class OrderDomainService {
 	 * 주문을 생성하는 메소드입니다.
 	 * @author ${Juwon}
 	 *
-	 * @param userId- 주문
+	 * @param userId-  주문
 	 * @param request- 주문 요청 정보
 	 *
 	 */
@@ -83,9 +83,8 @@ public class OrderDomainService {
 			final Long orderId,
 			final Long orderItemId
 	) {
-		final Order order = orderRepository.findOrderByIdAndUserId(userId, orderId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID));
-
+		final Order order = orderRepository.findOrderByIdAndUserId(userId, orderId);
+		validateOrder(order);
 		// TODO 결제 취소 Kafka Event 추가
 		applicationEventPublisher.publishEvent(new OrderCanceledEvent(orderItemId));
 		return OrderMapper.INSTANCE.toDto(
@@ -101,9 +100,9 @@ public class OrderDomainService {
 	 * @param orderItemIds- 주문 항목 번호 Set
 	 */
 	public void completeOrder(final Long orderId, final Set<Long> orderItemIds) {
-		orderRepository.findOrderById(orderId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_ORDER_ID))
-				.complete(orderItemIds);
+		Order order = orderRepository.findOrderById(orderId);
+		validateOrder(order);
+		order.complete(orderItemIds);
 	}
 
 	@VisibleForTesting
@@ -260,5 +259,12 @@ public class OrderDomainService {
 					}
 				}
 		);
+	}
+
+	@VisibleForTesting
+	public void validateOrder(final Order order) {
+		if (order == null) {
+			throw new CustomException(NOT_FOUND_ORDER_ID);
+		}
 	}
 }
