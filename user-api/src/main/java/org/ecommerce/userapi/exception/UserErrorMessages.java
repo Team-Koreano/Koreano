@@ -15,4 +15,5 @@ public class UserErrorMessages {
 	public static final String IsCanNotBeBelowZero = "0이하로 기입할 수 없습니다";
 	public static final String bankNameNotEmpty = "은행명을 기입해주세요";
 	public static final String bankNumberNotBlank = "계좌를 기입해주세요";
+	public static final String IdIsNotNull = "식별값을 입력해주세요";
 }
