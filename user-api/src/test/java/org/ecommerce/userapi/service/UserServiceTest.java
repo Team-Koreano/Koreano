@@ -185,7 +185,7 @@ class UserServiceTest {
 			);
 
 			when(userRepository.save(any(Users.class))).thenReturn(entity);
-			when(userServiceClient.createBeanPay(any(BeanPayDto.Request.CreateBeanPay.class))).thenReturn(
+			when(userServiceClient.createBeanPay()).thenReturn(
 				new BeanPayDto(
 					1,
 					entity.getId(),

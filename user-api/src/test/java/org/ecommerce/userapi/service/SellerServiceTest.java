@@ -124,7 +124,7 @@ class SellerServiceTest {
 			);
 
 			when(sellerRepository.save(any(Seller.class))).thenReturn(entity);
-			when(sellerServiceClient.createBeanPay(any(BeanPayDto.Request.CreateBeanPay.class))).thenReturn(
+			when(sellerServiceClient.createBeanPay()).thenReturn(
 				new BeanPayDto(
 					1,
 					entity.getId(),
