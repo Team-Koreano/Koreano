@@ -1,6 +1,7 @@
 package org.ecommerce.productmanagementapi.dto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
@@ -23,6 +24,12 @@ public interface ProductManagementMapper {
 		} else {
 			return mapDefaultProduct(dto);
 		}
+	}
+
+	default List<ProductManagementDto.Response> dtosToResponses(List<ProductManagementDto> productManagementDtos) {
+		return productManagementDtos.stream()
+			.map(this::toResponse)
+			.collect(Collectors.toList());
 	}
 
 	@Named("mapBeanProduct")
@@ -60,9 +67,8 @@ public interface ProductManagementMapper {
 			dto.getInformation(),
 			dto.getCreateDatetime(),
 			dto.getImages(),
-			dto.getSize()
+			dto.getSize(),
+			dto.getCapacity()
 		);
 	}
-
-	List<ProductManagementDto.Response> dtosToResponses(List<ProductManagementDto> productManagementDtos);
 }

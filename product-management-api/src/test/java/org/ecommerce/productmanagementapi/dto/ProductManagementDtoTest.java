@@ -32,7 +32,8 @@ class ProductManagementDtoTest {
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
 				false,
-				"20 * 50"
+				"20 * 50",
+				"500ml"
 			);
 	}
 }
