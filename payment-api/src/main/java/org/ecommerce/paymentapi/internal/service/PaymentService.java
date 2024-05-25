@@ -16,10 +16,8 @@ import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
-import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
-import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
@@ -38,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final BeanPayRepository beanPayRepository;
-	private final PaymentDetailRepository paymentDetailRepository;
 
 	/**
 	 결제 진행
@@ -122,15 +119,6 @@ public class PaymentService {
 			payment.cancelPaymentDetail(paymentCancel.orderItemId(), paymentCancel.cancelReason())
 		);
 	}
-
-	private PaymentDetail getPaymentDetail(final Long orderItemId) throws CustomException {
-		PaymentDetail paymentDetail = paymentDetailRepository.findPaymentDetailByOrderItemId(
-			orderItemId);
-		if(paymentDetail == null)
-			throw new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID);
-		return paymentDetail;
-	}
-
 
 	private Payment getPayment(final Long orderId) {
 		Payment payment = paymentRepository.findByOrderId(orderId);
