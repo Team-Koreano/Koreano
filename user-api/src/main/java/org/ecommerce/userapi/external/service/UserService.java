@@ -26,6 +26,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +51,7 @@ public class UserService {
 	private final RedisProvider redisProvider;
 
 	private final UserServiceClient userServiceClient;
-	//TODO : 유저에 관한 RUD API 개발
+
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
 
@@ -71,8 +73,7 @@ public class UserService {
 			passwordEncoder.encode(register.password()),
 			register.gender(), register.age(), register.phoneNumber()));
 
-		users.registerBeanPayId(userServiceClient.createBeanPay(
-			new BeanPayDto.Request.CreateBeanPay(users.getId(), Role.USER)).getId());
+		users.registerBeanPayId(userServiceClient.createBeanPay().getId());
 
 		return UserMapper.INSTANCE.userToDto(users);
 	}
@@ -89,13 +90,13 @@ public class UserService {
 	 */
 	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
 
-		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email())
-			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email());
 
-		if (!user.isValidStatus()) {
+		if (user == null || !checkIsMatchedPassword(login.password(), user.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		if (!user.isValidStatus())
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
-		}
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
@@ -131,8 +132,10 @@ public class UserService {
 	 * @return AddressDto
 	 */
 	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
-		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (users == null)
+			throw new CustomException(UserErrorCode.NOT_FOUND_USER);
 
 		final Address address = Address.ofRegister(users, register.name(), register.postAddress(), register.detail());
 
@@ -148,8 +151,11 @@ public class UserService {
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
 	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (users == null)
+			throw new CustomException(UserErrorCode.NOT_FOUND_USER);
 
 		final UsersAccount account = UsersAccount.ofRegister(users, register.number(), register.bankName());
 
@@ -171,9 +177,8 @@ public class UserService {
 		final String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
 			jwtProvider.getRoll(bearerToken));
 
-		if (!redisProvider.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey))
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
-		}
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
@@ -192,22 +197,27 @@ public class UserService {
 	 * @return void
 	 */
 	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.filter(users -> passwordEncoder.matches(withdrawal.password(), users.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
-		if (!user.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
+		if (users == null || !checkIsMatchedPassword(withdrawal.password(), users.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		userServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(users.getBeanPayId()));
+
+		if (!users.isValidUser(withdrawal.email(), withdrawal.phoneNumber()))
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
-		}
 
-		user.withdrawal();
-		userServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(user.getBeanPayId()));
+		users.withdrawal();
 
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
-		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
+		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber))
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
-		}
+	}
+
+	@VisibleForTesting
+	public boolean checkIsMatchedPassword(String requestPassword, String userPassword) {
+		return passwordEncoder.matches(requestPassword, userPassword);
 	}
 }

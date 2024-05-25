@@ -2,8 +2,6 @@ package org.ecommerce.userapi.repository.impl;
 
 import static org.ecommerce.userapi.entity.QSeller.*;
 
-import java.util.Optional;
-
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.repository.SellerCustomRepository;
 import org.springframework.stereotype.Repository;
@@ -29,22 +27,18 @@ public class SellerRepositoryImpl implements SellerCustomRepository {
 	}
 
 	@Override
-	public Optional<Seller> findSellerByEmailAndIsDeletedIsFalse(String email) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(seller)
-				.where(seller.email.eq(email),
-					seller.isDeleted.eq(false))
-				.fetchFirst()
-		);
+	public Seller findSellerByEmailAndIsDeletedIsFalse(String email) {
+		return jpaQueryFactory.selectFrom(seller)
+			.where(seller.email.eq(email),
+				seller.isDeleted.eq(false))
+			.fetchFirst();
 	}
 
 	@Override
-	public Optional<Seller> findSellerByIdAndIsDeletedIsFalse(Integer sellerId) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(seller)
-				.where(seller.id.eq(sellerId),
-					seller.isDeleted.eq(false))
-				.fetchFirst()
-		);
+	public Seller findSellerByIdAndIsDeletedIsFalse(Integer sellerId) {
+		return jpaQueryFactory.selectFrom(seller)
+			.where(seller.id.eq(sellerId),
+				seller.isDeleted.eq(false))
+			.fetchFirst();
 	}
 }

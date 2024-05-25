@@ -2,8 +2,6 @@ package org.ecommerce.userapi.repository.impl;
 
 import static org.ecommerce.userapi.entity.QUsers.*;
 
-import java.util.Optional;
-
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.repository.UserCustomRepository;
 import org.springframework.stereotype.Repository;
@@ -29,22 +27,18 @@ public class UserRepositoryImpl implements UserCustomRepository {
 	}
 
 	@Override
-	public Optional<Users> findUsersByEmailAndIsDeletedIsFalse(final String email) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(users)
-				.where(users.email.eq(email)
-					, users.isDeleted.isFalse())
-				.fetchFirst()
-		);
+	public Users findUsersByEmailAndIsDeletedIsFalse(final String email) {
+		return jpaQueryFactory.selectFrom(users)
+			.where(users.email.eq(email)
+				, users.isDeleted.isFalse())
+			.fetchFirst();
 	}
 
 	@Override
-	public Optional<Users> findUsersByIdAndIsDeletedIsFalse(Integer userId) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(users)
-				.where(users.id.eq(userId)
-					, users.isDeleted.isFalse())
-				.fetchFirst()
-		);
+	public Users findUsersByIdAndIsDeletedIsFalse(Integer userId) {
+		return jpaQueryFactory.selectFrom(users)
+			.where(users.id.eq(userId)
+				, users.isDeleted.isFalse())
+			.fetchFirst();
 	}
 }
