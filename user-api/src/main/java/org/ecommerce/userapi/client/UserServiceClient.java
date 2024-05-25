@@ -12,7 +12,6 @@ public interface UserServiceClient {
 	//beanPay 생성
 	@PostMapping()
 	BeanPayDto createBeanPay(
-		@RequestBody final BeanPayDto.Request.CreateBeanPay createBeanPay
 	);
 
 	@DeleteMapping()

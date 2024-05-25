@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface SellerServiceClient {
 	//beanPay 생성
 	@PostMapping()
-	BeanPayDto createBeanPay(
-		@RequestBody final BeanPayDto.Request.CreateBeanPay createBeanPay
-	);
+	BeanPayDto createBeanPay();
 
 	@DeleteMapping()
 	BeanPayDto deleteBeanPay(
