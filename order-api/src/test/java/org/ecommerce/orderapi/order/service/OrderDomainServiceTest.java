@@ -14,18 +14,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.order.client.BucketServiceClient;
 import org.ecommerce.orderapi.order.client.PaymentServiceClient;
 import org.ecommerce.orderapi.order.client.ProductServiceClient;
-import org.ecommerce.orderapi.order.dto.BucketDto;
-import org.ecommerce.orderapi.order.dto.OrderDto;
-import org.ecommerce.orderapi.order.dto.PaymentDetailDto;
-import org.ecommerce.orderapi.order.dto.PaymentDto;
-import org.ecommerce.orderapi.order.dto.ProductDto;
+import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
+import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
+import org.ecommerce.orderapi.order.dto.response.BucketResponse;
+import org.ecommerce.orderapi.order.dto.response.PaymentDetailResponse;
+import org.ecommerce.orderapi.order.dto.response.PaymentResponse;
+import org.ecommerce.orderapi.order.dto.response.ProductResponse;
 import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.entity.OrderStatusHistory;
@@ -70,7 +70,7 @@ public class OrderDomainServiceTest {
 	void 주문_생성() {
 		// given
 		final Integer userId = 1;
-		final OrderDto.Request.Create request = new OrderDto.Request.Create(
+		final CreateOrderRequest request = new CreateOrderRequest(
 				List.of(1L, 2L),
 				"receiveName",
 				"010-777-7777",
@@ -94,8 +94,8 @@ public class OrderDomainServiceTest {
 						null
 				)
 		);
-		final List<BucketDto.Response> bucketServiceResponse = List.of(
-				new BucketDto.Response(
+		final List<BucketResponse> bucketServiceResponse = List.of(
+				new BucketResponse(
 						1L,
 						1,
 						"seller1",
@@ -103,7 +103,7 @@ public class OrderDomainServiceTest {
 						1,
 						LocalDate.of(2024, 5, 1)
 				),
-				new BucketDto.Response(
+				new BucketResponse(
 						2L,
 						1,
 						"seller2",
@@ -112,8 +112,8 @@ public class OrderDomainServiceTest {
 						LocalDate.of(2024, 5, 1)
 				)
 		);
-		final List<ProductDto.Response> productServiceResponse = List.of(
-				new ProductDto.Response(
+		final List<ProductResponse> productServiceResponse = List.of(
+				new ProductResponse(
 						101,
 						"에디오피아 아가체프",
 						1000,
@@ -121,7 +121,7 @@ public class OrderDomainServiceTest {
 						"seller1",
 						AVAILABLE
 				),
-				new ProductDto.Response(
+				new ProductResponse(
 						102,
 						"과테말라 안티구아",
 						2000,
@@ -130,12 +130,12 @@ public class OrderDomainServiceTest {
 						AVAILABLE
 				)
 		);
-		PaymentDto.Response paymentServiceResponse = new PaymentDto.Response(
+		PaymentResponse paymentServiceResponse = new PaymentResponse(
 				1L,
 				50000,
 				LocalDateTime.of(2024, 5, 22, 0, 0),
 				List.of(
-						new PaymentDetailDto.Response(
+						new PaymentDetailResponse(
 								UUID.randomUUID(),
 								1L,
 								0,
@@ -143,7 +143,7 @@ public class OrderDomainServiceTest {
 								10000,
 								LocalDateTime.of(2024, 5, 22, 0, 0)
 						),
-						new PaymentDetailDto.Response(
+						new PaymentDetailResponse(
 								UUID.randomUUID(),
 								2L,
 								0,
@@ -236,7 +236,8 @@ public class OrderDomainServiceTest {
 				.willReturn(order);
 		ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 		// when
-		OrderDto orderDto = orderDomainService.createOrder(userId, request);
+		OrderDtoWithOrderItemDtoList orderDto = orderDomainService.createOrder(userId,
+				request);
 
 		// then
 		verify(orderRepository, times(1)).save(orderCaptor.capture());
@@ -247,7 +248,7 @@ public class OrderDomainServiceTest {
 		assertEquals(OPEN, savedOrder.getStatus());
 		assertEquals(OPEN, savedOrder.getOrderItems().get(0).getStatus());
 		assertEquals(OPEN, savedOrder.getOrderItems().get(1).getStatus());
-		assertEquals(APPROVE, orderDto.getStatus());
+		assertEquals(APPROVE, orderDto.status());
 	}
 
 	@Test

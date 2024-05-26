@@ -9,15 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.orderapi.order.dto.OrderDto;
+import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
+import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
 import org.ecommerce.orderapi.order.entity.enumerated.OrderStatusReason;
 import org.ecommerce.orderapi.order.external.controller.OrderController;
-import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.order.service.OrderDomainService;
+import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class OrderControllerTest {
 	@Test
 	void 주문하기() throws Exception {
 		// given
-		OrderDto orderDto = new OrderDto(
+		OrderDtoWithOrderItemDtoList orderDto = new OrderDtoWithOrderItemDtoList(
 				1L,
 				1,
 				"userName",
@@ -66,9 +66,9 @@ public class OrderControllerTest {
 				LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
 				LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
 				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
-				new ArrayList<>()
+				List.of()
 		);
-		when(orderDomainService.createOrder(anyInt(), any(OrderDto.Request.Create.class)))
+		when(orderDomainService.createOrder(anyInt(), any(CreateOrderRequest.class)))
 				.thenReturn(orderDto);
 
 		// when
@@ -76,7 +76,7 @@ public class OrderControllerTest {
 		mockMvc.perform(post("/api/external/orders/v1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(
-								new OrderDto.Request.Create(
+								new CreateOrderRequest(
 										List.of(1L, 2L, 3L),
 										"receiveName",
 										"010-777-7777",
@@ -86,25 +86,25 @@ public class OrderControllerTest {
 								)
 						)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.id").value(orderDto.getId()))
-				.andExpect(jsonPath("$.result.userId").value(orderDto.getUserId()))
+				.andExpect(jsonPath("$.result.id").value(orderDto.id()))
+				.andExpect(jsonPath("$.result.userId").value(orderDto.userId()))
 				.andExpect(
-						jsonPath("$.result.receiveName").value(orderDto.getReceiveName()))
+						jsonPath("$.result.receiveName").value(orderDto.receiveName()))
 				.andExpect(
-						jsonPath("$.result.phoneNumber").value(orderDto.getPhoneNumber()))
-				.andExpect(jsonPath("$.result.address1").value(orderDto.getAddress1()))
-				.andExpect(jsonPath("$.result.address2").value(orderDto.getAddress2()))
+						jsonPath("$.result.phoneNumber").value(orderDto.phoneNumber()))
+				.andExpect(jsonPath("$.result.address1").value(orderDto.address1()))
+				.andExpect(jsonPath("$.result.address2").value(orderDto.address2()))
 				.andExpect(jsonPath("$.result.deliveryComment").value(
-						orderDto.getDeliveryComment()))
+						orderDto.deliveryComment()))
 				.andExpect(jsonPath("$.result.totalPaymentAmount").value(
-						orderDto.getTotalPaymentAmount()))
+						orderDto.totalPaymentAmount()))
 				.andDo(print());
 	}
 
 	@Test
 	void 필수정보_없이_주문하기() throws Exception {
 		// given
-		OrderDto.Request.Create placeRequest = new OrderDto.Request.Create(
+		CreateOrderRequest request = new CreateOrderRequest(
 				List.of(1L, 2L, 3L),
 				"receiveName",
 				"010-777-7777",
@@ -117,7 +117,7 @@ public class OrderControllerTest {
 		// then
 		mockMvc.perform(post("/api/external/orders/v1")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(placeRequest)))
+						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
 				.andExpect(jsonPath("$.result").value(ADDRESS1_NOT_BLANK));
@@ -129,8 +129,8 @@ public class OrderControllerTest {
 		final Integer userId = 1;
 		final Integer year = null;
 		final Integer pageNumber = 1;
-		List<OrderDto> orderDtos = List.of(
-				new OrderDto(
+		List<OrderDtoWithOrderItemDtoList> orderDtoWithOrderItemDtoList = List.of(
+				new OrderDtoWithOrderItemDtoList(
 						1L,
 						1,
 						"userName",
@@ -152,6 +152,7 @@ public class OrderControllerTest {
 										10000,
 										1,
 										10000,
+										0,
 										10000,
 										1,
 										"seller1",
@@ -159,33 +160,33 @@ public class OrderControllerTest {
 										null,
 										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
-										)
+								)
 						)
 				)
 		);
 		given(orderReadService.getOrders(userId, year, pageNumber))
-				.willReturn(orderDtos);
+				.willReturn(orderDtoWithOrderItemDtoList);
 
 		// when
 		// then
-		OrderDto orderDto = orderDtos.get(0);
-		OrderItemDto orderItemDto = orderDto.getOrderItemDtos().get(0);
+		OrderDtoWithOrderItemDtoList orderDto = orderDtoWithOrderItemDtoList.get(0);
+		OrderItemDto orderItemDto = orderDto.orderItemDtoList().get(0);
 		mockMvc.perform(get("/api/external/orders/v1?year=&pageNumber=1"))
 				.andDo(print())
-				.andExpect(jsonPath("$.result.[0].id").value(orderDto.getId()))
-				.andExpect(jsonPath("$.result.[0].userId").value(orderDto.getUserId()))
+				.andExpect(jsonPath("$.result.[0].id").value(orderDto.id()))
+				.andExpect(jsonPath("$.result.[0].userId").value(orderDto.userId()))
 				.andExpect(jsonPath("$.result.[0].receiveName")
-						.value(orderDto.getReceiveName()))
+						.value(orderDto.receiveName()))
 				.andExpect(jsonPath("$.result.[0].address1")
-						.value(orderDto.getAddress1()))
+						.value(orderDto.address1()))
 				.andExpect(jsonPath("$.result.[0].address2")
-						.value(orderDto.getAddress2()))
+						.value(orderDto.address2()))
 				.andExpect(jsonPath("$.result.[0].deliveryComment")
-						.value(orderDto.getDeliveryComment()))
+						.value(orderDto.deliveryComment()))
 				.andExpect(jsonPath("$.result.[0].orderDatetime")
-						.value(orderDto.getOrderDatetime().toString()))
+						.value(orderDto.orderDatetime().toString()))
 				.andExpect(jsonPath("$.result.[0].orderItemResponses[0].status")
-						.value(orderItemDto.getStatus().toString()))
+						.value(orderItemDto.status().toString()))
 				.andExpect(status().isOk());
 
 	}
@@ -200,6 +201,7 @@ public class OrderControllerTest {
 				10000,
 				1,
 				10000,
+				0,
 				10000,
 				1,
 				"sellerName1",
@@ -208,7 +210,7 @@ public class OrderControllerTest {
 				LocalDateTime.of(2024, 5, 8, 0, 0),
 				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
 		);
-		OrderDto orderDto = new OrderDto(
+		OrderDtoWithOrderItemDtoList orderDto = new OrderDtoWithOrderItemDtoList(
 				1L,
 				1,
 				"userName",
@@ -231,30 +233,30 @@ public class OrderControllerTest {
 		// then
 		mockMvc.perform(delete("/api/external/orders/v1/1/orderItems/1"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.id").value(orderItemDto.getId()))
+				.andExpect(jsonPath("$.result.id").value(orderItemDto.id()))
 				.andExpect(
 						jsonPath("$.result.orderItemResponses[0].productId").value(
-								orderItemDto.getProductId()))
+								orderItemDto.productId()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].productName").value(
-						orderItemDto.getProductName()))
+						orderItemDto.productName()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].price").value(
-						orderItemDto.getPrice()))
+						orderItemDto.price()))
 				.andExpect(
 						jsonPath("$.result.orderItemResponses[0].quantity").value(
-								orderItemDto.getQuantity()))
+								orderItemDto.quantity()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].totalPrice").value(
-						orderItemDto.getTotalPrice()))
+						orderItemDto.totalPrice()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].paymentAmount").value(
-						orderItemDto.getPaymentAmount()))
+						orderItemDto.paymentAmount()))
 				.andExpect(
 						jsonPath("$.result.orderItemResponses[0].sellerId").value(
-								orderItemDto.getSellerId()))
+								orderItemDto.sellerId()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].sellerName").value(
-						orderItemDto.getSellerName()))
+						orderItemDto.sellerName()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].status").value(
-						orderItemDto.getStatus().toString()))
+						orderItemDto.status().toString()))
 				.andExpect(jsonPath("$.result.orderItemResponses[0].statusReason").value(
-						orderItemDto.getStatusReason().toString()))
+						orderItemDto.statusReason().toString()))
 				.andDo(print());
 	}
 

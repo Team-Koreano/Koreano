@@ -4,8 +4,8 @@ import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
 
 import java.util.List;
 
-import org.ecommerce.orderapi.order.dto.OrderItemDto;
-import org.ecommerce.orderapi.order.dto.OrderItemStatusHistoryDto;
+import org.ecommerce.orderapi.order.dto.OrderItemDtoWithOrderDto;
+import org.ecommerce.orderapi.order.dto.OrderItemDtoWithOrderStatusHistoryDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.repository.OrderItemRepository;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +28,9 @@ public class OrderItemReadService {
 	 * @param orderItemId- 주문 항목 번호
 	 * @return - 주문 항목
 	 */
-	public OrderItemStatusHistoryDto getOrderItemStatusHistories(final Long orderItemId) {
+	public OrderItemDtoWithOrderStatusHistoryDtoList getOrderItemStatusHistories(
+			final Long orderItemId
+	) {
 		return OrderMapper.INSTANCE.toOrderItemStatusHistoryDto(
 				orderItemRepository.findOrderItemById(orderItemId)
 		);
@@ -48,7 +50,7 @@ public class OrderItemReadService {
 	 * @param pageNumber- 페이지 번호
 	 * @return - 주문 항목 리스트
 	 */
-	public List<OrderItemDto> getOrderItems(
+	public List<OrderItemDtoWithOrderDto> getOrderItems(
 			final Integer sellerId,
 			final Integer month,
 			final Integer pageNumber
@@ -56,7 +58,7 @@ public class OrderItemReadService {
 		return orderItemRepository.findOrderItemsBySellerIdAndMonth(
 						sellerId, month, PageRequest.of(pageNumber, ORDER_ITEM_INQUIRY_PAGE_SIZE))
 				.stream()
-				.map(OrderMapper.INSTANCE::toDto)
+				.map(OrderMapper.INSTANCE::toOrderItemDtoWithOrderDto)
 				.toList();
 	}
 }

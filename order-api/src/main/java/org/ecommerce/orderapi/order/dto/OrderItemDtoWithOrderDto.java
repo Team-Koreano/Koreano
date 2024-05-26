@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.ecommerce.orderapi.order.entity.enumerated.OrderStatus;
 import org.ecommerce.orderapi.order.entity.enumerated.OrderStatusReason;
 
-public record OrderItemDto(
+public record OrderItemDtoWithOrderDto(
 		Long id,
 		Integer productId,
 		String productName,
@@ -19,6 +19,7 @@ public record OrderItemDto(
 		OrderStatus status,
 		OrderStatusReason statusReason,
 		LocalDateTime statusDatetime,
-		LocalDateTime paymentDatetime
+		LocalDateTime paymentDatetime,
+		OrderDto orderDto
 ) {
 }

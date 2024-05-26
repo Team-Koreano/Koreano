@@ -3,7 +3,7 @@ package org.ecommerce.orderapi.order.client;
 import java.util.List;
 
 import org.ecommerce.common.config.FeignConfig;
-import org.ecommerce.orderapi.order.dto.ProductDto;
+import org.ecommerce.orderapi.order.dto.response.ProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ProductServiceClient {
 
 	@GetMapping
-	List<ProductDto.Response> getProducts(
+	List<ProductResponse> getProducts(
 			@RequestParam("productIds") final List<Integer> productIds
 	);
 }

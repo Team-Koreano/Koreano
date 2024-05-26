@@ -4,7 +4,7 @@ import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
 
 import java.util.List;
 
-import org.ecommerce.orderapi.order.dto.OrderDto;
+import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderReadService {
 
 	private final OrderRepository orderRepository;
@@ -32,8 +33,7 @@ public class OrderReadService {
 	 * @param pageNumber- 페이지 번호
 	 * @return - 주문 리스트
 	 */
-	@Transactional(readOnly = true)
-	public List<OrderDto> getOrders(
+	public List<OrderDtoWithOrderItemDtoList> getOrders(
 			final Integer userId,
 			final Integer year,
 			final Integer pageNumber
@@ -41,7 +41,7 @@ public class OrderReadService {
 		return orderRepository.findOrdersByUserId(
 						userId, year, PageRequest.of(pageNumber, ORDER_INQUIRY_PAGE_SIZE))
 				.stream()
-				.map(OrderMapper.INSTANCE::toDto)
+				.map(OrderMapper.INSTANCE::toOrderDtoWithOrderItemDtoList)
 				.toList();
 	}
 }

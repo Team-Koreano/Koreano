@@ -12,10 +12,11 @@ import org.ecommerce.orderapi.order.client.PaymentServiceClient;
 import org.ecommerce.orderapi.order.client.ProductServiceClient;
 import org.ecommerce.orderapi.order.dto.BucketMapper;
 import org.ecommerce.orderapi.order.dto.BucketSummary;
-import org.ecommerce.orderapi.order.dto.OrderDto;
+import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.PaymentMapper;
 import org.ecommerce.orderapi.order.dto.ProductMapper;
+import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
 import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.entity.Payment;
 import org.ecommerce.orderapi.order.entity.Product;
@@ -54,9 +55,9 @@ public class OrderDomainService {
 	 * @param request- 주문 요청 정보
 	 *
 	 */
-	public OrderDto createOrder(
+	public OrderDtoWithOrderItemDtoList createOrder(
 			final Integer userId,
-			final OrderDto.Request.Create request
+			final CreateOrderRequest request
 	) {
 		final BucketSummary bucketSummary = getBucketSummary(userId, request.bucketIds());
 		final List<Product> products = getProducts(bucketSummary.getProductIds());
@@ -67,7 +68,7 @@ public class OrderDomainService {
 
 		paymentOrder(order);
 		applicationEventPublisher.publishEvent(new OrderCreatedEvent(order.getId()));
-		return OrderMapper.INSTANCE.toDto(order);
+		return OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(order);
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class OrderDomainService {
 	 * @param orderId- 주문 번호
 	 * @param orderItemId- 주문 항목 번호
 	 */
-	public OrderDto cancelOrder(
+	public OrderDtoWithOrderItemDtoList cancelOrder(
 			final Integer userId,
 			final Long orderId,
 			final Long orderItemId
@@ -87,7 +88,7 @@ public class OrderDomainService {
 		validateOrder(order);
 		// TODO 결제 취소 Kafka Event 추가
 		applicationEventPublisher.publishEvent(new OrderCanceledEvent(orderItemId));
-		return OrderMapper.INSTANCE.toDto(
+		return OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(
 				order.cancelItem(orderItemId)
 		);
 	}
@@ -108,7 +109,7 @@ public class OrderDomainService {
 	@VisibleForTesting
 	public Order saveOrder(
 			final Integer userId,
-			final OrderDto.Request.Create request,
+			final CreateOrderRequest request,
 			final List<Product> products,
 			final Map<Integer, Integer> quantities
 	) {
@@ -205,15 +206,15 @@ public class OrderDomainService {
 	public void paymentOrder(final Order order) {
 		Payment payment = PaymentMapper.INSTANCE.paymentResponseToEntity(
 				paymentServiceClient.paymentOrder(
-						OrderMapper.INSTANCE.toDto(order)
+						OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(order)
 				)
 				// (POST MAN CODE)
-				// new PaymentDto.Response(
+				// new PaymentResponse(
 				// 		1L,
 				// 		50000,
 				// 		LocalDateTime.now(),
 				// 		List.of(
-				// 				new PaymentDetailDto.Response(
+				// 				new PaymentDetailResponse(
 				// 						UUID.randomUUID(),
 				// 						1L,
 				// 						0,
@@ -221,7 +222,7 @@ public class OrderDomainService {
 				// 						10000,
 				// 						LocalDateTime.now()
 				// 				),
-				// 				new PaymentDetailDto.Response(
+				// 				new PaymentDetailResponse(
 				// 						UUID.randomUUID(),
 				// 						2L,
 				// 						0,
