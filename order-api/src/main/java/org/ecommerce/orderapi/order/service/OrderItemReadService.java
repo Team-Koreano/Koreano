@@ -1,16 +1,17 @@
 package org.ecommerce.orderapi.order.service;
 
-import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
-
 import java.util.List;
 
 import org.ecommerce.orderapi.order.dto.OrderItemDtoWithOrderDto;
 import org.ecommerce.orderapi.order.dto.OrderItemDtoWithOrderStatusHistoryDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
+import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.repository.OrderItemRepository;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,18 +48,36 @@ public class OrderItemReadService {
 	 *
 	 * @param sellerId- 판매자 번호
 	 * @param month- 조회 기간
-	 * @param pageNumber- 페이지 번호
+	 * @param pageable- 페이징 정보
 	 * @return - 주문 항목 리스트
 	 */
 	public List<OrderItemDtoWithOrderDto> getOrderItems(
 			final Integer sellerId,
 			final Integer month,
-			final Integer pageNumber
+			final Pageable pageable
 	) {
-		return orderItemRepository.findOrderItemsBySellerIdAndMonth(
-						sellerId, month, PageRequest.of(pageNumber, ORDER_ITEM_INQUIRY_PAGE_SIZE))
-				.stream()
+		return getPageContent(
+				orderItemRepository.findOrderItemsBySellerIdAndMonth(sellerId, month),
+				pageable).stream()
 				.map(OrderMapper.INSTANCE::toOrderItemDtoWithOrderDto)
 				.toList();
+	}
+
+	/**
+	 * 주문 항목 리스트 페이징 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orderItems- 주문 항목 리스트
+	 * @param pageable- 페이징 정보
+	 * @return - 주문 항목 리스트
+	 */
+	@VisibleForTesting
+	public List<OrderItem> getPageContent(
+			final List<OrderItem> orderItems,
+			final Pageable pageable
+	) {
+		int start = (int)pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), orderItems.size());
+		return orderItems.subList(start, end);
 	}
 }

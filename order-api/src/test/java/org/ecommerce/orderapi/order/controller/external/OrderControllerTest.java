@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -129,6 +130,7 @@ public class OrderControllerTest {
 		final Integer userId = 1;
 		final Integer year = null;
 		final Integer pageNumber = 1;
+		final Integer pageSize = 5;
 		List<OrderDtoWithOrderItemDtoList> orderDtoWithOrderItemDtoList = List.of(
 				new OrderDtoWithOrderItemDtoList(
 						1L,
@@ -164,7 +166,8 @@ public class OrderControllerTest {
 						)
 				)
 		);
-		given(orderReadService.getOrders(userId, year, pageNumber))
+		given(orderReadService.getOrders(
+				userId, year, PageRequest.of(pageNumber, pageSize)))
 				.willReturn(orderDtoWithOrderItemDtoList);
 
 		// when

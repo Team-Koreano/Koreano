@@ -1,15 +1,16 @@
 package org.ecommerce.orderapi.order.service;
 
-import static org.ecommerce.orderapi.order.util.OrderPolicyConstants.*;
-
 import java.util.List;
 
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
+import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,18 +31,32 @@ public class OrderReadService {
 	 *
 	 * @param userId- 유저 번호
 	 * @param year- 조회 연도
-	 * @param pageNumber- 페이지 번호
+	 * @param pageable- 페이징 정보
 	 * @return - 주문 리스트
 	 */
 	public List<OrderDtoWithOrderItemDtoList> getOrders(
 			final Integer userId,
 			final Integer year,
-			final Integer pageNumber
+			final Pageable pageable
 	) {
-		return orderRepository.findOrdersByUserId(
-						userId, year, PageRequest.of(pageNumber, ORDER_INQUIRY_PAGE_SIZE))
+		return getPageContent(orderRepository.findOrdersByUserId(userId, year), pageable)
 				.stream()
 				.map(OrderMapper.INSTANCE::toOrderDtoWithOrderItemDtoList)
 				.toList();
+	}
+
+	/**
+	 * 주문 리스트 페이징 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param orders- 주문 리스트
+	 * @param pageable- 페이징 정보
+	 * @return - 주문 리스트
+	 */
+	@VisibleForTesting
+	public List<Order> getPageContent(final List<Order> orders, final Pageable pageable) {
+		int start = (int)pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), orders.size());
+		return orders.subList(start, end);
 	}
 }

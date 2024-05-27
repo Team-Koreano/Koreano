@@ -9,13 +9,9 @@ import java.util.List;
 
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.repository.OrderItemCustomRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -37,27 +33,16 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	}
 
 	@Override
-	public Page<OrderItem> findOrderItemsBySellerIdAndMonth(
+	public List<OrderItem> findOrderItemsBySellerIdAndMonth(
 			final Integer sellerId,
-			final Integer month,
-			final Pageable pageable
+			final Integer month
 	) {
-		List<OrderItem> content = jpaQueryFactory
+		return jpaQueryFactory
 				.selectFrom(orderItem)
 				.leftJoin(orderItem.order, order).fetchJoin()
 				.where(orderItem.sellerId.eq(sellerId),
 						generateDateCondition(month))
-				.offset(pageable.getOffset())
-				.limit(pageable.getPageSize())
 				.fetch();
-
-		JPAQuery<Long> countQuery = jpaQueryFactory
-				.select(orderItem.count())
-				.from(orderItem)
-				.leftJoin(orderItem.order, order)
-				.where(orderItem.sellerId.eq(sellerId),
-						generateDateCondition(month));
-		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
 	}
 
 	private BooleanExpression generateDateCondition(final Integer month) {

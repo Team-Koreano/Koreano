@@ -7,6 +7,7 @@ import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemResponse;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemStatusHistoryResponse;
 import org.ecommerce.orderapi.order.service.OrderItemReadService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,12 +29,15 @@ public class OrderItemController {
 	@GetMapping
 	public Response<List<InquiryOrderItemResponse>> getOrderItems(
 			@RequestParam(required = false) final Integer month,
-			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber
+			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(required = false, defaultValue = "10") final Integer pageSize
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderItemReadService.getOrderItems(SELLER_ID, month, pageNumber).stream()
+				orderItemReadService.getOrderItems(
+								SELLER_ID, month, PageRequest.of(pageNumber, pageSize))
+						.stream()
 						.map(OrderMapper.INSTANCE::toInquiryOrderItemResponse)
 						.toList()
 		);

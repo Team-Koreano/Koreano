@@ -11,6 +11,7 @@ import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.stock.dto.StockDto;
 import org.ecommerce.orderapi.stock.dto.StockMapper;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,12 +53,16 @@ public class OrderController {
 	@GetMapping
 	public Response<List<CreateOrderResponse>> getOrders(
 			@RequestParam(required = false) final Integer year,
-			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber
+			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(required = false, defaultValue = "5") final Integer pageSize
+
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderReadService.getOrders(USER_ID, year, pageNumber).stream()
+				orderReadService.getOrders(
+								USER_ID, year, PageRequest.of(pageNumber, pageSize))
+						.stream()
 						.map(OrderMapper.INSTANCE::toCreateOrderResponse)
 						.toList()
 		);
