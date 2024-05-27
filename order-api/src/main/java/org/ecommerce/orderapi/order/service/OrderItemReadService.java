@@ -42,7 +42,6 @@ public class OrderItemReadService {
 	 * <p>
 	 * seller가 주문 항목 리스트를 조회할 때 사용합니다.
 	 * month는 조회할 기간입니다. default 이번 달
-	 * pageSize 10으로 고정인 상태이고 추후 동적으로 변경할 예정입니다.
 	 * <p>
 	 * @author ${Juwon}
 	 *
