@@ -65,7 +65,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				imageDtoList,
-				"http://image1.com"
+				"http://image1.com",
+				"testSize",
+				"testCapacity"
 			);
 
 		String productJsonBody = objectMapper.writeValueAsString(getProduct());

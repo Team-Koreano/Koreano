@@ -213,6 +213,7 @@ class ExternalProductManagementControllerTest {
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
 			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
