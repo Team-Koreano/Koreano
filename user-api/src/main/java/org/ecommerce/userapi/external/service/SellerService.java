@@ -9,6 +9,10 @@ import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.LoginSellerRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
@@ -54,7 +58,7 @@ public class SellerService {
 	 * @param requestSeller 사용자의 생성 정보가 들어간 dto 입니다.
 	 * @return SellerDto
 	 */
-	public SellerDto registerRequest(SellerDto.Request.Register requestSeller) {
+	public SellerDto registerRequest(CreateSellerRequest requestSeller) {
 
 		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(), requestSeller.phoneNumber());
 
@@ -67,7 +71,7 @@ public class SellerService {
 				.getId()
 		);
 
-		return SellerMapper.INSTANCE.sellerToDto(seller);
+		return SellerMapper.INSTANCE.toDto(seller);
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class SellerService {
 	 * @param login - 사용자의 로그인 정보가 들어간 dto 입니다
 	 * @return SellerDto
 	 */
-	public SellerDto loginRequest(SellerDto.Request.Login login, HttpServletResponse response) {
+	public SellerDto loginRequest(LoginSellerRequest login, HttpServletResponse response) {
 
 		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email());
 
@@ -92,7 +96,7 @@ public class SellerService {
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
-		return SellerMapper.INSTANCE.accessTokenToDto(
+		return SellerMapper.INSTANCE.toDto(
 			jwtProvider.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
@@ -117,7 +121,7 @@ public class SellerService {
 	 * @param register - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 * @author 홍종민
 	 */
-	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+	public AccountDto registerAccount(final AuthDetails authDetails, final CreateAccountRequest register) {
 
 		final Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
 
@@ -128,7 +132,7 @@ public class SellerService {
 
 		sellerAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.sellerAccountToDto(account);
+		return AccountMapper.INSTANCE.toDto(account);
 	}
 
 	/**
@@ -152,7 +156,7 @@ public class SellerService {
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return SellerMapper.INSTANCE.accessTokenToDto(
+		return SellerMapper.INSTANCE.toDto(
 			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
@@ -167,7 +171,7 @@ public class SellerService {
 	 * @param withdrawal- 탈퇴 요청 dto
 	 * @return void
 	 */
-	public void withdrawSeller(final SellerDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
+	public void withdrawSeller(final WithdrawalSellerRequest withdrawal, final AuthDetails authDetails) {
 
 		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
 
