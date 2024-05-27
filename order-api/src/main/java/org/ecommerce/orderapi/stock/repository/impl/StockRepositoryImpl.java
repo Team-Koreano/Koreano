@@ -40,7 +40,7 @@ public class StockRepositoryImpl implements StockCustomRepository {
 		return jpaQueryFactory.selectFrom(stock)
 				.leftJoin(stock.stockHistories, stockHistory).fetchJoin()
 				.where(stockHistory.orderItemId.eq(orderItemId))
+				.orderBy(stockHistory.operationDatetime.desc())
 				.fetchFirst();
-
 	}
 }
