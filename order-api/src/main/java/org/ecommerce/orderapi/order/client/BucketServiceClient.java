@@ -3,7 +3,7 @@ package org.ecommerce.orderapi.order.client;
 import java.util.List;
 
 import org.ecommerce.common.config.FeignConfig;
-import org.ecommerce.orderapi.order.dto.response.BucketResponse;
+import org.ecommerce.orderapi.bucket.dto.response.BucketResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

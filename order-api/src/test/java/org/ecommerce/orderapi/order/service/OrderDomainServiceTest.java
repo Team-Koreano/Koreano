@@ -22,7 +22,7 @@ import org.ecommerce.orderapi.order.client.PaymentServiceClient;
 import org.ecommerce.orderapi.order.client.ProductServiceClient;
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
-import org.ecommerce.orderapi.order.dto.response.BucketResponse;
+import org.ecommerce.orderapi.bucket.dto.response.BucketResponse;
 import org.ecommerce.orderapi.order.dto.response.PaymentDetailResponse;
 import org.ecommerce.orderapi.order.dto.response.PaymentResponse;
 import org.ecommerce.orderapi.order.dto.response.ProductResponse;
