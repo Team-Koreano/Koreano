@@ -98,8 +98,19 @@ public class Product {
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	public static Product createBean(ProductCategory category, Integer price, Integer stock, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep test) {
+	public static Product createProduct(final ProductCategory category,
+		Integer price, Integer stock, String name, Bean bean
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity,
+		SellerRep seller) {
+		return category == ProductCategory.BEAN
+			? createBean(category, price, stock, name, bean, acidity, information, isCrush, isDecaf, seller, null, null)
+			: createBean(category, price, stock, name, Bean.NONE, Acidity.NONE, information, null, null, seller, size,
+			capacity);
+	}
+
+	private static Product createBean(ProductCategory category, Integer price, Integer stock, String name, Bean bean
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep sellerRep, String size,
+		String capacity) {
 		Product product = new Product();
 		product.category = category;
 		product.price = price;
@@ -110,25 +121,14 @@ public class Product {
 		product.information = information;
 		product.isCrush = isCrush;
 		product.isDecaf = isDecaf;
-		product.sellerRep = test;
-		return product;
-	}
-
-	public static Product createDefault(ProductCategory category, Integer price, Integer stock, String name
-		, String information, String size, SellerRep test) {
-		Product product = new Product();
-		product.category = category;
-		product.price = price;
-		product.stock = stock;
-		product.name = name;
-		product.information = information;
-		product.sellerRep = test;
+		product.sellerRep = sellerRep;
 		product.size = size;
+		product.capacity = capacity;
 		return product;
 	}
 
 	public void toModify(ProductCategory category, Integer price, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity) {
 		this.category = category;
 		this.price = price;
 		this.name = name;
@@ -138,6 +138,7 @@ public class Product {
 		this.isCrush = isCrush;
 		this.isDecaf = isDecaf;
 		this.size = size;
+		this.capacity = capacity;
 	}
 
 	public void toModifyStatus(ProductStatus productStatus) {
@@ -170,5 +171,19 @@ public class Product {
 			.findFirst()
 			.map(Image::getImageUrl)
 			.orElse(null);
+	}
+
+	public void saveImages(List<Image> images) {
+		this.images.addAll(images);
+	}
+
+	public List<String> getImagesUrl() {
+		return this.images.stream()
+			.map(Image::getImageUrl)
+			.toList();
+	}
+
+	public void deleteImages() {
+		this.images.clear();
 	}
 }

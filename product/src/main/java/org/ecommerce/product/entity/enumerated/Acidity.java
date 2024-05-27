@@ -2,7 +2,6 @@ package org.ecommerce.product.entity.enumerated;
 
 import org.ecommerce.common.utils.mapper.EnumMapperType;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
@@ -16,7 +15,6 @@ public enum Acidity implements EnumMapperType {
 	FRENCH("프렌치"),
 	ITALIAN("이탈리안"),
 	NONE("NONE");
-	;
 
 	private final String title;
 

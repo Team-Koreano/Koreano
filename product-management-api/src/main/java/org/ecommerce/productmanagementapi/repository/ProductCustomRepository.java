@@ -5,5 +5,7 @@ import java.util.List;
 import org.ecommerce.product.entity.Product;
 
 public interface ProductCustomRepository {
-	List<Product> findProductById(List<Integer> productIds);
+	List<Product> findProductsByIds(List<Integer> productIds);
+
+	Product findProductById(Integer productId);
 }
