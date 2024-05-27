@@ -11,6 +11,11 @@ import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateAddressRequest;
+import org.ecommerce.userapi.dto.request.CreateUserRequest;
+import org.ecommerce.userapi.dto.request.LoginUserRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
@@ -62,20 +67,20 @@ public class UserService {
 	 * <p>
 	 * @author Hong
 	 *
-	 * @param register- 회원 가입 요청에 대한 정보
+	 * @param createRequest- 회원 가입 요청에 대한 정보
 	 * @return UserDto
 	 */
-	public UserDto registerRequest(final UserDto.Request.Register register) {
+	public UserDto registerRequest(final CreateUserRequest createRequest) {
 
-		checkDuplicatedPhoneNumberOrEmail(register.email(), register.phoneNumber());
+		checkDuplicatedPhoneNumberOrEmail(createRequest.email(), createRequest.phoneNumber());
 
-		Users users = userRepository.save(Users.ofRegister(register.email(), register.name(),
-			passwordEncoder.encode(register.password()),
-			register.gender(), register.age(), register.phoneNumber()));
+		Users users = userRepository.save(Users.ofRegister(createRequest.email(), createRequest.name(),
+			passwordEncoder.encode(createRequest.password()),
+			createRequest.gender(), createRequest.age(), createRequest.phoneNumber()));
 
 		users.registerBeanPayId(userServiceClient.createBeanPay().getId());
 
-		return UserMapper.INSTANCE.userToDto(users);
+		return UserMapper.INSTANCE.toDto(users);
 	}
 
 	/**
@@ -88,7 +93,7 @@ public class UserService {
 	 @param login - 사용자의 로그인 정보가 들어간 dto 입니다
 	 @return SellerDto
 	 */
-	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
+	public UserDto loginRequest(final LoginUserRequest login, HttpServletResponse response) {
 
 		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email());
 
@@ -100,7 +105,7 @@ public class UserService {
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
-		return UserMapper.INSTANCE.accessTokenToDto(
+		return UserMapper.INSTANCE.toDto(
 			jwtProvider.createUserTokens(user.getId(), authorization, response));
 	}
 
@@ -131,7 +136,7 @@ public class UserService {
 	 * @param register - 회원 주소 등록에 관련된 객체
 	 * @return AddressDto
 	 */
-	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
+	public AddressDto createAddress(final AuthDetails authDetails, final CreateAddressRequest register) {
 		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
 		if (users == null)
@@ -141,7 +146,7 @@ public class UserService {
 
 		addressRepository.save(address);
 
-		return AddressMapper.INSTANCE.addressToDto(address);
+		return AddressMapper.INSTANCE.toDto(address);
 
 	}
 
@@ -150,7 +155,8 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
-	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
+	public AccountDto createAccount(final AuthDetails authDetails,
+		final CreateAccountRequest register) {
 
 		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
@@ -161,7 +167,7 @@ public class UserService {
 
 		usersAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.userAccountToDto(account);
+		return AccountMapper.INSTANCE.toDto(account);
 	}
 
 	/**
@@ -182,7 +188,7 @@ public class UserService {
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return UserMapper.INSTANCE.accessTokenToDto(
+		return UserMapper.INSTANCE.toDto(
 			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
@@ -196,7 +202,7 @@ public class UserService {
 	 * @param withdrawal - 탈퇴 요청 dto
 	 * @return void
 	 */
-	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
+	public void withdrawUser(final WithdrawalUserRequest withdrawal, final AuthDetails authDetails) {
 		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
 		if (users == null || !checkIsMatchedPassword(withdrawal.password(), users.getPassword()))
