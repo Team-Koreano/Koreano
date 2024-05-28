@@ -1,5 +1,6 @@
 package org.ecommerce.orderapi.order.service;
 
+import static org.ecommerce.orderapi.bucket.exception.BucketErrorCode.*;
 import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
 
 import java.util.List;
@@ -7,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.order.client.BucketServiceClient;
-import org.ecommerce.orderapi.order.client.PaymentServiceClient;
-import org.ecommerce.orderapi.order.client.ProductServiceClient;
-import org.ecommerce.orderapi.bucket.dto.BucketMapper;
 import org.ecommerce.orderapi.bucket.dto.BucketSummary;
+import org.ecommerce.orderapi.bucket.entity.Bucket;
+import org.ecommerce.orderapi.bucket.repository.BucketRepository;
+import org.ecommerce.orderapi.global.client.ProductServiceClient;
+import org.ecommerce.orderapi.order.client.PaymentServiceClient;
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.PaymentMapper;
@@ -40,11 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class OrderDomainService {
 
-	private final BucketServiceClient bucketServiceClient;
 	private final ProductServiceClient productServiceClient;
 	private final PaymentServiceClient paymentServiceClient;
 	private final OrderRepository orderRepository;
 	private final StockRepository stockRepository;
+	private final BucketRepository bucketRepository;
 	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
@@ -184,12 +185,11 @@ public class OrderDomainService {
 			final Integer userId,
 			final List<Long> bucketIds
 	) {
-		return BucketSummary.create(
-				bucketServiceClient.getBuckets(userId, bucketIds)
-						.stream()
-						.map(BucketMapper.INSTANCE::responseToEntity)
-						.toList()
-		);
+		List<Bucket> buckets = bucketRepository.findAllByIdInAndUserId(bucketIds, userId);
+		if (bucketIds.size() != buckets.size()) {
+			throw new CustomException(NOT_FOUND_BUCKET_ID);
+		}
+		return BucketSummary.create(buckets);
 	}
 
 	/**

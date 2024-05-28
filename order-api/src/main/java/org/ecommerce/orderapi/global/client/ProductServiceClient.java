@@ -1,4 +1,4 @@
-package org.ecommerce.orderapi.order.client;
+package org.ecommerce.orderapi.global.client;
 
 import java.util.List;
 
@@ -14,5 +14,10 @@ public interface ProductServiceClient {
 	@GetMapping
 	List<ProductResponse> getProducts(
 			@RequestParam("productIds") final List<Integer> productIds
+	);
+
+	@GetMapping
+	ProductResponse getProduct(
+			@RequestParam("productId") final Integer productId
 	);
 }

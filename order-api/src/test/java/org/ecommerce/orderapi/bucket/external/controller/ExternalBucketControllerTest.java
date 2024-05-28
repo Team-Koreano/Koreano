@@ -13,7 +13,8 @@ import java.util.List;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
 import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
-import org.ecommerce.orderapi.bucket.service.BucketService;
+import org.ecommerce.orderapi.bucket.service.BucketDomainService;
+import org.ecommerce.orderapi.bucket.service.BucketReadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,7 +37,10 @@ public class ExternalBucketControllerTest {
 	private ObjectMapper objectMapper;
 
 	@MockBean
-	private BucketService bucketService;
+	private BucketDomainService bucketDomainService;
+
+	@MockBean
+	private BucketReadService bucketReadService;
 
 	@Test
 	void 장바구니_조회() throws Exception {
@@ -61,7 +65,7 @@ public class ExternalBucketControllerTest {
 								)
 						)
 				);
-		when(bucketService.getAllBuckets(anyInt())).thenReturn(bucketDtos);
+		when(bucketReadService.getAllBuckets(anyInt())).thenReturn(bucketDtos);
 
 		// when
 		// then
@@ -89,7 +93,7 @@ public class ExternalBucketControllerTest {
 		// given
 		final BucketDto bucketDto = new BucketDto(
 				1L, 1, "seller1", 101, 3, LocalDate.of(2024, 4, 14));
-		when(bucketService.addBucket(anyInt(), any(AddBucketRequest.class)))
+		when(bucketDomainService.addBucket(anyInt(), any(AddBucketRequest.class)))
 				.thenReturn(bucketDto);
 
 		// when
@@ -162,7 +166,7 @@ public class ExternalBucketControllerTest {
 				3,
 				LocalDate.of(2024, 4, 14)
 		);
-		given(bucketService.modifyBucket(anyInt(), anyLong(),
+		given(bucketDomainService.modifyBucket(anyInt(), anyLong(),
 				any(ModifyBucketRequest.class)))
 				.willReturn(bucketDto);
 

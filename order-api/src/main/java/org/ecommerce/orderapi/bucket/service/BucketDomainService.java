@@ -1,9 +1,8 @@
 package org.ecommerce.orderapi.bucket.service;
 
-
 import static org.ecommerce.orderapi.bucket.exception.BucketErrorCode.*;
-
-import java.util.List;
+import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
+import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
@@ -12,37 +11,26 @@ import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
 import org.ecommerce.orderapi.bucket.entity.Bucket;
 import org.ecommerce.orderapi.bucket.repository.BucketRepository;
+import org.ecommerce.orderapi.global.client.ProductServiceClient;
+import org.ecommerce.orderapi.order.dto.ProductMapper;
+import org.ecommerce.orderapi.order.entity.Product;
+import org.ecommerce.orderapi.stock.entity.Stock;
+import org.ecommerce.orderapi.stock.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BucketService {
+public class BucketDomainService {
 
 	private final BucketRepository bucketRepository;
-
-	// TODO : 회원 검증 로직 추가 (crud)
-	// TODO : 상품 검증 로직 추가 (cu)
-
-	/**
-	 * 회원의 장바구니 목록을 조회하는 메소드입니다.
-	 * <p>
-	 * @author ${Juwon}
-	 *
-	 * @param userId- 회원 번호
-	 * @return List<BucketDto>- 장바구니 정보가 담긴 리스트
-	 */
-	@Transactional(readOnly = true)
-	public List<BucketDto> getAllBuckets(final Integer userId) {
-
-		return bucketRepository.findAllByUserId(userId)
-				.stream()
-				.map(BucketMapper.INSTANCE::toDto)
-				.toList();
-	}
+	private final StockRepository stockRepository;
+	private final ProductServiceClient productServiceClient;
 
 	/**
 	 * 장바구니에 상품을 담는 메소드입니다.
@@ -59,7 +47,8 @@ public class BucketService {
 			final Integer userId,
 			final AddBucketRequest addRequest
 	) {
-
+		validateProduct(addRequest.productId());
+		validateStock(addRequest.productId(), addRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(
 				bucketRepository.save(
 						Bucket.ofAdd(
@@ -91,38 +80,59 @@ public class BucketService {
 			final Long bucketId,
 			final ModifyBucketRequest modifyRequest
 	) {
-		final Bucket bucket = bucketRepository.findByIdAndUserId(bucketId, userId)
-				.orElseThrow(() -> new CustomException(NOT_FOUND_BUCKET_ID));
+		final Bucket bucket = getBucket(userId, bucketId);
 		bucket.modifyQuantity(modifyRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
 
 	/**
-	 * 장바구니에 대한 정보를 반환하는 메소드입니다.
-	 * <p>
-	 * 단일 혹은 여러 장바구니에 대한 정보를 반환합니다.
-	 * MS간 회원의 장바구니 정보가 필요할 때 사용됩니다.
-	 *
-	 * 1. 회원에게 유효한 장바구니인지 검증합니다.
-	 * 2. 요청한 장바구니가 누락되지 않았는지 검증합니다.
-	 * <p>
+	 * 회원의 장바구니를 가져오는 메소드입니다.
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
-	 * @param bucketIds- 정보를 조회할 장바구니 번호 리스트
-	 * @return BucketDto- 장바구니 정보가 담긴 리스트
+	 * @param bucketId- 장바구니 번호
+	 * @return - 장바구니
 	 */
-	@Transactional(readOnly = true)
-	public List<BucketDto> getBuckets(final Integer userId, final List<Long> bucketIds) {
-
-		List<Bucket> buckets = bucketRepository.findAllByIdInAndUserId(bucketIds, userId);
-
-		if (bucketIds.size() != buckets.size()) {
+	@VisibleForTesting
+	public Bucket getBucket(final Integer userId, final Long bucketId) {
+		final Bucket bucket = bucketRepository.findByIdAndUserId(bucketId, userId);
+		if (bucket == null) {
 			throw new CustomException(NOT_FOUND_BUCKET_ID);
 		}
+		return bucket;
+	}
 
-		return buckets.stream()
-				.map(BucketMapper.INSTANCE::toDto)
-				.toList();
+	/**
+	 * 상품을 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productId- 상품 번호
+	 */
+	@VisibleForTesting
+	public void validateProduct(final Integer productId) {
+		Product product = ProductMapper.INSTANCE.responseToEntity(
+				productServiceClient.getProduct(productId));
+		if (product.isAvailableStatus()) {
+			throw new CustomException(NOT_AVAILABLE_PRODUCT);
+		}
+	}
+
+	/**
+	 * 재고를 검증하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param productId- 상품 번호
+	 * @param quantity- 수량
+	 */
+	@VisibleForTesting
+	public void validateStock(final Integer productId, final Integer quantity) {
+		Stock stock = stockRepository.findStockByProductId(productId);
+		if (stock == null) {
+			throw new CustomException(NOT_FOUND_STOCK);
+		}
+
+		if (!stock.hasStock(quantity)) {
+			throw new CustomException(INSUFFICIENT_STOCK);
+		}
 	}
 }
