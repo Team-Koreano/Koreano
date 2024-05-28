@@ -199,4 +199,30 @@ public class ExternalBucketControllerTest {
 				.andExpect(jsonPath("$.result").value(ERROR_QUANTITY_REQUIRED))
 				.andDo(print());
 	}
+
+	@Test
+	void 장바구니_삭제() throws Exception {
+		// given
+		BucketDto bucketDto = new BucketDto(
+				1L,
+				1,
+				"판매자 이름",
+				101,
+				10,
+				LocalDate.of(2024, 5, 28)
+		);
+		when(bucketDomainService.deleteBucket(anyInt(), anyLong())).thenReturn(bucketDto);
+
+		// when
+		// then
+		mockMvc.perform(delete("/api/external/buckets/v1/1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.result.id").value(bucketDto.id()))
+				.andExpect(jsonPath("$.result.userId").value(bucketDto.userId()))
+				.andExpect(jsonPath("$.result.seller").value(bucketDto.seller()))
+				.andExpect(jsonPath("$.result.productId").value(bucketDto.productId()))
+				.andExpect(jsonPath("$.result.quantity").value(bucketDto.quantity()))
+				.andDo(print());
+	}
+
 }
