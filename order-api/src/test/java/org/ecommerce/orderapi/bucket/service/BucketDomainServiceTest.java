@@ -142,4 +142,34 @@ public class BucketDomainServiceTest {
 		// then
 		assertEquals(BucketErrorCode.NOT_FOUND_BUCKET_ID, exception.getErrorCode());
 	}
+
+	@Test
+	void 장바구니_삭제() {
+		// given
+		final Integer userId = 1;
+		final Long bucketId = 1L;
+		Bucket bucket = new Bucket(
+				bucketId,
+				userId,
+				"sellerName",
+				101,
+				10,
+				LocalDate.of(2024, 5, 28)
+		);
+		given(bucketRepository.findByIdAndUserId(anyLong(), anyInt()))
+				.willReturn(bucket);
+		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
+
+		// when
+		BucketDto bucketDto = bucketDomainService.deleteBucket(anyInt(), anyLong());
+
+		// then
+		verify(bucketRepository, times(1)).delete(captor.capture());
+		assertEquals(bucketDto.id(), captor.getValue().getId());
+		assertEquals(bucketDto.userId(), captor.getValue().getUserId());
+		assertEquals(bucketDto.seller(), captor.getValue().getSeller());
+		assertEquals(bucketDto.productId(), captor.getValue().getProductId());
+		assertEquals(bucketDto.quantity(), captor.getValue().getQuantity());
+	}
+
 }
