@@ -9,11 +9,12 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.client.SellerServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginSellerRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
@@ -122,20 +123,11 @@ class SellerServiceTest {
 				LocalDateTime.now(),
 				false,
 				LocalDateTime.now(),
-				null,
 				UserStatus.GENERAL,
 				null
 			);
 
 			when(sellerRepository.save(any(Seller.class))).thenReturn(entity);
-			when(sellerServiceClient.createBeanPay()).thenReturn(
-				new BeanPayDto(
-					1,
-					entity.getId(),
-					Role.SELLER,
-					0,
-					null
-				));
 
 			final SellerDto result = sellerService.registerRequest(createSellerRequest);
 
@@ -150,6 +142,7 @@ class SellerServiceTest {
 			final SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
 
 			//then
+			verify(sellerServiceClient, times(1)).createBeanPay(new CreateBeanPayRequest(entity.getId(), Role.SELLER));
 			assertThat(SellerMapper.INSTANCE.toResponse(expectedResult))
 				.isEqualTo(SellerMapper.INSTANCE.toResponse(result));
 		}
@@ -276,7 +269,7 @@ class SellerServiceTest {
 
 			// then
 			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
-
+			verify(sellerServiceClient, times(1)).deleteBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
 			assertThat(seller.isValidStatus()).isFalse();
 			assertThat(seller.isDeleted()).isTrue();
 		}
