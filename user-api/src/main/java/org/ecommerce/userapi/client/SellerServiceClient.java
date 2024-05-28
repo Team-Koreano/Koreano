@@ -1,7 +1,8 @@
 package org.ecommerce.userapi.client;
 
 import org.ecommerce.common.config.FeignConfig;
-import org.ecommerce.userapi.dto.BeanPayDto;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface SellerServiceClient {
 	//beanPay 생성
 	@PostMapping()
-	BeanPayDto createBeanPay();
+	void createBeanPay(
+		@RequestBody final CreateBeanPayRequest createBeanPayRequest
+	);
 
 	@DeleteMapping()
-	BeanPayDto deleteBeanPay(
-		@RequestBody final BeanPayDto.Request.DeleteBeanPay deleteBeanPay
+	void deleteBeanPay(
+		@RequestBody final DeleteBeanPayRequest deleteBeanPayRequest
 	);
 }

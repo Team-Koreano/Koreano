@@ -8,12 +8,13 @@ import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
 import org.ecommerce.userapi.dto.AddressMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
 import org.ecommerce.userapi.dto.request.CreateAddressRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateUserRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginUserRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
@@ -78,7 +79,7 @@ public class UserService {
 			passwordEncoder.encode(createRequest.password()),
 			createRequest.gender(), createRequest.age(), createRequest.phoneNumber()));
 
-		users.registerBeanPayId(userServiceClient.createBeanPay().getId());
+		userServiceClient.createBeanPay(new CreateBeanPayRequest(users.getId(), Role.USER));
 
 		return UserMapper.INSTANCE.toDto(users);
 	}
@@ -208,10 +209,11 @@ public class UserService {
 		if (users == null || !checkIsMatchedPassword(withdrawal.password(), users.getPassword()))
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
 
-		userServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(users.getBeanPayId()));
+		userServiceClient.deleteBeanPay(new DeleteBeanPayRequest(users.getId(), Role.USER));
 
-		if (!users.isValidUser(withdrawal.email(), withdrawal.phoneNumber()))
+		if (!users.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
+		}
 
 		users.withdrawal();
 

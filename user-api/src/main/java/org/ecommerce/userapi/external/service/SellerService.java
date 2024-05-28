@@ -6,11 +6,12 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.userapi.client.SellerServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginSellerRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
@@ -66,10 +67,7 @@ public class SellerService {
 			passwordEncoder.encode(requestSeller.password()),
 			requestSeller.address(), requestSeller.phoneNumber()));
 
-		// seller.registerBeanPayId(
-		// 	sellerServiceClient.createBeanPay()
-		// 		.getId()
-		// );
+		sellerServiceClient.createBeanPay(new CreateBeanPayRequest(seller.getId(), Role.SELLER));
 
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
@@ -178,7 +176,7 @@ public class SellerService {
 		if (seller == null || !checkIsMatchedPassword(withdrawal.password(), seller.getPassword()))
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
 
-		sellerServiceClient.deleteBeanPay(new BeanPayDto.Request.DeleteBeanPay(seller.getBeanPayId()));
+		sellerServiceClient.deleteBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
 
 		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber()))
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
