@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
@@ -58,9 +58,9 @@ class BeanPayControllerTest {
 			//given
 			final Integer userId = 1;
 			final Role role = USER;
-			final CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
 			final BeanPay beanPay = BeanPay.ofCreate(userId, role);
-			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.entityToDto(beanPay);
+			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.toDto(beanPay);
 
 			//when
 			when(beanPayService.createBeanPay(request))

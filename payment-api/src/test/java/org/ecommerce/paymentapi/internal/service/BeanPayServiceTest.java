@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
@@ -40,7 +40,7 @@ class BeanPayServiceTest {
 			final Role role = USER;
 			final Integer amount = 0;
 			final LocalDateTime createDateTime = LocalDateTime.now();
-			final CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
 			final BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
 
 			//when
@@ -50,10 +50,10 @@ class BeanPayServiceTest {
 			BeanPayDto actual = beanPayService.createBeanPay(request);
 
 			//then
-			assertEquals(actual.getUserId(), userId);
-			assertEquals(actual.getRole(), role);
-			assertEquals(actual.getAmount(), amount);
-			assertEquals(actual.getCreateDateTime(), createDateTime);
+			assertEquals(actual.userId(), userId);
+			assertEquals(actual.role(), role);
+			assertEquals(actual.amount(), amount);
+			assertEquals(actual.createDateTime(), createDateTime);
 		}
 
 		@Test
@@ -61,7 +61,7 @@ class BeanPayServiceTest {
 			//given
 			final Integer userId = 1;
 			final Role role = USER;
-			final CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),

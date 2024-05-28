@@ -9,18 +9,17 @@ import java.util.List;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
-import org.ecommerce.paymentapi.dto.PaymentDto;
-import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
+import org.ecommerce.paymentapi.dto.PaymentDtoWithDetail;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
+import org.ecommerce.paymentapi.dto.request.PaymentCancelRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
-import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class PaymentService {
 			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}
 	)
-	public PaymentDto paymentPrice(final PaymentPrice paymentPrice) {
+	public PaymentDtoWithDetail paymentPrice(final PaymentPriceRequest paymentPrice) {
 		//유저 BeanPay 가져오기
 		final BeanPay userBeanPay = getBeanPay(paymentPrice.userId(), USER);
 
@@ -71,18 +70,18 @@ public class PaymentService {
 		);
 
 		Payment save = paymentRepository.save(payment);
-		return PaymentMapper.INSTANCE.paymentToDto(save);
+		return PaymentMapper.INSTANCE.toPaymentWithDetailDto(save);
 	}
 
 	@VisibleForTesting
-	public static List<Pair<BeanPay, PaymentDetailPrice>> mappedBeanPayPaymentDetailPrice(
-		final PaymentPrice paymentPrice,
+	public static List<Pair<BeanPay, PaymentDetailPriceRequest>> mappedBeanPayPaymentDetailPrice(
+		final PaymentPriceRequest paymentPrice,
 		final List<BeanPay> sellerBeanPays
 	) {
-		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap =
+		final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap =
 			new LinkedList<>();
 
-		for (final PaymentDetailPrice detailPrice : paymentPrice.paymentDetails()) {
+		for (final PaymentDetailPriceRequest detailPrice : paymentPrice.paymentDetails()) {
 			beanPayPaymentDetailPriceMap.add(
 				Pair.of(
 					sellerBeanPays.stream()
@@ -111,11 +110,11 @@ public class PaymentService {
 		"#paymentCancel.userId() + 'USER'",
 	})
 	public PaymentDetailDto cancelPaymentDetail(
-		final PaymentCancel paymentCancel
+		final PaymentCancelRequest paymentCancel
 	) {
 		final Payment payment = getPayment(paymentCancel.orderId());
 
-		return PaymentMapper.INSTANCE.paymentDetailToDto(
+		return PaymentMapper.INSTANCE.toPaymentDetailDto(
 			payment.cancelPaymentDetail(paymentCancel.orderItemId(), paymentCancel.cancelReason())
 		);
 	}

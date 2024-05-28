@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
@@ -88,7 +88,7 @@ public class Payment {
 		final BeanPay userBeanPay,
 		final Long orderId,
 		final String orderName,
-		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
+		final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
@@ -99,7 +99,7 @@ public class Payment {
 		beanPayPaymentDetailPriceMap.forEach((beanPayPaymentDetailPrice) -> {
 
 			BeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
-			PaymentDetailPrice paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
+			PaymentDetailPriceRequest paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
 			//결제 디테일 생성
 			payment.paymentDetails.add(
 				PaymentDetail.ofPayment(

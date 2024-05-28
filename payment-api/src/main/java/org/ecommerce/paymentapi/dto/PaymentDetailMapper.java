@@ -1,6 +1,6 @@
 package org.ecommerce.paymentapi.dto;
 
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Response;
+import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,8 +17,8 @@ public interface PaymentDetailMapper {
 	@Mapping(source = "chargeInfo.paymentKey", target = "paymentKey")
 	@Mapping(source = "chargeInfo.payType", target = "payType")
 	@Mapping(source = "chargeInfo.approveDateTime", target = "approveDateTime")
-	PaymentDetailDto entityToDto(PaymentDetail beanPayDetail);
+	PaymentDetailDto toDto(PaymentDetail beanPayDetail);
 
-	Response dtoToResponse(PaymentDetailDto beanPayDetailDto);
+	PaymentDetailResponse toResponse(PaymentDetailDto beanPayDetailDto);
 
 }

@@ -1,5 +1,7 @@
 package org.ecommerce.paymentapi.dto;
 
+import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
+import org.ecommerce.paymentapi.dto.response.PaymentWithDetailResponse;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.mapstruct.Mapper;
@@ -15,16 +17,16 @@ public interface PaymentMapper {
 	@Mapping(source = "userBeanPay.userId", target = "userId")
 	@Mapping(source = "paymentDetails", target = "paymentDetailDtos")
 	@Mapping(source = "status", target = "processStatus")
-	PaymentDto paymentToDto(Payment payment);
+	PaymentDtoWithDetail toPaymentWithDetailDto(Payment payment);
 
-	PaymentDto.Response paymentDtoToResponse(PaymentDto paymentDto);
+	PaymentWithDetailResponse toPaymentWithDetailResponse(PaymentDtoWithDetail paymentDto);
 
 	@Mapping(source = "userBeanPay.userId", target = "userId")
 	@Mapping(source = "sellerBeanPay.userId", target = "sellerId")
 	@Mapping(source = "chargeInfo.paymentKey", target = "paymentKey")
 	@Mapping(source = "chargeInfo.payType", target = "payType")
 	@Mapping(source = "chargeInfo.approveDateTime", target = "approveDateTime")
-	PaymentDetailDto paymentDetailToDto(PaymentDetail beanPayDetail);
+	PaymentDetailDto toPaymentDetailDto(PaymentDetail beanPayDetail);
 
-	PaymentDetailDto.Response paymentDetailDtoToResponse(PaymentDetailDto beanPayDetailDto);
+	PaymentDetailResponse toPaymentDetailResponse(PaymentDetailDto beanPayDetailDto);
 }

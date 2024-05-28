@@ -16,10 +16,10 @@ import java.util.stream.IntStream;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
-import org.ecommerce.paymentapi.dto.PaymentDto;
-import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
+import org.ecommerce.paymentapi.dto.PaymentDtoWithDetail;
+import org.ecommerce.paymentapi.dto.request.PaymentCancelRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
@@ -77,12 +77,12 @@ class PaymentServiceTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userBeanPay.getUserId(),
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -90,7 +90,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -98,7 +98,7 @@ class PaymentServiceTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -109,7 +109,7 @@ class PaymentServiceTest {
 				)
 			);
 
-			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -124,28 +124,28 @@ class PaymentServiceTest {
 			when(beanPayRepository.findBeanPayByUserIdsAndRole(paymentPrice.extractSellerIds()
 				, SELLER)).thenReturn(sellerBeanPays);
 			when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-			final PaymentDto paymentDto = paymentService.paymentPrice(paymentPrice);
+			final PaymentDtoWithDetail paymentDto = paymentService.paymentPrice(paymentPrice);
 
 			//then
-			assertEquals(orderId, paymentDto.getOrderId());
-			assertEquals(userBeanPay.getUserId(), paymentDto.getUserId());
-			assertEquals(paymentAmount, paymentDto.getTotalPaymentAmount());
-			assertEquals(paymentPrice.orderName(), paymentDto.getOrderName());
-			assertEquals(COMPLETED, paymentDto.getProcessStatus());
-			assertEquals(TRUE, paymentDto.getIsVisible());
-			assertEquals(COMPLETED, paymentDto.getProcessStatus());
+			assertEquals(orderId, paymentDto.orderId());
+			assertEquals(userBeanPay.getUserId(), paymentDto.userId());
+			assertEquals(paymentAmount, paymentDto.totalPaymentAmount());
+			assertEquals(paymentPrice.orderName(), paymentDto.orderName());
+			assertEquals(COMPLETED, paymentDto.processStatus());
+			assertEquals(TRUE, paymentDto.isVisible());
+			assertEquals(COMPLETED, paymentDto.processStatus());
 			assertEquals(startAmount - paymentAmount * 2, userBeanPay.getAmount());
-			IntStream.range(0, paymentDto.getPaymentDetailDtos().size()).forEach((i) -> {
-				PaymentDetailDto dto = paymentDto.getPaymentDetailDtos().get(i);
-				PaymentDetailPrice detailPrice = paymentPrice.paymentDetails().get(i);
-				assertEquals(userBeanPay.getUserId(), dto.getUserId());
-				assertEquals(detailPrice.sellerId(), dto.getSellerId());
-				assertEquals(detailPrice.orderItemId(), dto.getOrderItemId());
-				assertEquals(detailPrice.deliveryFee(), dto.getDeliveryFee());
-				assertEquals(detailPrice.quantity(), dto.getQuantity());
-				assertEquals(detailPrice.productName(), dto.getPaymentName());
-				assertEquals(PAYMENT, dto.getPaymentStatus());
-				assertEquals(COMPLETED, dto.getProcessStatus());
+			IntStream.range(0, paymentDto.paymentDetailDtos().size()).forEach((i) -> {
+				PaymentDetailDto dto = paymentDto.paymentDetailDtos().get(i);
+				PaymentDetailPriceRequest detailPrice = paymentPrice.paymentDetails().get(i);
+				assertEquals(userBeanPay.getUserId(), dto.userId());
+				assertEquals(detailPrice.sellerId(), dto.sellerId());
+				assertEquals(detailPrice.orderItemId(), dto.orderItemId());
+				assertEquals(detailPrice.deliveryFee(), dto.deliveryFee());
+				assertEquals(detailPrice.quantity(), dto.quantity());
+				assertEquals(detailPrice.productName(), dto.paymentName());
+				assertEquals(PAYMENT, dto.paymentStatus());
+				assertEquals(COMPLETED, dto.processStatus());
 			});
 		}
 
@@ -171,12 +171,12 @@ class PaymentServiceTest {
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
 
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userId,
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -184,7 +184,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -192,7 +192,7 @@ class PaymentServiceTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -203,7 +203,7 @@ class PaymentServiceTest {
 				)
 			);
 
-			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -245,12 +245,12 @@ class PaymentServiceTest {
 			final List<BeanPay> sellerBeanPays = List.of(
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userId,
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -258,7 +258,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -266,7 +266,7 @@ class PaymentServiceTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -313,12 +313,12 @@ class PaymentServiceTest {
 			new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 			new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 		);
-		final PaymentPrice paymentPrice = new PaymentPrice(
+		final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 			1L,
 			userId,
 			orderName,
 			List.of(
-				new PaymentDetailPrice(
+				new PaymentDetailPriceRequest(
 					orderItemIds[0],
 					prices[0],
 					quantity[0],
@@ -326,7 +326,7 @@ class PaymentServiceTest {
 					sellerIds[0],
 					productNames[0]
 				),
-				new PaymentDetailPrice(
+				new PaymentDetailPriceRequest(
 					orderItemIds[1],
 					prices[1],
 					quantity[1],
@@ -334,7 +334,7 @@ class PaymentServiceTest {
 					sellerIds[1],
 					productNames[1]
 				),
-				new PaymentDetailPrice(
+				new PaymentDetailPriceRequest(
 					orderItemIds[2],
 					prices[2],
 					quantity[2],
@@ -346,12 +346,12 @@ class PaymentServiceTest {
 		);
 
 		//when
-		final List<Pair<BeanPay, PaymentDetailPrice>> pairs = paymentService.mappedBeanPayPaymentDetailPrice(
+		final List<Pair<BeanPay, PaymentDetailPriceRequest>> pairs = paymentService.mappedBeanPayPaymentDetailPrice(
 			paymentPrice, sellerBeanPays);
 
 		//then
 		assertEquals(paymentPrice.paymentDetails().size(), pairs.size());
-		for(Pair<BeanPay, PaymentDetailPrice> pair : pairs) {
+		for(Pair<BeanPay, PaymentDetailPriceRequest> pair : pairs) {
 			assertEquals(pair.getFirst().getUserId(), pair.getSecond().sellerId());
 		}
 
@@ -382,12 +382,12 @@ class PaymentServiceTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userId,
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -395,7 +395,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -403,7 +403,7 @@ class PaymentServiceTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -413,7 +413,7 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -422,7 +422,7 @@ class PaymentServiceTest {
 				beanPayPaymentPrice
 			);
 			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			final PaymentCancel request = new PaymentCancel(
+			final PaymentCancelRequest request = new PaymentCancelRequest(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				orderId,
@@ -472,12 +472,12 @@ class PaymentServiceTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userId,
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -485,7 +485,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -493,7 +493,7 @@ class PaymentServiceTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -503,7 +503,7 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -512,7 +512,7 @@ class PaymentServiceTest {
 				beanPayPaymentPrice
 			);
 			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			final PaymentCancel request = new PaymentCancel(
+			final PaymentCancelRequest request = new PaymentCancelRequest(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				orderId,
@@ -552,12 +552,12 @@ class PaymentServiceTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentPrice paymentPrice = new PaymentPrice(
+			final PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 				1L,
 				userId,
 				orderName,
 				List.of(
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -565,7 +565,7 @@ class PaymentServiceTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -575,7 +575,7 @@ class PaymentServiceTest {
 					)
 				)
 			);
-			final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentPrice =
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice =
 				PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
@@ -585,7 +585,7 @@ class PaymentServiceTest {
 				beanPayPaymentPrice
 			);
 			final PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			final PaymentCancel request = new PaymentCancel(
+			final PaymentCancelRequest request = new PaymentCancelRequest(
 				userId,
 				paymentDetail.getSellerBeanPay().getUserId(),
 				orderId,
