@@ -10,6 +10,7 @@ import org.ecommerce.orderapi.bucket.dto.response.BucketResponse;
 import org.ecommerce.orderapi.bucket.service.BucketDomainService;
 import org.ecommerce.orderapi.bucket.service.BucketReadService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,6 +67,18 @@ public class BucketController {
 				HttpStatus.OK.value(),
 				BucketMapper.INSTANCE.toResponse(
 						bucketDomainService.modifyBucket(USER_ID, bucketId, request)
+				)
+		);
+	}
+
+	@DeleteMapping("/{bucketId}")
+	public Response<BucketResponse> deleteBucket(
+			@PathVariable("bucketId") final Long bucketId
+	) {
+		return new Response<>(
+				HttpStatus.OK.value(),
+				BucketMapper.INSTANCE.toResponse(
+						bucketDomainService.deleteBucket(USER_ID, bucketId)
 				)
 		);
 	}

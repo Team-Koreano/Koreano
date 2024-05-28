@@ -86,6 +86,23 @@ public class BucketDomainService {
 	}
 
 	/**
+	 * 장바구니 삭제 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param userId- 회원 번호
+	 * @param bucketId- 장바구니 번호
+	 * @return - 장바구니
+	 */
+	public BucketDto deleteBucket(
+			final Integer userId,
+			final Long bucketId
+	) {
+		final Bucket bucket = getBucket(userId, bucketId);
+		bucketRepository.delete(bucket);
+		return BucketMapper.INSTANCE.toDto(bucket);
+	}
+
+	/**
 	 * 회원의 장바구니를 가져오는 메소드입니다.
 	 * @author ${Juwon}
 	 *

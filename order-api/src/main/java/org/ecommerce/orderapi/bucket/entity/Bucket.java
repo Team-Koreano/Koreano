@@ -59,7 +59,6 @@ public class Bucket {
 		return bucket;
 	}
 
-	// TODO : 상품 상세옵션 변경 로직 추가
 	public void modifyQuantity(final Integer quantity) {
 		this.quantity = quantity;
 	}
