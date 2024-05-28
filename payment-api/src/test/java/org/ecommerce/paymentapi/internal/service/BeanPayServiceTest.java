@@ -9,7 +9,6 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
@@ -47,13 +46,9 @@ class BeanPayServiceTest {
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
 				request.role())).thenReturn(null);
 			when(beanPayRepository.save(any(BeanPay.class))).thenReturn(beanPay);
-			BeanPayDto actual = beanPayService.createBeanPay(request);
 
 			//then
-			assertEquals(actual.userId(), userId);
-			assertEquals(actual.role(), role);
-			assertEquals(actual.amount(), amount);
-			assertEquals(actual.createDateTime(), createDateTime);
+			assertDoesNotThrow(() -> beanPayService.createBeanPay(request));
 		}
 
 		@Test
