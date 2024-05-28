@@ -172,4 +172,46 @@ public class BucketDomainServiceTest {
 		assertEquals(bucketDto.quantity(), captor.getValue().getQuantity());
 	}
 
+	@Test
+	void 장바구니_리스트_삭제() {
+		// given
+		List<Bucket> buckets = List.of(
+				new Bucket(
+						1L,
+						1,
+						"sellerName",
+						101,
+						10,
+						LocalDate.of(2024, 5, 28)
+
+				),
+				new Bucket(
+						2L,
+						1,
+						"sellerName",
+						102,
+						20,
+						LocalDate.of(2024, 5, 28)
+
+				),
+				new Bucket(
+						3L,
+						1,
+						"sellerName",
+						103,
+						30,
+						LocalDate.of(2024, 5, 28)
+
+				)
+		);
+		given(bucketRepository.findAllByInId(anyList()))
+				.willReturn(buckets);
+
+		// when
+		bucketDomainService.deletedBuckets(anyList());
+
+		// then
+		verify(bucketRepository, times(1)).deleteAll(buckets);
+	}
+
 }
