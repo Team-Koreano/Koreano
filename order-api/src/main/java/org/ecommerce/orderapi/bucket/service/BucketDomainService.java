@@ -4,6 +4,8 @@ import static org.ecommerce.orderapi.bucket.exception.BucketErrorCode.*;
 import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
 import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 
+import java.util.List;
+
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
 import org.ecommerce.orderapi.bucket.dto.BucketMapper;
@@ -100,6 +102,16 @@ public class BucketDomainService {
 		final Bucket bucket = getBucket(userId, bucketId);
 		bucketRepository.delete(bucket);
 		return BucketMapper.INSTANCE.toDto(bucket);
+	}
+
+	/**
+	 * 장바구니 리스트를 삭제하는 메소드입니다.
+	 * @author ${Juwon}
+	 *
+	 * @param bucketIds- 장바구니 번호 리스트
+	 */
+	public void deletedBuckets(final List<Long> bucketIds) {
+		bucketRepository.deleteAll(bucketRepository.findAllByInId(bucketIds));
 	}
 
 	/**

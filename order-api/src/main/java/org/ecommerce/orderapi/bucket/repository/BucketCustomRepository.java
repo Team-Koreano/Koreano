@@ -9,5 +9,7 @@ public interface BucketCustomRepository {
 
 	Bucket findByIdAndUserId(final Long bucketId, final Integer userId);
 
-	List<Bucket> findAllByIdInAndUserId(List<Long> bucketIds, Integer userId);
+	List<Bucket> findAllByIdInAndUserId(final List<Long> bucketIds, final Integer userId);
+
+	List<Bucket> findAllByInId(final List<Long> bucketIds);
 }

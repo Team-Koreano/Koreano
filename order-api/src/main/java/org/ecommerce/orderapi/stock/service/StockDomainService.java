@@ -188,6 +188,7 @@ public class StockDomainService {
 	 * @param orderItemId- 주문 항목 번호
 	 * @return - 주문 항목
 	 */
+	@VisibleForTesting
 	public OrderItem getOrderItem(final Long orderItemId) {
 		OrderItem orderItem = orderItemRepository.findOrderItemById(orderItemId);
 		if (orderItem == null) {

@@ -2,11 +2,7 @@ spring:
   profiles:
     active: dev
 
-bucket-service:
-  url: http://localhost:8080/api/internal/buckets/v1
 product-search-service:
   url: http://localhost:8082/api/internal/product-search/v1
-user-service:
-  url: http://localhost:8083/api/internal/users/v1
 payment-service:
   url: http://localhost:8084/api/internal/payment/v1

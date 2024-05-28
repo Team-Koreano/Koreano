@@ -45,4 +45,11 @@ public class BucketRepositoryImpl implements BucketCustomRepository {
 						bucket.userId.eq(userId))
 				.fetch();
 	}
+
+	@Override
+	public List<Bucket> findAllByInId(List<Long> bucketIds) {
+		return jpaQueryFactory.selectFrom(bucket)
+				.where(bucket.id.in(bucketIds))
+				.fetch();
+	}
 }

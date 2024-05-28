@@ -68,7 +68,8 @@ public class OrderDomainService {
 				userId, request, products, bucketSummary.getQuantityMap());
 
 		paymentOrder(order);
-		applicationEventPublisher.publishEvent(new OrderCreatedEvent(order.getId()));
+		applicationEventPublisher.publishEvent(
+				new OrderCreatedEvent(order.getId(), request.bucketIds()));
 		return OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(order);
 	}
 
