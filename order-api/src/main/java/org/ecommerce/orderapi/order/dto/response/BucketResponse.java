@@ -1,8 +1,8 @@
-package org.ecommerce.orderapi.order.dto;
+package org.ecommerce.orderapi.order.dto.response;
 
 import java.time.LocalDate;
 
-public record BucketDto(
+public record BucketResponse(
 		Long id,
 		Integer userId,
 		String seller,

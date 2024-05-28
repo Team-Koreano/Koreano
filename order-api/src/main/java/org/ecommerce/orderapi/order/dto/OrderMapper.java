@@ -1,5 +1,11 @@
 package org.ecommerce.orderapi.order.dto;
 
+import org.ecommerce.orderapi.order.dto.response.CreateOrderResponse;
+import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemResponse;
+import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemStatusHistoryResponse;
+import org.ecommerce.orderapi.order.dto.response.OrderItemResponse;
+import org.ecommerce.orderapi.order.dto.response.OrderResponse;
+import org.ecommerce.orderapi.order.dto.response.OrderStatusHistoryResponse;
 import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.entity.OrderStatusHistory;
@@ -12,28 +18,40 @@ import org.mapstruct.factory.Mappers;
 public interface OrderMapper {
 	OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-	@Mapping(source = "order.orderItems", target = "orderItemDtos")
-	OrderDto OrderToDto(Order order);
+	OrderDto toDto(Order order);
 
-	@Mapping(source = "orderDto.orderItemDtos", target = "orderItemResponses")
-	OrderDto.Response OrderDtoToResponse(OrderDto orderDto);
+	OrderResponse toResponse(OrderDto orderDto);
 
-	OrderItemDto orderItemToDto(OrderItem orderItem);
+	OrderItemDto toDto(OrderItem orderItem);
 
-	OrderItemDto.Response orderItemDtoToResponse(OrderItemDto orderItemDto);
+	OrderItemResponse toResponse(OrderItemDto orderItemDto);
 
-	OrderStatusHistoryDto orderStatusHistoryToDto(
-			OrderStatusHistory orderStatusHistory);
+	OrderStatusHistoryDto toDto(OrderStatusHistory orderStatusHistory);
 
-	OrderStatusHistoryDto.Response orderStatusHistoryDtotoResponse(
+	OrderStatusHistoryResponse toResponse(
 			OrderStatusHistoryDto orderStatusHistoryDto);
 
-	@Mapping(source = "orderItem.orderStatusHistories", target = "orderStatusHistoryDtos")
-	OrderItemStatusHistoryDto orderItemToOrderItemStatusHistoryDto(
+	@Mapping(source = "order.orderItems", target = "orderItemDtoList")
+	OrderDtoWithOrderItemDtoList toOrderDtoWithOrderItemDtoList(Order order);
+
+	@Mapping(source = "orderDtoWithOrderItemDtoList.orderItemDtoList", target = "orderItemResponses")
+	CreateOrderResponse toCreateOrderResponse(
+			OrderDtoWithOrderItemDtoList orderDtoWithOrderItemDtoList);
+
+	@Mapping(source = "orderItem.order", target = "orderDto")
+	OrderItemDtoWithOrderDto toOrderItemDtoWithOrderDto(OrderItem orderItem);
+
+	@Mapping(source = "orderItemDtoWithOrderDto.orderDto", target = "orderResponse")
+	InquiryOrderItemResponse toInquiryOrderItemResponse(
+			OrderItemDtoWithOrderDto orderItemDtoWithOrderDto);
+
+	@Mapping(source = "orderItem.orderStatusHistories", target = "orderStatusHistoryDtoList")
+	OrderItemDtoWithOrderStatusHistoryDtoList toOrderItemStatusHistoryDto(
 			OrderItem orderItem);
 
-	@Mapping(source = "orderItemStatusHistoryDto.orderStatusHistoryDtos", target = "orderStatusHistoryResponses")
-	OrderItemStatusHistoryDto.Response orderItemStatusHistoryDtotoResponse(
-			OrderItemStatusHistoryDto orderItemStatusHistoryDto
+	@Mapping(source = "orderItemDtoWithOrderStatusHistoryDtoList.orderStatusHistoryDtoList", target = "orderStatusHistoryResponses")
+	InquiryOrderItemStatusHistoryResponse toInquiryOrderItemStatusHistoryResponse(
+			OrderItemDtoWithOrderStatusHistoryDtoList orderItemDtoWithOrderStatusHistoryDtoList
 	);
+
 }

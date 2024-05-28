@@ -1,9 +1,9 @@
-package org.ecommerce.orderapi.order.dto;
+package org.ecommerce.orderapi.order.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record PaymentDetailDto(
+public record PaymentDetailResponse(
 		UUID id,
 		Long orderItemId,
 		Integer deliveryFee,

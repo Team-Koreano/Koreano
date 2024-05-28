@@ -1,8 +1,8 @@
 package org.ecommerce.orderapi.order.client;
 
 import org.ecommerce.common.config.FeignConfig;
-import org.ecommerce.orderapi.order.dto.OrderDto;
-import org.ecommerce.orderapi.order.dto.PaymentDto;
+import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
+import org.ecommerce.orderapi.order.dto.response.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,5 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface PaymentServiceClient {
 
 	@PostMapping
-	PaymentDto.Response paymentOrder(@RequestBody final OrderDto orderDto);
+	PaymentResponse paymentOrder(
+			@RequestBody final OrderDtoWithOrderItemDtoList orderDtoWithOrderItemDtoList);
 }

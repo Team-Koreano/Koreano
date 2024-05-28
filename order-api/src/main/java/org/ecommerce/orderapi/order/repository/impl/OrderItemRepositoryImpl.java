@@ -1,8 +1,11 @@
 package org.ecommerce.orderapi.order.repository.impl;
 
+import static org.ecommerce.orderapi.order.entity.QOrder.*;
 import static org.ecommerce.orderapi.order.entity.QOrderItem.*;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 import org.ecommerce.orderapi.order.entity.OrderItem;
 import org.ecommerce.orderapi.order.repository.OrderItemCustomRepository;
@@ -22,23 +25,40 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public OrderItem findOrderItemByIdAndUserId(
-			final long orderItemId,
-			final Integer userId
-	) {
+	public OrderItem findOrderItemById(final Long orderItemId) {
 		return jpaQueryFactory.selectFrom(orderItem)
 				.leftJoin(orderItem.orderStatusHistories).fetchJoin()
-				.where(orderItem.id.eq(orderItemId),
-						userIdEq(userId))
+				.where(orderItem.id.eq(orderItemId))
 				.fetchFirst();
 	}
 
 	@Override
-	public Optional<OrderItem> findOrderItemById(Long orderItemId) {
-		return Optional.ofNullable(findOrderItemByIdAndUserId(orderItemId, null));
+	public List<OrderItem> findOrderItemsBySellerIdAndMonth(
+			final Integer sellerId,
+			final Integer month
+	) {
+		return jpaQueryFactory
+				.selectFrom(orderItem)
+				.leftJoin(orderItem.order, order).fetchJoin()
+				.where(orderItem.sellerId.eq(sellerId),
+						generateDateCondition(month))
+				.fetch();
 	}
 
-	private BooleanExpression userIdEq(final Integer userId) {
-		return userId == null ? null : orderItem.order.userId.eq(userId);
+	private BooleanExpression generateDateCondition(final Integer month) {
+		LocalDateTime start;
+		LocalDateTime end;
+		LocalDateTime now = LocalDateTime.now();
+
+		if (month == null) {
+			start = now.withDayOfMonth(1).with(LocalTime.MIN);
+			end = now.plusMonths(1).withDayOfMonth(1).with(LocalTime.MIN).minusNanos(1);
+		} else {
+			start = now.withMonth(month).withDayOfMonth(1).with(LocalTime.MIN);
+			end = start.plusMonths(1).withDayOfMonth(1).with(LocalTime.MIN).minusNanos(1);
+		}
+
+		return order.orderDatetime.between(start, end);
 	}
+
 }

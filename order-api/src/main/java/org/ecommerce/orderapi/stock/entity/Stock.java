@@ -69,9 +69,9 @@ public class Stock {
 
 		if (!hasStock(quantity)) {
 			stockHistories.add(
-					StockHistory.ofRecord(this, orderItemId, DECREASE, TOTAL_LIMIT)
+					StockHistory.ofRecord(this, orderItemId, DECREASE, SOLD_OUT)
 			);
-			return TOTAL_LIMIT;
+			return SOLD_OUT;
 		}
 
 		total -= quantity;

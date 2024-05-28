@@ -1,10 +1,10 @@
-package org.ecommerce.orderapi.order.dto;
+package org.ecommerce.orderapi.order.dto.response;
 
 import java.time.LocalDateTime;
 
 import org.ecommerce.orderapi.order.entity.enumerated.OrderStatus;
 
-public record OrderDto(
+public record OrderResponse(
 		Long id,
 		Integer userId,
 		String userName,
