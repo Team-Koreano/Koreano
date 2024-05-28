@@ -23,7 +23,7 @@ public enum UserErrorCode implements ErrorCode {
 	PLEASE_RELOGIN(HttpStatus.BAD_REQUEST, "재로그인 해주시길 바랍니다."),
 	IS_NOT_VALID_USER(HttpStatus.BAD_REQUEST, "유효하지 않은 회원입니다"),
 	IS_NOT_VALID_SELLER(HttpStatus.BAD_REQUEST, "유효하지 않은 판매자입니다"),
-	NOT_FOUND_USER(HttpStatus.BAD_REQUEST, "회원을 회원을 찾을 수 없습니다");
+	NOT_FOUND_USER(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다");
 
 	UserErrorCode(HttpStatus status, String message) {
 		this.message = message;
