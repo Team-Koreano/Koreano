@@ -112,7 +112,7 @@ public class BucketDomainService {
 	public void validateProduct(final Integer productId) {
 		Product product = ProductMapper.INSTANCE.responseToEntity(
 				productServiceClient.getProduct(productId));
-		if (product.isAvailableStatus()) {
+		if (!product.isAvailableStatus()) {
 			throw new CustomException(NOT_AVAILABLE_PRODUCT);
 		}
 	}

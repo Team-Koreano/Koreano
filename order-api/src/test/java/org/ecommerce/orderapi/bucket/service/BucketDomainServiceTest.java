@@ -1,9 +1,12 @@
 package org.ecommerce.orderapi.bucket.service;
 
+import static org.ecommerce.orderapi.order.entity.enumerated.ProductStatus.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
@@ -12,6 +15,10 @@ import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
 import org.ecommerce.orderapi.bucket.entity.Bucket;
 import org.ecommerce.orderapi.bucket.exception.BucketErrorCode;
 import org.ecommerce.orderapi.bucket.repository.BucketRepository;
+import org.ecommerce.orderapi.global.client.ProductServiceClient;
+import org.ecommerce.orderapi.order.dto.response.ProductResponse;
+import org.ecommerce.orderapi.stock.entity.Stock;
+import org.ecommerce.orderapi.stock.repository.StockRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +35,12 @@ public class BucketDomainServiceTest {
 
 	@Mock
 	private BucketRepository bucketRepository;
+
+	@Mock
+	private StockRepository stockRepository;
+
+	@Mock
+	private ProductServiceClient productServiceClient;
 
 	@Test
 	void 장바구니에_담기() {
@@ -46,6 +59,26 @@ public class BucketDomainServiceTest {
 				LocalDate.of(2024, 5, 2)
 		);
 
+		ProductResponse productResponse = new ProductResponse(
+				101,
+				"상품 이름",
+				10000,
+				1,
+				"판매자 이름",
+				AVAILABLE
+		);
+
+		Stock stock = new Stock(
+				1,
+				101,
+				10,
+				LocalDateTime.of(2024, 5, 28, 0, 0),
+				List.of()
+		);
+		given(productServiceClient.getProduct(anyInt()))
+				.willReturn(productResponse);
+		given(stockRepository.findStockByProductId(anyInt()))
+				.willReturn(stock);
 		given(bucketRepository.save(any(Bucket.class)))
 				.willReturn(savedBucket);
 		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
