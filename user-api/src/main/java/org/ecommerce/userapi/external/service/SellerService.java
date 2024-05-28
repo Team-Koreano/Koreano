@@ -66,10 +66,10 @@ public class SellerService {
 			passwordEncoder.encode(requestSeller.password()),
 			requestSeller.address(), requestSeller.phoneNumber()));
 
-		seller.registerBeanPayId(
-			sellerServiceClient.createBeanPay()
-				.getId()
-		);
+		// seller.registerBeanPayId(
+		// 	sellerServiceClient.createBeanPay()
+		// 		.getId()
+		// );
 
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
@@ -194,7 +194,7 @@ public class SellerService {
 	}
 
 	@VisibleForTesting
-	public boolean checkIsMatchedPassword(String requestPassword, String userPassword) {
+	public boolean checkIsMatchedPassword(final String requestPassword, final String userPassword) {
 		return passwordEncoder.matches(requestPassword, userPassword);
 	}
 }
