@@ -2,6 +2,7 @@ package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.enumerated.ProductDocumentField;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchCustomRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
@@ -18,6 +19,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -31,7 +33,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		// name 에 가중치를 둬서 일치할수록 score 를 높이는 쿼리
 		QueryVariant matchQueryBoostedKeyword = new MatchQuery.Builder()
-			.field("name")
+			.field(ProductDocumentField.NAME.getField())
 			.query(keyword)
 			.boost(2f)
 			.build();
@@ -54,58 +56,68 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	@Override
 	public SearchHits<ProductDocument> searchProducts(ProductSearchDto.Request.Search search, Pageable pageable) {
 
+		// TODO  .toLowerCase() 를 es 설정으로 ABC 토큰나이저 사용 안하게 변경해야함.
+
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
-				.field(search.sortType().getTitle())
-				.order(SortOrder.Desc));
-
+				.field(search.sortType().getField())
+				.order(SortOrder.valueOf(search.sortType().getOrderBy())));
 		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
 
-		if (!search.keyword().trim().isEmpty()) {
+		if (Boolean.TRUE.equals(search.validKeyword())) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("name")
+				.field(ProductDocumentField.NAME.getField())
 				.query(search.keyword())
 				.build();
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (search.isDecaf() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("isDecaf")
-				.query(search.isDecaf())
+		if (Boolean.TRUE.equals(search.validIsDecaf())) {
+			QueryVariant termQuery = new TermQuery.Builder()
+				.field(ProductDocumentField.IS_DECAF.getField())
+				.value(search.isDecaf())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (search.category() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("category")
-				.query(search.category().getCode())
+		if (Boolean.TRUE.equals(search.validCategory())) {
+			QueryVariant termQuery = new TermQuery.Builder()
+				.field(ProductDocumentField.CATEGORY.getField())
+				.value(search.category().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (search.bean() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("bean")
-				.query(search.bean().getCode())
+		if (Boolean.TRUE.equals(search.validBean())) {
+			QueryVariant termQuery = new TermQuery.Builder()
+				.field(ProductDocumentField.BEAN.getField())
+				.value(search.bean().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (search.acidity() != null) {
-			QueryVariant matchQuery = new MatchQuery.Builder()
-				.field("acidity")
-				.query(search.acidity().getTitle())
+		if (Boolean.TRUE.equals(search.validAcidity())) {
+			QueryVariant termQuery = new TermQuery.Builder()
+				.field(ProductDocumentField.ACIDITY.getField())
+				.value(search.acidity().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.must(new Query(matchQuery));
+			boolQueryBuilder.filter(new Query(termQuery));
 		}
+
+		//todo 전체 개수 반환 로직 추가 필요
+
+		Long totalCount = elasticsearchTemplate.count(
+			NativeQuery.builder()
+				.withQuery(boolQueryBuilder.build()._toQuery())
+				.build()
+			, ProductDocument.class);
 
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
 			.withSort(sortOptions)
 			.withPageable(pageable)
 			.build();
+
 
 		return elasticsearchTemplate.search(query, ProductDocument.class);
 	}

@@ -103,9 +103,10 @@ class ExternalProductManagementControllerTest {
 				"부산 진구 유명가수가 좋아하는 원두",
 				false
 				, "20 * 50"
+				, "500ml"
 			);
 
-		final Product product = Product.createBean(
+		final Product product = Product.createProduct(
 			productDtos.category(),
 			productDtos.price(),
 			productDtos.stock(),
@@ -115,6 +116,8 @@ class ExternalProductManagementControllerTest {
 			productDtos.information(),
 			productDtos.isCrush(),
 			productDtos.isDecaf(),
+			productDtos.size(),
+			productDtos.capacity(),
 			test
 		);
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -128,9 +131,6 @@ class ExternalProductManagementControllerTest {
 			"application/json", objectMapper.writeValueAsString(productDtos).getBytes(StandardCharsets.UTF_8));
 
 		final ProductManagementDto productConvertToDto = ProductManagementMapper.INSTANCE.toDto(product);
-
-		final ProductManagementDto.Response expectedResponse = ProductManagementMapper.INSTANCE.toResponse(
-			productConvertToDto);
 
 		saveImages(imageDtos, product);
 
@@ -179,7 +179,7 @@ class ExternalProductManagementControllerTest {
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", status, testTime, testTime, null
+			true, "20*50", "500ml", status, testTime, testTime, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
@@ -207,12 +207,13 @@ class ExternalProductManagementControllerTest {
 		final Product originalEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 		final Product expectedEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
@@ -234,12 +235,12 @@ class ExternalProductManagementControllerTest {
 		final Integer productId = 1;
 		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", null, true);
+			"수정된", "커피", null, null, true);
 
 		final Product expectedEntity = new Product(
 			productId, dto.category(), dto.price(), 50, test, 0, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), "20 * 50", ProductStatus.AVAILABLE, testTime, testTime, null
+			dto.isCrush(), "20 * 50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -295,13 +296,13 @@ class ExternalProductManagementControllerTest {
 		final Product entity1 = new Product(
 			1, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", status, null, null, null
+			true, "20*50", "500ml", status, null, null, null
 		);
 
 		final Product entity2 = new Product(
 			2, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", status, null, null, null
+			true, "20*50", "500ml", status, null, null, null
 		);
 
 		List<Product> products = List.of(entity1, entity2);

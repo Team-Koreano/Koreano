@@ -17,9 +17,20 @@ public class ProductRepositoryImpl implements ProductCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<Product> findProductById(List<Integer> productIds) {
+	public List<Product> findProductsByIds(List<Integer> productIds) {
 		return jpaQueryFactory.selectFrom(product)
+			.leftJoin(product.images).fetchJoin()
+			.leftJoin(product.sellerRep).fetchJoin()
 			.where(product.id.in(productIds))
 			.fetch();
+	}
+
+	@Override
+	public Product findProductById(Integer productId) {
+		return jpaQueryFactory.selectFrom(product)
+			.leftJoin(product.images).fetchJoin()
+			.leftJoin(product.sellerRep).fetchJoin()
+			.where(product.id.eq(productId))
+			.fetchFirst();
 	}
 }
