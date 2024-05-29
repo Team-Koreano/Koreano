@@ -6,6 +6,6 @@ import org.ecommerce.product.entity.Product;
 
 public interface ProductCustomRepository {
 
-	Optional<Product> findProductById(final Integer id);
+	Product findProductById(final Integer id);
 
 }
