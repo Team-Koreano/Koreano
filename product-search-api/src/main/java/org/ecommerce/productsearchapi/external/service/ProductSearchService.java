@@ -28,8 +28,11 @@ public class ProductSearchService {
 	@Transactional(readOnly = true)
 	public ProductSearchDto getProductById(final Integer productId) {
 
-		final Product product = productRepository.findProductById(productId)
-			.orElseThrow(() -> new CustomException(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID));
+		final Product product = productRepository.findProductById(productId);
+
+		if (product == null) {
+			throw new CustomException(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID);
+		}
 
 		return ProductMapper.INSTANCE.entityToDto(product);
 	}
