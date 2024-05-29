@@ -13,6 +13,7 @@ import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.enumerated.ProductSortType;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorMessages;
+import org.springframework.util.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -87,26 +88,23 @@ public class ProductSearchDto {
 			ProductSortType sortType
 		) {
 
-			public Boolean validKeyword() {
-				if (this.keyword == null) {
-					return false;
-				}
-				return !this.keyword.trim().isEmpty();
+			public boolean validKeyword() {
+				return StringUtils.hasText(this.keyword);
 			}
 
-			public Boolean validIsDecaf() {
+			public boolean validIsDecaf() {
 				return this.isDecaf != null;
 			}
 
-			public Boolean validCategory() {
+			public boolean validCategory() {
 				return this.category != null;
 			}
 
-			public Boolean validBean() {
+			public boolean validBean() {
 				return this.bean != null;
 			}
 
-			public Boolean validAcidity() {
+			public boolean validAcidity() {
 				return this.acidity != null;
 			}
 
