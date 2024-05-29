@@ -58,8 +58,8 @@ public class LockTestServiceTest {
 	@BeforeEach
 	public void before() {
 		BeanPay userBeanPay = BeanPay.ofCreate(1, USER);
-		BeanPay sellerBeanPay = new BeanPay(null, 1, SELLER, 0, null);
-		BeanPay sellerBeanPay2 = new BeanPay(null, 2, SELLER, 0, null);
+		BeanPay sellerBeanPay = new BeanPay(null, 1, SELLER, 0, null, null);
+		BeanPay sellerBeanPay2 = new BeanPay(null, 2, SELLER, 0, null, null);
 		this.userBeanPay = beanPayRepository.saveAndFlush(userBeanPay);
 		beanPayRepository.saveAndFlush(sellerBeanPay);
 		beanPayRepository.saveAndFlush(sellerBeanPay2);

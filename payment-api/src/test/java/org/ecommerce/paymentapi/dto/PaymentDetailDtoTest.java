@@ -156,10 +156,10 @@ class PaymentDetailDtoTest {
 		assertEquals(6, violations.size());
 	}
 	private BeanPay getUserBeanPay() {
-		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now(), null);
 	}
 	private BeanPay getSellerBeanPay() {
-		return new BeanPay(2, 1, SELLER, 0, LocalDateTime.now());
+		return new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null);
 	}
 
 }

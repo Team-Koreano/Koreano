@@ -67,7 +67,8 @@ class PaymentControllerTest {
 			final Long orderId = 1L;
 			final Integer startAmount = 100_000;
 			final Integer userId = 1;
-			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
+			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount,
+				LocalDateTime.now(), null);
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
@@ -79,8 +80,8 @@ class PaymentControllerTest {
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
 			final List<BeanPay> sellerBeanPays = List.of(
-				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
-				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
+				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null),
+				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now(), null)
 			);
 			final PaymentPriceRequest request =
 				new PaymentPriceRequest(
@@ -158,7 +159,7 @@ class PaymentControllerTest {
 			final String cancelReason = "사용자 단순 변심";
 			final Integer startAmount = 100_000;
 			final Integer userId = 1;
-			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now());
+			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now(), null);
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
@@ -170,8 +171,8 @@ class PaymentControllerTest {
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
 			final List<BeanPay> sellerBeanPays = List.of(
-				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
-				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
+				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null),
+				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now(), null)
 			);
 			final PaymentPriceRequest paymentPrice =
 				new PaymentPriceRequest(

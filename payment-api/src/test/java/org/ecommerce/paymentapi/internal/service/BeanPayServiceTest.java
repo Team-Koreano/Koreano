@@ -40,7 +40,8 @@ class BeanPayServiceTest {
 			final Integer amount = 0;
 			final LocalDateTime createDateTime = LocalDateTime.now();
 			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
-			final BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
+			final BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime
+				, null);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),

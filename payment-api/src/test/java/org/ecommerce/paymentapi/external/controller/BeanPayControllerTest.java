@@ -192,7 +192,7 @@ class BeanPayControllerTest {
 	}
 
 	private BeanPay getBeanPay() {
-		return new BeanPay(1, 1, USER, 0, LocalDateTime.now());
+		return new BeanPay(1, 1, USER, 0, LocalDateTime.now(), null);
 	}
 
 }
