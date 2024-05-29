@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class BucketReadServiceTest {
@@ -28,6 +29,8 @@ public class BucketReadServiceTest {
 	@Test
 	void 장바구니_조회() {
 		// given
+		Integer userId = 1;
+		PageRequest pageRequest = PageRequest.of(0, 10);
 		List<Bucket> buckets = List.of(
 				new Bucket(1L,
 						1,
@@ -48,7 +51,8 @@ public class BucketReadServiceTest {
 				.willReturn(buckets);
 
 		// when
-		final List<BucketDto> bucketDtos = bucketReadService.getAllBuckets(1);
+		final List<BucketDto> bucketDtos =
+				bucketReadService.getAllBuckets(userId, pageRequest);
 
 		// then
 		assertEquals(buckets.size(), bucketDtos.size());

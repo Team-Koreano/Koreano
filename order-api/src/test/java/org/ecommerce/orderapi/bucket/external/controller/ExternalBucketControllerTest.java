@@ -65,7 +65,7 @@ public class ExternalBucketControllerTest {
 								)
 						)
 				);
-		when(bucketReadService.getAllBuckets(anyInt())).thenReturn(bucketDtos);
+		when(bucketReadService.getAllBuckets(anyInt(), any())).thenReturn(bucketDtos);
 
 		// when
 		// then
