@@ -102,7 +102,7 @@ public class BucketDomainServiceTest {
 	@Test
 	void 장바구니_수정() {
 		// given
-		final Integer newQuantity = 777;
+		final Integer newQuantity = 7;
 		final Bucket savedBucket = spy(
 				new Bucket(1L,
 						1,
@@ -112,9 +112,29 @@ public class BucketDomainServiceTest {
 						LocalDate.of(2024, 5, 2)
 				)
 		);
+		ProductResponse productResponse = new ProductResponse(
+				101,
+				"상품 이름",
+				10000,
+				1,
+				"판매자 이름",
+				AVAILABLE
+		);
+
+		Stock stock = new Stock(
+				1,
+				101,
+				10,
+				LocalDateTime.of(2024, 5, 28, 0, 0),
+				List.of()
+		);
 		final ModifyBucketRequest request = new ModifyBucketRequest(newQuantity);
 		given(bucketRepository.findByIdAndUserId(anyLong(), anyInt()))
 				.willReturn(savedBucket);
+		given(productServiceClient.getProduct(anyInt()))
+				.willReturn(productResponse);
+		given(stockRepository.findStockByProductId(anyInt()))
+				.willReturn(stock);
 
 		// when
 		final BucketDto bucketDto = bucketDomainService.modifyBucket(
@@ -131,7 +151,7 @@ public class BucketDomainServiceTest {
 	@Test
 	void 존재하지_않는_장바구니를_수정할_때() {
 		// given
-		final ModifyBucketRequest bucketModifyRequest = new ModifyBucketRequest(777);
+		final ModifyBucketRequest bucketModifyRequest = new ModifyBucketRequest(40);
 		given(bucketRepository.findByIdAndUserId(anyLong(), anyInt()))
 				.willReturn(null);
 

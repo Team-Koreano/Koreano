@@ -157,7 +157,7 @@ public class ExternalBucketControllerTest {
 	@Test
 	void 장바구니_상품_수정() throws Exception {
 		// given
-		final Integer newQuantity = 777;
+		final Integer newQuantity = 7;
 		final BucketDto bucketDto = new BucketDto(
 				1L,
 				1,
