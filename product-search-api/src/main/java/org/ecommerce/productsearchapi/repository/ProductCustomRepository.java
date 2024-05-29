@@ -1,6 +1,5 @@
 package org.ecommerce.productsearchapi.repository;
 
-import java.util.Optional;
 
 import org.ecommerce.product.entity.Product;
 
