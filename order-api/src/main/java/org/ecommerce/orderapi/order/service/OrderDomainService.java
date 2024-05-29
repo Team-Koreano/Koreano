@@ -148,6 +148,7 @@ public class OrderDomainService {
 		// 				101,
 		// 				"에디오피아 이가체프",
 		// 				10000,
+		// 				0,
 		// 				1,
 		// 				"seller1",
 		// 				AVAILABLE
@@ -156,6 +157,7 @@ public class OrderDomainService {
 		// 				102,
 		// 				"과테말라 안티구아",
 		// 				20000,
+		// 				0,
 		// 				2,
 		// 				"seller2",
 		// 				AVAILABLE

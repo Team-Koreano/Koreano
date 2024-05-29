@@ -1,7 +1,11 @@
 package org.ecommerce.orderapi.bucket.entity;
 
+import static org.ecommerce.orderapi.bucket.exception.BucketErrorCode.*;
+import static org.ecommerce.orderapi.bucket.util.BucketPolicyConstants.*;
+
 import java.time.LocalDate;
 
+import org.ecommerce.common.error.CustomException;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
@@ -59,7 +63,10 @@ public class Bucket {
 		return bucket;
 	}
 
-	public void modifyQuantity(final Integer quantity) {
-		this.quantity = quantity;
+	public void modifyQuantity(final Integer newQuantity) {
+		if (newQuantity > MAXIMUM_PRODUCT_QUANTITY) {
+			throw new CustomException(TOO_MANY_QUANTITY_IN_BUCKET);
+		}
+		this.quantity = newQuantity;
 	}
 }

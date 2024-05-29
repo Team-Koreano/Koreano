@@ -11,7 +11,7 @@ public interface BucketMapper {
 
 	BucketMapper INSTANCE = Mappers.getMapper(BucketMapper.class);
 
-	Bucket responseToEntity(BucketResponse response);
 	BucketDto toDto(Bucket bucket);
+
 	BucketResponse toResponse(BucketDto bucketDto);
 }

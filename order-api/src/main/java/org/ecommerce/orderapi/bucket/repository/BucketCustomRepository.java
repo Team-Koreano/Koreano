@@ -12,4 +12,6 @@ public interface BucketCustomRepository {
 	List<Bucket> findAllByIdInAndUserId(final List<Long> bucketIds, final Integer userId);
 
 	List<Bucket> findAllByInId(final List<Long> bucketIds);
+
+	Bucket findByUserIdAndProductId(final Integer userId, final Integer productId);
 }

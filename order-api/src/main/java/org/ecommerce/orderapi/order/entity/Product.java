@@ -18,6 +18,7 @@ public class Product {
 	private Integer id;
 	private String name;
 	private Integer price;
+	private Integer deliveryFee;
 	private Integer sellerId;
 	private String sellerName;
 	private ProductStatus status;

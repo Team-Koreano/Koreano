@@ -94,9 +94,9 @@ public class StockDomainService {
 	 */
 	public void saveMock() {
 		stockRepository.saveAll(List.of(
-				Stock.of(101, 10),
-				Stock.of(102, 20),
-				Stock.of(103, 30)
+				Stock.of(101, 100),
+				Stock.of(102, 200),
+				Stock.of(103, 300)
 		));
 	}
 

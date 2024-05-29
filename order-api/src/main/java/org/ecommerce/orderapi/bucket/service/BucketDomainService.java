@@ -40,22 +40,33 @@ public class BucketDomainService {
 	 * @author ${Juwon}
 	 *
 	 * @param userId- 회원 번호
-	 * @param addRequest- 장바구니에 담을 상품 정보
+	 * @param request- 장바구니에 담을 상품 정보
 	 * @return BucketDto- 장바구니 정보
 	 */
 	public BucketDto addBucket(
 			final Integer userId,
-			final AddBucketRequest addRequest
+			final AddBucketRequest request
 	) {
-		validateProduct(addRequest.productId());
-		validateStock(addRequest.productId(), addRequest.quantity());
+		validateProduct(request.productId());
+
+		Bucket bucket =
+				bucketRepository.findByUserIdAndProductId(userId, request.productId());
+
+		if (bucket != null) {
+			Integer newQuantity = bucket.getQuantity() + request.quantity();
+			validateStock(request.productId(), newQuantity);
+			bucket.modifyQuantity(newQuantity);
+			return BucketMapper.INSTANCE.toDto(bucket);
+		}
+
+		validateStock(request.productId(), request.quantity());
 		return BucketMapper.INSTANCE.toDto(
 				bucketRepository.save(
 						Bucket.ofAdd(
 								userId,
-								addRequest.seller(),
-								addRequest.productId(),
-								addRequest.quantity()
+								request.seller(),
+								request.productId(),
+								request.quantity()
 						)
 				)
 		);
@@ -81,6 +92,8 @@ public class BucketDomainService {
 			final ModifyBucketRequest modifyRequest
 	) {
 		final Bucket bucket = getBucket(userId, bucketId);
+		validateProduct(bucket.getProductId());
+		validateStock(bucket.getProductId(), bucket.getQuantity());
 		bucket.modifyQuantity(modifyRequest.quantity());
 		return BucketMapper.INSTANCE.toDto(bucket);
 	}
