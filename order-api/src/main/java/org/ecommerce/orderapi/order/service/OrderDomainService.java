@@ -95,19 +95,6 @@ public class OrderDomainService {
 		);
 	}
 
-	/**
-	 * 주문을 완료하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param orderId- 주문 번호
-	 * @param orderItemIds- 주문 항목 번호 Set
-	 */
-	public void completeOrder(final Long orderId, final Set<Long> orderItemIds) {
-		Order order = orderRepository.findOrderById(orderId);
-		validateOrder(order);
-		order.complete(orderItemIds);
-	}
-
 	@VisibleForTesting
 	public Order saveOrder(
 			final Integer userId,
