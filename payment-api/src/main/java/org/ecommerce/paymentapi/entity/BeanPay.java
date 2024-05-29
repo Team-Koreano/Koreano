@@ -93,6 +93,8 @@ public class BeanPay {
 	public void delete() {
 		if(this.deleteDateTime != null)
 			throw new CustomException(ALREADY_DELETE);
+		if(this.amount > 0)
+			throw new CustomException(REMAIN_BEANPAY);
 		this.deleteDateTime = LocalDateTime.now();
 	}
 }
