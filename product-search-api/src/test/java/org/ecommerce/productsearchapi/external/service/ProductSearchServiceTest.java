@@ -39,7 +39,7 @@ public class ProductSearchServiceTest {
 		// given
 		final Product product = getProduct();
 
-		given(productRepository.findProductById(anyInt())).willReturn(Optional.of(product));
+		given(productRepository.findProductById(anyInt())).willReturn(product);
 
 		// when
 		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
@@ -90,7 +90,7 @@ public class ProductSearchServiceTest {
 	@Test
 	void 없는_상품_조회() {
 		// given
-		given(productRepository.findProductById(anyInt())).willReturn(Optional.empty());
+		given(productRepository.findProductById(anyInt())).willReturn(null);
 
 		// when
 		CustomException exception = assertThrows(CustomException.class, () -> productSearchService.getProductById(1));
