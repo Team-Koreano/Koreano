@@ -63,6 +63,7 @@ public class BucketDomainServiceTest {
 				101,
 				"상품 이름",
 				10000,
+				0,
 				1,
 				"판매자 이름",
 				AVAILABLE
@@ -116,6 +117,7 @@ public class BucketDomainServiceTest {
 				101,
 				"상품 이름",
 				10000,
+				0,
 				1,
 				"판매자 이름",
 				AVAILABLE
@@ -191,5 +193,64 @@ public class BucketDomainServiceTest {
 		assertEquals(bucketDto.productId(), captor.getValue().getProductId());
 		assertEquals(bucketDto.quantity(), captor.getValue().getQuantity());
 	}
+
+	@Test
+	void 존재하는_장바구니_추가로_담기() {
+		// given
+		AddBucketRequest bucketAddRequest =
+				new AddBucketRequest(
+						"inputSellerName",
+						103,
+						5
+				);
+		Bucket savedBucket = new Bucket(1L,
+				1,
+				"seller1",
+				101,
+				2,
+				LocalDate.of(2024, 5, 2)
+		);
+
+		ProductResponse productResponse = new ProductResponse(
+				101,
+				"상품 이름",
+				10000,
+				0,
+				1,
+				"판매자 이름",
+				AVAILABLE
+		);
+
+		Stock stock = new Stock(
+				1,
+				101,
+				10,
+				LocalDateTime.of(2024, 5, 28, 0, 0),
+				List.of()
+		);
+		given(productServiceClient.getProduct(anyInt()))
+				.willReturn(productResponse);
+		given(stockRepository.findStockByProductId(anyInt()))
+				.willReturn(stock);
+		given(bucketRepository.save(any(Bucket.class)))
+				.willReturn(savedBucket);
+		final ArgumentCaptor<Bucket> captor = ArgumentCaptor.forClass(Bucket.class);
+
+		// when
+		final BucketDto bucketDto = bucketDomainService.addBucket(
+				anyInt(),
+				bucketAddRequest
+		);
+
+		// then
+		verify(bucketRepository, times(1)).save(captor.capture());
+		assertEquals(bucketAddRequest.seller(), captor.getValue().getSeller());
+		assertEquals(bucketAddRequest.productId(), captor.getValue().getProductId());
+		assertEquals(bucketAddRequest.quantity(), captor.getValue().getQuantity());
+		assertEquals(savedBucket.getSeller(), bucketDto.seller());
+		assertEquals(savedBucket.getProductId(), bucketDto.productId());
+		assertEquals(savedBucket.getQuantity(), bucketDto.quantity());
+	}
+
 
 }
