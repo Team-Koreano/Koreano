@@ -21,8 +21,13 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.config.MockS3Config;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
+import org.ecommerce.productmanagementapi.dto.ImageDto;
+import org.ecommerce.productmanagementapi.dto.ProductManagementDtoWithImages;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyStockRequest;
 import org.ecommerce.productmanagementapi.external.ProductManagementService;
 import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ImageRepository;
@@ -85,14 +90,14 @@ class ExternalProductManagementControllerTest {
 	@Test
 	void 상품_등록() throws Exception {
 		//given
-		final List<ProductManagementDto.Request.Image> imageDtos = List.of(
-			new ProductManagementDto.Request.Image("image1.jpg", (short)1, true),
-			new ProductManagementDto.Request.Image("image2.jpg", (short)2, false),
-			new ProductManagementDto.Request.Image("image3.jpg", (short)3, false)
+		final List<ImageDto> imageDtos = List.of(
+			new ImageDto("image1.jpg", (short)1, true),
+			new ImageDto("image2.jpg", (short)2, false),
+			new ImageDto("image3.jpg", (short)3, false)
 		);
 
-		final ProductManagementDto.Request.Register productDtos =
-			new ProductManagementDto.Request.Register(
+		final CreateProductRequest productDtos =
+			new CreateProductRequest(
 				true,
 				1000,
 				50,
@@ -101,9 +106,10 @@ class ExternalProductManagementControllerTest {
 				ProductCategory.BEAN,
 				"정말 맛있는 원두 단돈 천원",
 				"부산 진구 유명가수가 좋아하는 원두",
-				false
-				, "20 * 50"
-				, "500ml"
+				false,
+				"20 * 50",
+				"500ml",
+				(short)3000
 			);
 
 		final Product product = Product.createProduct(
@@ -118,6 +124,7 @@ class ExternalProductManagementControllerTest {
 			productDtos.isDecaf(),
 			productDtos.size(),
 			productDtos.capacity(),
+			productDtos.deliveryFee(),
 			test
 		);
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -130,12 +137,12 @@ class ExternalProductManagementControllerTest {
 		final MockMultipartFile productJson = new MockMultipartFile("product", "",
 			"application/json", objectMapper.writeValueAsString(productDtos).getBytes(StandardCharsets.UTF_8));
 
-		final ProductManagementDto productConvertToDto = ProductManagementMapper.INSTANCE.toDto(product);
+		final ProductManagementDtoWithImages dto = ProductManagementMapper.INSTANCE.toDto(product);
 
 		saveImages(imageDtos, product);
 
 		when(productManagementService.productRegister(productDtos, mockThumbnailImage,
-			mockMultipartFiles)).thenReturn(productConvertToDto);
+			mockMultipartFiles)).thenReturn(dto);
 
 		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 		//when
@@ -160,12 +167,12 @@ class ExternalProductManagementControllerTest {
 			.andExpect(jsonPath("$.result.name").value(product.getName()))
 			.andExpect(jsonPath("$.result.price").value(product.getPrice()))
 			.andExpect(jsonPath("$.result.stock").value(product.getStock()))
-			.andExpect(jsonPath("$.result.acidity").value(product.getAcidity().getCode()))
-			.andExpect(jsonPath("$.result.bean").value(product.getBean().getCode()))
+			.andExpect(jsonPath("$.result.categoryResponse.acidity").value(product.getAcidity().getCode()))
+			.andExpect(jsonPath("$.result.categoryResponse.bean").value(product.getBean().getCode()))
 			.andExpect(jsonPath("$.result.category").value(product.getCategory().getCode()))
 			.andExpect(jsonPath("$.result.information").value(product.getInformation()))
 			.andExpect(jsonPath("$.result.status").value(product.getStatus().getCode()))
-			.andExpect(jsonPath("$.result.isCrush").value(product.getIsCrush()))
+			.andExpect(jsonPath("$.result.categoryResponse.isCrush").value(product.getIsCrush()))
 			.andExpect(jsonPath("$.result.bizName").value(product.getSellerRep().getBizName()))
 			.andDo(print());
 	}
@@ -179,10 +186,10 @@ class ExternalProductManagementControllerTest {
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, testTime, testTime, null
+			true, "20*50", "500ml", status, testTime, testTime, (short)3000, null
 		);
 
-		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
+		ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
 
 		when(productManagementService.modifyToStatus(eq(productId), eq(status)))
 			.thenReturn((expectedResponse));
@@ -202,21 +209,21 @@ class ExternalProductManagementControllerTest {
 		final Integer productId = 1;
 		final Integer changedStock = 10;
 
-		final ProductManagementDto.Request.Stock dto = new ProductManagementDto.Request.Stock(productId, changedStock);
+		final ModifyStockRequest dto = new ModifyStockRequest(productId, changedStock);
 
 		final Product originalEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 		);
 		final Product expectedEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 
 		);
 
-		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+		final ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
 
 		when(productManagementService.increaseToStock(dto))
 			.thenReturn(expectedResponse);
@@ -233,14 +240,14 @@ class ExternalProductManagementControllerTest {
 	@Test
 	void 상품_수정() throws Exception {
 		final Integer productId = 1;
-		final ProductManagementDto.Request.Modify dto = new ProductManagementDto.Request.Modify(
+		final ModifyProductRequest dto = new ModifyProductRequest(
 			true, 10000, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN,
-			"수정된", "커피", null, null, true);
+			"수정된", "커피", null, null, true, (short)3000);
 
 		final Product expectedEntity = new Product(
 			productId, dto.category(), dto.price(), 50, test, 0, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), "20 * 50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			dto.isCrush(), "20 * 50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -254,7 +261,7 @@ class ExternalProductManagementControllerTest {
 
 		mockMultipartFiles.add(mockMultipartFile);
 
-		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+		final ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
 
 		when(productManagementService.modifyToProduct(eq(productId),
 			eq(dto), eq(mockThumbnailImage), eq(mockMultipartFiles))).thenReturn(expectedResponse);
@@ -276,13 +283,13 @@ class ExternalProductManagementControllerTest {
 		perform
 			.andExpect(status().isOk())
 			.andDo(print())
-			.andExpect(jsonPath("$.result.id").value(expectedResponse.getId()))
-			.andExpect(jsonPath("$.result.category").value(expectedResponse.getCategory().name()))
-			.andExpect(jsonPath("$.result.price").value(expectedResponse.getPrice()))
-			.andExpect(jsonPath("$.result.name").value(expectedResponse.getName()))
-			.andExpect(jsonPath("$.result.information").value(expectedResponse.getInformation()))
-			.andExpect(jsonPath("$.result.isCrush").value(expectedResponse.getIsCrush()))
-			.andExpect(jsonPath("$.result.isDecaf").value(expectedResponse.getIsDecaf()));
+			.andExpect(jsonPath("$.result.id").value(expectedResponse.id()))
+			.andExpect(jsonPath("$.result.category").value(expectedResponse.category().name()))
+			.andExpect(jsonPath("$.result.price").value(expectedResponse.price()))
+			.andExpect(jsonPath("$.result.name").value(expectedResponse.name()))
+			.andExpect(jsonPath("$.result.information").value(expectedResponse.information()))
+			.andExpect(jsonPath("$.result.categoryResponse.isCrush").value(expectedResponse.isCrush()))
+			.andExpect(jsonPath("$.result.categoryResponse.isDecaf").value(expectedResponse.isDecaf()));
 	}
 
 	@Test
@@ -290,27 +297,25 @@ class ExternalProductManagementControllerTest {
 		// Given
 		final List<Integer> list = List.of(1, 2);
 		final ProductStatus status = ProductStatus.DISCONTINUED;
-		final ProductManagementDto.Request.BulkStatus request = new ProductManagementDto.Request.BulkStatus(list,
-			status);
+		final ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(list, status);
 
 		final Product entity1 = new Product(
 			1, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, null, null, null
+			true, "20*50", "500ml", status, null, null, (short)3000, null
 		);
 
 		final Product entity2 = new Product(
 			2, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, null, null, null
+			true, "20*50", "500ml", status, null, null, (short)3000, null
 		);
 
 		List<Product> products = List.of(entity1, entity2);
-		final List<ProductManagementDto> productManagementDtos = ProductManagementMapper.INSTANCE.productsToDtos(
-			products);
+		List<ProductManagementDtoWithImages> dtos = ProductManagementMapper.INSTANCE.toDtos(products);
 
 		when(productManagementService.bulkModifyStatus(eq(request)))
-			.thenReturn(productManagementDtos);
+			.thenReturn(dtos);
 
 		// when, then
 		mockMvc.perform(put("/api/external/product/v1/status")
@@ -324,13 +329,13 @@ class ExternalProductManagementControllerTest {
 	}
 
 	private void verifyImages(List<Image> images, int index,
-		List<ProductManagementDto.Request.Image> imageDtos) {
+		List<ImageDto> imageDtos) {
 		if (index >= images.size()) {
 			return;
 		}
 
 		Image image = images.get(index);
-		ProductManagementDto.Request.Image imageDto = imageDtos.get(index);
+		ImageDto imageDto = imageDtos.get(index);
 
 		assertThat(image.getImageUrl()).isEqualTo(imageDto.imageUrl());
 		assertThat(image.getIsThumbnail()).isEqualTo(imageDto.isThumbnail());
@@ -339,7 +344,7 @@ class ExternalProductManagementControllerTest {
 		verifyImages(images, index + 1, imageDtos);
 	}
 
-	private void saveImages(List<ProductManagementDto.Request.Image> imageDtos, Product savedProduct) {
+	private void saveImages(List<ImageDto> imageDtos, Product savedProduct) {
 		List<Image> images = imageDtos.stream()
 			.map(imageDto -> Image.ofCreate(imageDto.imageUrl(), imageDto.isThumbnail(), imageDto.sequenceNumber(),
 				savedProduct))
