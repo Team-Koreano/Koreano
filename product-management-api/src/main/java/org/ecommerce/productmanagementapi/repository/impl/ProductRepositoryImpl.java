@@ -31,6 +31,6 @@ public class ProductRepositoryImpl implements ProductCustomRepository {
 			.leftJoin(product.images).fetchJoin()
 			.leftJoin(product.sellerRep).fetchJoin()
 			.where(product.id.eq(productId))
-			.fetchFirst();
+			.fetchOne();
 	}
 }

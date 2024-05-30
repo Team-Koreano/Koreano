@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.productmanagementapi.aop.TimeCheck;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
+import org.ecommerce.productmanagementapi.dto.ImageDto;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
 import org.ecommerce.productmanagementapi.util.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +56,7 @@ public class S3Provider {
 	}
 
 	@TimeCheck
-	public List<ProductManagementDto.Request.Image> uploadImageFiles(MultipartFile thumbnailImage,
+	public List<ImageDto> uploadImageFiles(MultipartFile thumbnailImage,
 		List<MultipartFile> files) {
 
 		FileUtils.validateImageFile(thumbnailImage);
@@ -66,7 +66,7 @@ public class S3Provider {
 
 		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(numberOfThreads, 4));
 
-		List<CompletableFuture<ProductManagementDto.Request.Image>> tasks = new ArrayList<>(numberOfThreads);
+		List<CompletableFuture<ImageDto>> tasks = new ArrayList<>(numberOfThreads);
 
 		short count = 0;
 		boolean hasThumbnail = false;
@@ -78,7 +78,7 @@ public class S3Provider {
 			tasks.add(CompletableFuture.supplyAsync(() -> {
 				try {
 					String url = upload(thumbnailImage);
-					return ProductManagementDto.Request.Image.ofCreate(url, index, true);
+					return ImageDto.ofCreate(url, index, true);
 				} catch (IOException e) {
 					throw new CustomException(ProductManagementErrorCode.FAILED_FILE_UPLOAD);
 				}
@@ -93,7 +93,7 @@ public class S3Provider {
 				tasks.add(CompletableFuture.supplyAsync(() -> {
 					try {
 						String url = upload(file);
-						return ProductManagementDto.Request.Image.ofCreate(url, finalIndex, isThumbnail);
+						return ImageDto.ofCreate(url, finalIndex, isThumbnail);
 					} catch (IOException e) {
 						throw new CustomException(ProductManagementErrorCode.FAILED_FILE_UPLOAD);
 					}
