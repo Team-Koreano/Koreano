@@ -56,8 +56,11 @@ public class BeanPayService {
 	}
 
 	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		return beanPayRepository.findBeanPayByUserIdAndRole(userId, role)
-			.orElseThrow(() -> new CustomException(BeanPayErrorCode.NOT_FOUND_ID));
+		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+			userId, role);
+		if(beanPay == null)
+			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
+		return beanPay;
 	}
 
 	/**
@@ -91,13 +94,19 @@ public class BeanPayService {
 	 @return - BeanPay
 	 */
 	private PaymentDetail getPaymentDetail(final UUID id) throws CustomException {
-		return paymentDetailRepository.findPaymentDetailById(id)
-			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID));
+		PaymentDetail paymentDetail = paymentDetailRepository.findPaymentDetailById(id);
+		if(paymentDetail == null)
+			throw new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID);
+		return paymentDetail;
 	}
 
+
 	private PaymentDetail getPaymentDetail(final Long orderItemId) throws CustomException {
-		return paymentDetailRepository.findPaymentDetailByOrderItemId(orderItemId)
-			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID));
+		PaymentDetail paymentDetail = paymentDetailRepository.findPaymentDetailByOrderItemId(
+			orderItemId);
+		if(paymentDetail == null)
+			throw new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID);
+		return paymentDetail;
 	}
 
 	/**

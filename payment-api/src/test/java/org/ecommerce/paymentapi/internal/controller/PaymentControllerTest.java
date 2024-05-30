@@ -68,7 +68,7 @@ class PaymentControllerTest {
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
-			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -82,13 +82,11 @@ class PaymentControllerTest {
 			final PaymentDto.Request.PaymentPrice request =
 				new PaymentDto.Request.PaymentPrice(
 				1L,
-				paymentAmount,
 				userBeanPay.getUserId(),
 				orderName,
 				List.of(
 					new PaymentDetailDto.Request.PaymentDetailPrice(
 						orderItemIds[0],
-						amounts[0],
 						prices[0],
 						quantity[0],
 						deliveryFees[0],
@@ -97,7 +95,6 @@ class PaymentControllerTest {
 					),
 					new PaymentDetailDto.Request.PaymentDetailPrice(
 						orderItemIds[1],
-						amounts[1],
 						prices[1],
 						quantity[1],
 						deliveryFees[1],
@@ -106,7 +103,6 @@ class PaymentControllerTest {
 					),
 					new PaymentDetailDto.Request.PaymentDetailPrice(
 						orderItemIds[2],
-						amounts[2],
 						prices[2],
 						quantity[2],
 						deliveryFees[2],
@@ -121,7 +117,6 @@ class PaymentControllerTest {
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -138,7 +133,7 @@ class PaymentControllerTest {
 				.andExpect(jsonPath("$.id").value(response.id()))
 				.andExpect(jsonPath("$.orderId").value(response.orderId()))
 				.andExpect(jsonPath("$.userId").value(response.userId()))
-				.andExpect(jsonPath("$.totalAmount").value(response.totalAmount()))
+				.andExpect(jsonPath("$.totalPaymentAmount").value(response.totalPaymentAmount()))
 				.andExpect(jsonPath("$.orderName").value(response.orderName()))
 				.andExpect(jsonPath("$.processStatus").value(response.processStatus().name()))
 				.andExpect(jsonPath("$.createDateTime").value(response.createDateTime()))
@@ -164,7 +159,7 @@ class PaymentControllerTest {
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
-			final Integer[] amounts = {5000, 5000, 5000};
+			final Integer[] paymentAmounts = {5000, 5000, 5000};
 			final Integer[] deliveryFees = {0, 0, 0};
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
@@ -178,13 +173,11 @@ class PaymentControllerTest {
 			final PaymentDto.Request.PaymentPrice paymentPrice =
 				new PaymentDto.Request.PaymentPrice(
 					1L,
-					paymentAmount,
 					userBeanPay.getUserId(),
 					orderName,
 					List.of(
 						new PaymentDetailDto.Request.PaymentDetailPrice(
 							orderItemIds[0],
-							amounts[0],
 							prices[0],
 							quantity[0],
 							deliveryFees[0],
@@ -193,7 +186,6 @@ class PaymentControllerTest {
 						),
 						new PaymentDetailDto.Request.PaymentDetailPrice(
 							orderItemIds[1],
-							amounts[1],
 							prices[1],
 							quantity[1],
 							deliveryFees[1],
@@ -202,7 +194,6 @@ class PaymentControllerTest {
 						),
 						new PaymentDetailDto.Request.PaymentDetailPrice(
 							orderItemIds[2],
-							amounts[2],
 							prices[2],
 							quantity[2],
 							deliveryFees[2],
@@ -217,7 +208,6 @@ class PaymentControllerTest {
 			Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
-				paymentAmount,
 				orderName,
 				beanPayPaymentPrice
 			);
@@ -226,10 +216,11 @@ class PaymentControllerTest {
 			PaymentCancel request = new PaymentCancel(
 				paymentDetail.getUserBeanPay().getUserId(),
 				paymentDetail.getSellerBeanPay().getUserId(),
+				orderId,
 				paymentDetail.getOrderItemId(),
 				cancelReason
 			);
-			paymentDetail.cancelPaymentDetail(cancelReason);
+			payment.cancelPaymentDetail(request.orderItemId(), request.cancelReason());
 			PaymentDetailDto dto = PaymentMapper.INSTANCE.paymentDetailToDto(
 				paymentDetail);
 			when(paymentService.cancelPaymentDetail(request)).thenReturn(dto);

@@ -69,13 +69,21 @@ public class PaymentDetail {
 	private Long orderItemId;
 
 	@Column
+	private Integer price = 0;
+
+	@Column
+	private Integer quantity = 0;
+
+	@Column
 	private Integer deliveryFee = 0;
+
+	@Column
+	private Integer totalAmount = 0;
 
 	@Column(nullable = false)
 	private Integer paymentAmount = 0;
 
-	@Column
-	private Integer quantity = 0;
+
 
 	@Column
 	private String paymentName;
@@ -87,7 +95,6 @@ public class PaymentDetail {
 	private String failReason;
 
 	@OneToOne(
-		mappedBy = "paymentDetail",
 		fetch = FetchType.LAZY,
 		cascade = {
 			CascadeType.PERSIST,
@@ -138,8 +145,8 @@ public class PaymentDetail {
 		final BeanPay sellerBeanPay,
 		final Long orderDetailId,
 		final Integer deliveryFee,
-		final Integer paymentAmount,
 		final Integer quantity,
+		final Integer price,
 		final String productName
 	) {
 		final BeanPay userBeanPay = payment.getUserBeanPay();
@@ -149,9 +156,11 @@ public class PaymentDetail {
 		paymentDetail.userBeanPay = userBeanPay;
 		paymentDetail.sellerBeanPay = sellerBeanPay;
 		paymentDetail.orderItemId = orderDetailId;
-		paymentDetail.deliveryFee = deliveryFee;
-		paymentDetail.paymentAmount = paymentAmount;
+		paymentDetail.price = price;
 		paymentDetail.quantity = quantity;
+		paymentDetail.deliveryFee = deliveryFee;
+		paymentDetail.totalAmount = quantity * price;
+		paymentDetail.paymentAmount = quantity * price + deliveryFee;
 		paymentDetail.paymentName = productName;
 		paymentDetail.paymentStatus = PAYMENT;
 
@@ -159,10 +168,16 @@ public class PaymentDetail {
 			PaymentStatusHistory.ofRecord(paymentDetail)
 		);
 		// 각 결제 디테일 계산
-		userBeanPay.payment(paymentAmount, sellerBeanPay);
+		userBeanPay.payment(paymentDetail.getPaymentAmount(), sellerBeanPay);
+		payment.increaseTotalAmount(paymentDetail.getPaymentAmount());
 		paymentDetail.changeProcessStatus(COMPLETED);
 
 		return paymentDetail;
+	}
+
+
+	public void calculatePaymentAmount() {
+
 	}
 
 	/**
@@ -197,7 +212,6 @@ public class PaymentDetail {
 			throw new CustomException(PaymentDetailErrorCode.DUPLICATE_API_CALL);
 
 		this.chargeInfo = ChargeInfo.ofCharge(
-			this,
 			response.paymentKey(),
 			response.approveDateTime());
 		this.paymentName = response.orderName();

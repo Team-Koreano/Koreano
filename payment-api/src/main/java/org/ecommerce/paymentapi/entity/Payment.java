@@ -1,13 +1,16 @@
 package org.ecommerce.paymentapi.entity;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
+import static org.ecommerce.paymentapi.exception.PaymentErrorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.util.Pair;
@@ -53,7 +56,7 @@ public class Payment {
 	private BeanPay userBeanPay;
 
 	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount = 0;
+	private Integer totalPaymentAmount = 0;
 
 	@Column(name = "order_name", nullable = false)
 	private String orderName;
@@ -84,14 +87,12 @@ public class Payment {
 	public static Payment ofPayment(
 		final BeanPay userBeanPay,
 		final Long orderId,
-		final Integer totalAmount,
 		final String orderName,
 		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
 		payment.userBeanPay = userBeanPay;
-		payment.totalAmount = totalAmount;
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
 
@@ -106,8 +107,8 @@ public class Payment {
 					sellerBeanPay,
 					paymentDetailPrice.orderItemId(),
 					paymentDetailPrice.deliveryFee(),
-					paymentDetailPrice.paymentAmount(),
 					paymentDetailPrice.quantity(),
+					paymentDetailPrice.price(),
 					paymentDetailPrice.productName()
 				)
 			);
@@ -125,5 +126,26 @@ public class Payment {
 
 	private void changeProcessStatus(ProcessStatus status) {
 		this.status = status;
+	}
+
+	public PaymentDetail cancelPaymentDetail(Long orderItemId, String message) {
+		PaymentDetail cancelPaymentDetail = this.paymentDetails.stream()
+			.filter(paymentDetail ->
+				paymentDetail.getOrderItemId().equals(orderItemId))
+			.findFirst()
+			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID))
+			.cancelPaymentDetail(message);
+		decreaseTotalAmount(cancelPaymentDetail.getPaymentAmount());
+		return cancelPaymentDetail;
+	}
+
+	private void decreaseTotalAmount(Integer amount) {
+		if(this.totalPaymentAmount - amount < 0)
+			throw new CustomException(INVALID_AMOUNT);
+		this.totalPaymentAmount -= amount;
+	}
+
+	protected void increaseTotalAmount(Integer amount) {
+		this.totalPaymentAmount += amount;
 	}
 }

@@ -2,7 +2,6 @@ package org.ecommerce.paymentapi.repository.impl;
 
 import static org.ecommerce.paymentapi.entity.QPaymentDetail.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.ecommerce.paymentapi.entity.PaymentDetail;
@@ -20,22 +19,18 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<PaymentDetail> findPaymentDetailByOrderItemId(Long orderItemId) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(paymentDetail)
+	public PaymentDetail findPaymentDetailByOrderItemId(Long orderItemId) {
+		return jpaQueryFactory.selectFrom(paymentDetail)
 				.where(paymentDetail.orderItemId.eq(orderItemId))
 				.join(paymentDetail.userBeanPay).fetchJoin()
 				.join(paymentDetail.sellerBeanPay).fetchJoin()
-				.fetchFirst()
-		);
+				.fetchFirst();
 	}
 
-	public Optional<PaymentDetail> findPaymentDetailById(UUID id) {
-		return Optional.ofNullable(
-			jpaQueryFactory.selectFrom(paymentDetail)
+	public PaymentDetail findPaymentDetailById(UUID id) {
+		return jpaQueryFactory.selectFrom(paymentDetail)
 				.where(paymentDetail.id.eq(id))
 				.join(paymentDetail.userBeanPay).fetchJoin()
-				.fetchFirst()
-		);
+				.fetchFirst();
 	}
 }

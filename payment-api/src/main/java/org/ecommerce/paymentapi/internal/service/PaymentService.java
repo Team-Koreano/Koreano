@@ -16,10 +16,8 @@ import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
-import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
-import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
@@ -38,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final BeanPayRepository beanPayRepository;
-	private final PaymentDetailRepository paymentDetailRepository;
 
 	/**
 	 결제 진행
@@ -69,7 +66,6 @@ public class PaymentService {
 		final Payment payment = Payment.ofPayment(
 			userBeanPay,
 			paymentPrice.orderId(),
-			paymentPrice.totalAmount(),
 			paymentPrice.orderName(),
 			mappedBeanPayPaymentDetailPrice(paymentPrice, sellerBeanPays)
 		);
@@ -111,33 +107,32 @@ public class PaymentService {
 	@DistributedLock(
 		lockName = BEANPAY,
 		uniqueKey = {
-		"paymentCancel.sellerId() + 'SELLER'",
-		"paymentCancel.userId() + 'USER'",
+		"#paymentCancel.sellerId() + 'SELLER'",
+		"#paymentCancel.userId() + 'USER'",
 	})
 	public PaymentDetailDto cancelPaymentDetail(
 		final PaymentCancel paymentCancel
 	) {
-		final PaymentDetail paymentDetail = getPaymentDetail(paymentCancel.orderItemId());
+		final Payment payment = getPayment(paymentCancel.orderId());
 
 		return PaymentMapper.INSTANCE.paymentDetailToDto(
-			paymentDetail.cancelPaymentDetail(paymentCancel.cancelReason())
+			payment.cancelPaymentDetail(paymentCancel.orderItemId(), paymentCancel.cancelReason())
 		);
-	}
-
-	private PaymentDetail getPaymentDetail(final Long orderItemId) {
-		return paymentDetailRepository.findPaymentDetailByOrderItemId(orderItemId)
-			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID));
 	}
 
 	private Payment getPayment(final Long orderId) {
-		return paymentRepository.findByOrderId(orderId).orElseThrow(
-			() -> new CustomException(PaymentErrorCode.NOT_FOUND_ORDER_ID)
-		);
+		Payment payment = paymentRepository.findByOrderId(orderId);
+		if(payment == null)
+			new CustomException(PaymentErrorCode.NOT_FOUND_ORDER_ID);
+		return payment;
 	}
 
 	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		return beanPayRepository.findBeanPayByUserIdAndRole(userId, role)
-			.orElseThrow(() -> new CustomException(BeanPayErrorCode.NOT_FOUND_ID));
+		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+			userId, role);
+		if(beanPay == null)
+			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
+		return beanPay;
 	}
 
 }
