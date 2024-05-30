@@ -123,6 +123,7 @@ public class ProductSearchServiceTest {
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
+			(short)3000,
 			images
 		);
 	}
