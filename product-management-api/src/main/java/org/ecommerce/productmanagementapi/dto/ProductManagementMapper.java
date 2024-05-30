@@ -18,16 +18,16 @@ public interface ProductManagementMapper {
 
 	@Mapping(target = "bizName", source = "sellerRep.bizName")
 	@Mapping(target = "categoryResponse", source = ".", qualifiedByName = "mapCategoryResponse")
-	ProductResponse toResponse(ProductManagementDtoWithImages dto);
+	ProductResponse toResponse(ProductWithSellerRepAndImagesDto dto);
 
-	List<ProductResponse> toResponse(List<ProductManagementDtoWithImages> dtos);
+	List<ProductResponse> toResponse(List<ProductWithSellerRepAndImagesDto> dtos);
 
-	ProductManagementDtoWithImages toDto(Product product);
+	ProductWithSellerRepAndImagesDto toDto(Product product);
 
-	List<ProductManagementDtoWithImages> toDtos(List<Product> products);
+	List<ProductWithSellerRepAndImagesDto> toDtos(List<Product> products);
 
 	@Named("mapCategoryResponse")
-	default CategoryResponse mapCategoryResponse(ProductManagementDtoWithImages dto) {
+	default CategoryResponse mapCategoryResponse(ProductWithSellerRepAndImagesDto dto) {
 		if (dto.category() == ProductCategory.BEAN) {
 			return new CategoryResponse.BeanResponse(
 				dto.isDecaf(),

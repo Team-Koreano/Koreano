@@ -18,7 +18,7 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.dto.ImageDto;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDtoWithImages;
+import org.ecommerce.productmanagementapi.dto.ProductWithSellerRepAndImagesDto;
 import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
@@ -116,7 +116,7 @@ public class ProductManagementServiceTest {
 
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
-			final ProductManagementDtoWithImages productManagementDtoWithImages = productManagementService.productRegister(
+			final ProductWithSellerRepAndImagesDto productWithSellerRepAndImagesDto = productManagementService.productRegister(
 				productDtos,
 				mockThumbnailImage,
 				mockMultipartFiles);
@@ -124,17 +124,17 @@ public class ProductManagementServiceTest {
 			verify(productRepository, times(1)).save(captor.capture());
 
 			Product productValue = captor.getValue();
-			assertThat(productManagementDtoWithImages.acidity()).isEqualTo(productValue.getAcidity());
-			assertThat(productManagementDtoWithImages.bean()).isEqualTo(productValue.getBean());
-			assertThat(productManagementDtoWithImages.category()).isEqualTo(productValue.getCategory());
-			assertThat(productManagementDtoWithImages.information()).isEqualTo(productValue.getInformation());
-			assertThat(productManagementDtoWithImages.name()).isEqualTo(productValue.getName());
-			assertThat(productManagementDtoWithImages.price()).isEqualTo(productValue.getPrice());
-			assertThat(productManagementDtoWithImages.stock()).isEqualTo(productValue.getStock());
-			assertThat(productManagementDtoWithImages.sellerRep()).usingRecursiveComparison()
+			assertThat(productWithSellerRepAndImagesDto.acidity()).isEqualTo(productValue.getAcidity());
+			assertThat(productWithSellerRepAndImagesDto.bean()).isEqualTo(productValue.getBean());
+			assertThat(productWithSellerRepAndImagesDto.category()).isEqualTo(productValue.getCategory());
+			assertThat(productWithSellerRepAndImagesDto.information()).isEqualTo(productValue.getInformation());
+			assertThat(productWithSellerRepAndImagesDto.name()).isEqualTo(productValue.getName());
+			assertThat(productWithSellerRepAndImagesDto.price()).isEqualTo(productValue.getPrice());
+			assertThat(productWithSellerRepAndImagesDto.stock()).isEqualTo(productValue.getStock());
+			assertThat(productWithSellerRepAndImagesDto.sellerRep()).usingRecursiveComparison()
 				.isEqualTo(productValue.getSellerRep());
-			assertThat(productManagementDtoWithImages.isCrush()).isEqualTo(productValue.getIsCrush());
-			assertThat(productManagementDtoWithImages.isDecaf()).isEqualTo(productValue.getIsDecaf());
+			assertThat(productWithSellerRepAndImagesDto.isCrush()).isEqualTo(productValue.getIsCrush());
+			assertThat(productWithSellerRepAndImagesDto.isDecaf()).isEqualTo(productValue.getIsDecaf());
 		}
 
 		@Test
@@ -194,7 +194,7 @@ public class ProductManagementServiceTest {
 
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
-			ProductManagementDtoWithImages productManagementDtoWithImages = productManagementService.productRegister(
+			ProductWithSellerRepAndImagesDto productWithSellerRepAndImagesDto = productManagementService.productRegister(
 				productDtos,
 				mockThumbnailImage,
 				mockMultipartFiles);
@@ -202,14 +202,14 @@ public class ProductManagementServiceTest {
 			verify(productRepository, times(1)).save(captor.capture());
 
 			Product productValue = captor.getValue();
-			assertThat(productManagementDtoWithImages.category()).isEqualTo(productValue.getCategory());
-			assertThat(productManagementDtoWithImages.information()).isEqualTo(productValue.getInformation());
-			assertThat(productManagementDtoWithImages.name()).isEqualTo(productValue.getName());
-			assertThat(productManagementDtoWithImages.price()).isEqualTo(productValue.getPrice());
-			assertThat(productManagementDtoWithImages.stock()).isEqualTo(productValue.getStock());
-			assertThat(productManagementDtoWithImages.sellerRep()).usingRecursiveComparison()
+			assertThat(productWithSellerRepAndImagesDto.category()).isEqualTo(productValue.getCategory());
+			assertThat(productWithSellerRepAndImagesDto.information()).isEqualTo(productValue.getInformation());
+			assertThat(productWithSellerRepAndImagesDto.name()).isEqualTo(productValue.getName());
+			assertThat(productWithSellerRepAndImagesDto.price()).isEqualTo(productValue.getPrice());
+			assertThat(productWithSellerRepAndImagesDto.stock()).isEqualTo(productValue.getStock());
+			assertThat(productWithSellerRepAndImagesDto.sellerRep()).usingRecursiveComparison()
 				.isEqualTo(productValue.getSellerRep());
-			assertThat(productManagementDtoWithImages.size()).isEqualTo(productValue.getSize());
+			assertThat(productWithSellerRepAndImagesDto.size()).isEqualTo(productValue.getSize());
 		}
 	}
 
@@ -233,7 +233,7 @@ public class ProductManagementServiceTest {
 
 			entity.toModifyStatus(newStatus);
 
-			ProductManagementDtoWithImages result = productManagementService.modifyToStatus(
+			ProductWithSellerRepAndImagesDto result = productManagementService.modifyToStatus(
 				productId, newStatus);
 
 			assertThat(result.status()).isEqualTo(newStatus);
@@ -266,7 +266,7 @@ public class ProductManagementServiceTest {
 			ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(productIds,
 				newStatus);
 
-			List<ProductManagementDtoWithImages> result = productManagementService.bulkModifyStatus(request);
+			List<ProductWithSellerRepAndImagesDto> result = productManagementService.bulkModifyStatus(request);
 
 			assertThat(result).hasSize(2);
 			assertThat(result.get(0).status()).isEqualTo(newStatus);
@@ -297,7 +297,7 @@ public class ProductManagementServiceTest {
 
 			when(productRepository.findProductById((productId))).thenReturn(entity);
 
-			ProductManagementDtoWithImages result = productManagementService.increaseToStock(
+			ProductWithSellerRepAndImagesDto result = productManagementService.increaseToStock(
 				request);
 
 			assertThat(result.stock()).isEqualTo(existStock + stock);
@@ -378,7 +378,7 @@ public class ProductManagementServiceTest {
 
 		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
-		ProductManagementDtoWithImages resultDto = productManagementService.modifyToProduct(
+		ProductWithSellerRepAndImagesDto resultDto = productManagementService.modifyToProduct(
 			productId, dto, mockThumbnailImage,
 			mockMultipartFiles);
 

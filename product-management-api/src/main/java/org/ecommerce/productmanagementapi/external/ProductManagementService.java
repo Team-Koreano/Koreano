@@ -7,8 +7,8 @@ import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDtoWithImages;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.dto.ProductWithSellerRepAndImagesDto;
 import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
@@ -43,7 +43,7 @@ public class ProductManagementService {
 	 @param product - 상품 등록 데이터
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDtoWithImages productRegister(final CreateProductRequest product,
+	public ProductWithSellerRepAndImagesDto productRegister(final CreateProductRequest product,
 		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
 		final Product createdProduct = Product.createProduct(
@@ -82,7 +82,7 @@ public class ProductManagementService {
 	 * @param status - 상품의 변경할 상태값  
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDtoWithImages modifyToStatus(final Integer productId, final ProductStatus status) {
+	public ProductWithSellerRepAndImagesDto modifyToStatus(final Integer productId, final ProductStatus status) {
 		Product product = productRepository.findProductById(productId);
 		if (product == null) {
 			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
@@ -103,7 +103,7 @@ public class ProductManagementService {
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDtoWithImages increaseToStock(ModifyStockRequest stock) {
+	public ProductWithSellerRepAndImagesDto increaseToStock(ModifyStockRequest stock) {
 
 		Product product = productRepository.findProductById(stock.productId());
 
@@ -125,7 +125,7 @@ public class ProductManagementService {
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDtoWithImages decreaseToStock(final ModifyStockRequest stock) {
+	public ProductWithSellerRepAndImagesDto decreaseToStock(final ModifyStockRequest stock) {
 
 		Product product = productRepository.findProductById(stock.productId());
 
@@ -146,7 +146,7 @@ public class ProductManagementService {
 	 @param modifyProduct - 상품을 수정 데이터
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDtoWithImages modifyToProduct(
+	public ProductWithSellerRepAndImagesDto modifyToProduct(
 		final Integer productId,
 		final ModifyProductRequest modifyProduct,
 		MultipartFile thumbnailImage,
@@ -194,7 +194,7 @@ public class ProductManagementService {
 	 * @param bulkStatus - RequestDto 입니다.
 	 * @return List<ProductManagementDto>
 	 */
-	public List<ProductManagementDtoWithImages> bulkModifyStatus(
+	public List<ProductWithSellerRepAndImagesDto> bulkModifyStatus(
 		final ModifyProductsStatusRequest bulkStatus
 	) {
 

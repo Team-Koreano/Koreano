@@ -22,8 +22,8 @@ import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productmanagementapi.config.MockS3Config;
 import org.ecommerce.productmanagementapi.dto.ImageDto;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDtoWithImages;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.dto.ProductWithSellerRepAndImagesDto;
 import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
 import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
@@ -137,7 +137,7 @@ class ExternalProductManagementControllerTest {
 		final MockMultipartFile productJson = new MockMultipartFile("product", "",
 			"application/json", objectMapper.writeValueAsString(productDtos).getBytes(StandardCharsets.UTF_8));
 
-		final ProductManagementDtoWithImages dto = ProductManagementMapper.INSTANCE.toDto(product);
+		final ProductWithSellerRepAndImagesDto dto = ProductManagementMapper.INSTANCE.toDto(product);
 
 		saveImages(imageDtos, product);
 
@@ -189,7 +189,7 @@ class ExternalProductManagementControllerTest {
 			true, "20*50", "500ml", status, testTime, testTime, (short)3000, null
 		);
 
-		ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
+		ProductWithSellerRepAndImagesDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
 
 		when(productManagementService.modifyToStatus(eq(productId), eq(status)))
 			.thenReturn((expectedResponse));
@@ -223,7 +223,8 @@ class ExternalProductManagementControllerTest {
 
 		);
 
-		final ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+		final ProductWithSellerRepAndImagesDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(
+			expectedEntity);
 
 		when(productManagementService.increaseToStock(dto))
 			.thenReturn(expectedResponse);
@@ -261,7 +262,8 @@ class ExternalProductManagementControllerTest {
 
 		mockMultipartFiles.add(mockMultipartFile);
 
-		final ProductManagementDtoWithImages expectedResponse = ProductManagementMapper.INSTANCE.toDto(expectedEntity);
+		final ProductWithSellerRepAndImagesDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(
+			expectedEntity);
 
 		when(productManagementService.modifyToProduct(eq(productId),
 			eq(dto), eq(mockThumbnailImage), eq(mockMultipartFiles))).thenReturn(expectedResponse);
@@ -312,7 +314,7 @@ class ExternalProductManagementControllerTest {
 		);
 
 		List<Product> products = List.of(entity1, entity2);
-		List<ProductManagementDtoWithImages> dtos = ProductManagementMapper.INSTANCE.toDtos(products);
+		List<ProductWithSellerRepAndImagesDto> dtos = ProductManagementMapper.INSTANCE.toDtos(products);
 
 		when(productManagementService.bulkModifyStatus(eq(request)))
 			.thenReturn(dtos);
