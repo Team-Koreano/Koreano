@@ -24,6 +24,7 @@ public record DetailResponse(
 	String status,
 	Boolean isCrush,
 	Integer favoriteCount,
+	Short deliveryFee,
 	LocalDateTime createDatetime,
 	LinkedList<ImageDto> imageDtoList
 ) {
@@ -43,6 +44,7 @@ public record DetailResponse(
 			productDtoWithImageListDto.status().getTitle(),
 			productDtoWithImageListDto.isCrush(),
 			productDtoWithImageListDto.favoriteCount(),
+			productDtoWithImageListDto.deliveryFee(),
 			productDtoWithImageListDto.createDatetime(),
 			productDtoWithImageListDto.imageDtoList()
 				.stream()

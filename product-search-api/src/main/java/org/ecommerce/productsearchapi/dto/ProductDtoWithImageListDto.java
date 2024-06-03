@@ -28,6 +28,7 @@ public record ProductDtoWithImageListDto
 		List<ImageDto> imageDtoList,
 		String thumbnailUrl,
 		String size,
-		String capacity
-	){
+		String capacity,
+		Short deliveryFee
+	) {
 }

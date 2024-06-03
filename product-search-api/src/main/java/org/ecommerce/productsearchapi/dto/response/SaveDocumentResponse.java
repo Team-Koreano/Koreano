@@ -24,6 +24,7 @@ public record SaveDocumentResponse(
 	String thumbnailUrl,
 	String size,
 	String capacity,
+	Short deliveryFee,
 	LocalDateTime createDatetime
 ) {
 	@VisibleForTesting
@@ -52,6 +53,7 @@ public record SaveDocumentResponse(
 			productDto.thumbnailUrl(),
 			productDto.size(),
 			productDto.capacity(),
+			productDto.deliveryFee(),
 			productDto.createDatetime()
 		);
 	}
