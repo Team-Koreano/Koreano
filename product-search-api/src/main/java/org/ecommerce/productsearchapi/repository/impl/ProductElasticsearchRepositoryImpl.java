@@ -59,6 +59,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	@Override
 	public PagedSearchDto searchProducts(SearchRequest search, Pageable pageable) {
 
+		//todo: sortType 을 다른 방식으로 쉽게 사용할 방법 없나 고민.
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
 				.field(search.sortType().getField())
@@ -117,7 +118,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 
 		return PagedSearchDto.of(
 			productDocumentSearchHits.getTotalHits(),
-			productDocumentSearchHits.getTotalHits() / pageable.getPageSize() + 1,
+			productDocumentSearchHits.getTotalHits() / pageable.getPageSize(),
 			pageable.getPageNumber(),
 			pageable.getPageSize(),
 			productDocumentSearchHits
