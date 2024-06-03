@@ -2,6 +2,7 @@ package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.request.SearchRequest;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 import org.ecommerce.productsearchapi.enumerated.ProductDocumentField;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchCustomRepository;
 import org.springframework.data.domain.Pageable;
@@ -56,7 +57,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	}
 
 	@Override
-	public SearchHits<ProductDocument> searchProducts(SearchRequest search, Pageable pageable) {
+	public PagedSearchDto searchProducts(SearchRequest search, Pageable pageable) {
 
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
@@ -114,10 +115,12 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			.build();
 		SearchHits<ProductDocument> productDocumentSearchHits = elasticsearchTemplate.search(query, ProductDocument.class);
 
-		//todo 전체 개수 반환 로직 추가 필요
-		log.info("productDocumentSearchHits: {}", productDocumentSearchHits.getTotalHits());
-
-
-		return productDocumentSearchHits;
+		return PagedSearchDto.of(
+			productDocumentSearchHits.getTotalHits(),
+			productDocumentSearchHits.getTotalHits() / pageable.getPageSize() + 1,
+			pageable.getPageNumber(),
+			pageable.getPageSize(),
+			productDocumentSearchHits
+		);
 	}
 }

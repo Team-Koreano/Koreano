@@ -3,6 +3,7 @@ package org.ecommerce.productsearchapi.external.controller;
 import java.util.List;
 
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.dto.request.SearchRequest;
 import org.ecommerce.productsearchapi.dto.response.DetailResponse;
@@ -49,7 +50,7 @@ public class ProductSearchController {
 	}
 
 	@GetMapping("/search")
-	public Response<List<SearchResponse>> searchProducts(
+	public Response<SearchResponse> searchProducts(
 		SearchRequest request,
 		@RequestParam(required = false, defaultValue = "0", name = "pageNumber")
 		Integer pageNumber,
@@ -57,12 +58,10 @@ public class ProductSearchController {
 		Integer pageSize
 		) {
 
-		final List<ProductDto> searchProducts = elasticSearchService.searchProducts(request, pageNumber, pageSize);
+		final PagedSearchDto pagedSearchDto = elasticSearchService.searchProducts(request, pageNumber, pageSize);
 
 		return new Response<>(HttpStatus.OK.value(),
-			searchProducts.stream()
-				.map(SearchResponse::of)
-				.toList());
+			SearchResponse.of(pagedSearchDto));
 	}
 
 }
