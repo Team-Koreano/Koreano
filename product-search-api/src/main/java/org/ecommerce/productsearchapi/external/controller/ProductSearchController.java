@@ -3,7 +3,11 @@ package org.ecommerce.productsearchapi.external.controller;
 import java.util.List;
 
 import org.ecommerce.common.vo.Response;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.request.SearchRequest;
+import org.ecommerce.productsearchapi.dto.response.DetailResponse;
+import org.ecommerce.productsearchapi.dto.response.SearchResponse;
+import org.ecommerce.productsearchapi.dto.response.SuggestedResponse;
 import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.springframework.http.HttpStatus;
@@ -24,40 +28,40 @@ public class ProductSearchController {
 	private final ElasticSearchService elasticSearchService;
 
 	@GetMapping("/{productId}")
-	public Response<ProductSearchDto.Response.Detail> getProductById(
+	public Response<DetailResponse> getProductById(
 		@PathVariable("productId") final Integer productId) {
 
 		return new Response<>(HttpStatus.OK.value(),
-			ProductSearchDto.Response.Detail.of(productSearchService.getProductById(productId))
+			DetailResponse.of(productSearchService.getProductById(productId))
 		);
 	}
 
 	@GetMapping("/suggest")
-	public Response<List<ProductSearchDto.Response.SuggestedProducts>> suggestSearchKeyword(
+	public Response<List<SuggestedResponse>> suggestSearchKeyword(
 		@RequestParam(value = "keyword") final String keyword) {
 
-		final List<ProductSearchDto> suggestedProducts = elasticSearchService.suggestSearchKeyword(keyword);
+		final List<ProductDto> suggestedProducts = elasticSearchService.suggestSearchKeyword(keyword);
 
 		return new Response<>(HttpStatus.OK.value(),
 			suggestedProducts.stream()
-				.map(ProductSearchDto.Response.SuggestedProducts::of)
+				.map(SuggestedResponse::of)
 				.toList());
 	}
 
 	@GetMapping("/search")
-	public Response<List<ProductSearchDto.Response.Search>> searchProducts(
-		ProductSearchDto.Request.Search request,
+	public Response<List<SearchResponse>> searchProducts(
+		SearchRequest request,
 		@RequestParam(required = false, defaultValue = "0", name = "pageNumber")
 		Integer pageNumber,
 		@RequestParam(required = false, defaultValue = "10", name = "pageSize")
 		Integer pageSize
 		) {
 
-		final List<ProductSearchDto> searchProducts = elasticSearchService.searchProducts(request, pageNumber, pageSize);
+		final List<ProductDto> searchProducts = elasticSearchService.searchProducts(request, pageNumber, pageSize);
 
 		return new Response<>(HttpStatus.OK.value(),
 			searchProducts.stream()
-				.map(ProductSearchDto.Response.Search::of)
+				.map(SearchResponse::of)
 				.toList());
 	}
 

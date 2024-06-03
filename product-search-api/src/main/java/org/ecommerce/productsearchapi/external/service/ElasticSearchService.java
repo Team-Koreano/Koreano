@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.request.SearchRequest;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -27,7 +28,7 @@ public class ElasticSearchService {
 	 * @return List<ProductSearchDto>
 	 */
 
-	public List<ProductSearchDto> suggestSearchKeyword(final String keyword) {
+	public List<ProductDto> suggestSearchKeyword(final String keyword) {
 		final SearchHits<ProductDocument> searchHits = productRepository.findProductsByNameContaining(keyword);
 
 		return searchHits.stream()
@@ -46,7 +47,7 @@ public class ElasticSearchService {
 	 * @return List<ProductSearchDto>
 	 */
 
-	public List<ProductSearchDto> searchProducts(ProductSearchDto.Request.Search request, Integer pageNumber, Integer pageSize) {
+	public List<ProductDto> searchProducts(SearchRequest request, Integer pageNumber, Integer pageSize) {
 		final Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
 		final SearchHits<ProductDocument> searchHits = productRepository.searchProducts(request, pageable);
 
