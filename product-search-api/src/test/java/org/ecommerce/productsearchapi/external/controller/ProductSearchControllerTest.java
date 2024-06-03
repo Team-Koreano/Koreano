@@ -15,7 +15,10 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
+import org.ecommerce.productsearchapi.dto.SellerRepDto;
 import org.ecommerce.productsearchapi.dto.request.SearchRequest;
 import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
@@ -43,20 +46,20 @@ public class ProductSearchControllerTest {
 	void 단일_상품_조회() throws Exception {
 		// given
 
-		final List<ProductDto.ImageDto> imageDtoList = List.of(
-			new ProductDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+		final List<ImageDto> imageDtoList = List.of(
+			new ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
 				false),
-			new ProductDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+			new ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
 				false)
 		);
 
-		final ProductDto productDto =
-			new ProductDto(
+		final ProductDtoWithImageListDto productDtoWithImageListDto =
+			new ProductDtoWithImageListDto(
 				1,
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
@@ -68,47 +71,48 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				imageDtoList,
-				null,
+				"http://image1.com",
 				"size",
-				"capacity"
+				"capacity",
+				(short)1000
 			);
 		// when
-		when(productSearchService.getProductById(anyInt())).thenReturn(productDto);
+		when(productSearchService.getProductById(anyInt())).thenReturn(productDtoWithImageListDto);
 		// then
 		mockMvc.perform(get("/api/external/product/v1/1"))
-			.andExpect(jsonPath("$.result.id").value(productDto.getId()))
-			.andExpect(jsonPath("$.result.category").value(productDto.getCategory().getTitle()))
-			.andExpect(jsonPath("$.result.price").value(productDto.getPrice()))
-			.andExpect(jsonPath("$.result.stock").value(productDto.getStock()))
-			.andExpect(jsonPath("$.result.sellerId").value(productDto.getSellerRep().getId()))
-			.andExpect(jsonPath("$.result.sellerName").value(productDto.getSellerRep().getBizName()))
-			.andExpect(jsonPath("$.result.favoriteCount").value(productDto.getFavoriteCount()))
-			.andExpect(jsonPath("$.result.isDecaf").value(productDto.getIsDecaf()))
-			.andExpect(jsonPath("$.result.name").value(productDto.getName()))
-			.andExpect(jsonPath("$.result.bean").value(productDto.getBean().getTitle()))
-			.andExpect(jsonPath("$.result.acidity").value(productDto.getAcidity().getTitle()))
-			.andExpect(jsonPath("$.result.information").value(productDto.getInformation()))
-			.andExpect(jsonPath("$.result.status").value(productDto.getStatus().getTitle()))
-			.andExpect(jsonPath("$.result.isCrush").value(productDto.getIsCrush()))
-			.andExpect(jsonPath("$.result.createDatetime").value(productDto.getCreateDatetime().toString()))
-			.andExpect(jsonPath("$.result.imageDtoList[0].id").value(imageDtoList.get(0).getId()))
-			.andExpect(jsonPath("$.result.imageDtoList[0].isThumbnail").value(imageDtoList.get(0).getIsThumbnail()))
+			.andExpect(jsonPath("$.result.id").value(productDtoWithImageListDto.id()))
+			.andExpect(jsonPath("$.result.category").value(productDtoWithImageListDto.category().getTitle()))
+			.andExpect(jsonPath("$.result.price").value(productDtoWithImageListDto.price()))
+			.andExpect(jsonPath("$.result.stock").value(productDtoWithImageListDto.stock()))
+			.andExpect(jsonPath("$.result.sellerId").value(productDtoWithImageListDto.sellerRep().id()))
+			.andExpect(jsonPath("$.result.sellerName").value(productDtoWithImageListDto.sellerRep().bizName()))
+			.andExpect(jsonPath("$.result.favoriteCount").value(productDtoWithImageListDto.favoriteCount()))
+			.andExpect(jsonPath("$.result.isDecaf").value(productDtoWithImageListDto.isDecaf()))
+			.andExpect(jsonPath("$.result.name").value(productDtoWithImageListDto.name()))
+			.andExpect(jsonPath("$.result.bean").value(productDtoWithImageListDto.bean().getTitle()))
+			.andExpect(jsonPath("$.result.acidity").value(productDtoWithImageListDto.acidity().getTitle()))
+			.andExpect(jsonPath("$.result.information").value(productDtoWithImageListDto.information()))
+			.andExpect(jsonPath("$.result.status").value(productDtoWithImageListDto.status().getTitle()))
+			.andExpect(jsonPath("$.result.isCrush").value(productDtoWithImageListDto.isCrush()))
+			.andExpect(jsonPath("$.result.createDatetime").value(productDtoWithImageListDto.createDatetime().toString()))
+			.andExpect(jsonPath("$.result.imageDtoList[0].id").value(imageDtoList.get(0).id()))
+			.andExpect(jsonPath("$.result.imageDtoList[0].isThumbnail").value(imageDtoList.get(0).isThumbnail()))
 			.andExpect(jsonPath("$.result.imageDtoList[0].sequenceNumber").value(
-				Integer.valueOf(imageDtoList.get(0).getSequenceNumber())))
+				Integer.valueOf(imageDtoList.get(0).sequenceNumber())))
 			.andExpect(jsonPath("$.result.imageDtoList[0].createDatetime").value(
-				imageDtoList.get(0).getCreateDatetime().toString()))
+				imageDtoList.get(0).createDatetime().toString()))
 			.andExpect(jsonPath("$.result.imageDtoList[0].updateDatetime").value(
-				imageDtoList.get(0).getUpdateDatetime().toString()))
-			.andExpect(jsonPath("$.result.imageDtoList[0].imageUrl").value(imageDtoList.get(0).getImageUrl()))
-			.andExpect(jsonPath("$.result.imageDtoList[1].id").value(imageDtoList.get(1).getId()))
-			.andExpect(jsonPath("$.result.imageDtoList[1].isThumbnail").value(imageDtoList.get(1).getIsThumbnail()))
+				imageDtoList.get(0).updateDatetime().toString()))
+			.andExpect(jsonPath("$.result.imageDtoList[0].imageUrl").value(imageDtoList.get(0).imageUrl()))
+			.andExpect(jsonPath("$.result.imageDtoList[1].id").value(imageDtoList.get(1).id()))
+			.andExpect(jsonPath("$.result.imageDtoList[1].isThumbnail").value(imageDtoList.get(1).isThumbnail()))
 			.andExpect(jsonPath("$.result.imageDtoList[1].sequenceNumber").value(
-				Integer.valueOf(imageDtoList.get(1).getSequenceNumber())))
+				Integer.valueOf(imageDtoList.get(1).sequenceNumber())))
 			.andExpect(jsonPath("$.result.imageDtoList[1].createDatetime").value(
-				imageDtoList.get(1).getCreateDatetime().toString()))
+				imageDtoList.get(1).createDatetime().toString()))
 			.andExpect(jsonPath("$.result.imageDtoList[1].updateDatetime").value(
-				imageDtoList.get(1).getUpdateDatetime().toString()))
-			.andExpect(jsonPath("$.result.imageDtoList[1].imageUrl").value(imageDtoList.get(1).getImageUrl()))
+				imageDtoList.get(1).updateDatetime().toString()))
+			.andExpect(jsonPath("$.result.imageDtoList[1].imageUrl").value(imageDtoList.get(1).imageUrl()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
@@ -122,7 +126,7 @@ public class ProductSearchControllerTest {
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"아메리카노",
@@ -134,16 +138,16 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null,
 				"size",
-				"capacity"
+				"capacity",
+				(short)1000
 			),
 			new ProductDto(
 				2,
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"아메아메아메",
@@ -155,19 +159,19 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null,
 				"size",
-				"capacity"
+				"capacity",
+				(short)1000
 			)
 		);
 		// when
 		when(elasticSearchService.suggestSearchKeyword(anyString())).thenReturn(suggestedProducts);
 		// then
 		mockMvc.perform(get("/api/external/product/v1/suggest?keyword=아메"))
-			.andExpect(jsonPath("$.result[0].id").value(suggestedProducts.get(0).getId()))
-			.andExpect(jsonPath("$.result[0].name").value(suggestedProducts.get(0).getName()))
-			.andExpect(jsonPath("$.result[1].id").value(suggestedProducts.get(1).getId()))
-			.andExpect(jsonPath("$.result[1].name").value(suggestedProducts.get(1).getName()))
+			.andExpect(jsonPath("$.result[0].id").value(suggestedProducts.get(0).id()))
+			.andExpect(jsonPath("$.result[0].name").value(suggestedProducts.get(0).name()))
+			.andExpect(jsonPath("$.result[1].id").value(suggestedProducts.get(1).id()))
+			.andExpect(jsonPath("$.result[1].name").value(suggestedProducts.get(1).name()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
@@ -181,7 +185,7 @@ public class ProductSearchControllerTest {
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"아메리카노",
@@ -193,16 +197,16 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null,
 				"size",
-				"capacity"
+				"capacity",
+				(short)2000
 			),
 			new ProductDto(
 				2,
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"아메아메아메",
@@ -214,9 +218,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null,
 				"size",
-				"capacity"
+				"capacity",
+				(short)2000
 			)
 		);
 
@@ -259,7 +263,7 @@ public class ProductSearchControllerTest {
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
-			(short)3000,
+			(short)2000,
 			images
 		);
 	}

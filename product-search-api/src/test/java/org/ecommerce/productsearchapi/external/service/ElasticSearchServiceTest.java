@@ -1,5 +1,6 @@
 package org.ecommerce.productsearchapi.external.service;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
@@ -45,16 +46,16 @@ public class ElasticSearchServiceTest {
 		final List<ProductDto> productDtoList = elasticSearchService.suggestSearchKeyword("아메리카노");
 
 		// then
-		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productDtoList.get(0).getId());
-		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productDtoList.get(1).getId());
-		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productDtoList.get(0).getName());
-		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productDtoList.get(1).getName());
-		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productDtoList.get(0).getPrice());
-		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productDtoList.get(1).getPrice());
+		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productDtoList.get(0).id());
+		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productDtoList.get(1).id());
+		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productDtoList.get(0).name());
+		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productDtoList.get(1).name());
+		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productDtoList.get(0).price());
+		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productDtoList.get(1).price());
 		assertEquals(searchHits.getSearchHit(0).getContent().getBean(),
-			productDtoList.get(0).getBean().getCode());
+			productDtoList.get(0).bean().getCode());
 		assertEquals(searchHits.getSearchHit(1).getContent().getBean(),
-			productDtoList.get(1).getBean().getCode());
+			productDtoList.get(1).bean().getCode());
 	}
 
 	@Test
@@ -72,16 +73,16 @@ public class ElasticSearchServiceTest {
 		final List<ProductDto> productDtoList = elasticSearchService.searchProducts(request, 0, 2);
 
 		//then
-		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productDtoList.get(0).getId());
-		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productDtoList.get(1).getId());
-		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productDtoList.get(0).getName());
-		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productDtoList.get(1).getName());
-		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productDtoList.get(0).getPrice());
-		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productDtoList.get(1).getPrice());
+		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productDtoList.get(0).id());
+		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productDtoList.get(1).id());
+		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productDtoList.get(0).name());
+		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productDtoList.get(1).name());
+		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productDtoList.get(0).price());
+		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productDtoList.get(1).price());
 		assertEquals(searchHits.getSearchHit(0).getContent().getBean(),
-			productDtoList.get(0).getBean().getCode());
+			productDtoList.get(0).bean().getCode());
 		assertEquals(searchHits.getSearchHit(1).getContent().getBean(),
-			productDtoList.get(1).getBean().getCode());
+			productDtoList.get(1).bean().getCode());
 
 	}
 
