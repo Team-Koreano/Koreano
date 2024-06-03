@@ -95,6 +95,9 @@ public class Product {
 	@Column()
 	private LocalDateTime updateDatetime;
 
+	@Column()
+	private Short deliveryFee;
+
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
