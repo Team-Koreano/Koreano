@@ -3,6 +3,7 @@ package org.ecommerce.productsearchapi.external.service;
 import java.util.List;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
 import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.dto.request.SearchRequest;
@@ -47,13 +48,8 @@ public class ElasticSearchService {
 	 * @return List<ProductSearchDto>
 	 */
 
-	public List<ProductDto> searchProducts(SearchRequest request, Integer pageNumber, Integer pageSize) {
+	public PagedSearchDto searchProducts(SearchRequest request, Integer pageNumber, Integer pageSize) {
 		final Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
-		final SearchHits<ProductDocument> searchHits = productRepository.searchProducts(request, pageable);
-
-		return searchHits.stream()
-			.map(SearchHit::getContent)
-			.map(ProductMapper.INSTANCE::documentToDto)
-			.toList();
+		return productRepository.searchProducts(request, pageable);
 	}
 }

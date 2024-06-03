@@ -15,7 +15,9 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ImageDto;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
 import org.ecommerce.productsearchapi.dto.SellerRepDto;
@@ -28,6 +30,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.SearchHitsImpl;
+import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(value = ProductSearchController.class)
@@ -179,62 +185,23 @@ public class ProductSearchControllerTest {
 	@Test
 	void 상품_리스트_검색() throws Exception {
 		// given
-		final List<ProductDto> searchDtoList = List.of(
-			new ProductDto(
-				1,
-				ProductCategory.BEAN,
-				30000,
-				100,
-				new SellerRepDto(1, "커피천국"),
-				10,
-				false,
-				"아메리카노",
-				Bean.ARABICA,
-				Acidity.MEDIUM,
-				"커피천국에서만 만나볼 수 있는 특별한 커피",
-				ProductStatus.AVAILABLE,
-				false,
-				TEST_DATE_TIME,
-				TEST_DATE_TIME,
-				null,
-				"size",
-				"capacity",
-				(short)2000
-			),
-			new ProductDto(
-				2,
-				ProductCategory.BEAN,
-				30000,
-				100,
-				new SellerRepDto(1, "커피천국"),
-				10,
-				false,
-				"아메아메아메",
-				Bean.ARABICA,
-				Acidity.MEDIUM,
-				"커피천국에서만 만나볼 수 있는 특별한 커피",
-				ProductStatus.AVAILABLE,
-				false,
-				TEST_DATE_TIME,
-				TEST_DATE_TIME,
-				null,
-				"size",
-				"capacity",
-				(short)2000
-			)
+		final PagedSearchDto pagedSearchDto = new PagedSearchDto(
+			4L,
+			5L,
+			2,
+			3,
+			getSearchHits()
 		);
 
 		// when
 		when(elasticSearchService.searchProducts(any(SearchRequest.class), eq(0), eq(2)))
-			.thenReturn(searchDtoList);
+			.thenReturn(pagedSearchDto);
 		// then
 		mockMvc.perform(get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
-			.andExpect(jsonPath("$.result[0].id").value(searchDtoList.get(0).id()))
-			.andExpect(jsonPath("$.result[0].name").value(searchDtoList.get(0).name()))
-			.andExpect(jsonPath("$.result[0].favoriteCount").value(searchDtoList.get(1).favoriteCount()))
-			.andExpect(jsonPath("$.result[1].id").value(searchDtoList.get(1).id()))
-			.andExpect(jsonPath("$.result[1].name").value(searchDtoList.get(1).name()))
-			.andExpect(jsonPath("$.result[1].favoriteCount").value(searchDtoList.get(1).favoriteCount()))
+			.andExpect(jsonPath("$.result.totalElements").value(pagedSearchDto.totalElements()))
+			.andExpect(jsonPath("$.result.totalPages").value(pagedSearchDto.totalPages()))
+			.andExpect(jsonPath("$.result.currentPage").value(pagedSearchDto.currentPage()))
+			.andExpect(jsonPath("$.result.pageSize").value(pagedSearchDto.pageSize()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
@@ -266,6 +233,23 @@ public class ProductSearchControllerTest {
 			(short)2000,
 			images
 		);
+	}
+
+	private SearchHits<ProductDocument> getSearchHits() {
+		ProductDocument productDocument1 = new ProductDocument(1, "BEAN", 30000, 100, 1, "커피천국", 10, false,
+			"[특가 EVENT]&아메리카노 원두&세상에서 제일 존맛 커피", "MEDIUM", "ARABICA", "커피천국에서만 만나볼 수 있는 특별한 커피", "http://img123.com",
+			"size", "capacity", TEST_DATE_TIME);
+		ProductDocument productDocument2 = new ProductDocument(2, "BEAN", 30000, 100, 1, "커피천국", 10, false,
+			"아메리카노 아무나 사먹어", "MEDIUM", "ARABICA", "커피천국에서만 만나볼 수 있는 특별한 커피", "http://img123.com", "size", "capacity", TEST_DATE_TIME);
+
+		// SearchHit mock 생성
+		SearchHit<ProductDocument> searchHit1 = new SearchHit<>("1", "1", null, 1.0f, null, null, null, null, null,
+			null, productDocument1);
+		SearchHit<ProductDocument> searchHit2 = new SearchHit<>("2", "2", null, 2.0f, null, null, null, null, null,
+			null, productDocument2);
+
+		return new SearchHitsImpl<>(1L, TotalHitsRelation.EQUAL_TO, 1.0f, null, null, List.of(searchHit1, searchHit2),
+			null, null);
 	}
 
 }

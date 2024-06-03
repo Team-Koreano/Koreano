@@ -1,39 +1,66 @@
 package org.ecommerce.productsearchapi.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.document.ProductDocument;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 
 public record SearchResponse(
-	Integer id,
-	String name,
-	String category,
-	Integer price,
-	Integer stock,
-	Integer sellerId,
-	String sellerName,
-	Integer favoriteCount,
-	Boolean isDecaf,
-	String acidity,
-	String bean,
-	String thumbnailUrl,
-	LocalDateTime createDatetime
+	Long totalElements,
+	Long totalPages,
+	Integer currentPage,
+	Integer pageSize,
+	List<ContentResponse> content
 ) {
-	public static SearchResponse of(final ProductDto productDto) {
+
+	public record ContentResponse(
+		Integer id,
+		String name,
+		String category,
+		Integer price,
+		Integer stock,
+		Integer sellerId,
+		String sellerName,
+		Integer favoriteCount,
+		Boolean isDecaf,
+		String acidity,
+		String bean,
+		String thumbnailUrl,
+		LocalDateTime createDatetime
+	) {
+
+		public static ContentResponse of(final ProductDocument productDocument) {
+			return new ContentResponse(
+				productDocument.getId(),
+				productDocument.getName(),
+				productDocument.getCategory(),
+				productDocument.getPrice(),
+				productDocument.getStock(),
+				productDocument.getSellerId(),
+				productDocument.getSellerName(),
+				productDocument.getFavoriteCount(),
+				productDocument.getIsDecaf(),
+				productDocument.getAcidity(),
+				productDocument.getBean(),
+				productDocument.getThumbnailUrl(),
+				productDocument.getCreateDatetime()
+			);
+		}
+	}
+
+	public static SearchResponse of(
+		PagedSearchDto pagedSearchDto
+	) {
 		return new SearchResponse(
-			productDto.id(),
-			productDto.name(),
-			productDto.category().getTitle(),
-			productDto.price(),
-			productDto.stock(),
-			productDto.sellerRep().id(),
-			productDto.sellerRep().bizName(),
-			productDto.favoriteCount(),
-			productDto.isDecaf(),
-			productDto.acidity().getTitle(),
-			productDto.bean().getTitle(),
-			productDto.thumbnailUrl(),
-			productDto.createDatetime()
+			pagedSearchDto.totalElements(),
+			pagedSearchDto.totalPages(),
+			pagedSearchDto.currentPage(),
+			pagedSearchDto.pageSize(),
+			pagedSearchDto.searchHits().getSearchHits().stream()
+				.map(searchHit -> ContentResponse.of(searchHit.getContent()))
+				.toList()
 		);
 	}
+
 }
