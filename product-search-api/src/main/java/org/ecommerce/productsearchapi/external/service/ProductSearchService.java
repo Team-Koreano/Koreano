@@ -34,7 +34,7 @@ public class ProductSearchService {
 			throw new CustomException(ProductSearchErrorCode.NOT_FOUND_PRODUCT_ID);
 		}
 
-		return ProductMapper.INSTANCE.toDtoWithImageList(product);
+		return ProductMapper.INSTANCE.entityToDtoWithImageList(product);
 	}
 
 }
