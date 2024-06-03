@@ -179,7 +179,7 @@ class ExternalProductManagementControllerTest {
 		final Product entity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, testTime, testTime, null
+			true, "20*50", "500ml", status, testTime, testTime, (short)3000, null
 		);
 
 		final ProductManagementDto expectedResponse = ProductManagementMapper.INSTANCE.toDto(entity);
@@ -207,12 +207,12 @@ class ExternalProductManagementControllerTest {
 		final Product originalEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 		);
 		final Product expectedEntity = new Product(
 			productId, ProductCategory.BEAN, 1000, 50 + changedStock, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			true, "20*50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 
 		);
 
@@ -240,7 +240,7 @@ class ExternalProductManagementControllerTest {
 		final Product expectedEntity = new Product(
 			productId, dto.category(), dto.price(), 50, test, 0, dto.isDecaf(),
 			dto.name(), dto.bean(), dto.acidity(), dto.information(),
-			dto.isCrush(), "20 * 50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, null
+			dto.isCrush(), "20 * 50", "500ml", ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 		);
 
 		final MockMultipartFile mockThumbnailImage = createMockFile("thumbnailImage");
@@ -296,13 +296,13 @@ class ExternalProductManagementControllerTest {
 		final Product entity1 = new Product(
 			1, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, null, null, null
+			true, "20*50", "500ml", status, null, null, (short)3000, null
 		);
 
 		final Product entity2 = new Product(
 			2, ProductCategory.BEAN, 1000, 50, test, 0, false,
 			"정말 맛있는 원두 단돈 천원", Bean.ARABICA, Acidity.CINNAMON, "부산 진구 유명가수가 좋아하는 원두",
-			true, "20*50", "500ml", status, null, null, null
+			true, "20*50", "500ml", status, null, null, (short)3000, null
 		);
 
 		List<Product> products = List.of(entity1, entity2);
