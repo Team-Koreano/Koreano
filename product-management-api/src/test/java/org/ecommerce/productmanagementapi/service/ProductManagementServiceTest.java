@@ -320,6 +320,7 @@ public class ProductManagementServiceTest {
 				true, null, null, ProductStatus.AVAILABLE, testTime, testTime, (short)3000, null
 			);
 
+
 			given(productRepository.save(any(Product.class))).willReturn(entity);
 
 			when(productRepository.findProductById((productId))).thenReturn(entity);
