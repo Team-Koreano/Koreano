@@ -1,7 +1,7 @@
 package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.request.SearchRequest;
 import org.ecommerce.productsearchapi.enumerated.ProductDocumentField;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchCustomRepository;
 import org.springframework.data.domain.Pageable;
@@ -56,7 +56,7 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	}
 
 	@Override
-	public SearchHits<ProductDocument> searchProducts(ProductSearchDto.Request.Search search, Pageable pageable) {
+	public SearchHits<ProductDocument> searchProducts(SearchRequest search, Pageable pageable) {
 
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder

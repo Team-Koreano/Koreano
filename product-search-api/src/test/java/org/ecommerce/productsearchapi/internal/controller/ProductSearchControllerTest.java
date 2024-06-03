@@ -12,7 +12,7 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.internal.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,20 +40,20 @@ public class ProductSearchControllerTest {
 	@Test
 	void 엘라스틱서치에_상품_정보_저장() throws Exception {
 		// given
-		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+		final List<ProductDto.ImageDto> imageDtoList = List.of(
+			new ProductDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
 				false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+			new ProductDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
 				false)
 		);
 
-		final ProductSearchDto productSearchDto =
-			new ProductSearchDto(
+		final ProductDto productDto =
+			new ProductDto(
 				1,
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductSearchDto.SellerRep(1, "커피천국"),
+				new ProductDto.SellerRep(1, "커피천국"),
 				10,
 				false,
 				"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
@@ -73,7 +73,7 @@ public class ProductSearchControllerTest {
 		String productJsonBody = objectMapper.writeValueAsString(getProduct());
 
 		// when
-		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productSearchDto);
+		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productDto);
 
 		// // then
 		// mockMvc.perform(MockMvcRequestBuilders

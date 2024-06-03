@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.product.entity.Image;
@@ -15,7 +14,7 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
@@ -42,49 +41,49 @@ public class ProductSearchServiceTest {
 		given(productRepository.findProductById(anyInt())).willReturn(product);
 
 		// when
-		final ProductSearchDto productSearchDto = productSearchService.getProductById(1);
+		final ProductDto productDto = productSearchService.getProductById(1);
 
 		// then
-		assertEquals(product.getId(), productSearchDto.getId());
-		assertEquals(product.getCategory(), productSearchDto.getCategory());
-		assertEquals(product.getPrice(), productSearchDto.getPrice());
-		assertEquals(product.getStock(), productSearchDto.getStock());
-		assertEquals(product.getSellerRep().getId(), productSearchDto.getSellerRep().getId());
-		assertEquals(product.getSellerRep().getBizName(), productSearchDto.getSellerRep().getBizName());
-		assertEquals(product.getFavoriteCount(), productSearchDto.getFavoriteCount());
-		assertEquals(product.getIsDecaf(), productSearchDto.getIsDecaf());
-		assertEquals(product.getName(), productSearchDto.getName());
-		assertEquals(product.getBean(), productSearchDto.getBean());
-		assertEquals(product.getAcidity(), productSearchDto.getAcidity());
-		assertEquals(product.getInformation(), productSearchDto.getInformation());
-		assertEquals(product.getStatus(), productSearchDto.getStatus());
-		assertEquals(product.getIsCrush(), productSearchDto.getIsCrush());
-		assertEquals(product.getCreateDatetime(), productSearchDto.getCreateDatetime());
-		assertEquals(product.getUpdateDatetime(), productSearchDto.getUpdateDatetime());
-		assertEquals(product.getImages().get(0).getId(), productSearchDto.getImageDtoList().get(0).getId());
-		assertEquals(product.getImages().get(0).getImageUrl(), productSearchDto.getImageDtoList().get(0).getImageUrl());
+		assertEquals(product.getId(), productDto.getId());
+		assertEquals(product.getCategory(), productDto.getCategory());
+		assertEquals(product.getPrice(), productDto.getPrice());
+		assertEquals(product.getStock(), productDto.getStock());
+		assertEquals(product.getSellerRep().getId(), productDto.getSellerRep().getId());
+		assertEquals(product.getSellerRep().getBizName(), productDto.getSellerRep().getBizName());
+		assertEquals(product.getFavoriteCount(), productDto.getFavoriteCount());
+		assertEquals(product.getIsDecaf(), productDto.getIsDecaf());
+		assertEquals(product.getName(), productDto.getName());
+		assertEquals(product.getBean(), productDto.getBean());
+		assertEquals(product.getAcidity(), productDto.getAcidity());
+		assertEquals(product.getInformation(), productDto.getInformation());
+		assertEquals(product.getStatus(), productDto.getStatus());
+		assertEquals(product.getIsCrush(), productDto.getIsCrush());
+		assertEquals(product.getCreateDatetime(), productDto.getCreateDatetime());
+		assertEquals(product.getUpdateDatetime(), productDto.getUpdateDatetime());
+		assertEquals(product.getImages().get(0).getId(), productDto.getImageDtoList().get(0).getId());
+		assertEquals(product.getImages().get(0).getImageUrl(), productDto.getImageDtoList().get(0).getImageUrl());
 		assertEquals(product.getImages().get(0).getIsThumbnail(),
-			productSearchDto.getImageDtoList().get(0).getIsThumbnail());
+			productDto.getImageDtoList().get(0).getIsThumbnail());
 		assertEquals(product.getImages().get(0).getSequenceNumber(),
-			productSearchDto.getImageDtoList().get(0).getSequenceNumber());
+			productDto.getImageDtoList().get(0).getSequenceNumber());
 		assertEquals(product.getImages().get(0).getIsDeleted(),
-			productSearchDto.getImageDtoList().get(0).getIsDeleted());
+			productDto.getImageDtoList().get(0).getIsDeleted());
 		assertEquals(product.getImages().get(0).getCreateDatetime(),
-			productSearchDto.getImageDtoList().get(0).getCreateDatetime());
+			productDto.getImageDtoList().get(0).getCreateDatetime());
 		assertEquals(product.getImages().get(0).getUpdateDatetime(),
-			productSearchDto.getImageDtoList().get(0).getUpdateDatetime());
-		assertEquals(product.getImages().get(1).getId(), productSearchDto.getImageDtoList().get(1).getId());
-		assertEquals(product.getImages().get(1).getImageUrl(), productSearchDto.getImageDtoList().get(1).getImageUrl());
+			productDto.getImageDtoList().get(0).getUpdateDatetime());
+		assertEquals(product.getImages().get(1).getId(), productDto.getImageDtoList().get(1).getId());
+		assertEquals(product.getImages().get(1).getImageUrl(), productDto.getImageDtoList().get(1).getImageUrl());
 		assertEquals(product.getImages().get(1).getIsThumbnail(),
-			productSearchDto.getImageDtoList().get(1).getIsThumbnail());
+			productDto.getImageDtoList().get(1).getIsThumbnail());
 		assertEquals(product.getImages().get(1).getSequenceNumber(),
-			productSearchDto.getImageDtoList().get(1).getSequenceNumber());
+			productDto.getImageDtoList().get(1).getSequenceNumber());
 		assertEquals(product.getImages().get(1).getIsDeleted(),
-			productSearchDto.getImageDtoList().get(1).getIsDeleted());
+			productDto.getImageDtoList().get(1).getIsDeleted());
 		assertEquals(product.getImages().get(1).getCreateDatetime(),
-			productSearchDto.getImageDtoList().get(1).getCreateDatetime());
+			productDto.getImageDtoList().get(1).getCreateDatetime());
 		assertEquals(product.getImages().get(1).getUpdateDatetime(),
-			productSearchDto.getImageDtoList().get(1).getUpdateDatetime());
+			productDto.getImageDtoList().get(1).getUpdateDatetime());
 	}
 
 	@Test

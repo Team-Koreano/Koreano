@@ -1,7 +1,5 @@
 package org.ecommerce.productsearchapi.internal.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +10,7 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,23 +32,23 @@ public class ProductSearchServiceTest {
 		// given
 		Product product = getProduct();
 		// when
-		final ProductSearchDto productSearchDto = productSearchService.saveProduct(product);
+		final ProductDto productDto = productSearchService.saveProduct(product);
 
 		// then
-		assertEquals(product.getId(), productSearchDto.getId());
-		assertEquals(product.getCategory(), productSearchDto.getCategory());
-		assertEquals(product.getPrice(), productSearchDto.getPrice());
-		assertEquals(product.getStock(), productSearchDto.getStock());
-		assertEquals(product.getSellerRep().getId(), productSearchDto.getSellerRep().getId());
-		assertEquals(product.getSellerRep().getBizName(), productSearchDto.getSellerRep().getBizName());
-		assertEquals(product.getFavoriteCount(), productSearchDto.getFavoriteCount());
-		assertEquals(product.getIsDecaf(), productSearchDto.getIsDecaf());
-		assertEquals(product.getName(), productSearchDto.getName());
-		assertEquals(product.getBean(), productSearchDto.getBean());
-		assertEquals(product.getAcidity(), productSearchDto.getAcidity());
-		assertEquals(product.getInformation(), productSearchDto.getInformation());
-		assertEquals(getThumbnailUrl(product.getImages()), productSearchDto.getThumbnailUrl());
-		assertEquals(TEST_DATE_TIME, productSearchDto.getCreateDatetime());
+		assertEquals(product.getId(), productDto.getId());
+		assertEquals(product.getCategory(), productDto.getCategory());
+		assertEquals(product.getPrice(), productDto.getPrice());
+		assertEquals(product.getStock(), productDto.getStock());
+		assertEquals(product.getSellerRep().getId(), productDto.getSellerRep().getId());
+		assertEquals(product.getSellerRep().getBizName(), productDto.getSellerRep().getBizName());
+		assertEquals(product.getFavoriteCount(), productDto.getFavoriteCount());
+		assertEquals(product.getIsDecaf(), productDto.getIsDecaf());
+		assertEquals(product.getName(), productDto.getName());
+		assertEquals(product.getBean(), productDto.getBean());
+		assertEquals(product.getAcidity(), productDto.getAcidity());
+		assertEquals(product.getInformation(), productDto.getInformation());
+		assertEquals(getThumbnailUrl(product.getImages()), productDto.getThumbnailUrl());
+		assertEquals(TEST_DATE_TIME, productDto.getCreateDatetime());
 	}
 
 	private Product getProduct() {

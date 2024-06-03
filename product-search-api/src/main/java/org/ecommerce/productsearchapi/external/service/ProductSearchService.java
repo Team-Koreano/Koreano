@@ -3,7 +3,7 @@ package org.ecommerce.productsearchapi.external.service;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.exception.ProductSearchErrorCode;
 import org.ecommerce.productsearchapi.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class ProductSearchService {
 	 * @return ProductSearchDto
 	 */
 	@Transactional(readOnly = true)
-	public ProductSearchDto getProductById(final Integer productId) {
+	public ProductDto getProductById(final Integer productId) {
 
 		final Product product = productRepository.findProductById(productId);
 

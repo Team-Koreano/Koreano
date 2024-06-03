@@ -15,11 +15,11 @@ public interface ProductMapper {
 
 
 	@Mapping(target = "imageDtoList", source = "images")
-	ProductSearchDto entityToDto(Product product);
+	ProductDto entityToDto(Product product);
 
 	@Mapping(source = "sellerId", target = "sellerRep.id")
 	@Mapping(source = "sellerName", target = "sellerRep.bizName")
-	ProductSearchDto documentToDto(ProductDocument productDocument);
+	ProductDto documentToDto(ProductDocument productDocument);
 
 
 }
