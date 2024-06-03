@@ -12,6 +12,7 @@ public record ProductDtoWithImageListDto
 	(
 		Integer id,
 		ProductCategory category,
+		SellerRepDto sellerRep,
 		Integer price,
 		Integer stock,
 		Integer favoriteCount,

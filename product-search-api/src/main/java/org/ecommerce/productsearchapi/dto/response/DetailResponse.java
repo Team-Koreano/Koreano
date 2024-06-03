@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
 
 public record DetailResponse(
 	Integer id,
@@ -26,24 +27,24 @@ public record DetailResponse(
 	LocalDateTime createDatetime,
 	LinkedList<ImageDto> imageDtoList
 ) {
-	public static DetailResponse of(final ProductDto productDto) {
+	public static DetailResponse of(final ProductDtoWithImageListDto productDtoWithImageListDto) {
 		return new DetailResponse(
-			productDto.id(),
-			productDto.isDecaf(),
-			productDto.price(),
-			productDto.sellerRep().id(),
-			productDto.sellerRep().bizName(),
-			productDto.stock(),
-			productDto.acidity().getTitle(),
-			productDto.bean().getTitle(),
-			productDto.category().getTitle(),
-			productDto.information(),
-			productDto.name(),
-			productDto.status().getTitle(),
-			productDto.isCrush(),
-			productDto.favoriteCount(),
-			productDto.createDatetime(),
-			productDto.imageDtoList()
+			productDtoWithImageListDto.id(),
+			productDtoWithImageListDto.isDecaf(),
+			productDtoWithImageListDto.price(),
+			productDtoWithImageListDto.sellerRep().id(),
+			productDtoWithImageListDto.sellerRep().bizName(),
+			productDtoWithImageListDto.stock(),
+			productDtoWithImageListDto.acidity().getTitle(),
+			productDtoWithImageListDto.bean().getTitle(),
+			productDtoWithImageListDto.category().getTitle(),
+			productDtoWithImageListDto.information(),
+			productDtoWithImageListDto.name(),
+			productDtoWithImageListDto.status().getTitle(),
+			productDtoWithImageListDto.isCrush(),
+			productDtoWithImageListDto.favoriteCount(),
+			productDtoWithImageListDto.createDatetime(),
+			productDtoWithImageListDto.imageDtoList()
 				.stream()
 				.sorted(Comparator.comparingInt(ImageDto::sequenceNumber))
 				.collect(Collectors.toCollection(LinkedList::new))
