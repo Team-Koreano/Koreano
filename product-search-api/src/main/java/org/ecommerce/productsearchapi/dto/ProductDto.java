@@ -25,7 +25,6 @@ public record ProductDto
 		Boolean isCrush,
 		LocalDateTime createDatetime,
 		LocalDateTime updateDatetime,
-		List<ImageDto> imageDtoList,
 		String thumbnailUrl,
 		String size,
 		String capacity,

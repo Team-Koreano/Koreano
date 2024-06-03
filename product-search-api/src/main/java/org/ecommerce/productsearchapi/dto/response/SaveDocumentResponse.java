@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.productsearchapi.dto.ImageDto;
-import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -36,25 +36,25 @@ public record SaveDocumentResponse(
 			.orElse(null);
 	}
 
-	public static SaveDocumentResponse of(final ProductDto productDto) {
+	public static SaveDocumentResponse of(final ProductDtoWithImageListDto productDtoWithImageListDto) {
 		return new SaveDocumentResponse(
-			productDto.id(),
-			productDto.category().getTitle(),
-			productDto.price(),
-			productDto.stock(),
-			productDto.sellerRep().id(),
-			productDto.sellerRep().bizName(),
-			productDto.favoriteCount(),
-			productDto.isDecaf(),
-			productDto.name(),
-			productDto.acidity().getTitle(),
-			productDto.bean().getTitle(),
-			productDto.information(),
-			productDto.thumbnailUrl(),
-			productDto.size(),
-			productDto.capacity(),
-			productDto.deliveryFee(),
-			productDto.createDatetime()
+			productDtoWithImageListDto.id(),
+			productDtoWithImageListDto.category().getTitle(),
+			productDtoWithImageListDto.price(),
+			productDtoWithImageListDto.stock(),
+			productDtoWithImageListDto.sellerRep().id(),
+			productDtoWithImageListDto.sellerRep().bizName(),
+			productDtoWithImageListDto.favoriteCount(),
+			productDtoWithImageListDto.isDecaf(),
+			productDtoWithImageListDto.name(),
+			productDtoWithImageListDto.acidity().getTitle(),
+			productDtoWithImageListDto.bean().getTitle(),
+			productDtoWithImageListDto.information(),
+			productDtoWithImageListDto.thumbnailUrl(),
+			productDtoWithImageListDto.size(),
+			productDtoWithImageListDto.capacity(),
+			productDtoWithImageListDto.deliveryFee(),
+			productDtoWithImageListDto.createDatetime()
 		);
 	}
 }
