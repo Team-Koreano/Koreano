@@ -32,7 +32,6 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
-import org.h2.engine.Role;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class UserBeanPayServiceTest {
+class BeanPayServiceTest {
 
 	@InjectMocks
 	private BeanPayService beanPayService;

@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class UserBeanPayIntegrationServiceTest {
+public class BeanPayIntegrationServiceTest {
 
 	@Autowired
 	private BeanPayService internalBeanPayService;

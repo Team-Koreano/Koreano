@@ -44,10 +44,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class UserBeanPayControllerTest {
+class BeanPayControllerTest {
 
 	private static final Logger log = LoggerFactory.getLogger(
-		UserBeanPayControllerTest.class);
+		BeanPayControllerTest.class);
 	@MockBean
 	private BeanPayService beanPayService;
 
