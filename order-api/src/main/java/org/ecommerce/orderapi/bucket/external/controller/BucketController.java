@@ -9,13 +9,16 @@ import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.response.BucketResponse;
 import org.ecommerce.orderapi.bucket.service.BucketDomainService;
 import org.ecommerce.orderapi.bucket.service.BucketReadService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -33,10 +36,14 @@ public class BucketController {
 	private final static Integer USER_ID = 1;
 
 	@GetMapping
-	public Response<List<BucketResponse>> getBuckets() {
+	public Response<List<BucketResponse>> getBuckets(
+			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(required = false, defaultValue = "10") final Integer pageSize
+	) {
 
 		return new Response<>(HttpStatus.OK.value(),
-				bucketReadService.getAllBuckets(USER_ID)
+				bucketReadService.getAllBuckets(USER_ID,
+								PageRequest.of(pageNumber, pageSize))
 						.stream()
 						.map(BucketMapper.INSTANCE::toResponse)
 						.toList()
@@ -66,6 +73,18 @@ public class BucketController {
 				HttpStatus.OK.value(),
 				BucketMapper.INSTANCE.toResponse(
 						bucketDomainService.modifyBucket(USER_ID, bucketId, request)
+				)
+		);
+	}
+
+	@DeleteMapping("/{bucketId}")
+	public Response<BucketResponse> deleteBucket(
+			@PathVariable("bucketId") final Long bucketId
+	) {
+		return new Response<>(
+				HttpStatus.OK.value(),
+				BucketMapper.INSTANCE.toResponse(
+						bucketDomainService.deleteBucket(USER_ID, bucketId)
 				)
 		);
 	}

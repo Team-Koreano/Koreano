@@ -68,7 +68,8 @@ public class OrderDomainService {
 				userId, request, products, bucketSummary.getQuantityMap());
 
 		paymentOrder(order);
-		applicationEventPublisher.publishEvent(new OrderCreatedEvent(order.getId()));
+		applicationEventPublisher.publishEvent(
+				new OrderCreatedEvent(order.getId(), request.bucketIds()));
 		return OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(order);
 	}
 
@@ -92,19 +93,6 @@ public class OrderDomainService {
 		return OrderMapper.INSTANCE.toOrderDtoWithOrderItemDtoList(
 				order.cancelItem(orderItemId)
 		);
-	}
-
-	/**
-	 * 주문을 완료하는 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param orderId- 주문 번호
-	 * @param orderItemIds- 주문 항목 번호 Set
-	 */
-	public void completeOrder(final Long orderId, final Set<Long> orderItemIds) {
-		Order order = orderRepository.findOrderById(orderId);
-		validateOrder(order);
-		order.complete(orderItemIds);
 	}
 
 	@VisibleForTesting
@@ -147,6 +135,7 @@ public class OrderDomainService {
 		// 				101,
 		// 				"에디오피아 이가체프",
 		// 				10000,
+		// 				0,
 		// 				1,
 		// 				"seller1",
 		// 				AVAILABLE
@@ -155,6 +144,7 @@ public class OrderDomainService {
 		// 				102,
 		// 				"과테말라 안티구아",
 		// 				20000,
+		// 				0,
 		// 				2,
 		// 				"seller2",
 		// 				AVAILABLE

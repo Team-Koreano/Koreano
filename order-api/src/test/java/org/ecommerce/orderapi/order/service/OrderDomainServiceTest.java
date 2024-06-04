@@ -117,6 +117,7 @@ public class OrderDomainServiceTest {
 						101,
 						"에디오피아 아가체프",
 						1000,
+						0,
 						1,
 						"seller1",
 						AVAILABLE
@@ -125,6 +126,7 @@ public class OrderDomainServiceTest {
 						102,
 						"과테말라 안티구아",
 						2000,
+						0,
 						2,
 						"seller2",
 						AVAILABLE
