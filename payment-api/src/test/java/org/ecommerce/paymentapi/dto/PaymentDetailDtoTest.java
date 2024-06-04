@@ -3,7 +3,6 @@ package org.ecommerce.paymentapi.dto;
 import static java.lang.Boolean.*;
 import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,10 +13,11 @@ import java.util.UUID;
 
 import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.dto.request.TossFailRequest;
-import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.ChargeInfo;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
+import org.ecommerce.paymentapi.entity.SellerBeanPay;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -89,7 +89,7 @@ class PaymentDetailDtoTest {
 		assertEquals(dto.id(), entity.getId());
 		assertEquals(dto.paymentDetailId(), entity.getPayment().getId());
 		assertEquals(dto.userId(), entity.getUserBeanPay().getUserId());
-		assertEquals(dto.sellerId(), entity.getSellerBeanPay().getUserId());
+		assertEquals(dto.sellerId(), entity.getSellerBeanPay().getSellerId());
 		assertEquals(dto.orderItemId(), entity.getOrderItemId());
 		assertEquals(dto.deliveryFee(), entity.getDeliveryFee());
 		assertEquals(dto.paymentAmount(), entity.getPaymentAmount());
@@ -155,11 +155,11 @@ class PaymentDetailDtoTest {
 		//then
 		assertEquals(6, violations.size());
 	}
-	private BeanPay getUserBeanPay() {
-		return new BeanPay(1, 1, USER, 0, LocalDateTime.now(), null);
+	private UserBeanPay getUserBeanPay() {
+		return new UserBeanPay(1, 1, 0, LocalDateTime.now(), null);
 	}
-	private BeanPay getSellerBeanPay() {
-		return new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null);
+	private SellerBeanPay getSellerBeanPay() {
+		return new SellerBeanPay(2, 1, 0, LocalDateTime.now(), null);
 	}
 
 }

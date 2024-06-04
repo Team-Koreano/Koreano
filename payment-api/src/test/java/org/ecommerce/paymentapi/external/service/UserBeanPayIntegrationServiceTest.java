@@ -2,7 +2,6 @@ package org.ecommerce.paymentapi.external.service;
 
 import static org.ecommerce.paymentapi.entity.enumerate.PaymentStatus.*;
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.ecommerce.paymentapi.exception.PaymentDetailErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,12 +15,12 @@ import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
 import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
-import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
-import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.ChargeInfoRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
+import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class BeanPayIntegrationServiceTest {
+public class UserBeanPayIntegrationServiceTest {
 
 	@Autowired
 	private BeanPayService internalBeanPayService;
@@ -51,20 +50,20 @@ public class BeanPayIntegrationServiceTest {
 	@Autowired
 	private TossKey tossKey;
 	@Autowired
-	private BeanPayRepository beanPayRepository;
+	private UserBeanPayRepository beanPayRepository;
 	@Autowired
 	private PaymentDetailRepository paymentDetailRepository;
 
 	@Autowired
 	private ChargeInfoRepository chargeInfoRepository;
 
-	private BeanPay beanPay;
+	private UserBeanPay userBeanPay;
 
 	@Transactional
 	@BeforeEach
 	public void 사전() {
-		this.beanPay = BeanPay.ofCreate(1, USER);
-		beanPayRepository.saveAndFlush(this.beanPay);
+		this.userBeanPay = UserBeanPay.ofCreate(1);
+		beanPayRepository.saveAndFlush(this.userBeanPay);
 	}
 
 	@AfterEach
@@ -122,7 +121,7 @@ public class BeanPayIntegrationServiceTest {
 			//when
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request))
 				.thenReturn(tossResponse);
-			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId, USER);
+			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId);
 
 			//then
 			assertNotNull(actual);
@@ -165,9 +164,8 @@ public class BeanPayIntegrationServiceTest {
 			//when
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request))
 				.thenReturn(tossResponse);
-			externalBeanPayService.validTossCharge(request, userId, USER);
-			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId,
-				USER);
+			externalBeanPayService.validTossCharge(request, userId);
+			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId);
 
 			// then
 			assertNotNull(actual);

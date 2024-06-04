@@ -1,6 +1,5 @@
 package org.ecommerce.paymentapi.internal.controller;
 
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -16,9 +15,10 @@ import org.ecommerce.paymentapi.dto.request.PaymentCancelRequest;
 import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.dto.response.PaymentWithDetailResponse;
-import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
+import org.ecommerce.paymentapi.entity.SellerBeanPay;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -67,7 +67,7 @@ class PaymentControllerTest {
 			final Long orderId = 1L;
 			final Integer startAmount = 100_000;
 			final Integer userId = 1;
-			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount,
+			final UserBeanPay userBeanPay = new UserBeanPay(1, userId, startAmount,
 				LocalDateTime.now(), null);
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
@@ -79,9 +79,9 @@ class PaymentControllerTest {
 			final Integer[] prices = {1000, 1000, 1000};
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
-			final List<BeanPay> sellerBeanPays = List.of(
-				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null),
-				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now(), null)
+			final List<SellerBeanPay> sellerUserBeanPays = List.of(
+				new SellerBeanPay(2, 1, 0, LocalDateTime.now(), null),
+				new SellerBeanPay(3, 2, 0, LocalDateTime.now(), null)
 			);
 			final PaymentPriceRequest request =
 				new PaymentPriceRequest(
@@ -116,8 +116,8 @@ class PaymentControllerTest {
 				)
 			);
 
-			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
-				request, sellerBeanPays);
+			final List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+				request, sellerUserBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
@@ -159,7 +159,7 @@ class PaymentControllerTest {
 			final String cancelReason = "사용자 단순 변심";
 			final Integer startAmount = 100_000;
 			final Integer userId = 1;
-			final BeanPay userBeanPay = new BeanPay(1, userId, USER, startAmount, LocalDateTime.now(), null);
+			final UserBeanPay userBeanPay = new UserBeanPay(1, userId, startAmount, LocalDateTime.now(), null);
 			final Integer[] sellerIds = new Integer[] {1, 2};
 			final Long[] orderItemIds = new Long[] {1L, 2L, 3L};
 			final Integer paymentAmount = 15000;
@@ -170,9 +170,9 @@ class PaymentControllerTest {
 			final Integer[] prices = {1000, 1000, 1000};
 			final String[] productNames = new String[]{"product1", "product2",
 				"product3"};
-			final List<BeanPay> sellerBeanPays = List.of(
-				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now(), null),
-				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now(), null)
+			final List<SellerBeanPay> sellerUserBeanPays = List.of(
+				new SellerBeanPay(2, 1, 0, LocalDateTime.now(), null),
+				new SellerBeanPay(3, 2, 0, LocalDateTime.now(), null)
 			);
 			final PaymentPriceRequest paymentPrice =
 				new PaymentPriceRequest(
@@ -207,8 +207,8 @@ class PaymentControllerTest {
 					)
 				);
 
-			List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
-				paymentPrice, sellerBeanPays);
+			List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+				paymentPrice, sellerUserBeanPays);
 			Payment payment = Payment.ofPayment(
 				userBeanPay,
 				orderId,
@@ -219,7 +219,7 @@ class PaymentControllerTest {
 			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
 			PaymentCancelRequest request = new PaymentCancelRequest(
 				paymentDetail.getUserBeanPay().getUserId(),
-				paymentDetail.getSellerBeanPay().getUserId(),
+				paymentDetail.getSellerBeanPay().getSellerId(),
 				orderId,
 				paymentDetail.getOrderItemId(),
 				cancelReason
@@ -236,7 +236,7 @@ class PaymentControllerTest {
 				).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.userId").value(userId))
-				.andExpect(jsonPath("$.sellerId").value(paymentDetail.getSellerBeanPay().getUserId()))
+				.andExpect(jsonPath("$.sellerId").value(paymentDetail.getSellerBeanPay().getSellerId()))
 				.andExpect(jsonPath("$.orderItemId").value(paymentDetail.getOrderItemId()))
 				.andExpect(jsonPath("$.deliveryFee").value(paymentDetail.getDeliveryFee()))
 				.andExpect(jsonPath("$.paymentAmount").value(paymentDetail.getPaymentAmount()))
