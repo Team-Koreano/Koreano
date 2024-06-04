@@ -1,7 +1,6 @@
 package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
@@ -41,9 +40,9 @@ public class BeanPayController {
 
 	@GetMapping("/success")
 	public Response<PaymentDetailResponse> validCharge(@Valid final TossPaymentRequest request) {
-		//TODO: Id, Role 적용 예정
+		//TODO: Jwt 회원 Id 적용 예정
 		final PaymentDetailResponse response =
-			PaymentDetailMapper.INSTANCE.toResponse(beanPayService.validTossCharge(request, 1, USER));
+			PaymentDetailMapper.INSTANCE.toResponse(beanPayService.validTossCharge(request, 1));
 		if(response.processStatus() == FAILED) {
 			return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		}

@@ -59,11 +59,11 @@ public class PaymentDetail {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "beanpay_user_id", nullable = false)
-	private BeanPay userBeanPay;
+	private UserBeanPay userBeanPay;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "beanpay_seller_id")
-	private BeanPay sellerBeanPay;
+	private SellerBeanPay sellerBeanPay;
 
 	@Column(unique = true)
 	private Long orderItemId;
@@ -132,7 +132,7 @@ public class PaymentDetail {
 	@Column(name = "is_visible")
 	private Boolean isVisible = TRUE;
 
-	protected static PaymentDetail ofBeforeCharge(BeanPay userBeanPay, Integer chargeAmount){
+	protected static PaymentDetail ofBeforeCharge(UserBeanPay userBeanPay, Integer chargeAmount){
 		PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.userBeanPay = userBeanPay;
 		paymentDetail.paymentAmount = chargeAmount;
@@ -142,14 +142,14 @@ public class PaymentDetail {
 
 	protected static PaymentDetail ofPayment(
 		final Payment payment,
-		final BeanPay sellerBeanPay,
+		final SellerBeanPay sellerBeanPay,
 		final Long orderDetailId,
 		final Integer deliveryFee,
 		final Integer quantity,
 		final Integer price,
 		final String productName
 	) {
-		final BeanPay userBeanPay = payment.getUserBeanPay();
+		final UserBeanPay userBeanPay = payment.getUserBeanPay();
 
 		final PaymentDetail paymentDetail = new PaymentDetail();
 		paymentDetail.payment = payment;
@@ -198,6 +198,7 @@ public class PaymentDetail {
 			PaymentStatusHistory.ofRecord(this)
 		);
 		this.userBeanPay.cancelPayment(getPaymentAmount(), this.sellerBeanPay);
+		this.payment.decreaseTotalAmount(this.getPaymentAmount());
 		return this;
 	}
 

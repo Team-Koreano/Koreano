@@ -1,7 +1,6 @@
 package org.ecommerce.paymentapi.internal.service;
 
 import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,12 +13,13 @@ import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.dto.request.PaymentCancelRequest;
 import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
-import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.SellerBeanPay;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
-import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentErrorCode;
-import org.ecommerce.paymentapi.repository.BeanPayRepository;
+import org.ecommerce.paymentapi.repository.SellerBeanPayRepository;
+import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class PaymentService {
 	private final PaymentRepository paymentRepository;
-	private final BeanPayRepository beanPayRepository;
+	private final UserBeanPayRepository beanPayRepository;
+	private final SellerBeanPayRepository sellerBeanPayRepository;
 
 	/**
 	 결제 진행
@@ -44,21 +45,20 @@ public class PaymentService {
 	 * @return - 반환 값 설명 텍스트
 	 */
 	@DistributedLock(
-		lockName = BEANPAY,
-		uniqueKey = {
-			"#paymentPrice.userId() + 'USER'",
-			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
+		lockName = {USER_BEANPAY, SELLER_BEANPAY},
+		keys = {
+			"#paymentPrice.userId()",
+			"#paymentPrice.paymentDetails().get().sellerId()"
 		}
 	)
 	public PaymentDtoWithDetail paymentPrice(final PaymentPriceRequest paymentPrice) {
 		//유저 BeanPay 가져오기
-		final BeanPay userBeanPay = getBeanPay(paymentPrice.userId(), USER);
+		final UserBeanPay userBeanPay = getUserBeanPay(paymentPrice.userId());
 
 		// 판매자들 BeanPay 가져오기
-		final List<BeanPay> sellerBeanPays =
-			beanPayRepository.findBeanPayByUserIdsAndRole(
-			paymentPrice.extractSellerIds(),
-			SELLER
+		final List<SellerBeanPay> sellerBeanPays =
+			sellerBeanPayRepository.findSellerBeanPayBySellerIds(
+			paymentPrice.extractSellerIds()
 		);
 
 		// 결제
@@ -74,19 +74,19 @@ public class PaymentService {
 	}
 
 	@VisibleForTesting
-	public static List<Pair<BeanPay, PaymentDetailPriceRequest>> mappedBeanPayPaymentDetailPrice(
+	public static List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> mappedBeanPayPaymentDetailPrice(
 		final PaymentPriceRequest paymentPrice,
-		final List<BeanPay> sellerBeanPays
+		final List<SellerBeanPay> sellerUserBeanPays
 	) {
-		final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap =
+		final List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap =
 			new LinkedList<>();
 
 		for (final PaymentDetailPriceRequest detailPrice : paymentPrice.paymentDetails()) {
 			beanPayPaymentDetailPriceMap.add(
 				Pair.of(
-					sellerBeanPays.stream()
+					sellerUserBeanPays.stream()
 						.filter(sellerBeanPay ->
-							sellerBeanPay.getUserId().equals(detailPrice.sellerId()))
+							sellerBeanPay.getSellerId().equals(detailPrice.sellerId()))
 						.findFirst()
 						.orElseThrow(() ->
 							new CustomException(BeanPayErrorCode.NOT_FOUND_SELLER_ID)),
@@ -104,10 +104,10 @@ public class PaymentService {
 	 * @return - 반환 값 설명 텍스트
 	 */
 	@DistributedLock(
-		lockName = BEANPAY,
-		uniqueKey = {
-		"#paymentCancel.sellerId() + 'SELLER'",
-		"#paymentCancel.userId() + 'USER'",
+		lockName = {USER_BEANPAY, SELLER_BEANPAY},
+		keys = {
+		"#paymentCancel.userId()",
+		"#paymentCancel.sellerId()",
 	})
 	public PaymentDetailDto cancelPaymentDetail(
 		final PaymentCancelRequest paymentCancel
@@ -126,12 +126,12 @@ public class PaymentService {
 		return payment;
 	}
 
-	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
-			userId, role);
-		if(beanPay == null)
+	private UserBeanPay getUserBeanPay(final Integer userId) {
+		final UserBeanPay userBeanPay = beanPayRepository.findUserBeanPayByUserId(
+			userId);
+		if(userBeanPay == null)
 			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
-		return beanPay;
+		return userBeanPay;
 	}
 
 }
