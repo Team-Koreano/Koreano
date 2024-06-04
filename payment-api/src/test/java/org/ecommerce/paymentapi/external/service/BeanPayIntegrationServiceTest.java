@@ -12,10 +12,10 @@ import java.util.UUID;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
-import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
+import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
+import org.ecommerce.paymentapi.dto.request.TossFailRequest;
+import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
+import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
@@ -79,7 +79,7 @@ public class BeanPayIntegrationServiceTest {
 		//given
 		final Integer amount = 10_000;
 		final Integer userId = 1;
-		final PreCharge request = new PreCharge(
+		final PreChargeRequest request = new PreChargeRequest(
 			userId,
 			amount
 		);
@@ -88,8 +88,8 @@ public class BeanPayIntegrationServiceTest {
 		PaymentDetailDto actual = externalBeanPayService.beforeCharge(request);
 
 		//then
-		assertEquals(actual.getPaymentAmount(), amount);
-		assertEquals(actual.getUserId(), userId);
+		assertEquals(actual.paymentAmount(), amount);
+		assertEquals(actual.userId(), userId);
 	}
 
 	@Nested
@@ -100,7 +100,7 @@ public class BeanPayIntegrationServiceTest {
 			//사전 결제
 			final Integer amount = 10_000;
 			final Integer userId = 1;
-			final PreCharge preCharge = new PreCharge(
+			final PreChargeRequest preCharge = new PreChargeRequest(
 				userId,
 				amount
 			);
@@ -111,12 +111,12 @@ public class BeanPayIntegrationServiceTest {
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
-			final UUID orderId = dto.getId();
-			final TossPayment request = new TossPayment(paymentType, paymentKey,
+			final UUID orderId = dto.id();
+			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
 				orderId, amount);
-			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentKey, orderName,
+			final TossPaymentResponse response = new TossPaymentResponse(paymentKey, orderName,
 				paymentType, amount, approveDateTime);
-			final ResponseEntity<TossDto.Response.TossPayment> tossResponse =
+			final ResponseEntity<TossPaymentResponse> tossResponse =
 				new ResponseEntity<>(response, HttpStatus.OK);
 
 			//when
@@ -126,16 +126,16 @@ public class BeanPayIntegrationServiceTest {
 
 			//then
 			assertNotNull(actual);
-			assertEquals(actual.getId(), orderId);
-			assertEquals(actual.getPaymentDetailId(), dto.getPaymentDetailId());
-			assertEquals(actual.getUserId(), dto.getUserId());
-			assertNull(actual.getSellerId());
-			assertEquals(actual.getPaymentAmount(), amount);
-			assertNull(actual.getCancelReason());
-			assertNull(actual.getFailReason());
-			assertEquals(actual.getPaymentStatus(), DEPOSIT);
-			assertEquals(actual.getProcessStatus(), COMPLETED);
-			assertNotNull(actual.getApproveDateTime());
+			assertEquals(actual.id(), orderId);
+			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
+			assertEquals(actual.userId(), dto.userId());
+			assertNull(actual.sellerId());
+			assertEquals(actual.paymentAmount(), amount);
+			assertNull(actual.cancelReason());
+			assertNull(actual.failReason());
+			assertEquals(actual.paymentStatus(), DEPOSIT);
+			assertEquals(actual.processStatus(), COMPLETED);
+			assertNotNull(actual.approveDateTime());
 		}
 
 		@Test
@@ -143,7 +143,7 @@ public class BeanPayIntegrationServiceTest {
 			//사전 결제
 			final Integer amount = 10_000;
 			final Integer userId = 1;
-			final PreCharge preCharge = new PreCharge(
+			final PreChargeRequest preCharge = new PreChargeRequest(
 				userId,
 				amount
 			);
@@ -154,12 +154,12 @@ public class BeanPayIntegrationServiceTest {
 			final String paymentKey = "paymentKey";
 			final String orderName = "orderName";
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
-			final UUID orderId = dto.getId();
-			final TossPayment request = new TossPayment(paymentType, paymentKey,
+			final UUID orderId = dto.id();
+			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
 				orderId, amount);
-			final TossDto.Response.TossPayment response = new TossDto.Response.TossPayment(paymentKey, orderName,
+			final TossPaymentResponse response = new TossPaymentResponse(paymentKey, orderName,
 				paymentType, amount, approveDateTime);
-			final ResponseEntity<TossDto.Response.TossPayment> tossResponse =
+			final ResponseEntity<TossPaymentResponse> tossResponse =
 				new ResponseEntity<>(response, HttpStatus.OK);
 
 			//when
@@ -171,16 +171,16 @@ public class BeanPayIntegrationServiceTest {
 
 			// then
 			assertNotNull(actual);
-			assertEquals(actual.getId(), orderId);
-			assertEquals(actual.getPaymentDetailId(), dto.getPaymentDetailId());
-			assertEquals(actual.getUserId(), dto.getUserId());
-			assertNull(actual.getSellerId());
-			assertEquals(actual.getPaymentAmount(), amount);
-			assertNull(actual.getCancelReason());
-			assertEquals(actual.getFailReason(), DUPLICATE_API_CALL.getMessage());
-			assertEquals(actual.getPaymentStatus(), DEPOSIT);
-			assertEquals(actual.getProcessStatus(), FAILED);
-			assertNotNull(actual.getApproveDateTime());
+			assertEquals(actual.id(), orderId);
+			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
+			assertEquals(actual.userId(), dto.userId());
+			assertNull(actual.sellerId());
+			assertEquals(actual.paymentAmount(), amount);
+			assertNull(actual.cancelReason());
+			assertEquals(actual.failReason(), DUPLICATE_API_CALL.getMessage());
+			assertEquals(actual.paymentStatus(), DEPOSIT);
+			assertEquals(actual.processStatus(), FAILED);
+			assertNotNull(actual.approveDateTime());
 		}
 	}
 
@@ -193,19 +193,19 @@ public class BeanPayIntegrationServiceTest {
 			final Integer userId = 1;
 			final Integer amount = 1000;
 			PaymentDetailDto dto = 사전결제(userId, amount);
-			final UUID orderId = dto.getId();
+			final UUID orderId = dto.id();
 			final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
-			final TossFail request = new TossFail(orderId, errorCode, errorMessage);
+			final TossFailRequest request = new TossFailRequest(orderId, errorCode, errorMessage);
 
 			//when
 			PaymentDetailDto result = externalBeanPayService.failTossCharge(request);
 
 			//then
-			assertEquals(result.getFailReason(), errorMessage);
-			assertEquals(result.getProcessStatus(), ProcessStatus.FAILED);
-			assertEquals(result.getPaymentStatus(), DEPOSIT);
+			assertEquals(result.failReason(), errorMessage);
+			assertEquals(result.processStatus(), ProcessStatus.FAILED);
+			assertEquals(result.paymentStatus(), DEPOSIT);
 		}
 		@Test
 		void 결제상세_존재안함_예외발생() {
@@ -217,7 +217,7 @@ public class BeanPayIntegrationServiceTest {
 			final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
-			final TossFail request = new TossFail(notExistId, errorCode, errorMessage);
+			final TossFailRequest request = new TossFailRequest(notExistId, errorCode, errorMessage);
 
 			//when
 			CustomException actual = assertThrows(CustomException.class, () -> {
@@ -228,7 +228,7 @@ public class BeanPayIntegrationServiceTest {
 		}
 
 		private PaymentDetailDto 사전결제(Integer userId, Integer amount) {
-			final PreCharge preCharge = new PreCharge(
+			final PreChargeRequest preCharge = new PreChargeRequest(
 				userId,
 				amount
 			);

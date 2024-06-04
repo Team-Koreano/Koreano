@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.AopForTransaction;
 import org.ecommerce.paymentapi.aop.DistributedLock;
-import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
@@ -49,7 +49,7 @@ public class LockTestService {
 			"#paymentPrice.paymentDetails().get().sellerId() + 'SELLER'"
 		}
 	)
-	public void useMultiLockTest(PaymentPrice paymentPrice) {
+	public void useMultiLockTest(PaymentPriceRequest paymentPrice) {
 
 		BeanPay beanPay = getBeanPay(1, Role.USER);
 

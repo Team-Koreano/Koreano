@@ -8,8 +8,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
-import org.ecommerce.paymentapi.dto.PaymentDto.Request.PaymentPrice;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
@@ -146,13 +146,13 @@ public class LockTestServiceTest {
 		ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 		CountDownLatch latch = new CountDownLatch(threadCount);
 		Integer totalAmount = threadCount * 5000;
-		PaymentPrice paymentPrice = new PaymentPrice(
+		PaymentPriceRequest paymentPrice = new PaymentPriceRequest(
 			1L,
 			1,
 			"orderName",
 			List.of(
-				new PaymentDetailPrice(1L, 1000, 3, 0, 1, "productName1"),
-				new PaymentDetailPrice(2L, 1000, 3, 0, 1, "productName2")
+				new PaymentDetailPriceRequest(1L, 1000, 3, 0, 1, "productName1"),
+				new PaymentDetailPriceRequest(2L, 1000, 3, 0, 1, "productName2")
 			)
 		);
 

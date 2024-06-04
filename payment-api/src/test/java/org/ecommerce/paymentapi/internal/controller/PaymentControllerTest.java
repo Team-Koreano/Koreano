@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentCancel;
-import org.ecommerce.paymentapi.dto.PaymentDto;
+import org.ecommerce.paymentapi.dto.PaymentDtoWithDetail;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
+import org.ecommerce.paymentapi.dto.request.PaymentCancelRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
+import org.ecommerce.paymentapi.dto.response.PaymentWithDetailResponse;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.Payment;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
@@ -79,13 +82,13 @@ class PaymentControllerTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentDto.Request.PaymentPrice request =
-				new PaymentDto.Request.PaymentPrice(
+			final PaymentPriceRequest request =
+				new PaymentPriceRequest(
 				1L,
 				userBeanPay.getUserId(),
 				orderName,
 				List.of(
-					new PaymentDetailDto.Request.PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[0],
 						prices[0],
 						quantity[0],
@@ -93,7 +96,7 @@ class PaymentControllerTest {
 						sellerIds[0],
 						productNames[0]
 					),
-					new PaymentDetailDto.Request.PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[1],
 						prices[1],
 						quantity[1],
@@ -101,7 +104,7 @@ class PaymentControllerTest {
 						sellerIds[1],
 						productNames[1]
 					),
-					new PaymentDetailDto.Request.PaymentDetailPrice(
+					new PaymentDetailPriceRequest(
 						orderItemIds[2],
 						prices[2],
 						quantity[2],
@@ -112,7 +115,7 @@ class PaymentControllerTest {
 				)
 			);
 
-			final List<Pair<BeanPay, PaymentDetailDto.Request.PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				request, sellerBeanPays);
 			final Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -120,8 +123,8 @@ class PaymentControllerTest {
 				orderName,
 				beanPayPaymentPrice
 			);
-			final PaymentDto paymentDto = PaymentMapper.INSTANCE.paymentToDto(payment);
-			final PaymentDto.Response response = PaymentMapper.INSTANCE.paymentDtoToResponse(paymentDto);
+			final PaymentDtoWithDetail paymentDto = PaymentMapper.INSTANCE.toPaymentWithDetailDto(payment);
+			final PaymentWithDetailResponse response = PaymentMapper.INSTANCE.toPaymentWithDetailResponse(paymentDto);
 			when(paymentService.paymentPrice(request)).thenReturn(paymentDto);
 
 			//when
@@ -170,13 +173,13 @@ class PaymentControllerTest {
 				new BeanPay(2, 1, SELLER, 0, LocalDateTime.now()),
 				new BeanPay(3, 2, SELLER, 0, LocalDateTime.now())
 			);
-			final PaymentDto.Request.PaymentPrice paymentPrice =
-				new PaymentDto.Request.PaymentPrice(
+			final PaymentPriceRequest paymentPrice =
+				new PaymentPriceRequest(
 					1L,
 					userBeanPay.getUserId(),
 					orderName,
 					List.of(
-						new PaymentDetailDto.Request.PaymentDetailPrice(
+						new PaymentDetailPriceRequest(
 							orderItemIds[0],
 							prices[0],
 							quantity[0],
@@ -184,7 +187,7 @@ class PaymentControllerTest {
 							sellerIds[0],
 							productNames[0]
 						),
-						new PaymentDetailDto.Request.PaymentDetailPrice(
+						new PaymentDetailPriceRequest(
 							orderItemIds[1],
 							prices[1],
 							quantity[1],
@@ -192,7 +195,7 @@ class PaymentControllerTest {
 							sellerIds[1],
 							productNames[1]
 						),
-						new PaymentDetailDto.Request.PaymentDetailPrice(
+						new PaymentDetailPriceRequest(
 							orderItemIds[2],
 							prices[2],
 							quantity[2],
@@ -203,7 +206,7 @@ class PaymentControllerTest {
 					)
 				);
 
-			List<Pair<BeanPay, PaymentDetailDto.Request.PaymentDetailPrice>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
+			List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				paymentPrice, sellerBeanPays);
 			Payment payment = Payment.ofPayment(
 				userBeanPay,
@@ -213,7 +216,7 @@ class PaymentControllerTest {
 			);
 
 			PaymentDetail paymentDetail = payment.getPaymentDetails().get(0);
-			PaymentCancel request = new PaymentCancel(
+			PaymentCancelRequest request = new PaymentCancelRequest(
 				paymentDetail.getUserBeanPay().getUserId(),
 				paymentDetail.getSellerBeanPay().getUserId(),
 				orderId,
@@ -221,7 +224,7 @@ class PaymentControllerTest {
 				cancelReason
 			);
 			payment.cancelPaymentDetail(request.orderItemId(), request.cancelReason());
-			PaymentDetailDto dto = PaymentMapper.INSTANCE.paymentDetailToDto(
+			PaymentDetailDto dto = PaymentMapper.INSTANCE.toPaymentDetailDto(
 				paymentDetail);
 			when(paymentService.cancelPaymentDetail(request)).thenReturn(dto);
 

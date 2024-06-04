@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
+import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.ChargeInfo;
 import org.ecommerce.paymentapi.entity.Payment;
@@ -85,18 +85,18 @@ class PaymentDetailDtoTest {
 		);
 
 		PaymentDetailDto dto =
-			PaymentDetailMapper.INSTANCE.entityToDto(entity);
-		assertEquals(dto.getId(), entity.getId());
-		assertEquals(dto.getPaymentDetailId(), entity.getPayment().getId());
-		assertEquals(dto.getUserId(), entity.getUserBeanPay().getUserId());
-		assertEquals(dto.getSellerId(), entity.getSellerBeanPay().getUserId());
-		assertEquals(dto.getOrderItemId(), entity.getOrderItemId());
-		assertEquals(dto.getDeliveryFee(), entity.getDeliveryFee());
-		assertEquals(dto.getPaymentAmount(), entity.getPaymentAmount());
-		assertEquals(dto.getCancelReason(), entity.getCancelReason());
-		assertEquals(dto.getFailReason(), entity.getFailReason());
-		assertEquals(dto.getProcessStatus(), entity.getProcessStatus());
-		assertEquals(dto.getPaymentStatus(), entity.getPaymentStatus());
+			PaymentDetailMapper.INSTANCE.toDto(entity);
+		assertEquals(dto.id(), entity.getId());
+		assertEquals(dto.paymentDetailId(), entity.getPayment().getId());
+		assertEquals(dto.userId(), entity.getUserBeanPay().getUserId());
+		assertEquals(dto.sellerId(), entity.getSellerBeanPay().getUserId());
+		assertEquals(dto.orderItemId(), entity.getOrderItemId());
+		assertEquals(dto.deliveryFee(), entity.getDeliveryFee());
+		assertEquals(dto.paymentAmount(), entity.getPaymentAmount());
+		assertEquals(dto.cancelReason(), entity.getCancelReason());
+		assertEquals(dto.failReason(), entity.getFailReason());
+		assertEquals(dto.processStatus(), entity.getProcessStatus());
+		assertEquals(dto.paymentStatus(), entity.getPaymentStatus());
 	}
 
 	@Nested
@@ -109,8 +109,8 @@ class PaymentDetailDtoTest {
 			final String errorCode = "PAY_PROCESS_CANCELED";
 
 			//when
-			final TossFail request =
-				new TossFail(orderId, errorCode, errorMessage);
+			final TossFailRequest request =
+				new TossFailRequest(orderId, errorCode, errorMessage);
 
 			//then
 			assertEquals(orderId, request.orderId());
@@ -125,11 +125,11 @@ class PaymentDetailDtoTest {
 			final String errorCode = "";
 
 			//when
-			final PaymentDetailDto.Request.TossFail request =
-				new PaymentDetailDto.Request.TossFail(orderId, errorMessage, errorCode);
+			final TossFailRequest request =
+				new TossFailRequest(orderId, errorMessage, errorCode);
 
 			//then
-			Set<ConstraintViolation<PaymentDetailDto.Request.TossFail>> violations =
+			Set<ConstraintViolation<TossFailRequest>> violations =
 				validator.validate(request);
 
 			assertEquals(3, violations.size());
@@ -139,7 +139,7 @@ class PaymentDetailDtoTest {
 	@Test
 	void PaymentDetailPrice_테스트() {
 		//given
-		PaymentDetailPrice request = new PaymentDetailPrice(
+		PaymentDetailPriceRequest request = new PaymentDetailPriceRequest(
 			null,
 			null,
 			null,
@@ -149,7 +149,7 @@ class PaymentDetailDtoTest {
 		);
 
 		//when
-		Set<ConstraintViolation<PaymentDetailPrice>> violations =
+		Set<ConstraintViolation<PaymentDetailPriceRequest>> violations =
 			validator.validate(request);
 
 		//then

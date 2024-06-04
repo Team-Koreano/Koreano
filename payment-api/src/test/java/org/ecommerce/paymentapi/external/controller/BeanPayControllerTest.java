@@ -13,10 +13,11 @@ import java.util.UUID;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
-import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
+import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
+import org.ecommerce.paymentapi.dto.request.TossFailRequest;
+import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
+import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
@@ -77,14 +78,14 @@ class BeanPayControllerTest {
 	@Test
 	void 사전결제객체_생성() throws Exception {
 		//given
-		final PreCharge request = new PreCharge(1, 10_000);
+		final PreChargeRequest request = new PreChargeRequest(1, 10_000);
 		final BeanPay beanPay = getBeanPay();
 		final PaymentDetail entity = beanPay.beforeCharge(10000);
-		final PaymentDetailDto dto = PaymentDetailMapper.INSTANCE.entityToDto(entity);
+		final PaymentDetailDto dto = PaymentDetailMapper.INSTANCE.toDto(entity);
 
 		when(beanPayService.beforeCharge(request)).thenReturn(dto);
-		final Response<PaymentDetailDto.Response> response = new Response<>(200,
-			PaymentDetailMapper.INSTANCE.dtoToResponse(dto));
+		final Response<PaymentDetailResponse> response = new Response<>(200,
+			PaymentDetailMapper.INSTANCE.toResponse(dto));
 
 		//when
 		MvcResult mvcResult =
@@ -110,7 +111,7 @@ class BeanPayControllerTest {
 
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
-			final TossPayment request = new TossPayment(paymentType, paymentKey,
+			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
 				orderId, amount);
 			final PaymentDetailDto response = new PaymentDetailDto(
 				orderId,
@@ -132,8 +133,8 @@ class BeanPayControllerTest {
 				null,
 				null
 			);
-			final Response<PaymentDetailDto.Response> result = new Response<>(200,
-				PaymentDetailMapper.INSTANCE.dtoToResponse(response));
+			final Response<PaymentDetailResponse> result = new Response<>(200,
+				PaymentDetailMapper.INSTANCE.toResponse(response));
 
 			when(beanPayService.validTossCharge(request, userId, role)).thenReturn(response);
 
@@ -164,13 +165,13 @@ class BeanPayControllerTest {
 		final String errorMessage = "사용자에 의해 결제가 취소되었습니다.";
 		final String errorCode = "PAY_PROCESS_CANCELED";
 
-		final TossFail request = new TossFail(orderId, errorCode, errorMessage);
+		final TossFailRequest request = new TossFailRequest(orderId, errorCode, errorMessage);
 		final BeanPay beanPay = getBeanPay();
 		PaymentDetail paymentDetail = beanPay.beforeCharge(amount);
-		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
+		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
 
-		final Response<PaymentDetailDto.Response> result = new Response<>(200,
-			PaymentDetailMapper.INSTANCE.dtoToResponse(response));
+		final Response<PaymentDetailResponse> result = new Response<>(200,
+			PaymentDetailMapper.INSTANCE.toResponse(response));
 
 		when(beanPayService.failTossCharge(request)).thenReturn(response);
 

@@ -9,11 +9,11 @@ import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.client.TossServiceClient;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.TossFail;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
-import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
+import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
+import org.ecommerce.paymentapi.dto.request.TossFailRequest;
+import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
+import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
@@ -44,12 +44,12 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public PaymentDetailDto beforeCharge(final PreCharge request) {
+	public PaymentDetailDto beforeCharge(final PreChargeRequest request) {
 
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
 		final PaymentDetail paymentDetail = beanPay.beforeCharge(request.chargeAmount());
 
-		return PaymentDetailMapper.INSTANCE.entityToDto(
+		return PaymentDetailMapper.INSTANCE.toDto(
 			paymentDetailRepository.save(paymentDetail)
 		);
 
@@ -72,7 +72,7 @@ public class BeanPayService {
 		lockName = BEANPAY,
 		uniqueKey = "#userId + #role.name()")
 	public PaymentDetailDto validTossCharge(
-		final TossPayment request,
+		final TossPaymentRequest request,
 		final Integer userId,
 		final Role role
 	) {
@@ -85,7 +85,7 @@ public class BeanPayService {
 		} catch (CustomException e) {
 			handleException(paymentDetail, e.getErrorMessage());
 		}
-		return PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
+		return PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class BeanPayService {
 	 @return - void
 	 */
 	private void validateBeanPayDetail(final PaymentDetail paymentDetail,
-		final TossPayment request) throws CustomException {
+		final TossPaymentRequest request) throws CustomException {
 		if (!paymentDetail.validCharge(request.orderId(), request.chargeAmount())) {
 			throw new CustomException(PaymentDetailErrorCode.VERIFICATION_FAIL);
 		}
@@ -127,8 +127,8 @@ public class BeanPayService {
 	 @return - void
 	 */
 	private void processApproval(final PaymentDetail paymentDetail,
-		final TossPayment request) throws CustomException {
-		final ResponseEntity<TossDto.Response.TossPayment> response =
+		final TossPaymentRequest request) throws CustomException {
+		final ResponseEntity<TossPaymentResponse> response =
 			tossServiceClient.approvePayment(
 				tossKey.getAuthorizationKey(), request);
 
@@ -158,12 +158,12 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public PaymentDetailDto failTossCharge(final TossFail request) {
+	public PaymentDetailDto failTossCharge(final TossFailRequest request) {
 
 		final PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
 		handleException(paymentDetail, request.errorMessage());
 
-		return PaymentDetailMapper.INSTANCE.entityToDto(paymentDetail);
+		return PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
 	}
 
 

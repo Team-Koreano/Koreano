@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.paymentapi.dto.TossDto;
+import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
@@ -207,7 +207,7 @@ public class PaymentDetail {
 			this.getPaymentAmount().equals(amount);
 	}
 
-	public void chargeComplete(TossDto.Response.TossPayment response) {
+	public void chargeComplete(TossPaymentResponse response) {
 		if(this.chargeInfo != null)
 			throw new CustomException(PaymentDetailErrorCode.DUPLICATE_API_CALL);
 
