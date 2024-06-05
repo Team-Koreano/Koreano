@@ -12,4 +12,4 @@ jasypt:
   encryptor:
     password: test
 payment-service:
-  url: http://localhost:8085/api/internal/beanpay/v1
+  url: http://localhost:8081/api/internal/beanpay/v1
