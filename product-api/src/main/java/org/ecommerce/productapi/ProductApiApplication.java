@@ -1,11 +1,10 @@
 package org.ecommerce.productapi;
 
-import org.ecommerce.productapi.config.ElasticSearchConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 
-@SpringBootApplication(scanBasePackages = {"org.ecommerce.common"},
+@SpringBootApplication(scanBasePackages = {"org.ecommerce.common", "org.ecommerce.productapi"},
 	nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
 public class ProductApiApplication {
 	public static void main(String[] args) {
