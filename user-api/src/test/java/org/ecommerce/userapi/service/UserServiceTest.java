@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.UserServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
@@ -65,7 +65,7 @@ class UserServiceTest {
 	private JwtProvider jwtProvider;
 
 	@Mock
-	private UserServiceClient userServiceClient;
+	private PaymentServiceClient paymentServiceClient;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -207,7 +207,8 @@ class UserServiceTest {
 			assertThat(UserMapper.INSTANCE.toResponse(expectedResult))
 				.isEqualTo(UserMapper.INSTANCE.toResponse(result));
 
-			verify(userServiceClient, times(1)).createBeanPay(new CreateBeanPayRequest(entity.getId(), Role.USER));
+			verify(paymentServiceClient, times(1)).createUserBeanPay(
+				new CreateBeanPayRequest(entity.getId(), Role.USER));
 		}
 
 		@Test
@@ -356,7 +357,7 @@ class UserServiceTest {
 
 			// then
 			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
-			verify(userServiceClient, times(1)).deleteBeanPay(new DeleteBeanPayRequest(user.getId(), Role.USER));
+			verify(paymentServiceClient, times(1)).deleteUserBeanPay(new DeleteBeanPayRequest(user.getId(), Role.USER));
 			assertThat(user.isValidStatus()).isFalse();
 			assertThat(user.isDeleted()).isTrue();
 		}

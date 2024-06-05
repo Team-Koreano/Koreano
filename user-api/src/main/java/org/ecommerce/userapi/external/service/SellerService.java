@@ -3,7 +3,7 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.SellerServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
@@ -49,7 +49,7 @@ public class SellerService {
 
 	private final SellerAccountRepository sellerAccountRepository;
 
-	private final SellerServiceClient sellerServiceClient;
+	private final PaymentServiceClient paymentServiceClient;
 
 	//TODO : 계좌에 관한 RUD API 개발
 
@@ -67,7 +67,7 @@ public class SellerService {
 			passwordEncoder.encode(requestSeller.password()),
 			requestSeller.address(), requestSeller.phoneNumber()));
 
-		sellerServiceClient.createBeanPay(new CreateBeanPayRequest(seller.getId(), Role.SELLER));
+		paymentServiceClient.createSellerBeanPay(new CreateBeanPayRequest(seller.getId(), Role.SELLER));
 
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
@@ -176,7 +176,7 @@ public class SellerService {
 		if (seller == null || !checkIsMatchedPassword(withdrawal.password(), seller.getPassword()))
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
 
-		sellerServiceClient.deleteBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
+		paymentServiceClient.deleteSellerBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
 
 		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber()))
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);

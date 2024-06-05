@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.SellerServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
@@ -56,7 +56,7 @@ class SellerServiceTest {
 	private JwtProvider jwtProvider;
 
 	@Mock
-	private SellerServiceClient sellerServiceClient;
+	private PaymentServiceClient paymentServiceClient;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -142,7 +142,8 @@ class SellerServiceTest {
 			final SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
 
 			//then
-			verify(sellerServiceClient, times(1)).createBeanPay(new CreateBeanPayRequest(entity.getId(), Role.SELLER));
+			verify(paymentServiceClient, times(1)).createSellerBeanPay(
+				new CreateBeanPayRequest(entity.getId(), Role.SELLER));
 			assertThat(SellerMapper.INSTANCE.toResponse(expectedResult))
 				.isEqualTo(SellerMapper.INSTANCE.toResponse(result));
 		}
@@ -269,7 +270,8 @@ class SellerServiceTest {
 
 			// then
 			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
-			verify(sellerServiceClient, times(1)).deleteBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
+			verify(paymentServiceClient, times(1)).deleteSellerBeanPay(
+				new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
 			assertThat(seller.isValidStatus()).isFalse();
 			assertThat(seller.isDeleted()).isTrue();
 		}
