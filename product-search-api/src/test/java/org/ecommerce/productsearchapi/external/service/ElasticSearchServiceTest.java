@@ -10,7 +10,9 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.productsearchapi.document.ProductDocument;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
+import org.ecommerce.productsearchapi.dto.request.SearchRequest;
 import org.ecommerce.productsearchapi.enumerated.ProductSortType;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.junit.jupiter.api.Test;
@@ -42,19 +44,19 @@ public class ElasticSearchServiceTest {
 		given(productElasticsearchRepository.findProductsByNameContaining("아메리카노")).willReturn(searchHits);
 
 		// when
-		final List<ProductSearchDto> productSearchDtoList = elasticSearchService.suggestSearchKeyword("아메리카노");
+		final List<ProductDto> productDtoList = elasticSearchService.suggestSearchKeyword("아메리카노");
 
 		// then
-		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productSearchDtoList.get(0).getId());
-		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productSearchDtoList.get(1).getId());
-		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productSearchDtoList.get(0).getName());
-		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productSearchDtoList.get(1).getName());
-		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productSearchDtoList.get(0).getPrice());
-		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productSearchDtoList.get(1).getPrice());
+		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productDtoList.get(0).id());
+		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productDtoList.get(1).id());
+		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productDtoList.get(0).name());
+		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productDtoList.get(1).name());
+		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productDtoList.get(0).price());
+		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productDtoList.get(1).price());
 		assertEquals(searchHits.getSearchHit(0).getContent().getBean(),
-			productSearchDtoList.get(0).getBean().getCode());
+			productDtoList.get(0).bean().getCode());
 		assertEquals(searchHits.getSearchHit(1).getContent().getBean(),
-			productSearchDtoList.get(1).getBean().getCode());
+			productDtoList.get(1).bean().getCode());
 	}
 
 	@Test
@@ -62,26 +64,24 @@ public class ElasticSearchServiceTest {
 
 		//given
 		final SearchHits<ProductDocument> searchHits = getSearchHits();
-		final ProductSearchDto.Request.Search request = new ProductSearchDto.Request.Search("아메리카노", true, ProductCategory.BEAN, Bean.ARABICA, Acidity.MEDIUM, ProductSortType.NEWEST);
+		final SearchRequest request = new SearchRequest("아메리카노", true, ProductCategory.BEAN, Bean.ARABICA, Acidity.MEDIUM, ProductSortType.NEWEST);
 		final Pageable pageable = Pageable.ofSize(2).withPage(0);
 
+		final PagedSearchDto givenPagedSearchDto = PagedSearchDto.of(2L, 1L, 0, 2, searchHits);
 
-		given(productElasticsearchRepository.searchProducts(request, pageable)).willReturn(searchHits);
+
+		given(productElasticsearchRepository.searchProducts(request, pageable)).willReturn(givenPagedSearchDto);
 
 		//when
-		final List<ProductSearchDto> productSearchDtoList = elasticSearchService.searchProducts(request, 0, 2);
+		final PagedSearchDto whenPagedSearchDto = elasticSearchService.searchProducts(request, 0, 2);
 
 		//then
-		assertEquals(searchHits.getSearchHit(0).getContent().getId(), productSearchDtoList.get(0).getId());
-		assertEquals(searchHits.getSearchHit(1).getContent().getId(), productSearchDtoList.get(1).getId());
-		assertEquals(searchHits.getSearchHit(0).getContent().getName(), productSearchDtoList.get(0).getName());
-		assertEquals(searchHits.getSearchHit(1).getContent().getName(), productSearchDtoList.get(1).getName());
-		assertEquals(searchHits.getSearchHit(0).getContent().getPrice(), productSearchDtoList.get(0).getPrice());
-		assertEquals(searchHits.getSearchHit(1).getContent().getPrice(), productSearchDtoList.get(1).getPrice());
-		assertEquals(searchHits.getSearchHit(0).getContent().getBean(),
-			productSearchDtoList.get(0).getBean().getCode());
-		assertEquals(searchHits.getSearchHit(1).getContent().getBean(),
-			productSearchDtoList.get(1).getBean().getCode());
+		assertEquals(givenPagedSearchDto.currentPage(), whenPagedSearchDto.currentPage());
+		assertEquals(givenPagedSearchDto.pageSize(), whenPagedSearchDto.pageSize());
+		assertEquals(givenPagedSearchDto.totalPages(), whenPagedSearchDto.totalPages());
+		assertEquals(givenPagedSearchDto.totalElements(), whenPagedSearchDto.totalElements());
+		assertEquals(givenPagedSearchDto.searchHits().getSearchHit(0).getContent().getId(), whenPagedSearchDto.searchHits().getSearchHit(0).getContent().getId()
+		);
 
 	}
 
