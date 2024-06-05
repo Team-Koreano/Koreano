@@ -15,16 +15,15 @@ import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
 import org.ecommerce.userapi.dto.request.CreateAddressRequest;
-import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateUserBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateUserRequest;
-import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.DeleteUserBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginUserRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Gender;
-import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.UserService;
@@ -208,7 +207,7 @@ class UserServiceTest {
 				.isEqualTo(UserMapper.INSTANCE.toResponse(result));
 
 			verify(paymentServiceClient, times(1)).createUserBeanPay(
-				new CreateBeanPayRequest(entity.getId(), Role.USER));
+				new CreateUserBeanPayRequest(entity.getId()));
 		}
 
 		@Test
@@ -357,7 +356,7 @@ class UserServiceTest {
 
 			// then
 			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
-			verify(paymentServiceClient, times(1)).deleteUserBeanPay(new DeleteBeanPayRequest(user.getId(), Role.USER));
+			verify(paymentServiceClient, times(1)).deleteUserBeanPay(new DeleteUserBeanPayRequest(user.getId()));
 			assertThat(user.isValidStatus()).isFalse();
 			assertThat(user.isDeleted()).isTrue();
 		}

@@ -9,9 +9,9 @@ import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
-import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateSellerBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateSellerRequest;
-import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.DeleteSellerBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginSellerRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
@@ -67,7 +67,7 @@ public class SellerService {
 			passwordEncoder.encode(requestSeller.password()),
 			requestSeller.address(), requestSeller.phoneNumber()));
 
-		paymentServiceClient.createSellerBeanPay(new CreateBeanPayRequest(seller.getId(), Role.SELLER));
+		paymentServiceClient.createSellerBeanPay(new CreateSellerBeanPayRequest(seller.getId()));
 
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
@@ -176,13 +176,15 @@ public class SellerService {
 		if (seller == null || !checkIsMatchedPassword(withdrawal.password(), seller.getPassword()))
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
 
-		paymentServiceClient.deleteSellerBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
+		paymentServiceClient.deleteSellerBeanPay(new DeleteSellerBeanPayRequest(seller.getId()));
 
 		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber()))
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
 
 		seller.withdrawal();
 
+		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
