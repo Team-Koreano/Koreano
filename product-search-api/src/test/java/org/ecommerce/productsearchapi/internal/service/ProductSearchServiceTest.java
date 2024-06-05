@@ -73,9 +73,11 @@ public class ProductSearchServiceTest {
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
 			"testSize",
+			"testCapacity",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
+			(short)3000,
 			images
 		);
 	}

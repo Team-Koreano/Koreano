@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Set;
 import java.util.UUID;
 
+import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,13 +36,13 @@ public class TossDtoTest {
 			final Integer amount = 1000;
 
 			//when
-			final TossDto.Request.TossPayment request =
-				new TossDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
+			final TossPaymentRequest request =
+				new TossPaymentRequest(paymentType, paymentKey, orderId, amount);
 
 			//then
 			assertEquals(orderId, request.orderId());
 			assertEquals(paymentKey, request.paymentKey());
-			assertEquals(amount, request.amount());
+			assertEquals(amount, request.chargeAmount());
 			assertEquals(paymentType, request.paymentType());
 		}
 		@Test
@@ -53,11 +54,11 @@ public class TossDtoTest {
 			final Integer amount = -1;
 
 			//when
-			final TossDto.Request.TossPayment request =
-				new TossDto.Request.TossPayment(paymentType, paymentKey, orderId, amount);
+			final TossPaymentRequest request =
+				new TossPaymentRequest(paymentType, paymentKey, orderId, amount);
 
 			//then
-			Set<ConstraintViolation<TossDto.Request.TossPayment>> violations =
+			Set<ConstraintViolation<TossPaymentRequest>> violations =
 				validator.validate(request);
 
 			assertEquals(5, violations.size());

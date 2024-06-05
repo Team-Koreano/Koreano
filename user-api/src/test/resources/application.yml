@@ -1,4 +1,4 @@
-SECRET_KEY_SOURCE : test
+SECRET_KEY_SOURCE: test
 spring:
   profiles:
     active: test
@@ -6,8 +6,10 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6370
-jwt :
-  secret : test
+jwt:
+  secret: test
 jasypt:
   encryptor:
     password: test
+payment-service:
+  url: http://localhost:8085/api/internal/beanpay/v1

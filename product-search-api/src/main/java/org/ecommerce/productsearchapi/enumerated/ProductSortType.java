@@ -1,23 +1,22 @@
 package org.ecommerce.productsearchapi.enumerated;
 
-import org.ecommerce.common.utils.mapper.EnumMapperType;
-
 import lombok.Getter;
 
 @Getter
-public enum ProductSortType implements EnumMapperType {
+public enum ProductSortType {
 
-	NEWEST("createDatetime"),
-	POPULAR("favoriteCount"),
+	NEWEST("createDatetime", "Desc"),
+	POPULAR("favoriteCount", "Desc"),
+	PRICE_ASC("price", "Asc"),
+	PRICE_DESC("price", "Desc"),
 	;
-	private final String title;
+	private final String field;
+	private final String orderBy;
 
-	ProductSortType(String title) {
-		this.title = title;
+
+	ProductSortType(String field, String orderBy) {
+		this.field = field;
+		this.orderBy = orderBy;
 	}
 
-	@Override
-	public String getCode() {
-		return name();
-	}
 }

@@ -14,7 +14,8 @@ public enum ProductManagementErrorCode implements ErrorCode {
 	NOT_FOUND_SELLER("판매자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST.value()),
 	IS_INVALID_FILE_OPTION("유효하지않은 확장자 입니다.", HttpStatus.BAD_REQUEST.value()),
 	FAILED_FILE_UPLOAD("파일 업로드에 실패하였습니다.", HttpStatus.BAD_REQUEST.value()),
-	NOT_FOUND_CATEGORY("해당 카테고리를 찾을 수 없습니다", HttpStatus.BAD_REQUEST.value());
+	NOT_FOUND_CATEGORY("해당 카테고리를 찾을 수 없습니다", HttpStatus.BAD_REQUEST.value()),
+	FAILED_PRODUCT_UPLOAD("상품 등록에 실패하였습니다.", HttpStatus.BAD_REQUEST.value());
 
 	ProductManagementErrorCode(String message, int code) {
 		this.message = message;

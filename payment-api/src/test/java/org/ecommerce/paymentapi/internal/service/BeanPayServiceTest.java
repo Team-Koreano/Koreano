@@ -7,15 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
-import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,9 +30,6 @@ class BeanPayServiceTest {
 	@Mock
 	private BeanPayRepository beanPayRepository;
 
-	@Mock
-	private BeanPayDetailRepository beanPayDetailRepository;
-
 
 	@Nested
 	class 빈페이_생성 {
@@ -46,20 +40,20 @@ class BeanPayServiceTest {
 			final Role role = USER;
 			final Integer amount = 0;
 			final LocalDateTime createDateTime = LocalDateTime.now();
-			CreateBeanPay request = new CreateBeanPay(userId, role);
-			BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
+			final BeanPay beanPay = new BeanPay(1, userId, role, amount, createDateTime);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
-				request.role())).thenReturn(Optional.empty());
+				request.role())).thenReturn(null);
 			when(beanPayRepository.save(any(BeanPay.class))).thenReturn(beanPay);
 			BeanPayDto actual = beanPayService.createBeanPay(request);
 
 			//then
-			assertEquals(actual.getUserId(), userId);
-			assertEquals(actual.getRole(), role);
-			assertEquals(actual.getAmount(), amount);
-			assertEquals(actual.getCreateDateTime(), createDateTime);
+			assertEquals(actual.userId(), userId);
+			assertEquals(actual.role(), role);
+			assertEquals(actual.amount(), amount);
+			assertEquals(actual.createDateTime(), createDateTime);
 		}
 
 		@Test
@@ -67,14 +61,14 @@ class BeanPayServiceTest {
 			//given
 			final Integer userId = 1;
 			final Role role = USER;
-			CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
 
 			//when
 			when(beanPayRepository.findBeanPayByUserIdAndRole(request.userId(),
-				request.role())).thenReturn(Optional.ofNullable(mock(BeanPay.class)));
+				request.role())).thenReturn(mock(BeanPay.class));
 
 			//then
-			CustomException actual = assertThrows(CustomException.class, () -> {
+			final CustomException actual = assertThrows(CustomException.class, () -> {
 				beanPayService.createBeanPay(request);
 			});
 			assertEquals(actual.getErrorCode(), ALREADY_EXISTS);

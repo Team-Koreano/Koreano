@@ -59,13 +59,19 @@ public class ProductDocument {
 	@Field(type = FieldType.Text)
 	private String thumbnailUrl;
 
+	@Field(type = FieldType.Text)
+	private String size;
+
+	@Field(type = FieldType.Text)
+	private String capacity;
+
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	private LocalDateTime createDatetime;
 
 	public static ProductDocument of(Product product) {
 		ProductDocument productDocument = new ProductDocument();
 		productDocument.id = product.getId();
-		productDocument.category = product.getCategory().name();
+		productDocument.category = product.getCategory().getCode();
 		productDocument.price = product.getPrice();
 		productDocument.stock = product.getStock();
 		productDocument.sellerId = product.getSellerRep().getId();
@@ -73,11 +79,13 @@ public class ProductDocument {
 		productDocument.favoriteCount = product.getFavoriteCount();
 		productDocument.isDecaf = product.getIsDecaf();
 		productDocument.name = product.getName();
-		productDocument.acidity = product.getAcidity().name();
-		productDocument.bean = product.getBean().name();
+		productDocument.acidity = product.getAcidity().getCode();
+		productDocument.bean = product.getBean().getCode();
 		productDocument.information = product.getInformation();
 		productDocument.createDatetime = product.getCreateDatetime();
 		productDocument.thumbnailUrl = product.getThumbnailUrl();
+		productDocument.size = product.getSize();
+		productDocument.capacity = product.getCapacity();
 		return productDocument;
 	}
 

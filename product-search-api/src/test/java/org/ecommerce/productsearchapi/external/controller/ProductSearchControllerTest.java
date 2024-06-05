@@ -67,7 +67,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				imageDtoList,
-				null
+				null,
+				"size",
+				"capacity"
 			);
 		// when
 		when(productSearchService.getProductById(anyInt())).thenReturn(productSearchDto);
@@ -131,7 +133,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null
+				null,
+				"size",
+				"capacity"
 			),
 			new ProductSearchDto(
 				2,
@@ -150,7 +154,9 @@ public class ProductSearchControllerTest {
 				TEST_DATE_TIME,
 				TEST_DATE_TIME,
 				null,
-				null
+				null,
+				"size",
+				"capacity"
 			)
 		);
 		// when
@@ -161,6 +167,70 @@ public class ProductSearchControllerTest {
 			.andExpect(jsonPath("$.result[0].name").value(suggestedProducts.get(0).getName()))
 			.andExpect(jsonPath("$.result[1].id").value(suggestedProducts.get(1).getId()))
 			.andExpect(jsonPath("$.result[1].name").value(suggestedProducts.get(1).getName()))
+			.andExpect(status().isOk())
+			.andDo(print());
+	}
+
+	@Test
+	void 상품_리스트_검색() throws Exception {
+		// given
+		final List<ProductSearchDto> searchDtoList = List.of(
+			new ProductSearchDto(
+				1,
+				ProductCategory.BEAN,
+				30000,
+				100,
+				new ProductSearchDto.SellerRep(1, "커피천국"),
+				10,
+				false,
+				"아메리카노",
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
+				false,
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null,
+				"size",
+				"capacity"
+			),
+			new ProductSearchDto(
+				2,
+				ProductCategory.BEAN,
+				30000,
+				100,
+				new ProductSearchDto.SellerRep(1, "커피천국"),
+				10,
+				false,
+				"아메아메아메",
+				Bean.ARABICA,
+				Acidity.MEDIUM,
+				"커피천국에서만 만나볼 수 있는 특별한 커피",
+				ProductStatus.AVAILABLE,
+				false,
+				TEST_DATE_TIME,
+				TEST_DATE_TIME,
+				null,
+				null,
+				"size",
+				"capacity"
+			)
+		);
+
+		// when
+		when(elasticSearchService.searchProducts(any(ProductSearchDto.Request.Search.class), eq(0), eq(2)))
+			.thenReturn(searchDtoList);
+		// then
+		mockMvc.perform(
+				get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
+			.andExpect(jsonPath("$.result[0].id").value(searchDtoList.get(0).getId()))
+			.andExpect(jsonPath("$.result[0].name").value(searchDtoList.get(0).getName()))
+			.andExpect(jsonPath("$.result[0].favoriteCount").value(searchDtoList.get(1).getFavoriteCount()))
+			.andExpect(jsonPath("$.result[1].id").value(searchDtoList.get(1).getId()))
+			.andExpect(jsonPath("$.result[1].name").value(searchDtoList.get(1).getName()))
+			.andExpect(jsonPath("$.result[1].favoriteCount").value(searchDtoList.get(1).getFavoriteCount()))
 			.andExpect(status().isOk())
 			.andDo(print());
 	}
@@ -185,9 +255,11 @@ public class ProductSearchControllerTest {
 			"커피천국에서만 만나볼 수 있는 특별한 커피",
 			false,
 			"testSize",
+			"testCapacity",
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
+			(short)3000,
 			images
 		);
 	}

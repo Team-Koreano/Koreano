@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
+import org.ecommerce.productmanagementapi.dto.response.CategoryResponse;
+import org.ecommerce.productmanagementapi.dto.response.ProductResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -13,56 +16,29 @@ import org.mapstruct.factory.Mappers;
 public interface ProductManagementMapper {
 	ProductManagementMapper INSTANCE = Mappers.getMapper(ProductManagementMapper.class);
 
-	ProductManagementDto toDto(Product product);
+	@Mapping(target = "bizName", source = "sellerRep.bizName")
+	@Mapping(target = "categoryResponse", source = ".", qualifiedByName = "mapCategoryResponse")
+	ProductResponse toResponse(ProductWithSellerRepAndImagesDto dto);
 
-	List<ProductManagementDto> productsToDtos(List<Product> product);
+	List<ProductResponse> toResponse(List<ProductWithSellerRepAndImagesDto> dtos);
 
-	default ProductManagementDto.Response toResponse(ProductManagementDto dto) {
-		if (dto.getCategory() == ProductCategory.BEAN) {
-			return mapBeanProduct(dto);
+	ProductWithSellerRepAndImagesDto toDto(Product product);
+
+	List<ProductWithSellerRepAndImagesDto> toDtos(List<Product> products);
+
+	@Named("mapCategoryResponse")
+	default CategoryResponse mapCategoryResponse(ProductWithSellerRepAndImagesDto dto) {
+		if (dto.category() == ProductCategory.BEAN) {
+			return new CategoryResponse.BeanResponse(
+				dto.isDecaf(),
+				dto.acidity().name(),
+				dto.bean().name(),
+				dto.isCrush());
 		} else {
-			return mapDefaultProduct(dto);
+			return new CategoryResponse.DefaultResponse(
+				dto.size(),
+				dto.capacity()
+			);
 		}
 	}
-
-	@Named("mapBeanProduct")
-	default ProductManagementDto.Response.BeanProductResponse mapBeanProduct(ProductManagementDto dto) {
-		return new ProductManagementDto.Response.BeanProductResponse(
-			dto.getId(),
-			dto.getPrice(),
-			dto.getSellerRep().getBizName(),
-			dto.getStock(),
-			dto.getFavoriteCount(),
-			dto.getCategory().name(),
-			dto.getName(),
-			dto.getStatus().name(),
-			dto.getInformation(),
-			dto.getCreateDatetime(),
-			dto.getImages(),
-			dto.getIsDecaf(),
-			dto.getAcidity().name(),
-			dto.getBean().name(),
-			dto.getIsCrush()
-		);
-	}
-
-	@Named("mapDefaultProduct")
-	default ProductManagementDto.Response.DefaultProductResponse mapDefaultProduct(ProductManagementDto dto) {
-		return new ProductManagementDto.Response.DefaultProductResponse(
-			dto.getId(),
-			dto.getPrice(),
-			dto.getSellerRep().getBizName(),
-			dto.getStock(),
-			dto.getFavoriteCount(),
-			dto.getCategory().name(),
-			dto.getName(),
-			dto.getStatus().name(),
-			dto.getInformation(),
-			dto.getCreateDatetime(),
-			dto.getImages(),
-			dto.getSize()
-		);
-	}
-
-	List<ProductManagementDto.Response> dtosToResponses(List<ProductManagementDto> productManagementDtos);
 }

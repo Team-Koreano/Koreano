@@ -17,7 +17,7 @@ public @interface DistributedLock {
 
 	LockName lockName() default BEANPAY;
 
-	String[] key();
+	String[] uniqueKey();
 
 	TimeUnit timeUnit() default TimeUnit.SECONDS;
 

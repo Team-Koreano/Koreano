@@ -65,9 +65,6 @@ public class Users {
 	@Column()
 	private LocalDateTime updateDatetime;
 
-	@Column()
-	private Long beanPayId;
-
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;

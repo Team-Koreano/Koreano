@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.aop.TimeCheck;
-import org.ecommerce.paymentapi.dto.PaymentDto;
-import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
 import org.ecommerce.paymentapi.external.service.LockTestService;
-import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,9 +23,8 @@ public class TestController {
 	@TimeCheck
 	@PostMapping("/multilock")
 	public Response<Void> test1() {
-		lockTestService.useMultiLockTest(new PaymentDto.Request.PaymentPrice(
+		lockTestService.useMultiLockTest(new PaymentPriceRequest(
 			1L,
-			5000,
 			1,
 			"orderName",
 			List.of()

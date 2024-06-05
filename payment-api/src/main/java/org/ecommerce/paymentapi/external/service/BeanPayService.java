@@ -3,27 +3,24 @@ package org.ecommerce.paymentapi.external.service;
 
 import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.aop.DistributedLock;
 import org.ecommerce.paymentapi.client.TossServiceClient;
-import org.ecommerce.paymentapi.dto.BeanPayDetailDto;
-import org.ecommerce.paymentapi.dto.BeanPayDetailDto.Request.PreCharge;
-import org.ecommerce.paymentapi.dto.BeanPayDetailMapper;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
-import org.ecommerce.paymentapi.dto.BeanPayMapper;
-import org.ecommerce.paymentapi.dto.TossDto;
-import org.ecommerce.paymentapi.dto.TossDto.Request.TossPayment;
+import org.ecommerce.paymentapi.dto.PaymentDetailDto;
+import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
+import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
+import org.ecommerce.paymentapi.dto.request.TossFailRequest;
+import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
+import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
 import org.ecommerce.paymentapi.entity.BeanPay;
-import org.ecommerce.paymentapi.entity.BeanPayDetail;
+import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
-import org.ecommerce.paymentapi.exception.BeanPayDetailErrorCode;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
-import org.ecommerce.paymentapi.repository.BeanPayDetailRepository;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
+import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,30 +36,31 @@ public class BeanPayService {
 
 	private final TossKey tossKey;
 	private final BeanPayRepository beanPayRepository;
-	private final BeanPayDetailRepository beanPayDetailRepository;
 	private final TossServiceClient tossServiceClient;
+	private final PaymentDetailRepository paymentDetailRepository;
 
 	/**
 	 충전하기 전 사전 객체 생성
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public BeanPayDetailDto preChargeBeanPay(final PreCharge request) {
+	public PaymentDetailDto beforeCharge(final PreChargeRequest request) {
+
 		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
+		final PaymentDetail paymentDetail = beanPay.beforeCharge(request.chargeAmount());
 
-		BeanPayDetail beanPayDetail = beanPay.preCharge(request.amount());
-
-		final BeanPayDetail createBeanPayDetail = beanPayDetailRepository.save(
-			beanPayDetail
+		return PaymentDetailMapper.INSTANCE.toDto(
+			paymentDetailRepository.save(paymentDetail)
 		);
-
-		return BeanPayDetailMapper.INSTANCE.toDto(createBeanPayDetail);
 
 	}
 
 	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		return beanPayRepository.findBeanPayByUserIdAndRole(userId, role)
-			.orElseThrow(() -> new CustomException(BeanPayErrorCode.NOT_FOUND_ID));
+		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+			userId, role);
+		if(beanPay == null)
+			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
+		return beanPay;
 	}
 
 	/**
@@ -72,22 +70,22 @@ public class BeanPayService {
 	 */
 	@DistributedLock(
 		lockName = BEANPAY,
-		key = "#userId + #role")
-	public BeanPayDetailDto validTossCharge(
-		final TossPayment request,
+		uniqueKey = "#userId + #role.name()")
+	public PaymentDetailDto validTossCharge(
+		final TossPaymentRequest request,
 		final Integer userId,
 		final Role role
 	) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(),
-			request.amount());
-		BeanPayDetail beanPayDetail = getBeanPayDetail(request.orderId());
+			request.chargeAmount());
+		PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
 		try {
-			validateBeanPayDetail(beanPayDetail, request);
-			processApproval(beanPayDetail, request);
+			validateBeanPayDetail(paymentDetail, request);
+			processApproval(paymentDetail, request);
 		} catch (CustomException e) {
-			handleException(beanPayDetail, e.getErrorMessage());
+			handleException(paymentDetail, e.getErrorMessage());
 		}
-		return BeanPayDetailMapper.INSTANCE.toDto(beanPayDetail);
+		return PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
 	}
 
 	/**
@@ -95,9 +93,20 @@ public class BeanPayService {
 	 @param - UUID orderId
 	 @return - BeanPay
 	 */
-	private BeanPayDetail getBeanPayDetail(final UUID orderId) throws CustomException {
-		return beanPayDetailRepository.findById(orderId)
-			.orElseThrow(() -> new CustomException(BeanPayDetailErrorCode.NOT_EXIST));
+	private PaymentDetail getPaymentDetail(final UUID id) throws CustomException {
+		PaymentDetail paymentDetail = paymentDetailRepository.findPaymentDetailById(id);
+		if(paymentDetail == null)
+			throw new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID);
+		return paymentDetail;
+	}
+
+
+	private PaymentDetail getPaymentDetail(final Long orderItemId) throws CustomException {
+		PaymentDetail paymentDetail = paymentDetailRepository.findPaymentDetailByOrderItemId(
+			orderItemId);
+		if(paymentDetail == null)
+			throw new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID);
+		return paymentDetail;
 	}
 
 	/**
@@ -105,10 +114,10 @@ public class BeanPayService {
 	 @param - BeanPay beanPay, TossPayment request
 	 @return - void
 	 */
-	private void validateBeanPayDetail(final BeanPayDetail beanPayDetail,
-		final TossPayment request) throws CustomException {
-		if (!beanPayDetail.validBeanPay(request.orderId(), request.amount())) {
-			throw new CustomException(BeanPayDetailErrorCode.VERIFICATION_FAIL);
+	private void validateBeanPayDetail(final PaymentDetail paymentDetail,
+		final TossPaymentRequest request) throws CustomException {
+		if (!paymentDetail.validCharge(request.orderId(), request.chargeAmount())) {
+			throw new CustomException(PaymentDetailErrorCode.VERIFICATION_FAIL);
 		}
 	}
 
@@ -117,17 +126,18 @@ public class BeanPayService {
 	 @param - BeanPay beanPay, TossPayment request
 	 @return - void
 	 */
-	private void processApproval(final BeanPayDetail beanPayDetail,
-		final TossPayment request) throws CustomException {
-		ResponseEntity<TossDto.Response.TossPayment> response = tossServiceClient.approvePayment(
-			tossKey.getAuthorizationKey(), request);
+	private void processApproval(final PaymentDetail paymentDetail,
+		final TossPaymentRequest request) throws CustomException {
+		final ResponseEntity<TossPaymentResponse> response =
+			tossServiceClient.approvePayment(
+				tossKey.getAuthorizationKey(), request);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			log.error("토스 결제 승인 실패");
-			throw new CustomException(BeanPayDetailErrorCode.TOSS_RESPONSE_FAIL);
+			throw new CustomException(PaymentDetailErrorCode.TOSS_RESPONSE_FAIL);
 		}
 
-		beanPayDetail.chargeComplete(response.getBody());
+		paymentDetail.chargeComplete(response.getBody());
 		log.info("토스 결제 승인 서비스 로직 종료");
 
 	}
@@ -137,9 +147,9 @@ public class BeanPayService {
 	 @param - BeanPay beanPay, String message
 	 @return - void
 	 */
-	private void handleException(final BeanPayDetail beanPayDetail,
+	private void handleException(final PaymentDetail paymentDetail,
 		final String message) {
-		beanPayDetail.chargeFail(message);
+		paymentDetail.chargeFail(message);
 	}
 
 	/**
@@ -148,25 +158,13 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public BeanPayDetailDto failTossCharge(final BeanPayDetailDto.Request.TossFail request) {
+	public PaymentDetailDto failTossCharge(final TossFailRequest request) {
 
-		BeanPayDetail findBeanPayDetail = getBeanPayDetail(request.orderId());
-		handleException(findBeanPayDetail, request.errorMessage());
+		final PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
+		handleException(paymentDetail, request.errorMessage());
 
-		return BeanPayDetailMapper.INSTANCE.toDto(findBeanPayDetail);
+		return PaymentDetailMapper.INSTANCE.toDto(paymentDetail);
 	}
 
-	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
-		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
-			createBeanPay.userId(),
-			createBeanPay.role()
-		);
 
-		if (beanPay.isPresent())
-			throw new CustomException(BeanPayErrorCode.ALREADY_EXISTS);
-
-		return BeanPayMapper.INSTANCE.toDto(
-			beanPayRepository.save(
-				BeanPay.ofCreate(createBeanPay.userId(), createBeanPay.role())));
-	}
 }

@@ -1,12 +1,10 @@
 
 package org.ecommerce.paymentapi.internal.service;
 
-import java.util.Optional;
-
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.repository.BeanPayRepository;
@@ -29,13 +27,13 @@ public class BeanPayService {
 	 * @param - CreateBeanPay createBeanPay
 	 * @return - BeanPayDto
 	 */
-	public BeanPayDto createBeanPay(CreateBeanPay createBeanPay) {
-		Optional<BeanPay> beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
+	public BeanPayDto createBeanPay(final CreateBeanPayRequest createBeanPay) {
+		BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
 			createBeanPay.userId(),
 			createBeanPay.role()
 		);
 
-		if (beanPay.isPresent())
+		if (beanPay != null)
 			throw new CustomException(BeanPayErrorCode.ALREADY_EXISTS);
 
 		return BeanPayMapper.INSTANCE.toDto(

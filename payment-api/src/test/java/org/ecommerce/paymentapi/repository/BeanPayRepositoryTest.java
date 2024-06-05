@@ -4,7 +4,6 @@ import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.paymentapi.config.QueryDslConfig;
 import org.ecommerce.paymentapi.entity.BeanPay;
@@ -38,14 +37,13 @@ public class BeanPayRepositoryTest {
 			beanPayRepository.save(beanPay);
 
 			//when
-			Optional<BeanPay> optionalFindBeanPay =
+			BeanPay findBeanPay =
 				beanPayRepository.findBeanPayByUserIdAndRole(
 					userId, role
 				);
 
 			//then
-			assertTrue(optionalFindBeanPay.isPresent());
-			BeanPay findBeanPay = optionalFindBeanPay.get();
+			assertNotNull(findBeanPay);
 			assertEquals(beanId, findBeanPay.getId());
 			assertEquals(findBeanPay.getUserId(), userId);
 			assertEquals(findBeanPay.getRole(), role);
@@ -62,13 +60,13 @@ public class BeanPayRepositoryTest {
 			beanPayRepository.save(beanPay);
 
 			//when
-			Optional<BeanPay> optionalFindBeanPay =
+			BeanPay findBeanPay =
 				beanPayRepository.findBeanPayByUserIdAndRole(
 					difUserId, role
 				);
 
 			//then
-			assertTrue(optionalFindBeanPay.isEmpty());
+			assertNull(findBeanPay);
 		}
 	}
 	

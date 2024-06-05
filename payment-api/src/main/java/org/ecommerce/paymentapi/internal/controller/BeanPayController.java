@@ -1,10 +1,9 @@
 package org.ecommerce.paymentapi.internal.controller;
 
-import org.ecommerce.common.vo.Response;
-import org.ecommerce.paymentapi.dto.BeanPayDto;
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.response.BeanPayResponse;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +21,10 @@ public class BeanPayController {
 	private final BeanPayService beanPayService;
 
 	@PostMapping
-	public Response<BeanPayDto> createBeanPay(@RequestBody final CreateBeanPay createBeanPay) {
-		final BeanPayDto response = beanPayService.createBeanPay(createBeanPay);
-		return new Response<>(HttpStatus.OK.value(), response);
+	public BeanPayResponse createBeanPay(@RequestBody final CreateBeanPayRequest createBeanPay) {
+		return BeanPayMapper.INSTANCE.toResponse(
+			beanPayService.createBeanPay(createBeanPay)
+		);
 	}
 
 }

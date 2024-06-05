@@ -1,14 +1,16 @@
 package org.ecommerce.paymentapi.entity;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
+import static org.ecommerce.paymentapi.exception.PaymentErrorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ecommerce.paymentapi.dto.PaymentDetailDto.Request.PaymentDetailPrice;
+import org.ecommerce.common.error.CustomException;
+import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
-import org.hibernate.annotations.ColumnDefault;
+import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.util.Pair;
@@ -37,7 +39,7 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "payment",
 	indexes = {
-		@Index(name = "idx_orderId", columnList = "orderId"),
+		@Index(name = "idx_order_id", columnList = "orderId"),
 	}
 )
 public class Payment {
@@ -53,9 +55,8 @@ public class Payment {
 	@JoinColumn(name = "beanpay_user_id", nullable = false)
 	private BeanPay userBeanPay;
 
-	@ColumnDefault("0")
 	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount;
+	private Integer totalPaymentAmount = 0;
 
 	@Column(name = "order_name", nullable = false)
 	private String orderName;
@@ -86,31 +87,28 @@ public class Payment {
 	public static Payment ofPayment(
 		final BeanPay userBeanPay,
 		final Long orderId,
-		final Integer totalAmount,
 		final String orderName,
-		final List<Pair<BeanPay, PaymentDetailPrice>> beanPayPaymentDetailPriceMap
+		final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
 		payment.userBeanPay = userBeanPay;
-		payment.totalAmount = totalAmount;
 		payment.orderName = orderName;
 		payment.changeProcessStatus(COMPLETED);
 
 		beanPayPaymentDetailPriceMap.forEach((beanPayPaymentDetailPrice) -> {
 
 			BeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
-			PaymentDetailPrice paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
+			PaymentDetailPriceRequest paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
 			//결제 디테일 생성
 			payment.paymentDetails.add(
 				PaymentDetail.ofPayment(
 					payment,
 					sellerBeanPay,
-					paymentDetailPrice.orderDetailId(),
-					paymentDetailPrice.totalPrice(),
+					paymentDetailPrice.orderItemId(),
 					paymentDetailPrice.deliveryFee(),
-					paymentDetailPrice.paymentAmount(),
 					paymentDetailPrice.quantity(),
+					paymentDetailPrice.price(),
 					paymentDetailPrice.productName()
 				)
 			);
@@ -121,12 +119,33 @@ public class Payment {
 	public Payment cancelPayment(String message) {
 		changeProcessStatus(CANCELLED);
 		this.paymentDetails.forEach( paymentDetail ->
-			paymentDetail.cancelPayment(message)
+			paymentDetail.cancelPaymentDetail(message)
 		);
 		return this;
 	}
 
 	private void changeProcessStatus(ProcessStatus status) {
 		this.status = status;
+	}
+
+	public PaymentDetail cancelPaymentDetail(Long orderItemId, String message) {
+		PaymentDetail cancelPaymentDetail = this.paymentDetails.stream()
+			.filter(paymentDetail ->
+				paymentDetail.getOrderItemId().equals(orderItemId))
+			.findFirst()
+			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID))
+			.cancelPaymentDetail(message);
+		decreaseTotalAmount(cancelPaymentDetail.getPaymentAmount());
+		return cancelPaymentDetail;
+	}
+
+	private void decreaseTotalAmount(Integer amount) {
+		if(this.totalPaymentAmount - amount < 0)
+			throw new CustomException(INVALID_AMOUNT);
+		this.totalPaymentAmount -= amount;
+	}
+
+	protected void increaseTotalAmount(Integer amount) {
+		this.totalPaymentAmount += amount;
 	}
 }

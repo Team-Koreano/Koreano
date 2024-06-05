@@ -3,10 +3,17 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.LoginSellerRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
@@ -19,6 +26,8 @@ import org.ecommerce.userapi.security.AuthDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +49,8 @@ public class SellerService {
 
 	private final SellerAccountRepository sellerAccountRepository;
 
-	//TODO : 셀러에 관한 RUD API 개발
+	private final PaymentServiceClient paymentServiceClient;
+
 	//TODO : 계좌에 관한 RUD API 개발
 
 	/**
@@ -49,17 +59,17 @@ public class SellerService {
 	 * @param requestSeller 사용자의 생성 정보가 들어간 dto 입니다.
 	 * @return SellerDto
 	 */
-	public SellerDto registerRequest(SellerDto.Request.Register requestSeller) {
+	public SellerDto registerRequest(CreateSellerRequest requestSeller) {
 
 		checkDuplicatedPhoneNumberOrEmail(requestSeller.email(), requestSeller.phoneNumber());
 
-		final Seller seller = Seller.ofRegister(requestSeller.email(), requestSeller.name(),
+		Seller seller = sellerRepository.save(Seller.ofRegister(requestSeller.email(), requestSeller.name(),
 			passwordEncoder.encode(requestSeller.password()),
-			requestSeller.address(), requestSeller.phoneNumber());
+			requestSeller.address(), requestSeller.phoneNumber()));
 
-		sellerRepository.save(seller);
+		paymentServiceClient.createSellerBeanPay(new CreateBeanPayRequest(seller.getId(), Role.SELLER));
 
-		return SellerMapper.INSTANCE.sellerToDto(seller);
+		return SellerMapper.INSTANCE.toDto(seller);
 	}
 
 	/**
@@ -72,19 +82,19 @@ public class SellerService {
 	 * @param login - 사용자의 로그인 정보가 들어간 dto 입니다
 	 * @return SellerDto
 	 */
-	public SellerDto loginRequest(SellerDto.Request.Login login, HttpServletResponse response) {
+	public SellerDto loginRequest(LoginSellerRequest login, HttpServletResponse response) {
 
-		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email())
-			.filter(sellers -> passwordEncoder.matches(login.password(), sellers.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+		final Seller seller = sellerRepository.findSellerByEmailAndIsDeletedIsFalse(login.email());
 
-		if (!seller.isValidStatus()) {
+		if (seller == null || !checkIsMatchedPassword(login.password(), seller.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		if (!seller.isValidStatus())
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
-		}
 
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
-		return SellerMapper.INSTANCE.accessTokenToDto(
+		return SellerMapper.INSTANCE.toDto(
 			jwtProvider.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
@@ -109,15 +119,18 @@ public class SellerService {
 	 * @param register - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 * @author 홍종민
 	 */
-	public AccountDto registerAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		final Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+	public AccountDto registerAccount(final AuthDetails authDetails, final CreateAccountRequest register) {
+
+		final Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (seller == null)
+			throw new CustomException(UserErrorCode.NOT_FOUND_SELLER);
 
 		final SellerAccount account = SellerAccount.ofRegister(seller, register.number(), register.bankName());
 
 		sellerAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.sellerAccountToDto(account);
+		return AccountMapper.INSTANCE.toDto(account);
 	}
 
 	/**
@@ -136,13 +149,12 @@ public class SellerService {
 		final String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
 			jwtProvider.getRoll(bearerToken));
 
-		if (!redisProvider.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey))
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
-		}
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return SellerMapper.INSTANCE.accessTokenToDto(
+		return SellerMapper.INSTANCE.toDto(
 			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
@@ -157,20 +169,30 @@ public class SellerService {
 	 * @param withdrawal- 탈퇴 요청 dto
 	 * @return void
 	 */
-	public void withdrawSeller(final SellerDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())
-			.filter(sellers -> passwordEncoder.matches(withdrawal.password(), sellers.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+	public void withdrawSeller(final WithdrawalSellerRequest withdrawal, final AuthDetails authDetails) {
 
-		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber())) {
+		Seller seller = sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (seller == null || !checkIsMatchedPassword(withdrawal.password(), seller.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		paymentServiceClient.deleteSellerBeanPay(new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
+
+		if (!seller.isValidSeller(withdrawal.email(), withdrawal.phoneNumber()))
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_SELLER);
-		}
+
 		seller.withdrawal();
+
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
 		if (sellerRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
 		}
+	}
+
+	@VisibleForTesting
+	public boolean checkIsMatchedPassword(final String requestPassword, final String userPassword) {
+		return passwordEncoder.matches(requestPassword, userPassword);
 	}
 }

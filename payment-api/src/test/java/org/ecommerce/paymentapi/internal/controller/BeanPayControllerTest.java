@@ -8,10 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
-
-import org.ecommerce.paymentapi.dto.BeanPayDto.Request.CreateBeanPay;
+import org.ecommerce.paymentapi.dto.BeanPayDto;
 import org.ecommerce.paymentapi.dto.BeanPayMapper;
+import org.ecommerce.paymentapi.dto.request.CreateBeanPayRequest;
 import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.Role;
 import org.ecommerce.paymentapi.internal.service.BeanPayService;
@@ -59,12 +58,13 @@ class BeanPayControllerTest {
 			//given
 			final Integer userId = 1;
 			final Role role = USER;
-			final CreateBeanPay request = new CreateBeanPay(userId, role);
+			final CreateBeanPayRequest request = new CreateBeanPayRequest(userId, role);
 			final BeanPay beanPay = BeanPay.ofCreate(userId, role);
+			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.toDto(beanPay);
 
 			//when
 			when(beanPayService.createBeanPay(request))
-				.thenReturn(BeanPayMapper.INSTANCE.toDto(beanPay));
+				.thenReturn(beanPayDto);
 
 			//then
 			mvc.perform(post("/api/internal/beanpay/v1")
@@ -72,8 +72,8 @@ class BeanPayControllerTest {
 					.content(mapper.writeValueAsString(request)))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.result.userId").value(userId))
-				.andExpect(jsonPath("$.result.role").value(role.toString()));
+				.andExpect(jsonPath("$.userId").value(userId))
+				.andExpect(jsonPath("$.role").value(role.toString()));
 		}
 	}
 
