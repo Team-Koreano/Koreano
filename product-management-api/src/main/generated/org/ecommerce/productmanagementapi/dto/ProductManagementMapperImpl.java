@@ -1,13 +1,19 @@
 package org.ecommerce.productmanagementapi.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
+import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productmanagementapi.dto.response.CategoryResponse;
+import org.ecommerce.productmanagementapi.dto.response.ImageResponse;
+import org.ecommerce.productmanagementapi.dto.response.ProductResponse;
 import org.springframework.stereotype.Component;
 
 @Generated(
@@ -99,9 +105,7 @@ public class ProductManagementMapperImpl implements ProductManagementMapper {
 
         id = product.getId();
         category = product.getCategory();
-        price = product.getPrice();
-        stock = product.getStock();
-        sellerRep = product.getSellerRep();
+        sellerRep = sellerRepToSellerRepDto( product.getSellerRep() );
         favoriteCount = product.getFavoriteCount();
         isDecaf = product.getIsDecaf();
         name = product.getName();
