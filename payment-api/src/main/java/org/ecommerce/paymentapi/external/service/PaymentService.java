@@ -22,6 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 	private final PaymentDetailRepository paymentDetailRepository;
 
+	/**
+	 사용자의 빈페이 내역을 조회합니다.
+	 * @author 이우진
+	 *
+	 * @param - 	Integer userId,
+					LocalDateTime start,
+					LocalDateTime end,
+					PaymentStatus status,
+					Pageable pageable
+	 * @return - Page[PaymentDetailDto]
+	 */
 	public Page<PaymentDetailDto> getPaymentDetailsByDateRange(
 		Integer userId,
 		LocalDateTime start,
