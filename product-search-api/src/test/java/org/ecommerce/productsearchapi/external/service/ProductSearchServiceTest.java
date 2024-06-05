@@ -47,8 +47,6 @@ public class ProductSearchServiceTest {
 		// then
 		assertEquals(product.getId(), productDtoWithImageListDto.id());
 		assertEquals(product.getCategory(), productDtoWithImageListDto.category());
-		assertEquals(product.getPrice(), productDtoWithImageListDto.price());
-		assertEquals(product.getStock(), productDtoWithImageListDto.stock());
 		assertEquals(product.getSellerRep().getId(), productDtoWithImageListDto.sellerRep().id());
 		assertEquals(product.getSellerRep().getBizName(), productDtoWithImageListDto.sellerRep().bizName());
 		assertEquals(product.getFavoriteCount(), productDtoWithImageListDto.favoriteCount());
@@ -57,7 +55,6 @@ public class ProductSearchServiceTest {
 		assertEquals(product.getBean(), productDtoWithImageListDto.bean());
 		assertEquals(product.getAcidity(), productDtoWithImageListDto.acidity());
 		assertEquals(product.getInformation(), productDtoWithImageListDto.information());
-		assertEquals(product.getStatus(), productDtoWithImageListDto.status());
 		assertEquals(product.getIsCrush(), productDtoWithImageListDto.isCrush());
 		assertEquals(product.getCreateDatetime(), productDtoWithImageListDto.createDatetime());
 		assertEquals(product.getUpdateDatetime(), productDtoWithImageListDto.updateDatetime());

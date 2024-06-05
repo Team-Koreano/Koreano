@@ -72,8 +72,6 @@ public class ProductDocument {
 		ProductDocument productDocument = new ProductDocument();
 		productDocument.id = product.getId();
 		productDocument.category = product.getCategory().getCode();
-		productDocument.price = product.getPrice();
-		productDocument.stock = product.getStock();
 		productDocument.sellerId = product.getSellerRep().getId();
 		productDocument.sellerName = product.getSellerRep().getBizName();
 		productDocument.favoriteCount = product.getFavoriteCount();
@@ -84,7 +82,6 @@ public class ProductDocument {
 		productDocument.information = product.getInformation();
 		productDocument.createDatetime = product.getCreateDatetime();
 		productDocument.thumbnailUrl = product.getThumbnailUrl();
-		productDocument.size = product.getSize();
 		productDocument.capacity = product.getCapacity();
 		return productDocument;
 	}

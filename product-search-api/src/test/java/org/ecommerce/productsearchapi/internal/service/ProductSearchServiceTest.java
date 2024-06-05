@@ -40,8 +40,6 @@ public class ProductSearchServiceTest {
 		// then
 		assertEquals(product.getId(), productDtoWithImageListDto.id());
 		assertEquals(product.getCategory(), productDtoWithImageListDto.category());
-		assertEquals(product.getPrice(), productDtoWithImageListDto.price());
-		assertEquals(product.getStock(), productDtoWithImageListDto.stock());
 		assertEquals(product.getSellerRep().getId(), productDtoWithImageListDto.sellerRep().id());
 		assertEquals(product.getSellerRep().getBizName(), productDtoWithImageListDto.sellerRep().bizName());
 		assertEquals(product.getFavoriteCount(), productDtoWithImageListDto.favoriteCount());
