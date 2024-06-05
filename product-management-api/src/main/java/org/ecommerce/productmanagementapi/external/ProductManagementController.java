@@ -4,8 +4,13 @@ import java.util.List;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.dto.ProductWithSellerRepAndImagesDto;
+import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyStockRequest;
+import org.ecommerce.productmanagementapi.dto.response.ProductResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,58 +32,61 @@ public class ProductManagementController {
 	private final ProductManagementService productManagementService;
 
 	@PostMapping()
-	public Response<ProductManagementDto.Response> register(
-		@Valid @RequestPart(value = "product") final ProductManagementDto.Request.Register product,
+	public Response<ProductResponse> register(
+		@Valid @RequestPart(value = "product") final CreateProductRequest product,
 		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
 		@RequestPart(value = "images", required = false) final List<MultipartFile> images) {
-		ProductManagementDto productManagementDto = productManagementService.productRegister(product, thumbnailImage,
+		ProductWithSellerRepAndImagesDto productManagementDto = productManagementService.productRegister(product,
+			thumbnailImage,
 			images);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
 	@PutMapping("/status/{productId}/{status}")
-	public Response<ProductManagementDto.Response> modifyToStatus(
+	public Response<ProductResponse> modifyToStatus(
 		@PathVariable("productId") final Integer productId,
 		@PathVariable("status") final ProductStatus status
 	) {
-		ProductManagementDto productManagementDto = productManagementService.modifyToStatus(productId, status);
+		ProductWithSellerRepAndImagesDto productManagementDto = productManagementService.modifyToStatus(productId,
+			status);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
 	@PutMapping("/status")
-	public Response<List<ProductManagementDto.Response>> bulkModifyStatus(
-		@RequestBody final ProductManagementDto.Request.BulkStatus bulkStatus
+	public Response<List<ProductResponse>> bulkModifyStatus(
+		@RequestBody final ModifyProductsStatusRequest bulkStatus
 	) {
-		final List<ProductManagementDto> productManagementDto = productManagementService.bulkModifyStatus(bulkStatus);
+		final List<ProductWithSellerRepAndImagesDto> productManagementDto = productManagementService.bulkModifyStatus(
+			bulkStatus);
 		return new Response<>(HttpStatus.OK.value(),
-			ProductManagementMapper.INSTANCE.dtosToResponses(productManagementDto));
+			ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
 	@PutMapping("/stock/increase")
-	public Response<ProductManagementDto.Response> increaseToStock(
-		@Valid @RequestBody final ProductManagementDto.Request.Stock stock
+	public Response<ProductResponse> increaseToStock(
+		@Valid @RequestBody final ModifyStockRequest stock
 	) {
-		ProductManagementDto productManagementDto = productManagementService.increaseToStock(stock);
+		ProductWithSellerRepAndImagesDto productManagementDto = productManagementService.increaseToStock(stock);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
 	@PutMapping("/stock/decrease")
-	public Response<ProductManagementDto.Response> decreaseToStock(
-		@Valid @RequestBody final ProductManagementDto.Request.Stock stock
+	public Response<ProductResponse> decreaseToStock(
+		@Valid @RequestBody final ModifyStockRequest stock
 	) {
-		ProductManagementDto productManagementDto = productManagementService.decreaseToStock(stock);
+		ProductWithSellerRepAndImagesDto productManagementDto = productManagementService.decreaseToStock(stock);
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));
 	}
 
 	@PutMapping("/{productId}")
-	public Response<ProductManagementDto.Response> modifyToProduct(
+	public Response<ProductResponse> modifyToProduct(
 		@PathVariable("productId") final Integer productId,
-		@Valid @RequestPart(value = "modifyProduct") final ProductManagementDto.Request.Modify modifyProduct,
+		@Valid @RequestPart(value = "modifyProduct") final ModifyProductRequest modifyProduct,
 		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
 		@RequestPart(value = "images", required = false) final List<MultipartFile> images
 
 	) {
-		ProductManagementDto productManagementDto = productManagementService
+		ProductWithSellerRepAndImagesDto productManagementDto = productManagementService
 			.modifyToProduct(productId, modifyProduct, thumbnailImage, images);
 
 		return new Response<>(HttpStatus.OK.value(), ProductManagementMapper.INSTANCE.toResponse(productManagementDto));

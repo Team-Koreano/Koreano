@@ -16,7 +16,6 @@ import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
 import org.ecommerce.productsearchapi.dto.ProductSearchDto;
-import org.ecommerce.productsearchapi.enumerated.ProductSortType;
 import org.ecommerce.productsearchapi.external.service.ElasticSearchService;
 import org.ecommerce.productsearchapi.external.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
@@ -224,7 +223,8 @@ public class ProductSearchControllerTest {
 		when(elasticSearchService.searchProducts(any(ProductSearchDto.Request.Search.class), eq(0), eq(2)))
 			.thenReturn(searchDtoList);
 		// then
-		mockMvc.perform(get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
+		mockMvc.perform(
+				get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
 			.andExpect(jsonPath("$.result[0].id").value(searchDtoList.get(0).getId()))
 			.andExpect(jsonPath("$.result[0].name").value(searchDtoList.get(0).getName()))
 			.andExpect(jsonPath("$.result[0].favoriteCount").value(searchDtoList.get(1).getFavoriteCount()))
@@ -259,6 +259,7 @@ public class ProductSearchControllerTest {
 			ProductStatus.AVAILABLE,
 			TEST_DATE_TIME,
 			TEST_DATE_TIME,
+			(short)3000,
 			images
 		);
 	}
