@@ -1,5 +1,6 @@
 package org.ecommerce.userapi.dto;
 
+import org.ecommerce.userapi.dto.response.CreateAddressResponse;
 import org.ecommerce.userapi.entity.Address;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,8 +11,8 @@ public interface AddressMapper {
 
 	AddressMapper INSTANCE = Mappers.getMapper(AddressMapper.class);
 
-	AddressDto addressToDto(Address address);
+	AddressDto toDto(Address address);
 
-	AddressDto.Response.Register addressDtoToResponse(AddressDto addressDto);
+	CreateAddressResponse toResponse(AddressDto addressDto);
 
 }

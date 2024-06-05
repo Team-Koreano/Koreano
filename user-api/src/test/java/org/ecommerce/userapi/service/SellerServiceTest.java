@@ -4,15 +4,19 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.SellerServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.LoginSellerRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
@@ -52,7 +56,7 @@ class SellerServiceTest {
 	private JwtProvider jwtProvider;
 
 	@Mock
-	private SellerServiceClient sellerServiceClient;
+	private PaymentServiceClient paymentServiceClient;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -70,7 +74,7 @@ class SellerServiceTest {
 	void 셀러_계좌_등록() {
 		// given
 		final AuthDetails authDetails = new AuthDetails(1, null);
-		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+		final CreateAccountRequest registerRequest = new CreateAccountRequest(
 			"213124124123", "부산은행");
 
 		final Seller seller = Seller.ofRegister(
@@ -84,10 +88,9 @@ class SellerServiceTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-			java.util.Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(seller);
 		// when
 		final AccountDto result = sellerService.registerAccount(authDetails, registerRequest);
 		//then
@@ -100,7 +103,7 @@ class SellerServiceTest {
 		@Test
 		void 셀러_등록() {
 			//given
-			final SellerDto.Request.Register newSellerReqeust = new SellerDto.Request.Register(
+			final CreateSellerRequest createSellerRequest = new CreateSellerRequest(
 				"newuser@example.com",
 				"New User",
 				"newpassword",
@@ -108,55 +111,48 @@ class SellerServiceTest {
 				"01012341234");
 
 			//when
-			when(sellerRepository.existsByEmailOrPhoneNumber(newSellerReqeust.email(),
-				newSellerReqeust.phoneNumber())).thenReturn(false);
+			when(sellerRepository.existsByEmailOrPhoneNumber(createSellerRequest.email(),
+				createSellerRequest.phoneNumber())).thenReturn(false);
 			final Seller entity = new Seller(
 				1,
-				newSellerReqeust.email(),
-				newSellerReqeust.name(),
-				newSellerReqeust.password(),
-				newSellerReqeust.address(),
-				newSellerReqeust.phoneNumber(),
+				createSellerRequest.email(),
+				createSellerRequest.name(),
+				createSellerRequest.password(),
+				createSellerRequest.address(),
+				createSellerRequest.phoneNumber(),
 				LocalDateTime.now(),
 				false,
 				LocalDateTime.now(),
-				null,
 				UserStatus.GENERAL,
 				null
 			);
 
 			when(sellerRepository.save(any(Seller.class))).thenReturn(entity);
-			when(sellerServiceClient.createBeanPay(any(BeanPayDto.Request.CreateBeanPay.class))).thenReturn(
-				new BeanPayDto(
-					1,
-					entity.getId(),
-					Role.SELLER,
-					0,
-					null
-				));
 
-			final SellerDto result = sellerService.registerRequest(newSellerReqeust);
+			final SellerDto result = sellerService.registerRequest(createSellerRequest);
 
 			final Seller savedSeller = Seller.ofRegister(
-				newSellerReqeust.email(),
-				newSellerReqeust.name(),
-				bCryptPasswordEncoder.encode(newSellerReqeust.password()),
-				newSellerReqeust.address(),
-				newSellerReqeust.phoneNumber()
+				createSellerRequest.email(),
+				createSellerRequest.name(),
+				bCryptPasswordEncoder.encode(createSellerRequest.password()),
+				createSellerRequest.address(),
+				createSellerRequest.phoneNumber()
 			);
 
-			final SellerDto expectedResult = SellerMapper.INSTANCE.sellerToDto(savedSeller);
+			final SellerDto expectedResult = SellerMapper.INSTANCE.toDto(savedSeller);
 
 			//then
-			assertThat(SellerMapper.INSTANCE.sellerDtoToResponse(expectedResult))
-				.isEqualTo(SellerMapper.INSTANCE.sellerDtoToResponse(result));
+			verify(paymentServiceClient, times(1)).createSellerBeanPay(
+				new CreateBeanPayRequest(entity.getId(), Role.SELLER));
+			assertThat(SellerMapper.INSTANCE.toResponse(expectedResult))
+				.isEqualTo(SellerMapper.INSTANCE.toResponse(result));
 		}
 
 		@Test
 		void 중복_이메일_케이스() {
 			// given
 			// 중복 이메일 케이스
-			final SellerDto.Request.Register duplicatedEmailRequest = new SellerDto.Request.Register("user3@example.com"
+			final CreateSellerRequest duplicatedEmailRequest = new CreateSellerRequest("user3@example.com"
 				, "Duplicate Email"
 				, "password",
 				"manchester"
@@ -175,7 +171,7 @@ class SellerServiceTest {
 		void 중복_전화번호_케이스() {
 			//given
 			// 중복 전화번호 케이스
-			final SellerDto.Request.Register duplicatedPhoneRequest = new SellerDto.Request.Register("user3@example.com"
+			final CreateSellerRequest duplicatedPhoneRequest = new CreateSellerRequest("user3@example.com"
 				, "Duplicate Phone"
 				, "password",
 				"manchester"
@@ -201,17 +197,17 @@ class SellerServiceTest {
 			final String email = "user1@example.com";
 			final String password = "password1";
 
-			final SellerDto.Request.Login loginRequest = new SellerDto.Request.Login(email, password);
+			final LoginSellerRequest loginRequest = new LoginSellerRequest(email, password);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
-			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
-			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(seller);
 			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
+			when(sellerService.checkIsMatchedPassword(password, seller.getPassword())).thenReturn(true);
 
 			// when
 			final SellerDto expectedResponse = sellerService.loginRequest(loginRequest, response);
 
 			// then
-			assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_access_token");
+			assertThat(expectedResponse.accessToken()).isEqualTo("Bearer fake_access_token");
 		}
 
 		@Test
@@ -221,12 +217,12 @@ class SellerServiceTest {
 			final String incorrectEmail = "incorrect@example.com";
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			final SellerDto.Request.Login inCorrectEmailRequest = new SellerDto.Request.Login(incorrectEmail, password);
+			final LoginSellerRequest inCorrectEmailRequest = new LoginSellerRequest(incorrectEmail, password);
 
 			// then
 			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -238,15 +234,15 @@ class SellerServiceTest {
 
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			final SellerDto.Request.Login inCorrectPasswordRequest = new SellerDto.Request.Login(email,
+			final LoginSellerRequest inCorrectPasswordRequest = new LoginSellerRequest(email,
 				incorrectPassword);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 
-			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(seller));
+			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(seller);
 			// then
 			assertThatThrownBy(() -> sellerService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 	}
 
@@ -260,21 +256,22 @@ class SellerServiceTest {
 			final String password = "password1";
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
-			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email, password,
+			final WithdrawalSellerRequest withdrawalRequest = new WithdrawalSellerRequest(email, password,
 				phoneNumber);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", phoneNumber);
 			final SellerAccount account = SellerAccount.ofRegister(seller, "1234567890", "KEB하나은행");
 
 			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId()))
-				.thenReturn(Optional.of(seller));
+				.thenReturn(seller);
+			when(sellerService.checkIsMatchedPassword(password, seller.getPassword())).thenReturn(true);
 
-			when(bCryptPasswordEncoder.matches(password, seller.getPassword())).thenReturn(true);
 			// when
 			sellerService.withdrawSeller(withdrawalRequest, authDetails);
 
 			// then
 			verify(sellerRepository, times(1)).findSellerByIdAndIsDeletedIsFalse(authDetails.getId());
-
+			verify(paymentServiceClient, times(1)).deleteSellerBeanPay(
+				new DeleteBeanPayRequest(seller.getId(), Role.SELLER));
 			assertThat(seller.isValidStatus()).isFalse();
 			assertThat(seller.isDeleted()).isTrue();
 		}
@@ -286,14 +283,14 @@ class SellerServiceTest {
 			final String incorrectPhoneNumber = "01011112222";
 			final String password = "password1";
 
-			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(incorrectEmail,
+			final WithdrawalSellerRequest withdrawalRequest = new WithdrawalSellerRequest(incorrectEmail,
 				password, incorrectPhoneNumber);
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			// then
 			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -302,20 +299,20 @@ class SellerServiceTest {
 			final String email = "user1@example.com";
 			final String phoneNumber = "01012345678";
 			final String incorrectPassword = "incorrectPassword";
-
-			final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email,
+			final String correctPassword = "correctPassword";
+			final WithdrawalSellerRequest withdrawalRequest = new WithdrawalSellerRequest(email,
 				incorrectPassword, phoneNumber);
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
-			final Seller seller = Seller.ofRegister(email, "John Doe", incorrectPassword, "어쩌구 저쩌구", phoneNumber);
+			final Seller seller = Seller.ofRegister(email, "John Doe", correctPassword, "어쩌구 저쩌구", phoneNumber);
 
 			when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-				Optional.of(seller));
-
+				seller);
+			when(sellerService.checkIsMatchedPassword(incorrectPassword, seller.getPassword())).thenReturn(false);
 			// then
 			assertThatThrownBy(() -> sellerService.withdrawSeller(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 	}
 }

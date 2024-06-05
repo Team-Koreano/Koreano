@@ -1,7 +1,10 @@
 package org.ecommerce.productmanagementapi.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
+import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.Acidity;
@@ -12,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-04-26T20:52:40+0900",
-    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
+    date = "2024-06-03T20:22:23+0900",
+    comments = "version: 1.5.3.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.4.jar, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
 public class ProductManagementMapperImpl implements ProductManagementMapper {
@@ -24,6 +27,7 @@ public class ProductManagementMapperImpl implements ProductManagementMapper {
             return null;
         }
 
+        List<ProductManagementDto.Image> images = null;
         Integer id = null;
         ProductCategory category = null;
         Integer price = null;
@@ -37,9 +41,12 @@ public class ProductManagementMapperImpl implements ProductManagementMapper {
         String information = null;
         Boolean isCrush = null;
         ProductStatus status = null;
+        String size = null;
+        String capacity = null;
         LocalDateTime createDatetime = null;
         LocalDateTime updateDatetime = null;
 
+        images = imageListToImageList( product.getImages() );
         id = product.getId();
         category = product.getCategory();
         price = product.getPrice();
@@ -53,60 +60,60 @@ public class ProductManagementMapperImpl implements ProductManagementMapper {
         information = product.getInformation();
         isCrush = product.getIsCrush();
         status = product.getStatus();
+        size = product.getSize();
+        capacity = product.getCapacity();
         createDatetime = product.getCreateDatetime();
         updateDatetime = product.getUpdateDatetime();
 
-        ProductManagementDto productManagementDto = new ProductManagementDto( id, category, price, stock, sellerRep, favoriteCount, isDecaf, name, bean, acidity, information, isCrush, status, createDatetime, updateDatetime );
+        ProductManagementDto productManagementDto = new ProductManagementDto( id, category, price, stock, sellerRep, favoriteCount, isDecaf, name, bean, acidity, information, isCrush, status, size, capacity, createDatetime, updateDatetime, images );
 
         return productManagementDto;
     }
 
     @Override
-    public ProductManagementDto.Response toResponse(ProductManagementDto productManagementDto) {
-        if ( productManagementDto == null ) {
+    public List<ProductManagementDto> productsToDtos(List<Product> product) {
+        if ( product == null ) {
             return null;
         }
 
-        Integer id = null;
-        Boolean isDecaf = null;
-        Integer price = null;
-        Integer stock = null;
-        Integer favoriteCount = null;
-        String acidity = null;
-        String bean = null;
-        String category = null;
-        String information = null;
-        String name = null;
-        String status = null;
-        LocalDateTime createDatetime = null;
-        Boolean isCrush = null;
-
-        id = productManagementDto.getId();
-        isDecaf = productManagementDto.getIsDecaf();
-        price = productManagementDto.getPrice();
-        stock = productManagementDto.getStock();
-        favoriteCount = productManagementDto.getFavoriteCount();
-        if ( productManagementDto.getAcidity() != null ) {
-            acidity = productManagementDto.getAcidity().name();
+        List<ProductManagementDto> list = new ArrayList<ProductManagementDto>( product.size() );
+        for ( Product product1 : product ) {
+            list.add( toDto( product1 ) );
         }
-        if ( productManagementDto.getBean() != null ) {
-            bean = productManagementDto.getBean().name();
-        }
-        if ( productManagementDto.getCategory() != null ) {
-            category = productManagementDto.getCategory().name();
-        }
-        information = productManagementDto.getInformation();
-        name = productManagementDto.getName();
-        if ( productManagementDto.getStatus() != null ) {
-            status = productManagementDto.getStatus().name();
-        }
-        createDatetime = productManagementDto.getCreateDatetime();
-        isCrush = productManagementDto.getIsCrush();
 
-        String bizName = null;
+        return list;
+    }
 
-        ProductManagementDto.Response response = new ProductManagementDto.Response( id, isDecaf, price, bizName, stock, favoriteCount, acidity, bean, category, information, name, status, createDatetime, isCrush );
+    protected ProductManagementDto.Image imageToImage(Image image) {
+        if ( image == null ) {
+            return null;
+        }
 
-        return response;
+        String imageUrl = null;
+        Short sequenceNumber = null;
+        boolean isThumbnail = false;
+
+        imageUrl = image.getImageUrl();
+        sequenceNumber = image.getSequenceNumber();
+        if ( image.getIsThumbnail() != null ) {
+            isThumbnail = image.getIsThumbnail();
+        }
+
+        ProductManagementDto.Image image1 = new ProductManagementDto.Image( imageUrl, sequenceNumber, isThumbnail );
+
+        return image1;
+    }
+
+    protected List<ProductManagementDto.Image> imageListToImageList(List<Image> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<ProductManagementDto.Image> list1 = new ArrayList<ProductManagementDto.Image>( list.size() );
+        for ( Image image : list ) {
+            list1.add( imageToImage( image ) );
+        }
+
+        return list1;
     }
 }

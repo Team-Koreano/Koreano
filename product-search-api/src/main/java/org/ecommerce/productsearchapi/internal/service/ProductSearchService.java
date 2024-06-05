@@ -2,8 +2,9 @@ package org.ecommerce.productsearchapi.internal.service;
 
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.productsearchapi.document.ProductDocument;
+import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
 import org.ecommerce.productsearchapi.dto.ProductMapper;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ProductDto;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,10 @@ public class ProductSearchService {
 	 * @param  product 상품 정보
 	 * @return ProductSearchDto
 	 */
-	public ProductSearchDto saveProduct(Product product) {
+	public ProductDtoWithImageListDto saveProduct(Product product) {
 		ProductDocument productDocument = ProductDocument.of(product);
 		productElasticsearchRepository.save(productDocument);
-		return ProductMapper.INSTANCE.documentToDto(productDocument);
+		return ProductMapper.INSTANCE.documentToDtoWithImageList(productDocument);
 	}
 
 }
