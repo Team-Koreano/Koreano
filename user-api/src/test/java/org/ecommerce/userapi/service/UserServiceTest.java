@@ -4,17 +4,22 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.UserServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
 import org.ecommerce.userapi.dto.AddressMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateAddressRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateUserRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.LoginUserRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
@@ -60,7 +65,7 @@ class UserServiceTest {
 	private JwtProvider jwtProvider;
 
 	@Mock
-	private UserServiceClient userServiceClient;
+	private PaymentServiceClient paymentServiceClient;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -97,7 +102,7 @@ class UserServiceTest {
 	void 회원_계좌_등록() {
 		// given
 		final AuthDetails authDetails = new AuthDetails(1, null);
-		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+		final CreateAccountRequest registerRequest = new CreateAccountRequest(
 			"213124124123", "부산은행");
 
 		final Users users = Users.ofRegister(
@@ -112,10 +117,9 @@ class UserServiceTest {
 		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-			java.util.Optional.of(users));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(users);
 		// when
 		final AccountDto result = userService.createAccount(authDetails, registerRequest);
 		assertThat(result).usingRecursiveComparison().isEqualTo(dto);
@@ -125,7 +129,7 @@ class UserServiceTest {
 	@Test
 	void 회원_주소_등록() {
 		final AuthDetails authDetails = new AuthDetails(1, null);
-		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
+		final CreateAddressRequest registerRequest = new CreateAddressRequest(
 			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
 
 		final Users users = Users.ofRegister(
@@ -140,11 +144,9 @@ class UserServiceTest {
 		final Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
+		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
 
-		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(
-			java.util.Optional.of(users));
-
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(users);
 		// when
 		final AddressDto result = userService.createAddress(authDetails, registerRequest);
 
@@ -158,7 +160,7 @@ class UserServiceTest {
 		@Test
 		void 회원_등록_성공() {
 			//given
-			final UserDto.Request.Register newUserRequest = new UserDto.Request.Register(
+			final CreateUserRequest newUserRequest = new CreateUserRequest(
 				"newuser@example.com",
 				"New User",
 				"newpassword",
@@ -182,21 +184,12 @@ class UserServiceTest {
 				LocalDateTime.now(),
 				false,
 				LocalDateTime.now(),
-				null,
 				UserStatus.GENERAL,
 				null,
 				null
 			);
 
 			when(userRepository.save(any(Users.class))).thenReturn(entity);
-			when(userServiceClient.createBeanPay(any(BeanPayDto.Request.CreateBeanPay.class))).thenReturn(
-				new BeanPayDto(
-					1,
-					entity.getId(),
-					Role.SELLER,
-					0,
-					null
-				));
 
 			final UserDto result = userService.registerRequest(newUserRequest);
 
@@ -208,17 +201,20 @@ class UserServiceTest {
 				newUserRequest.age(),
 				newUserRequest.phoneNumber()
 			);
-			final UserDto expectedResult = UserMapper.INSTANCE.userToDto(savedUser);
+			final UserDto expectedResult = UserMapper.INSTANCE.toDto(savedUser);
 
 			//then
-			assertThat(UserMapper.INSTANCE.userDtoToResponse(expectedResult))
-				.isEqualTo(UserMapper.INSTANCE.userDtoToResponse(result));
+			assertThat(UserMapper.INSTANCE.toResponse(expectedResult))
+				.isEqualTo(UserMapper.INSTANCE.toResponse(result));
+
+			verify(paymentServiceClient, times(1)).createUserBeanPay(
+				new CreateBeanPayRequest(entity.getId(), Role.USER));
 		}
 
 		@Test
 		void 회원_등록_실패_이메일_중복() {
 
-			final UserDto.Request.Register duplicatedEmailRequest = new UserDto.Request.Register(
+			final CreateUserRequest duplicatedEmailRequest = new CreateUserRequest(
 				"user3@example.com",
 				"Duplicate Email",
 				"newpassword",
@@ -239,7 +235,7 @@ class UserServiceTest {
 		void 회원_등록_실패_전화번호_중복() {
 			// given
 			// 중복 전화번호 케이스
-			final UserDto.Request.Register duplicatedPhoneRequest = new UserDto.Request.Register(
+			final CreateUserRequest duplicatedPhoneRequest = new CreateUserRequest(
 				"newuser2@example.com",
 				"Duplicate Phone",
 				"newpassword",
@@ -266,18 +262,18 @@ class UserServiceTest {
 			final String password = "password1";
 			final MockHttpServletResponse response = new MockHttpServletResponse();
 
-			final UserDto.Request.Login loginRequest = new UserDto.Request.Login(email, password);
+			final LoginUserRequest loginRequest = new LoginUserRequest(email, password);
 			final Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
-			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(user);
 
 			//when
 			when(jwtProvider.createUserTokens(any(), any(), any())).thenReturn("Bearer fake_token");
+			when(userService.checkIsMatchedPassword(password, user.getPassword())).thenReturn(true);
 
 			//then
 			final UserDto expectedResponse = userService.loginRequest(loginRequest, response);
 
-			assertThat(expectedResponse.getAccessToken()).isEqualTo("Bearer fake_token");
+			assertThat(expectedResponse.accessToken()).isEqualTo("Bearer fake_token");
 		}
 
 		@Test
@@ -288,12 +284,12 @@ class UserServiceTest {
 			final String password = "password1";
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			final UserDto.Request.Login inCorrectEmailRequest = new UserDto.Request.Login(incorrectEmail, password);
+			final LoginUserRequest inCorrectEmailRequest = new LoginUserRequest(incorrectEmail, password);
 
 			//then
 			assertThatThrownBy(() -> userService.loginRequest(inCorrectEmailRequest, response))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -306,10 +302,10 @@ class UserServiceTest {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
 			final Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
-			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(user);
 
 			//then
-			final UserDto.Request.Login inCorrectPasswordRequest = new UserDto.Request.Login(email, incorrectPassword);
+			final LoginUserRequest inCorrectPasswordRequest = new LoginUserRequest(email, incorrectPassword);
 			assertThatThrownBy(() -> userService.loginRequest(inCorrectPasswordRequest, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_PASSWORD.getMessage());
@@ -324,13 +320,13 @@ class UserServiceTest {
 			final String password = "password1";
 			MockHttpServletResponse response = new MockHttpServletResponse();
 
-			Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
+			final Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, "01012345678");
 			user.withdrawal();
 
-			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(Optional.of(user));
-			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
+			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(user);
+			when(userService.checkIsMatchedPassword(password, user.getPassword())).thenReturn(true);
 			//then
-			UserDto.Request.Login request = new UserDto.Request.Login(email, password);
+			final LoginUserRequest request = new LoginUserRequest(email, password);
 			assertThatThrownBy(() -> userService.loginRequest(request, response))
 				.isInstanceOf(CustomException.class)
 				.hasMessageContaining(UserErrorCode.IS_NOT_VALID_USER.getMessage());
@@ -348,22 +344,20 @@ class UserServiceTest {
 			final String password = "password1";
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
-			final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, password,
+			final WithdrawalUserRequest withdrawalRequest = new WithdrawalUserRequest(email, password,
 				phoneNumber);
 			final Users user = Users.ofRegister(email, "John Doe", password, Gender.MALE, (short)25, phoneNumber);
-			final UsersAccount account = UsersAccount.ofRegister(user, "1234567890", "KEB하나은행");
-			final Address address = Address.ofRegister(user, "집", "부산시 사하구", "123-45");
 
 			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId()))
-				.thenReturn(Optional.of(user));
+				.thenReturn(user);
+			when(userService.checkIsMatchedPassword(password, user.getPassword())).thenReturn(true);
 
-			when(bCryptPasswordEncoder.matches(password, user.getPassword())).thenReturn(true);
 			// when
 			userService.withdrawUser(withdrawalRequest, authDetails);
 
 			// then
 			verify(userRepository, times(1)).findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
-
+			verify(paymentServiceClient, times(1)).deleteUserBeanPay(new DeleteBeanPayRequest(user.getId(), Role.USER));
 			assertThat(user.isValidStatus()).isFalse();
 			assertThat(user.isDeleted()).isTrue();
 		}
@@ -375,14 +369,17 @@ class UserServiceTest {
 			final String incorrectPhoneNumber = "01011112222";
 			final String password = "password1";
 
-			final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(incorrectEmail,
+			final WithdrawalUserRequest withdrawalRequest = new WithdrawalUserRequest(incorrectEmail,
 				password, incorrectPhoneNumber);
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
+			final Users user = Users.ofRegister("correct@example.com", "John Doe", "password1", Gender.MALE, (short)25,
+				"01011111111");
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(user);
 			// then
 			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 
 		@Test
@@ -392,18 +389,19 @@ class UserServiceTest {
 			final String phoneNumber = "01012345678";
 			final String incorrectPassword = "incorrectPassword";
 
-			final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email,
+			final WithdrawalUserRequest withdrawalRequest = new WithdrawalUserRequest(email,
 				incorrectPassword, phoneNumber);
 			final AuthDetails authDetails = new AuthDetails(1, null);
 
 			final Users user = Users.ofRegister(email, "John Doe", "password1", Gender.MALE, (short)25, phoneNumber);
 
-			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(Optional.of(user));
+			when(userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())).thenReturn(user);
+			when(userService.checkIsMatchedPassword(incorrectPassword, user.getPassword())).thenReturn(false);
 
 			// then
 			assertThatThrownBy(() -> userService.withdrawUser(withdrawalRequest, authDetails))
 				.isInstanceOf(CustomException.class)
-				.hasMessageContaining(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD.getMessage());
+				.hasMessageContaining(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD.getMessage());
 		}
 	}
 }

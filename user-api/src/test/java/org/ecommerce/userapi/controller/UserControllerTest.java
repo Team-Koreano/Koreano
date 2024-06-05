@@ -1,6 +1,6 @@
 package org.ecommerce.userapi.controller;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
@@ -17,6 +16,15 @@ import org.ecommerce.userapi.dto.AddressDto;
 import org.ecommerce.userapi.dto.AddressMapper;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateAddressRequest;
+import org.ecommerce.userapi.dto.request.CreateUserRequest;
+import org.ecommerce.userapi.dto.request.LoginUserRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
+import org.ecommerce.userapi.dto.response.CreateAccountResponse;
+import org.ecommerce.userapi.dto.response.CreateAddressResponse;
+import org.ecommerce.userapi.dto.response.CreateUserResponse;
+import org.ecommerce.userapi.dto.response.LoginUserResponse;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
@@ -103,7 +111,7 @@ public class UserControllerTest {
 	void 회원_등록() throws Exception {
 		//given
 
-		final UserDto.Request.Register registerRequest = new UserDto.Request.Register(
+		final CreateUserRequest registerRequest = new CreateUserRequest(
 			"test1@example.com",
 			"Test User",
 			"password",
@@ -111,7 +119,7 @@ public class UserControllerTest {
 			(short)30,
 			"01012345678");
 
-		final UserDto.Response.Register expectedResponse = new UserDto.Response.Register(
+		final CreateUserResponse expectedResponse = new CreateUserResponse(
 			registerRequest.email(),
 			registerRequest.name(),
 			registerRequest.gender(),
@@ -127,7 +135,7 @@ public class UserControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		UserDto responseDto = UserMapper.INSTANCE.userToDto(users);
+		UserDto responseDto = UserMapper.INSTANCE.toDto(users);
 
 		when(userService.registerRequest(registerRequest)).thenReturn(responseDto);
 
@@ -157,17 +165,17 @@ public class UserControllerTest {
 		// given
 		final String email = "test@example.com";
 		final String password = "test";
-		final UserDto.Request.Login login = new UserDto.Request.Login(email, password);
+		final LoginUserRequest login = new LoginUserRequest(email, password);
 		final String content = objectMapper.writeValueAsString(login);
 
 		final String mockAccessToken = "mocked_access_token";
 
-		final UserDto mocking = UserMapper.INSTANCE.accessTokenToDto(mockAccessToken);
+		final UserDto mocking = UserMapper.INSTANCE.toDto(mockAccessToken);
 
-		when(userService.loginRequest(any(UserDto.Request.Login.class), any(HttpServletResponse.class)))
+		when(userService.loginRequest(any(LoginUserRequest.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
 
-		final UserDto.Response.Login expectedResponse = UserDto.Response.Login.of(mocking);
+		final LoginUserResponse expectedResponse = LoginUserResponse.of(mocking);
 
 		// when
 		final ResultActions resultActions = performLoginRequest(content);
@@ -176,13 +184,13 @@ public class UserControllerTest {
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
 			.andReturn();
 
-		final Response<UserDto.Response.Login> responseDto = objectMapper.readValue(
+		final Response<LoginUserResponse> responseDto = objectMapper.readValue(
 			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<UserDto.Response.Login>>() {
+			new TypeReference<Response<LoginUserResponse>>() {
 			}
 		);
 
-		UserDto.Response.Login result = responseDto.result();
+		final LoginUserResponse result = responseDto.result();
 
 		assertThat(result).isEqualTo(expectedResponse);
 	}
@@ -190,7 +198,7 @@ public class UserControllerTest {
 	@Test
 	void 회원_주소_등록() throws Exception {
 		// given
-		final AddressDto.Request.Register registerRequest = new AddressDto.Request.Register(
+		final CreateAddressRequest registerRequest = new CreateAddressRequest(
 			"우리집", "부산시 사하구 감전동 유림아파트", "103동 302호");
 
 		final Users users = Users.ofRegister(
@@ -205,9 +213,9 @@ public class UserControllerTest {
 		final Address address = Address.ofRegister(users, registerRequest.name(), registerRequest.postAddress(),
 			registerRequest.detail());
 
-		final AddressDto dto = AddressMapper.INSTANCE.addressToDto(address);
+		final AddressDto dto = AddressMapper.INSTANCE.toDto(address);
 
-		final AddressDto.Response.Register expectedResponse = AddressMapper.INSTANCE.addressDtoToResponse(dto);
+		final CreateAddressResponse expectedResponse = AddressMapper.INSTANCE.toResponse(dto);
 
 		when(userService.createAddress(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
@@ -229,7 +237,7 @@ public class UserControllerTest {
 	@Test
 	void 회원_계좌_등록() throws Exception {
 		// given
-		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+		final CreateAccountRequest registerRequest = new CreateAccountRequest(
 			"213124124123", "부산은행");
 
 		final Users users = Users.ofRegister(
@@ -241,11 +249,12 @@ public class UserControllerTest {
 			"01087654321"
 		);
 
-		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(), registerRequest.number());
+		final UsersAccount account = UsersAccount.ofRegister(users, registerRequest.number(),
+			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.userAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
+		final CreateAccountResponse expectedResponse = AccountMapper.INSTANCE.toResponse(dto);
 
 		when(userService.createAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 		// when
@@ -267,7 +276,7 @@ public class UserControllerTest {
 		final String email = "test@example.com";
 		final String phoneNumber = "01087654321";
 		final String password = "test";
-		final UserDto.Request.Withdrawal withdrawalRequest = new UserDto.Request.Withdrawal(email, phoneNumber,
+		final WithdrawalUserRequest withdrawalRequest = new WithdrawalUserRequest(email, phoneNumber,
 			password);
 
 		final Users user = Users.ofRegister(
@@ -279,7 +288,7 @@ public class UserControllerTest {
 			phoneNumber
 		);
 
-		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(user));
+		when(userRepository.findUsersByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(user);
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/external/users/v1")
 			.with(csrf())
