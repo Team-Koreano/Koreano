@@ -44,12 +44,6 @@ public class Product {
 	@Enumerated(EnumType.STRING)
 	private ProductCategory category;
 
-	@Column(nullable = false)
-	private Integer price;
-
-	@Column(nullable = false)
-	private Integer stock;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller_id", nullable = false)
 	private SellerRep sellerRep;
@@ -78,14 +72,7 @@ public class Product {
 	private Boolean isCrush;
 
 	@Column()
-	private String size;
-
-	@Column()
 	private String capacity;
-
-	@Column(name = "status", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private ProductStatus status = ProductStatus.AVAILABLE;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
@@ -97,6 +84,9 @@ public class Product {
 
 	@Column()
 	private Short deliveryFee;
+
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ProductDetail> productDetails = new ArrayList<>();
 
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
@@ -117,8 +107,6 @@ public class Product {
 		String capacity, short deliveryFee) {
 		Product product = new Product();
 		product.category = category;
-		product.price = price;
-		product.stock = stock;
 		product.name = name;
 		product.bean = bean;
 		product.acidity = acidity;
@@ -126,7 +114,6 @@ public class Product {
 		product.isCrush = isCrush;
 		product.isDecaf = isDecaf;
 		product.sellerRep = sellerRep;
-		product.size = size;
 		product.capacity = capacity;
 		product.deliveryFee = deliveryFee;
 		return product;
@@ -136,20 +123,17 @@ public class Product {
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity,
 		short deliveryFee) {
 		this.category = category;
-		this.price = price;
 		this.name = name;
 		this.bean = bean;
 		this.acidity = acidity;
 		this.information = information;
 		this.isCrush = isCrush;
 		this.isDecaf = isDecaf;
-		this.size = size;
 		this.capacity = capacity;
 		this.deliveryFee = deliveryFee;
 	}
 
 	public void toModifyStatus(ProductStatus productStatus) {
-		this.status = productStatus;
 	}
 
 	public boolean checkStock(int quantity) {
@@ -161,15 +145,13 @@ public class Product {
 	}
 
 	private void decreaseStock(int quantity) {
-		this.stock -= quantity;
 	}
 
 	public void increaseStock(int quantity) {
-		this.stock += quantity;
 	}
 
 	private boolean hasEnoughStock(int requiredQuantity) {
-		return this.stock >= requiredQuantity;
+		return true;
 	}
 
 	public String getThumbnailUrl() {
@@ -192,5 +174,25 @@ public class Product {
 
 	public void deleteImages() {
 		this.images.clear();
+	}
+
+	// 테이블 변경으로 인해 에러를 피하기 위한 임시 생성자 (추후 pr에서 모듈 합치는 작업 진행하면서 제거 예정)
+	public Product(Integer productId, ProductCategory productCategory, int i, int i1, SellerRep seller, int favoriteCount, boolean isDecaf, String name, Bean bean, Acidity acidity, String information,
+		boolean isCrush, Object o, Object o1, ProductStatus productStatus, LocalDateTime testTime, LocalDateTime testTime1, short deliveryFee, List<Image> images) {
+		this.id = productId;
+		this.category = productCategory;
+		this.sellerRep = seller;
+		this.favoriteCount = favoriteCount;
+		this.isDecaf = isDecaf;
+		this.name = name;
+		this.bean = bean;
+		this.acidity = acidity;
+		this.information = information;
+		this.isCrush = isCrush;
+		this.capacity = "testCapacity";
+		this.createDatetime = testTime;
+		this.updateDatetime = testTime1;
+		this.deliveryFee = deliveryFee;
+		this.images = images;
 	}
 }
