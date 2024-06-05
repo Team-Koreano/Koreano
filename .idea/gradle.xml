@@ -4,11 +4,10 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/payment-api" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/product-management-api" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/bucket-api" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/order-api" />
             <option value="$PROJECT_DIR$/payment-api" />
