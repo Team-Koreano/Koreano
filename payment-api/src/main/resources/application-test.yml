@@ -34,7 +34,9 @@ spring:
       port: 16379
       redisson-prefix: "redis://"
 toss:
-  secretKey: test
+  secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)
+  server:
+    url: https://api.tosspayments.com/v1/payments
 jasypt:
   encryptor:
     password: test
