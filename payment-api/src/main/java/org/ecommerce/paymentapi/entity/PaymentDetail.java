@@ -43,6 +43,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "payment_detail",
 	indexes = {
 		@Index(name = "idx_order_item_id", columnList = "orderItemId"),
+		@Index(name = "idx_create_datetime", columnList = "createDateTime"),
 	}
 )
 public class PaymentDetail {
