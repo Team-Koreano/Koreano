@@ -1,10 +1,5 @@
 package org.ecommerce.userapi.repository.impl;
 
-import static org.ecommerce.userapi.entity.QSellerAccount.*;
-
-import java.util.List;
-
-import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.repository.SellerCustomAccountRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,11 +13,4 @@ public class SellerAccountRepositoryImpl implements SellerCustomAccountRepositor
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	@Override
-	public List<SellerAccount> findBySellerIdAndIsDeletedIsFalse(final Integer sellerId) {
-		return jpaQueryFactory.selectFrom(sellerAccount)
-			.where(sellerAccount.seller.id.eq(sellerId)
-				, sellerAccount.isDeleted.isFalse())
-			.fetch();
-	}
 }

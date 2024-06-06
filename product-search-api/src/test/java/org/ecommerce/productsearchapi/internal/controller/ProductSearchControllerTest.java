@@ -1,18 +1,21 @@
 package org.ecommerce.productsearchapi.internal.controller;
 
 import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
-import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.ImageDto;
+import org.ecommerce.productsearchapi.dto.ProductDtoWithImageListDto;
+import org.ecommerce.productsearchapi.dto.SellerRepDto;
+import org.ecommerce.productsearchapi.dto.response.SaveDocumentResponse;
 import org.ecommerce.productsearchapi.internal.service.ProductSearchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,20 +45,20 @@ public class ProductSearchControllerTest {
 	@Test
 	void 엘라스틱서치에_상품_정보_저장() throws Exception {
 		// given
-		final List<ProductSearchDto.ImageDto> imageDtoList = List.of(
-			new ProductSearchDto.ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
+		final List<ImageDto> imageDtoList = List.of(
+			new ImageDto(1, true, (short)1, TEST_DATE_TIME, TEST_DATE_TIME, "http://image1.com",
 				false),
-			new ProductSearchDto.ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
+			new ImageDto(2, false, (short)2, TEST_DATE_TIME, TEST_DATE_TIME, "http://image2.com",
 				false)
 		);
 
-		final ProductSearchDto productSearchDto =
-			new ProductSearchDto(
+		final ProductDtoWithImageListDto productDtoWithImageListDto =
+			new ProductDtoWithImageListDto(
 				1,
 				ProductCategory.BEAN,
 				30000,
 				100,
-				new ProductSearchDto.SellerRep(1, "커피천국"),
+				new SellerRepDto(1, "커피천국"),
 				10,
 				false,
 				"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
@@ -67,64 +72,36 @@ public class ProductSearchControllerTest {
 				imageDtoList,
 				"http://image1.com",
 				"testSize",
-				"testCapacity"
+				"testCapacity",
+				(short)1000
 			);
 
-		String productJsonBody = objectMapper.writeValueAsString(getProduct());
-
 		// when
-		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productSearchDto);
+		when(productSearchService.saveProduct(any(Product.class))).thenReturn(productDtoWithImageListDto);
 
 		// // then
-		// mockMvc.perform(MockMvcRequestBuilders
-		// 		.post("/api/internal/product/v1")
-		// 		.contentType(MediaType.APPLICATION_JSON)
-		// 		.content(productJsonBody))
-		// 	.andExpect(jsonPath("$.id").value(productSearchDto.getId()))
-		// 	.andExpect(jsonPath("$.category").value(productSearchDto.getCategory().getTitle()))
-		// 	.andExpect(jsonPath("$.price").value(productSearchDto.getPrice()))
-		// 	.andExpect(jsonPath("$.stock").value(productSearchDto.getStock()))
-		// 	.andExpect(jsonPath("$.sellerId").value(productSearchDto.getSellerRep().getId()))
-		// 	.andExpect(jsonPath("$.sellerName").value(productSearchDto.getSellerRep().getBizName()))
-		// 	.andExpect(jsonPath("$.favoriteCount").value(productSearchDto.getFavoriteCount()))
-		// 	.andExpect(jsonPath("$.isDecaf").value(productSearchDto.getIsDecaf()))
-		// 	.andExpect(jsonPath("$.name").value(productSearchDto.getName()))
-		// 	.andExpect(jsonPath("$.bean").value(productSearchDto.getBean().getTitle()))
-		// 	.andExpect(jsonPath("$.acidity").value(productSearchDto.getAcidity().getTitle()))
-		// 	.andExpect(jsonPath("$.information").value(productSearchDto.getInformation()))
-		// 	.andExpect(jsonPath("$.createDatetime").value(productSearchDto.getCreateDatetime().toString()))
-		// 	.andExpect(jsonPath("$.thumbnailUrl").value(
-		// 		ProductSearchDto.Response.SavedProduct.getThumbnailUrl(productSearchDto.getImageDtoList())))
-		// 	.andExpect(status().isOk())
-		// 	.andDo(print());
-	}
-
-	private Product getProduct() {
-		final List<Image> images = List.of(
-			new Image(1, null, "http://image1.com", true, (short)1, false, TEST_DATE_TIME, TEST_DATE_TIME),
-			new Image(2, null, "http://image2.com", false, (short)2, false, TEST_DATE_TIME, TEST_DATE_TIME)
-		);
-
-		return new Product(
-			1,
-			ProductCategory.BEAN,
-			30000,
-			100,
-			new SellerRep(1, "커피천국"),
-			10,
-			false,
-			"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피",
-			Bean.ARABICA,
-			Acidity.MEDIUM,
-			"커피천국에서만 만나볼 수 있는 특별한 커피",
-			false,
-			"testSize",
-			"testCapacity",
-			ProductStatus.AVAILABLE,
-			TEST_DATE_TIME,
-			TEST_DATE_TIME,
-			images
-		);
+		mockMvc.perform(MockMvcRequestBuilders
+				.post("/api/internal/product/v1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(
+					"{\"id\":1,\"category\":\"BEAN\",\"price\":30000,\"stock\":100,\"sellerRep\":{\"id\":1,\"bizName\":\"커피천국\"},\"favoriteCount\":10,\"isDecaf\":false,\"name\":\"[특가 EVENT]&아라비카 원두&세상에서 제일 존맛 커피\",\"bean\":\"ARABICA\",\"acidity\":\"MEDIUM\",\"information\":\"커피천국에서만 만나볼 수 있는 특별한 커피\",\"isCrush\":false,\"size\":\"testSize\",\"capacity\":\"testCapacity\",\"status\":\"AVAILABLE\",\"createDatetime\":\"2024-04-22T03:23:01\",\"updateDatetime\":\"2024-04-22T03:23:01\",\"deliveryFee\":2000,\"images\":[{\"id\":1,\"product\":null,\"imageUrl\":\"http://image1.com\",\"isThumbnail\":true,\"sequenceNumber\":1,\"isDeleted\":false,\"createDatetime\":\"2024-04-22T03:23:01\",\"updateDatetime\":\"2024-04-22T03:23:01\"},{\"id\":2,\"product\":null,\"imageUrl\":\"http://image2.com\",\"isThumbnail\":false,\"sequenceNumber\":2,\"isDeleted\":false,\"createDatetime\":\"2024-04-22T03:23:01\",\"updateDatetime\":\"2024-04-22T03:23:01\"}]}"))
+			.andExpect(jsonPath("$.id").value(productDtoWithImageListDto.id()))
+			.andExpect(jsonPath("$.category").value(productDtoWithImageListDto.category().getTitle()))
+			.andExpect(jsonPath("$.price").value(productDtoWithImageListDto.price()))
+			.andExpect(jsonPath("$.stock").value(productDtoWithImageListDto.stock()))
+			.andExpect(jsonPath("$.sellerId").value(productDtoWithImageListDto.sellerRep().id()))
+			.andExpect(jsonPath("$.sellerName").value(productDtoWithImageListDto.sellerRep().bizName()))
+			.andExpect(jsonPath("$.favoriteCount").value(productDtoWithImageListDto.favoriteCount()))
+			.andExpect(jsonPath("$.isDecaf").value(productDtoWithImageListDto.isDecaf()))
+			.andExpect(jsonPath("$.name").value(productDtoWithImageListDto.name()))
+			.andExpect(jsonPath("$.bean").value(productDtoWithImageListDto.bean().getTitle()))
+			.andExpect(jsonPath("$.acidity").value(productDtoWithImageListDto.acidity().getTitle()))
+			.andExpect(jsonPath("$.information").value(productDtoWithImageListDto.information()))
+			.andExpect(jsonPath("$.createDatetime").value(productDtoWithImageListDto.createDatetime().toString()))
+			.andExpect(jsonPath("$.thumbnailUrl").value(
+				SaveDocumentResponse.getThumbnailUrl(productDtoWithImageListDto.imageDtoList())))
+			.andExpect(status().isOk())
+			.andDo(print());
 	}
 
 }

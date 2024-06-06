@@ -1,5 +1,6 @@
 package org.ecommerce.userapi.dto;
 
+import org.ecommerce.userapi.dto.response.CreateSellerResponse;
 import org.ecommerce.userapi.entity.Seller;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -9,9 +10,9 @@ import org.mapstruct.factory.Mappers;
 public interface SellerMapper {
 	SellerMapper INSTANCE = Mappers.getMapper(SellerMapper.class);
 
-	SellerDto sellerToDto(Seller users);
+	SellerDto toDto(Seller users);
 
-	SellerDto accessTokenToDto(String accessToken);
+	SellerDto toDto(String accessToken);
 
-	SellerDto.Response.Register sellerDtoToResponse(SellerDto sellerDto);
+	CreateSellerResponse toResponse(SellerDto sellerDto);
 }

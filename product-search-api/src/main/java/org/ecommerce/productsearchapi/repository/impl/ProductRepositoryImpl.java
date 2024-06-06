@@ -19,13 +19,12 @@ public class ProductRepositoryImpl implements ProductCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<Product> findProductById(final Integer id) {
+	public Product findProductById(final Integer id) {
 
-		return Optional.ofNullable(jpaQueryFactory.selectFrom(product)
-			.leftJoin(product.images)
-			.fetchJoin()
+		return jpaQueryFactory.selectFrom(product)
+			.leftJoin(product.images).fetchJoin()
 			.where(product.id.eq(id))
-			.fetchFirst())
+			.fetchFirst()
 			;
 	}
 }

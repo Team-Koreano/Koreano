@@ -3,14 +3,20 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.client.UserServiceClient;
+import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.AddressDto;
 import org.ecommerce.userapi.dto.AddressMapper;
-import org.ecommerce.userapi.dto.BeanPayDto;
 import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateAddressRequest;
+import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateUserRequest;
+import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.LoginUserRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
 import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
@@ -25,6 +31,8 @@ import org.ecommerce.userapi.security.AuthDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +56,8 @@ public class UserService {
 
 	private final RedisProvider redisProvider;
 
-	private final UserServiceClient userServiceClient;
-	//TODO : 유저에 관한 RUD API 개발
+	private final PaymentServiceClient paymentServiceClient;
+
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
 
@@ -60,21 +68,20 @@ public class UserService {
 	 * <p>
 	 * @author Hong
 	 *
-	 * @param register- 회원 가입 요청에 대한 정보
+	 * @param createRequest- 회원 가입 요청에 대한 정보
 	 * @return UserDto
 	 */
-	public UserDto registerRequest(final UserDto.Request.Register register) {
+	public UserDto registerRequest(final CreateUserRequest createRequest) {
 
-		checkDuplicatedPhoneNumberOrEmail(register.email(), register.phoneNumber());
+		checkDuplicatedPhoneNumberOrEmail(createRequest.email(), createRequest.phoneNumber());
 
-		Users users = userRepository.save(Users.ofRegister(register.email(), register.name(),
-			passwordEncoder.encode(register.password()),
-			register.gender(), register.age(), register.phoneNumber()));
+		Users users = userRepository.save(Users.ofRegister(createRequest.email(), createRequest.name(),
+			passwordEncoder.encode(createRequest.password()),
+			createRequest.gender(), createRequest.age(), createRequest.phoneNumber()));
 
-		users.registerBeanPayId(userServiceClient.createBeanPay(
-			new BeanPayDto.Request.CreateBeanPay(users.getId(), Role.USER)).getId());
+		paymentServiceClient.createUserBeanPay(new CreateBeanPayRequest(users.getId(), Role.USER));
 
-		return UserMapper.INSTANCE.userToDto(users);
+		return UserMapper.INSTANCE.toDto(users);
 	}
 
 	/**
@@ -87,19 +94,19 @@ public class UserService {
 	 @param login - 사용자의 로그인 정보가 들어간 dto 입니다
 	 @return SellerDto
 	 */
-	public UserDto loginRequest(final UserDto.Request.Login login, HttpServletResponse response) {
+	public UserDto loginRequest(final LoginUserRequest login, HttpServletResponse response) {
 
-		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email())
-			.filter(users -> passwordEncoder.matches(login.password(), users.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+		final Users user = userRepository.findUsersByEmailAndIsDeletedIsFalse(login.email());
 
-		if (!user.isValidStatus()) {
+		if (user == null || !checkIsMatchedPassword(login.password(), user.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		if (!user.isValidStatus())
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
-		}
 
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
-		return UserMapper.INSTANCE.accessTokenToDto(
+		return UserMapper.INSTANCE.toDto(
 			jwtProvider.createUserTokens(user.getId(), authorization, response));
 	}
 
@@ -130,15 +137,17 @@ public class UserService {
 	 * @param register - 회원 주소 등록에 관련된 객체
 	 * @return AddressDto
 	 */
-	public AddressDto createAddress(final AuthDetails authDetails, final AddressDto.Request.Register register) {
-		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+	public AddressDto createAddress(final AuthDetails authDetails, final CreateAddressRequest register) {
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (users == null)
+			throw new CustomException(UserErrorCode.NOT_FOUND_USER);
 
 		final Address address = Address.ofRegister(users, register.name(), register.postAddress(), register.detail());
 
 		addressRepository.save(address);
 
-		return AddressMapper.INSTANCE.addressToDto(address);
+		return AddressMapper.INSTANCE.toDto(address);
 
 	}
 
@@ -147,15 +156,19 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 @param register    - 사용자의 계좌 정보가 들어간 dto 입니다.
 	 */
-	public AccountDto createAccount(final AuthDetails authDetails, final AccountDto.Request.Register register) {
-		Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL));
+	public AccountDto createAccount(final AuthDetails authDetails,
+		final CreateAccountRequest register) {
+
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
+
+		if (users == null)
+			throw new CustomException(UserErrorCode.NOT_FOUND_USER);
 
 		final UsersAccount account = UsersAccount.ofRegister(users, register.number(), register.bankName());
 
 		usersAccountRepository.save(account);
 
-		return AccountMapper.INSTANCE.userAccountToDto(account);
+		return AccountMapper.INSTANCE.toDto(account);
 	}
 
 	/**
@@ -171,13 +184,12 @@ public class UserService {
 		final String refreshTokenKey = jwtProvider.getRefreshTokenKey(jwtProvider.getId(bearerToken),
 			jwtProvider.getRoll(bearerToken));
 
-		if (!redisProvider.hasKey(refreshTokenKey)) {
+		if (!redisProvider.hasKey(refreshTokenKey))
 			throw new CustomException(UserErrorCode.PLEASE_RELOGIN);
-		}
 
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
-		return UserMapper.INSTANCE.accessTokenToDto(
+		return UserMapper.INSTANCE.toDto(
 			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
@@ -191,21 +203,29 @@ public class UserService {
 	 * @param withdrawal - 탈퇴 요청 dto
 	 * @return void
 	 */
-	public void withdrawUser(final UserDto.Request.Withdrawal withdrawal, final AuthDetails authDetails) {
-		Users user = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId())
-			.filter(users -> passwordEncoder.matches(withdrawal.password(), users.getPassword()))
-			.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND_EMAIL_OR_NOT_MATCHED_PASSWORD));
+	public void withdrawUser(final WithdrawalUserRequest withdrawal, final AuthDetails authDetails) {
+		final Users users = userRepository.findUsersByIdAndIsDeletedIsFalse(authDetails.getId());
 
-		if (!user.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
+		if (users == null || !checkIsMatchedPassword(withdrawal.password(), users.getPassword()))
+			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
+
+		paymentServiceClient.deleteUserBeanPay(new DeleteBeanPayRequest(users.getId(), Role.USER));
+
+		if (!users.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
 		}
 
-		user.withdrawal();
+		users.withdrawal();
+
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {
-		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber)) {
+		if (userRepository.existsByEmailOrPhoneNumber(email, phoneNumber))
 			throw new CustomException(UserErrorCode.DUPLICATED_EMAIL_OR_PHONENUMBER);
-		}
+	}
+
+	@VisibleForTesting
+	public boolean checkIsMatchedPassword(String requestPassword, String userPassword) {
+		return passwordEncoder.matches(requestPassword, userPassword);
 	}
 }

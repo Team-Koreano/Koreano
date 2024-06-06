@@ -95,22 +95,26 @@ public class Product {
 	@Column()
 	private LocalDateTime updateDatetime;
 
+	@Column()
+	private Short deliveryFee;
+
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
 	public static Product createProduct(final ProductCategory category,
 		Integer price, Integer stock, String name, Bean bean
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity,
-		SellerRep seller) {
+		short deliveryFee, SellerRep seller) {
 		return category == ProductCategory.BEAN
-			? createBean(category, price, stock, name, bean, acidity, information, isCrush, isDecaf, seller, null, null)
+			? createBean(category, price, stock, name, bean, acidity, information, isCrush, isDecaf, seller, null, null,
+			deliveryFee)
 			: createBean(category, price, stock, name, Bean.NONE, Acidity.NONE, information, null, null, seller, size,
-			capacity);
+			capacity, deliveryFee);
 	}
 
 	private static Product createBean(ProductCategory category, Integer price, Integer stock, String name, Bean bean
 		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep sellerRep, String size,
-		String capacity) {
+		String capacity, short deliveryFee) {
 		Product product = new Product();
 		product.category = category;
 		product.price = price;
@@ -124,11 +128,13 @@ public class Product {
 		product.sellerRep = sellerRep;
 		product.size = size;
 		product.capacity = capacity;
+		product.deliveryFee = deliveryFee;
 		return product;
 	}
 
 	public void toModify(ProductCategory category, Integer price, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity) {
+		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String size, String capacity,
+		short deliveryFee) {
 		this.category = category;
 		this.price = price;
 		this.name = name;
@@ -139,6 +145,7 @@ public class Product {
 		this.isDecaf = isDecaf;
 		this.size = size;
 		this.capacity = capacity;
+		this.deliveryFee = deliveryFee;
 	}
 
 	public void toModifyStatus(ProductStatus productStatus) {

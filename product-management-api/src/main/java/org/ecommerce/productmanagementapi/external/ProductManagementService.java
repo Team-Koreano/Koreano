@@ -7,8 +7,12 @@ import org.ecommerce.product.entity.Image;
 import org.ecommerce.product.entity.Product;
 import org.ecommerce.product.entity.SellerRep;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
-import org.ecommerce.productmanagementapi.dto.ProductManagementDto;
 import org.ecommerce.productmanagementapi.dto.ProductManagementMapper;
+import org.ecommerce.productmanagementapi.dto.ProductWithSellerRepAndImagesDto;
+import org.ecommerce.productmanagementapi.dto.request.CreateProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyProductsStatusRequest;
+import org.ecommerce.productmanagementapi.dto.request.ModifyStockRequest;
 import org.ecommerce.productmanagementapi.exception.ProductManagementErrorCode;
 import org.ecommerce.productmanagementapi.provider.S3Provider;
 import org.ecommerce.productmanagementapi.repository.ProductRepository;
@@ -39,7 +43,7 @@ public class ProductManagementService {
 	 @param product - 상품 등록 데이터
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto productRegister(final ProductManagementDto.Request.Register product,
+	public ProductWithSellerRepAndImagesDto productRegister(final CreateProductRequest product,
 		MultipartFile thumbnailImage, final List<MultipartFile> images) {
 
 		final Product createdProduct = Product.createProduct(
@@ -54,6 +58,7 @@ public class ProductManagementService {
 			product.isDecaf(),
 			product.size(),
 			product.capacity(),
+			product.deliveryFee(),
 			seller
 		);
 
@@ -77,7 +82,7 @@ public class ProductManagementService {
 	 * @param status - 상품의 변경할 상태값  
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto modifyToStatus(final Integer productId, final ProductStatus status) {
+	public ProductWithSellerRepAndImagesDto modifyToStatus(final Integer productId, final ProductStatus status) {
 		Product product = productRepository.findProductById(productId);
 		if (product == null) {
 			throw new CustomException(ProductManagementErrorCode.NOT_FOUND_PRODUCT);
@@ -98,7 +103,7 @@ public class ProductManagementService {
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto increaseToStock(ProductManagementDto.Request.Stock stock) {
+	public ProductWithSellerRepAndImagesDto increaseToStock(ModifyStockRequest stock) {
 
 		Product product = productRepository.findProductById(stock.productId());
 
@@ -120,7 +125,7 @@ public class ProductManagementService {
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto decreaseToStock(final ProductManagementDto.Request.Stock stock) {
+	public ProductWithSellerRepAndImagesDto decreaseToStock(final ModifyStockRequest stock) {
 
 		Product product = productRepository.findProductById(stock.productId());
 
@@ -141,9 +146,9 @@ public class ProductManagementService {
 	 @param modifyProduct - 상품을 수정 데이터
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductManagementDto modifyToProduct(
+	public ProductWithSellerRepAndImagesDto modifyToProduct(
 		final Integer productId,
-		final ProductManagementDto.Request.Modify modifyProduct,
+		final ModifyProductRequest modifyProduct,
 		MultipartFile thumbnailImage,
 		List<MultipartFile> images
 	) {
@@ -175,7 +180,8 @@ public class ProductManagementService {
 			modifyProduct.isCrush(),
 			modifyProduct.isDecaf(),
 			modifyProduct.size(),
-			modifyProduct.capacity()
+			modifyProduct.capacity(),
+			modifyProduct.deliveryFee()
 		);
 
 		return ProductManagementMapper.INSTANCE.toDto(product);
@@ -188,8 +194,8 @@ public class ProductManagementService {
 	 * @param bulkStatus - RequestDto 입니다.
 	 * @return List<ProductManagementDto>
 	 */
-	public List<ProductManagementDto> bulkModifyStatus(
-		final ProductManagementDto.Request.BulkStatus bulkStatus
+	public List<ProductWithSellerRepAndImagesDto> bulkModifyStatus(
+		final ModifyProductsStatusRequest bulkStatus
 	) {
 
 		List<Product> products = productRepository.findProductsByIds(bulkStatus.productId());
@@ -200,6 +206,6 @@ public class ProductManagementService {
 
 		products.forEach(product -> product.toModifyStatus(bulkStatus.productStatus()));
 
-		return ProductManagementMapper.INSTANCE.productsToDtos(products);
+		return ProductManagementMapper.INSTANCE.toDtos(products);
 	}
 }
