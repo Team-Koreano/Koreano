@@ -13,13 +13,18 @@ public interface ProductMapper {
 
 	ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
-
-	@Mapping(target = "imageDtoList", source = "images")
-	ProductSearchDto entityToDto(Product product);
+	ProductDto entityToDto(Product product);
 
 	@Mapping(source = "sellerId", target = "sellerRep.id")
 	@Mapping(source = "sellerName", target = "sellerRep.bizName")
-	ProductSearchDto documentToDto(ProductDocument productDocument);
+	ProductDto documentToDto(ProductDocument productDocument);
+
+	@Mapping(target = "imageDtoList", source = "images")
+	ProductDtoWithImageListDto entityToDtoWithImageList(Product product);
+
+	@Mapping(source = "sellerId", target = "sellerRep.id")
+	@Mapping(source = "sellerName", target = "sellerRep.bizName")
+	ProductDtoWithImageListDto documentToDtoWithImageList(ProductDocument productDocument);
 
 
 }

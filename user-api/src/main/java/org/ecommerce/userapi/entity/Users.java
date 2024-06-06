@@ -65,9 +65,6 @@ public class Users {
 	@Column()
 	private LocalDateTime updateDatetime;
 
-	@Column()
-	private Integer beanPayId;
-
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus = UserStatus.GENERAL;
@@ -104,9 +101,5 @@ public class Users {
 	public void withdrawal() {
 		this.userStatus = UserStatus.WITHDRAWAL;
 		this.isDeleted = true;
-	}
-
-	public void registerBeanPayId(Integer id) {
-		this.beanPayId = id;
 	}
 }

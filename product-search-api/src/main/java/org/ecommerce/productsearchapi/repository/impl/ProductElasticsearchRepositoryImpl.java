@@ -1,7 +1,8 @@
 package org.ecommerce.productsearchapi.repository.impl;
 
 import org.ecommerce.productsearchapi.document.ProductDocument;
-import org.ecommerce.productsearchapi.dto.ProductSearchDto;
+import org.ecommerce.productsearchapi.dto.request.SearchRequest;
+import org.ecommerce.productsearchapi.dto.PagedSearchDto;
 import org.ecommerce.productsearchapi.enumerated.ProductDocumentField;
 import org.ecommerce.productsearchapi.repository.ProductElasticsearchCustomRepository;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +22,11 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryVariant;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchCustomRepository {
 
 	private final ElasticsearchTemplate elasticsearchTemplate;
@@ -54,17 +57,18 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 	}
 
 	@Override
-	public SearchHits<ProductDocument> searchProducts(ProductSearchDto.Request.Search search, Pageable pageable) {
+	public PagedSearchDto searchProducts(SearchRequest search, Pageable pageable) {
 
-		// TODO  .toLowerCase() 를 es 설정으로 ABC 토큰나이저 사용 안하게 변경해야함.
-
+		//todo: sortType 을 다른 방식으로 쉽게 사용할 방법 없나 고민.
 		SortOptions sortOptions = SortOptionsBuilders
 			.field(builder -> builder
 				.field(search.sortType().getField())
 				.order(SortOrder.valueOf(search.sortType().getOrderBy())));
-		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
 
-		if (Boolean.TRUE.equals(search.validKeyword())) {
+		BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
+		BoolQuery.Builder filterQueryBuilder = QueryBuilders.bool();
+
+		if (search.validKeyword()) {
 			QueryVariant matchQuery = new MatchQuery.Builder()
 				.field(ProductDocumentField.NAME.getField())
 				.query(search.keyword())
@@ -72,53 +76,52 @@ public class ProductElasticsearchRepositoryImpl implements ProductElasticsearchC
 			boolQueryBuilder.must(new Query(matchQuery));
 		}
 
-		if (Boolean.TRUE.equals(search.validIsDecaf())) {
+		if (search.validIsDecaf()) {
 			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.IS_DECAF.getField())
 				.value(search.isDecaf())
 				.build();
-			boolQueryBuilder.filter(new Query(termQuery));
+			filterQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (Boolean.TRUE.equals(search.validCategory())) {
+		if (search.validCategory()) {
 			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.CATEGORY.getField())
 				.value(search.category().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.filter(new Query(termQuery));
+			filterQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (Boolean.TRUE.equals(search.validBean())) {
+		if (search.validBean()) {
 			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.BEAN.getField())
 				.value(search.bean().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.filter(new Query(termQuery));
+			filterQueryBuilder.filter(new Query(termQuery));
 		}
 
-		if (Boolean.TRUE.equals(search.validAcidity())) {
+		if (search.validAcidity()) {
 			QueryVariant termQuery = new TermQuery.Builder()
 				.field(ProductDocumentField.ACIDITY.getField())
 				.value(search.acidity().getCode().toLowerCase())
 				.build();
-			boolQueryBuilder.filter(new Query(termQuery));
+			filterQueryBuilder.filter(new Query(termQuery));
 		}
-
-		//todo 전체 개수 반환 로직 추가 필요
-
-		Long totalCount = elasticsearchTemplate.count(
-			NativeQuery.builder()
-				.withQuery(boolQueryBuilder.build()._toQuery())
-				.build()
-			, ProductDocument.class);
 
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
+			.withFilter(filterQueryBuilder.build()._toQuery())
 			.withSort(sortOptions)
 			.withPageable(pageable)
 			.build();
+		SearchHits<ProductDocument> productDocumentSearchHits = elasticsearchTemplate.search(query, ProductDocument.class);
 
-
-		return elasticsearchTemplate.search(query, ProductDocument.class);
+		return PagedSearchDto.of(
+			productDocumentSearchHits.getTotalHits(),
+			productDocumentSearchHits.getTotalHits() / pageable.getPageSize(),
+			pageable.getPageNumber(),
+			pageable.getPageSize(),
+			productDocumentSearchHits
+		);
 	}
 }

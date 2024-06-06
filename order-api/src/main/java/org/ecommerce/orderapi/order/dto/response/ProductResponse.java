@@ -6,6 +6,7 @@ public record ProductResponse(
 		Integer id,
 		String name,
 		Integer price,
+		Integer deliveryFee,
 		Integer sellerId,
 		String sellerName,
 		ProductStatus status

@@ -1,9 +1,14 @@
 package org.ecommerce.orderapi.order.event.listener;
 
-import org.ecommerce.orderapi.order.service.OrderDomainService;
+import java.util.Set;
+
+import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.ecommerce.orderapi.stock.event.StockDecreasedEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import lombok.RequiredArgsConstructor;
@@ -12,11 +17,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StockDecreasedEventListener {
 
-	private final OrderDomainService orderDomainService;
+	private final OrderCompletionService orderCompletionService;
 
-	@Async
-	@TransactionalEventListener
+	@TransactionalEventListener(fallbackExecution = true)
 	public void receive(final StockDecreasedEvent event) {
-		orderDomainService.completeOrder(event.getOrderId(), event.getOrderItemIds());
+		orderCompletionService.completeOrder(event.getOrderId(), event.getOrderItemIds());
+	}
+
+	@Service
+	@RequiredArgsConstructor
+	static class OrderCompletionService {
+
+		private final OrderRepository orderRepository;
+
+		@Async
+		@Transactional(propagation = Propagation.REQUIRES_NEW)
+		void completeOrder(final Long orderId, final Set<Long> orderItemIds) {
+			orderRepository.findOrderById(orderId).complete(orderItemIds);
+		}
 	}
 }

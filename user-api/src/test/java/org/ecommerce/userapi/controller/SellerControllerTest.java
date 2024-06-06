@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.ecommerce.common.vo.Response;
@@ -16,6 +15,13 @@ import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
+import org.ecommerce.userapi.dto.request.CreateAccountRequest;
+import org.ecommerce.userapi.dto.request.CreateSellerRequest;
+import org.ecommerce.userapi.dto.request.LoginSellerRequest;
+import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
+import org.ecommerce.userapi.dto.response.CreateAccountResponse;
+import org.ecommerce.userapi.dto.response.CreateSellerResponse;
+import org.ecommerce.userapi.dto.response.LoginSellerResponse;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.external.service.SellerService;
@@ -85,14 +91,14 @@ class SellerControllerTest {
 	@Test
 	void 셀러_등록() throws Exception {
 		//given
-		final SellerDto.Request.Register registerRequest = new SellerDto.Request.Register(
+		final CreateSellerRequest registerRequest = new CreateSellerRequest(
 			"test@example.com",
 			"Test User",
 			"password",
 			"homeTown",
 			"010-0000-0000");
 
-		final SellerDto.Response.Register expectedResponse = new SellerDto.Response.Register(
+		final CreateSellerResponse expectedResponse = new CreateSellerResponse(
 			registerRequest.email(),
 			registerRequest.name(),
 			registerRequest.address(),
@@ -106,7 +112,7 @@ class SellerControllerTest {
 			registerRequest.phoneNumber()
 		);
 
-		final SellerDto responseDto = SellerMapper.INSTANCE.sellerToDto(seller);
+		final SellerDto responseDto = SellerMapper.INSTANCE.toDto(seller);
 
 		final String content = objectMapper.writeValueAsString(responseDto);
 		//when
@@ -132,18 +138,18 @@ class SellerControllerTest {
 		// given
 		final String email = "test@example.com";
 		final String password = "test";
-		final SellerDto.Request.Login login = new SellerDto.Request.Login(email, password);
+		final LoginSellerRequest login = new LoginSellerRequest(email, password);
 
 		final String content = objectMapper.writeValueAsString(login);
 
 		final String mockAccessToken = "mocked_access_token";
 
-		final SellerDto mocking = SellerMapper.INSTANCE.accessTokenToDto(mockAccessToken);
+		final SellerDto mocking = SellerMapper.INSTANCE.toDto(mockAccessToken);
 
-		when(sellerService.loginRequest(any(SellerDto.Request.Login.class), any(HttpServletResponse.class)))
+		when(sellerService.loginRequest(any(LoginSellerRequest.class), any(HttpServletResponse.class)))
 			.thenReturn(mocking);
 
-		final SellerDto.Response.Login expectedResponse = SellerDto.Response.Login.of(mocking);
+		final LoginSellerResponse expectedResponse = LoginSellerResponse.of(mocking);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -159,9 +165,9 @@ class SellerControllerTest {
 		final MvcResult mvcResult = resultActions.andExpect(status().isOk())
 			.andReturn();
 
-		final SellerDto.Response.Login result = objectMapper.readValue(
+		final LoginSellerResponse result = objectMapper.readValue(
 			mvcResult.getResponse().getContentAsString(),
-			new TypeReference<Response<SellerDto.Response.Login>>() {
+			new TypeReference<Response<LoginSellerResponse>>() {
 			}
 		).result();
 		Assertions.assertThat(result).isEqualTo(expectedResponse);
@@ -170,7 +176,7 @@ class SellerControllerTest {
 	@Test
 	void 셀러_계좌_등록() throws Exception {
 		// given
-		final AccountDto.Request.Register registerRequest = new AccountDto.Request.Register(
+		final CreateAccountRequest registerRequest = new CreateAccountRequest(
 			"213124124123", "부산은행");
 
 		final Seller seller = Seller.ofRegister(
@@ -184,9 +190,9 @@ class SellerControllerTest {
 		final SellerAccount account = SellerAccount.ofRegister(seller, registerRequest.number(),
 			registerRequest.bankName());
 
-		final AccountDto dto = AccountMapper.INSTANCE.sellerAccountToDto(account);
+		final AccountDto dto = AccountMapper.INSTANCE.toDto(account);
 
-		final AccountDto.Response.Register expectedResponse = AccountMapper.INSTANCE.accountDtoToResponse(dto);
+		final CreateAccountResponse expectedResponse = AccountMapper.INSTANCE.toResponse(dto);
 
 		when(sellerService.registerAccount(any(AuthDetails.class), eq(registerRequest))).thenReturn(dto);
 
@@ -208,7 +214,7 @@ class SellerControllerTest {
 		final String email = "test@example.com";
 		final String phoneNumber = "01087654321";
 		final String password = "test";
-		final SellerDto.Request.Withdrawal withdrawalRequest = new SellerDto.Request.Withdrawal(email, phoneNumber,
+		final WithdrawalSellerRequest withdrawalRequest = new WithdrawalSellerRequest(email, phoneNumber,
 			password);
 
 		final Seller seller = Seller.ofRegister(
@@ -219,7 +225,7 @@ class SellerControllerTest {
 			"01087654321"
 		);
 
-		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(Optional.of(seller));
+		when(sellerRepository.findSellerByIdAndIsDeletedIsFalse(any(Integer.class))).thenReturn(seller);
 		// when
 		final ResultActions resultActions = mockMvc.perform(delete("/api/external/sellers/v1")
 			.with(csrf())
