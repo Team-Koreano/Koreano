@@ -24,11 +24,11 @@ services:
       - kafka-broker-2
       - kafka-broker-3
     ports:
-      - "8082:8082"
+      - "9090:9090"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
-      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8082
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:9090
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-2:9092,LISTENER_LOCAL://localhost:29092
       SCHEMA_REGISTRY_DEBUG: 'true'
   kafka-broker-1:
