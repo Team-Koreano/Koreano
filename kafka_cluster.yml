@@ -16,6 +16,8 @@ services:
     volumes:
       - "./volumes/zookeeper/data:/var/lib/zookeeper/data"
       - "./volumes/zookeeper/transactions:/var/lib/zookeeper/log"
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
   schema-registry:
     image: confluentinc/cp-schema-registry:${KAFKA_VERSION}
     hostname: schema-registry
@@ -31,6 +33,8 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:9090
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-2:9092,LISTENER_LOCAL://localhost:29092
       SCHEMA_REGISTRY_DEBUG: 'true'
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
   kafka-broker-1:
     image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-1
@@ -46,6 +50,8 @@ services:
       KAFKA_COMPRESSION_TYPE: producer
     volumes:
       - "./volumes/kafka/broker-1:/var/lib/kafka/data"
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
   kafka-broker-2:
     image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-2
@@ -61,6 +67,8 @@ services:
       KAFKA_COMPRESSION_TYPE: producer
     volumes:
       - "./volumes/kafka/broker-2:/var/lib/kafka/data"
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
   kafka-broker-3:
     image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-3
@@ -76,10 +84,22 @@ services:
       KAFKA_COMPRESSION_TYPE: producer
     volumes:
       - "./volumes/kafka/broker-3:/var/lib/kafka/data"
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
   kafka-manager:
     image: hlebalbau/kafka-manager:stable
     restart: always
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
     ports:
       - "9000:9000"
     environment:
       ZK_HOSTS: "zookeeper:2181"
+      KM_ARGS: -Djava.net.preferIPv4Stack=true
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
+networks:
+  kafka:
+    driver: bridge

@@ -5,5 +5,12 @@ import lombok.Getter;
 @Getter
 public class StockOperationMessage {
 	private Integer productId;
-	private Integer quantity;
+	private Integer total;
+
+	public static StockOperationMessage of(Integer productId, Integer total) {
+		StockOperationMessage stockOperationMessage = new StockOperationMessage();
+		stockOperationMessage.productId = productId;
+		stockOperationMessage.total = total;
+		return stockOperationMessage;
+	}
 }
