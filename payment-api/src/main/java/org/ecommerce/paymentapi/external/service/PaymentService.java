@@ -53,6 +53,17 @@ public class PaymentService {
 				userId, start, end, status));
 	}
 
+	/**
+	 판매자의 빈페이 내역을 조회합니다.
+	 * @author 이우진
+	 *
+	 * @param - 	Integer sellerId,
+					LocalDateTime start,
+					LocalDateTime end,
+					PaymentStatus status,
+					Pageable pageable
+	 * @return - Page[PaymentDetailDto]
+	 */
 	public Page<PaymentDetailDto> getSellerPaymentDetailByBetweenRange(
 		int sellerId,
 		LocalDateTime start,
