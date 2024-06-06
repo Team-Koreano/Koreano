@@ -11,14 +11,28 @@ import org.springframework.data.domain.Pageable;
 public interface PaymentDetailCustomRepository {
 	PaymentDetail findPaymentDetailByOrderItemId(Long orderItemId);
 	PaymentDetail findPaymentDetailById(UUID id);
-	List<PaymentDetail> findByCreatedAtBetween(
+	List<PaymentDetail> findByUserIdAndBetweenCreateDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,
 		Pageable pageable
 	);
-	long totalPaymentDetailCount(
+	long userPaymentDetailCountByUserIdAndBetweenCreateDateTime(
+		Integer userId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status
+	);
+
+	List<PaymentDetail> findBySellerIdAndBetweenCreateDateTime(
+		Integer sellerId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status,
+		Pageable pageable
+	);
+	long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,

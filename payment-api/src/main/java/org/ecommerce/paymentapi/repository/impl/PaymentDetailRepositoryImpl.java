@@ -40,7 +40,7 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 	}
 
 	@Override
-	public List<PaymentDetail> findByCreatedAtBetween(
+	public List<PaymentDetail> findByUserIdAndBetweenCreateDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,
@@ -52,7 +52,8 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 			.where(
 				paymentDetail.userBeanPay.userId.eq(userId),
 				getStatus(status),
-				paymentDetail.createDateTime.between(start, end))
+				paymentDetail.createDateTime.between(start, end),
+				paymentDetail.isVisible.eq(true))
 			.leftJoin(paymentDetail.chargeInfo).fetchJoin()
 			.leftJoin(paymentDetail.sellerBeanPay).fetchJoin()
 			.leftJoin(paymentDetail.userBeanPay).fetchJoin()
@@ -64,7 +65,7 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 
 	}
 	@Override
-	public long totalPaymentDetailCount(
+	public long userPaymentDetailCountByUserIdAndBetweenCreateDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,
@@ -73,6 +74,34 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 		return jpaQueryFactory.selectFrom(paymentDetail)
 			.where(
 				paymentDetail.userBeanPay.userId.eq(userId),
+				getStatus(status),
+				paymentDetail.createDateTime.between(start, end),
+				paymentDetail.isVisible.eq(true))
+			.fetchCount();
+	}
+
+	@Override
+	public List<PaymentDetail> findBySellerIdAndBetweenCreateDateTime(Integer sellerId,
+		LocalDateTime start, LocalDateTime end, PaymentStatus status, Pageable pageable) {
+		return jpaQueryFactory.selectFrom(paymentDetail)
+			.where(
+				paymentDetail.sellerBeanPay.sellerId.eq(sellerId),
+				getStatus(status),
+				paymentDetail.createDateTime.between(start, end))
+			.leftJoin(paymentDetail.userBeanPay).fetchJoin()
+			.leftJoin(paymentDetail.sellerBeanPay).fetchJoin()
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.orderBy(paymentDetail.createDateTime.desc())
+			.fetch();
+	}
+
+	@Override
+	public long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(Integer sellerId,
+		LocalDateTime start, LocalDateTime end, PaymentStatus status) {
+		return jpaQueryFactory.selectFrom(paymentDetail)
+			.where(
+				paymentDetail.sellerBeanPay.sellerId.eq(sellerId),
 				getStatus(status),
 				paymentDetail.createDateTime.between(start, end))
 			.fetchCount();
