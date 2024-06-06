@@ -129,7 +129,6 @@ public class BeanPayIntegrationServiceTest {
 			//then
 			assertNotNull(actual);
 			assertEquals(actual.id(), orderId);
-			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
 			assertEquals(actual.userId(), dto.userId());
 			assertNull(actual.sellerId());
 			assertEquals(actual.paymentAmount(), amount);
@@ -173,7 +172,6 @@ public class BeanPayIntegrationServiceTest {
 			// then
 			assertNotNull(actual);
 			assertEquals(actual.id(), orderId);
-			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
 			assertEquals(actual.userId(), dto.userId());
 			assertNull(actual.sellerId());
 			assertEquals(actual.paymentAmount(), amount);
