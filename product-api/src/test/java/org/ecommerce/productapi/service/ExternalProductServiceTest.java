@@ -431,7 +431,7 @@ public class ExternalProductServiceTest {
 				(short)1000,
 				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
 				mockImages);
-			
+
 			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
 				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
 			List<MultipartFile> mockMultipartFiles = List.of(
@@ -494,6 +494,107 @@ public class ExternalProductServiceTest {
 			assertThat(result.price()).isEqualTo(request.price());
 			assertThat(result.size()).isEqualTo(request.size());
 			assertThat(result.isDefault()).isEqualTo(request.isDefault());
+		}
+	}
+
+	@Nested
+	class 상품_삭제 {
+		@Test
+		void 상품_삭제_성공() {
+			final int productDetailId1 = 1;
+			final int productDetailId2 = 2;
+
+			final Image image = Image.ofCreate(
+				"test",
+				true,
+				(short)1,
+				null
+			);
+
+			List<Image> mockImages = new ArrayList<>();
+			mockImages.add(image);
+
+			int productId = 1;
+			final Product product = new Product(
+				productId,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				new ArrayList<>(List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE),
+					ProductDetail.ofCreate(null, 1000, 50, "700g", true, ProductStatus.AVAILABLE))),
+				mockImages
+			);
+
+			final ProductDetail productDetail1 = new ProductDetail(productDetailId1, product, 1000, 50, "500g", false,
+				ProductStatus.AVAILABLE);
+			final ProductDetail productDetail2 = new ProductDetail(productDetailId2, product, 1000, 50, "700g", false,
+				ProductStatus.AVAILABLE);
+
+			final Integer request = productDetailId1;
+
+			given(productDetailRepository.findByProductDetailId(productDetailId1)).willReturn(productDetail1);
+			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
+
+			String response = productService.deleteProductDetail(request);
+
+			assertThat(response).isEqualTo("상품 디테일 삭제를 성공 하였습니다");
+		}
+
+		@Test
+		void 상품_삭제_실패_상품디테일이_하나도_안남은_경우() {
+			final int productDetailId1 = 1;
+
+			final Image image = Image.ofCreate(
+				"test",
+				true,
+				(short)1,
+				null
+			);
+
+			List<Image> mockImages = new ArrayList<>();
+			mockImages.add(image);
+
+			int productId = 1;
+			final Product product = new Product(
+				productId,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				new ArrayList<>(List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE))),
+				mockImages
+			);
+
+			final ProductDetail productDetail1 = new ProductDetail(productDetailId1, product, 1000, 50, "500g", false,
+				ProductStatus.AVAILABLE);
+
+			final Integer request = productDetailId1;
+
+			given(productDetailRepository.findByProductDetailId(productDetailId1)).willReturn(productDetail1);
+			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
+
+			assertThatThrownBy(() -> productService.deleteProductDetail(request))
+				.isInstanceOf(CustomException.class)
+				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
 		}
 	}
 }
