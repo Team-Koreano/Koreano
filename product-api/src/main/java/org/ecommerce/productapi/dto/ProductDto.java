@@ -11,8 +11,6 @@ public record ProductDto
 	(
 		Integer id,
 		ProductCategory category,
-		Integer price,
-		Integer stock,
 		SellerRepDto sellerRep,
 		Integer favoriteCount,
 		Boolean isDecaf,

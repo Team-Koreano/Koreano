@@ -5,10 +5,11 @@ import org.ecommerce.productapi.exception.ProductErrorMessages;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record ModifyStockRequest(
-	Integer productDetailId,
-	@NotNull(message = ProductErrorMessages.stockNotNull)
+public record ModifyProductDetailRequest(
+	@NotNull(message = ProductErrorMessages.priceNotNull)
 	@Min(value = 0, message = ProductErrorMessages.isCanNotBeBelowZero)
-	Integer requestStock
+	Integer price,
+	String size,
+	Boolean isDefault
 ) {
 }

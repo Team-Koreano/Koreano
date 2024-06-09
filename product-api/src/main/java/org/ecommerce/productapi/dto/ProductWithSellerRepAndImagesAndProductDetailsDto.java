@@ -8,11 +8,13 @@ import org.ecommerce.productapi.entity.enumerated.Bean;
 import org.ecommerce.productapi.entity.enumerated.ProductCategory;
 import org.ecommerce.productapi.entity.enumerated.ProductStatus;
 
-public record ProductWithSellerRepAndImagesDto(
+public record ProductWithSellerRepAndImagesAndProductDetailsDto(
 	Integer id,
 	ProductCategory category,
 	Integer price,
 	Integer stock,
+	ProductStatus status,
+	String size,
 	SellerRepDto sellerRep,
 	Integer favoriteCount,
 	Boolean isDecaf,
@@ -21,13 +23,12 @@ public record ProductWithSellerRepAndImagesDto(
 	Acidity acidity,
 	String information,
 	Boolean isCrush,
-	ProductStatus status,
 	String thumbnailUrl,
-	String size,
 	String capacity,
 	LocalDateTime createDatetime,
 	LocalDateTime updateDatetime,
 	Short deliveryFee,
-	List<ImageDto> images
+	List<ImageDto> images,
+	List<ProductDetailDto> productDetails
 ) {
 }
