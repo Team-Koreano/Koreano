@@ -131,6 +131,56 @@ public class ExternalProductServiceTest {
 			assertThat(productDto.isDecaf()).isEqualTo(productValue.getIsDecaf());
 		}
 
+		@Test
+		void 상품_등록_실패_디테일_1개_이상_등록_안할시_예외던짐() {
+			// Arrange
+			final List<ImageDto> imageDtos = List.of(
+				new ImageDto("image1.jpg", (short)1, true),
+				new ImageDto("image2.jpg", (short)2, false),
+				new ImageDto("image3.jpg", (short)3, false)
+			);
+
+			final CreateProductRequest productRequest = new CreateProductRequest(
+				false,
+				Acidity.CINNAMON,
+				Bean.ARABICA,
+				ProductCategory.BEAN,
+				"정말 맛있는 원두 단돈 천원",
+				"부산 진구 유명가수가 좋아하는 원두",
+				false,
+				null,
+				(short)1000,
+				List.of()
+			);
+
+			final Product product = Product.createProduct(
+				productRequest.category(),
+				productRequest.name(),
+				productRequest.bean(),
+				productRequest.acidity(),
+				productRequest.information(),
+				productRequest.isCrush(),
+				productRequest.isDecaf(),
+				productRequest.capacity(),
+				productRequest.deliveryFee(),
+				seller
+			);
+
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
+				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
+
+			List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+			final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt",
+				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
+			mockMultipartFiles.add(mockMultipartFile);
+
+			// Assert
+			assertThatThrownBy(() -> productService.productRegister(
+				productRequest,
+				mockThumbnailImage,
+				mockMultipartFiles)).isInstanceOf(CustomException.class)
+				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
+		}
 	}
 
 	@Nested
