@@ -29,7 +29,7 @@ public record CreateProductRequest(
 	List<ProductDetailDto> productDetails
 ) {
 	public void validate() {
-		if (productDetails.isEmpty()) {
+		if (productDetails.isEmpty() || productDetails.stream().noneMatch(ProductDetailDto::isDefault)) {
 			throw new CustomException(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL);
 		}
 		if (productDetails.stream().filter(ProductDetailDto::isDefault).count() > 1) {

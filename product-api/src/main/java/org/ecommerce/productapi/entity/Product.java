@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.productapi.entity.enumerated.Acidity;
 import org.ecommerce.productapi.entity.enumerated.Bean;
 import org.ecommerce.productapi.entity.enumerated.ProductCategory;
 import org.ecommerce.productapi.entity.enumerated.ProductStatus;
+import org.ecommerce.productapi.exception.ProductErrorCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -215,6 +217,9 @@ public class Product {
 	}
 
 	public void deleteProductDetail(ProductDetail productDetail) {
+		if (!this.checkHasEnoughDetails()) {
+			throw new CustomException(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL);
+		}
 		this.productDetails.remove(productDetail);
 	}
 }

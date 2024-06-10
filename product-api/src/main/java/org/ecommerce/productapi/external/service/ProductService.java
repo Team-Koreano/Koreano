@@ -171,10 +171,6 @@ public class ProductService {
 
 		product.deleteProductDetail(productDetail);
 
-		if (!product.checkHasEnoughDetails()) {
-			throw new CustomException(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL);
-		}
-
 		return "상품 디테일 삭제를 성공 하였습니다";
 	}
 

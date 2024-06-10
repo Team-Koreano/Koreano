@@ -132,7 +132,7 @@ public class ExternalProductServiceTest {
 		}
 
 		@Test
-		void 상품_등록_실패_디테일_1개_이상_등록_안할시_예외던짐() {
+		void 상품_등록_실패_디테일_1개_이상_등록_안할경우() {
 			// Arrange
 			final CreateProductRequest productRequest = new CreateProductRequest(
 				false,
@@ -166,7 +166,7 @@ public class ExternalProductServiceTest {
 		}
 
 		@Test
-		void 상품_등록_실패_대표상품_2개이상_일경우_예외던짐() {
+		void 상품_등록_실패_대표상품_2개이상_일경우() {
 			// Arrange
 			final CreateProductRequest productRequest = new CreateProductRequest(
 				false,
@@ -198,6 +198,40 @@ public class ExternalProductServiceTest {
 				mockThumbnailImage,
 				mockMultipartFiles)).isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.ONLY_ONE_DEFAULT_PRODUCT_ALLOWED.getMessage());
+		}
+
+		@Test
+		void 상품_등록_실패_대표상품_등록을_안할경우_예외던짐() {
+			// Arrange
+			final CreateProductRequest productRequest = new CreateProductRequest(
+				false,
+				Acidity.CINNAMON,
+				Bean.ARABICA,
+				ProductCategory.BEAN,
+				"정말 맛있는 원두 단돈 천원",
+				"부산 진구 유명가수가 좋아하는 원두",
+				false,
+				null,
+				(short)1000,
+				List.of(
+					new ProductDetailDto(1000, 50, "Small", false, ProductStatus.AVAILABLE)
+				)
+			);
+
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
+				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
+
+			List<MultipartFile> mockMultipartFiles = new ArrayList<>();
+			final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt",
+				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
+			mockMultipartFiles.add(mockMultipartFile);
+
+			// Assert
+			assertThatThrownBy(() -> productService.productRegister(
+				productRequest,
+				mockThumbnailImage,
+				mockMultipartFiles)).isInstanceOf(CustomException.class)
+				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
 		}
 
 	}
