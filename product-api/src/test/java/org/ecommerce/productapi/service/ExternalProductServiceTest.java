@@ -83,7 +83,9 @@ public class ExternalProductServiceTest {
 				false,
 				null,
 				(short)1000,
-				List.of(new ProductDetailDto(1000, 50, "Small", true, ProductStatus.AVAILABLE))
+				List.of(
+					new ProductDetailDto(1000, 50, "Small", true, ProductStatus.AVAILABLE)
+				)
 			);
 
 			final Product product = Product.createProduct(
@@ -102,12 +104,22 @@ public class ExternalProductServiceTest {
 			given(productRepository.save(any(Product.class))).willReturn(product);
 			final ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
 
-			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
-				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile(
+				"thumbnailImage",
+				"test.txt",
+				"multipart/form-data",
+				"test file".getBytes(StandardCharsets.UTF_8)
+			);
 
 			List<MultipartFile> mockMultipartFiles = new ArrayList<>();
-			final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt",
-				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
+
+			final MockMultipartFile mockMultipartFile = new MockMultipartFile(
+				"images",
+				"test2.txt",
+				"multipart/form-data",
+				"test file2".getBytes(StandardCharsets.UTF_8)
+			);
+
 			mockMultipartFiles.add(mockMultipartFile);
 
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
@@ -149,19 +161,31 @@ public class ExternalProductServiceTest {
 				)
 			);
 
-			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
-				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile(
+				"thumbnailImage",
+				"test.txt",
+				"multipart/form-data",
+				"test file".getBytes(StandardCharsets.UTF_8)
+			);
 
 			List<MultipartFile> mockMultipartFiles = new ArrayList<>();
-			final MockMultipartFile mockMultipartFile = new MockMultipartFile("images", "test2.txt",
-				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
+
+			final MockMultipartFile mockMultipartFile = new MockMultipartFile(
+				"images",
+				"test2.txt",
+				"multipart/form-data",
+				"test file2".getBytes(StandardCharsets.UTF_8)
+			);
+
 			mockMultipartFiles.add(mockMultipartFile);
 
 			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
-				mockMultipartFiles)).isInstanceOf(CustomException.class)
+				mockMultipartFiles)
+			)
+				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
 		}
 
@@ -196,7 +220,9 @@ public class ExternalProductServiceTest {
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
-				mockMultipartFiles)).isInstanceOf(CustomException.class)
+				mockMultipartFiles)
+			)
+				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.ONLY_ONE_DEFAULT_PRODUCT_ALLOWED.getMessage());
 		}
 
@@ -230,10 +256,11 @@ public class ExternalProductServiceTest {
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
-				mockMultipartFiles)).isInstanceOf(CustomException.class)
+				mockMultipartFiles)
+			)
+				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
 		}
-
 	}
 
 	@Nested
@@ -259,8 +286,13 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
-				List.of(Image.ofCreate("wwww.test.test", true, (short)1, null)));
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
 
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
@@ -281,7 +313,10 @@ public class ExternalProductServiceTest {
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(null);
 
 			// When, Then
-			assertThatThrownBy(() -> productService.modifyToStatus(productId, newStatus))
+			assertThatThrownBy(() -> productService.modifyToStatus(
+				productId,
+				newStatus)
+			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
 		}
@@ -307,8 +342,13 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
-				List.of(Image.ofCreate("wwww.test.test", true, (short)1, null)));
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
 
 			final Product product2 = new Product(
 				productIds.get(1),
@@ -325,14 +365,19 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
-				List.of(Image.ofCreate("wwww.test.test", true, (short)1, null)));
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
 
-			List<Product> products = List.of(product1, product2);
+			final List<Product> products = List.of(product1, product2);
 
 			given(productRepository.findProductWithProductDetailsByIds(productIds)).willReturn(products);
 
-			ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(productIds, newStatus);
+			final ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(productIds, newStatus);
 
 			// When
 			List<ProductWithSellerRepAndImagesAndProductDetailsDto> result = productService.bulkModifyStatus(request);
@@ -350,8 +395,14 @@ public class ExternalProductServiceTest {
 			final ProductStatus requestStatus = ProductStatus.OUT_OF_STOCK;
 
 			final ProductDetail productDetail = new ProductDetail(
-				1, null, 1000, 50, "500g", true,
-				ProductStatus.AVAILABLE);
+				1,
+				null,
+				1000,
+				50,
+				"Small",
+				true,
+				ProductStatus.AVAILABLE
+			);
 
 			given(productDetailRepository.findByProductDetailId(productDetailId)).willReturn(productDetail);
 
@@ -372,7 +423,15 @@ public class ExternalProductServiceTest {
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
 
-			ProductDetail productDetail = new ProductDetail(1, null, 1000, 50, "Small", true, ProductStatus.AVAILABLE);
+			final ProductDetail productDetail = new ProductDetail(
+				1,
+				null,
+				1000,
+				50,
+				"Small",
+				true,
+				ProductStatus.AVAILABLE
+			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
 
@@ -390,8 +449,15 @@ public class ExternalProductServiceTest {
 			final ModifyStockRequest request = new ModifyStockRequest(1, 40);
 
 			int existStock = 50;
-			ProductDetail productDetail = new ProductDetail(1, null, 1000, existStock, "Small", true,
-				ProductStatus.AVAILABLE);
+			ProductDetail productDetail = new ProductDetail(
+				1,
+				null,
+				1000,
+				existStock,
+				"Small",
+				true,
+				ProductStatus.AVAILABLE
+			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
 
@@ -421,7 +487,15 @@ public class ExternalProductServiceTest {
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
 
-			ProductDetail productDetail = new ProductDetail(1, null, 1000, 50, "Small", true, ProductStatus.AVAILABLE);
+			ProductDetail productDetail = new ProductDetail(
+				1,
+				null,
+				1000,
+				50,
+				"Small",
+				true,
+				ProductStatus.AVAILABLE
+			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
 
@@ -444,9 +518,19 @@ public class ExternalProductServiceTest {
 			);
 
 			final Integer productId = 1;
+
 			final ModifyProductRequest modifyProductRequest = new ModifyProductRequest(
-				false, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN, "수정된", "커피", null, true, (short)4000
+				false,
+				Acidity.CINNAMON,
+				Bean.ARABICA,
+				ProductCategory.BEAN,
+				"수정된",
+				"커피",
+				null,
+				true,
+				(short)4000
 			);
+
 			final Image image = Image.ofCreate(
 				"test",
 				true,
@@ -478,10 +562,18 @@ public class ExternalProductServiceTest {
 
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
-			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
-				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile(
+				"thumbnailImage",
+				"test.txt",
+				"multipart/form-data",
+				"test file".getBytes(StandardCharsets.UTF_8)
+			);
+
 			List<MultipartFile> mockMultipartFiles = List.of(
-				new MockMultipartFile("images", "test2.txt", "multipart/form-data",
+				new MockMultipartFile(
+					"images",
+					"test2.txt",
+					"multipart/form-data",
 					"test file2".getBytes(StandardCharsets.UTF_8))
 			);
 
@@ -489,7 +581,11 @@ public class ExternalProductServiceTest {
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
 			ProductWithSellerRepAndImagesAndProductDetailsDto resultDto = productService.modifyToProduct(
-				productId, modifyProductRequest, mockThumbnailImage, mockMultipartFiles);
+				productId,
+				modifyProductRequest,
+				mockThumbnailImage,
+				mockMultipartFiles
+			);
 
 			// Then
 			verify(productRepository).findProductWithProductDetailsById(productId);
@@ -507,28 +603,44 @@ public class ExternalProductServiceTest {
 		void 실패_상품을_못찾은_케이스() {
 			// Given
 			final Integer productId = 1;
+
 			final ModifyProductRequest modifyProductRequest = new ModifyProductRequest(
-				false, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN, "수정된", "커피", null, true, (short)4000
-			);
-
-			final Image image = Image.ofCreate(
-				"test",
+				false,
+				Acidity.CINNAMON,
+				Bean.ARABICA,
+				ProductCategory.BEAN,
+				"수정된",
+				"커피",
+				null,
 				true,
-				(short)1,
-				null
+				(short)4000
 			);
 
-			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
-				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
-			List<MultipartFile> mockMultipartFiles = List.of(
-				new MockMultipartFile("images", "test2.txt", "multipart/form-data",
+			final MockMultipartFile mockThumbnailImage = new MockMultipartFile(
+				"thumbnailImage",
+				"test.txt",
+				"multipart/form-data",
+				"test file".getBytes(StandardCharsets.UTF_8)
+			);
+
+			final List<MultipartFile> mockMultipartFiles = List.of(
+				new MockMultipartFile(
+					"images",
+					"test2.txt",
+					"multipart/form-data",
 					"test file2".getBytes(StandardCharsets.UTF_8))
 			);
+
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(null);
 
 			// When, Then
 			assertThatThrownBy(() -> productService.modifyToProduct(
-				productId, modifyProductRequest, mockThumbnailImage, mockMultipartFiles))
+					productId,
+					modifyProductRequest,
+					mockThumbnailImage,
+					mockMultipartFiles
+				)
+			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
 		}
@@ -552,6 +664,7 @@ public class ExternalProductServiceTest {
 			mockImages.add(image);
 
 			int productId = 1;
+
 			final Product product = new Product(
 				productId,
 				ProductCategory.BEAN,
@@ -567,11 +680,28 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
-				mockImages);
+				List.of(
+					ProductDetail.ofCreate(
+						null,
+						1000,
+						50,
+						"500g",
+						true,
+						ProductStatus.AVAILABLE
+					)
+				),
+				mockImages
+			);
 
-			final ProductDetail productDetail = new ProductDetail(productDetailId, product, 1000, 50, "500g", false,
-				ProductStatus.AVAILABLE);
+			final ProductDetail productDetail = new ProductDetail(
+				productDetailId,
+				product,
+				1000,
+				50,
+				"500g",
+				false,
+				ProductStatus.AVAILABLE
+			);
 
 			final ModifyProductDetailRequest request = new ModifyProductDetailRequest(3000, "500g", true);
 
@@ -623,8 +753,10 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				new ArrayList<>(List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE),
-					ProductDetail.ofCreate(null, 1000, 50, "700g", true, ProductStatus.AVAILABLE))),
+				new ArrayList<>(List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE),
+					ProductDetail.ofCreate(null, 1000, 50, "700g", true, ProductStatus.AVAILABLE))
+				),
 				mockImages
 			);
 
@@ -677,12 +809,21 @@ public class ExternalProductServiceTest {
 				testTime,
 				testTime,
 				(short)1000,
-				new ArrayList<>(List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE))),
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
 				mockImages
 			);
 
-			final ProductDetail productDetail1 = new ProductDetail(productDetailId1, product, 1000, 50, "500g", false,
-				ProductStatus.AVAILABLE);
+			final ProductDetail productDetail1 = new ProductDetail(
+				productDetailId1,
+				product,
+				1000,
+				50,
+				"500g",
+				false,
+				ProductStatus.AVAILABLE
+			);
 
 			final Integer request = productDetailId1;
 
