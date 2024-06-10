@@ -55,9 +55,7 @@ public class ProductService {
 		final List<MultipartFile> images
 	) {
 
-		if (createProductRequest.productDetails().isEmpty()) {
-			throw new CustomException(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL);
-		}
+		createProductRequest.validate();
 
 		final Product createdProduct = Product.createProduct(
 			createProductRequest.category(),
