@@ -66,7 +66,7 @@ public class ExternalProductServiceTest {
 	class 상품_등록 {
 		@Test
 		void 상품_등록_성공() {
-			// Arrange
+			// Given
 			final List<ImageDto> imageDtos = List.of(
 				new ImageDto("image1.jpg", (short)1, true),
 				new ImageDto("image2.jpg", (short)2, false),
@@ -112,13 +112,13 @@ public class ExternalProductServiceTest {
 
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
-			// Act
+			// When
 			final ProductWithSellerRepAndImagesAndProductDetailsDto productDto = productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
 				mockMultipartFiles);
 
-			// Assert
+			// Then
 			verify(productRepository, times(1)).save(captor.capture());
 			Product productValue = captor.getValue();
 			assertThat(productDto.acidity()).isEqualTo(productValue.getAcidity());
@@ -133,7 +133,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 상품_등록_실패_디테일_1개_이상_등록_안할경우() {
-			// Arrange
+			// Given
 			final CreateProductRequest productRequest = new CreateProductRequest(
 				false,
 				Acidity.CINNAMON,
@@ -157,7 +157,7 @@ public class ExternalProductServiceTest {
 				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
 			mockMultipartFiles.add(mockMultipartFile);
 
-			// Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
@@ -167,7 +167,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 상품_등록_실패_대표상품_2개이상_일경우() {
-			// Arrange
+			// Given
 			final CreateProductRequest productRequest = new CreateProductRequest(
 				false,
 				Acidity.CINNAMON,
@@ -192,7 +192,7 @@ public class ExternalProductServiceTest {
 				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
 			mockMultipartFiles.add(mockMultipartFile);
 
-			// Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
@@ -202,7 +202,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 상품_등록_실패_대표상품_등록을_안할경우_예외던짐() {
-			// Arrange
+			// Given
 			final CreateProductRequest productRequest = new CreateProductRequest(
 				false,
 				Acidity.CINNAMON,
@@ -226,7 +226,7 @@ public class ExternalProductServiceTest {
 				"multipart/form-data", "test file2".getBytes(StandardCharsets.UTF_8));
 			mockMultipartFiles.add(mockMultipartFile);
 
-			// Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
@@ -240,7 +240,7 @@ public class ExternalProductServiceTest {
 	class 상품_상태_수정 {
 		@Test
 		void 상품_상태_수정_성공() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ProductStatus newStatus = ProductStatus.DISCONTINUED;
 
@@ -264,23 +264,23 @@ public class ExternalProductServiceTest {
 
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
-			// Act
+			// When
 			ProductWithSellerRepAndImagesAndProductDetailsDto result = productService.modifyToStatus(productId,
 				newStatus);
 
-			// Assert
+			// Then
 			assertThat(result.productDetails().get(0).status()).isEqualTo(newStatus);
 		}
 
 		@Test
 		void 상품_상태_변경_실패_상품을_못찾은_케이스() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ProductStatus newStatus = ProductStatus.DISCONTINUED;
 
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(null);
 
-			// Act & Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.modifyToStatus(productId, newStatus))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
@@ -288,7 +288,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 여러개_상품_상태_수정_성공() {
-			// Arrange
+			// Given
 			final List<Integer> productIds = List.of(1, 2);
 			final ProductStatus newStatus = ProductStatus.DISCONTINUED;
 
@@ -334,10 +334,10 @@ public class ExternalProductServiceTest {
 
 			ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(productIds, newStatus);
 
-			// Act
+			// When
 			List<ProductWithSellerRepAndImagesAndProductDetailsDto> result = productService.bulkModifyStatus(request);
 
-			// Assert
+			// Then
 			assertThat(result).hasSize(2);
 			assertThat(result.get(0).productDetails().get(0).status()).isEqualTo(newStatus);
 			assertThat(result.get(1).productDetails().get(0).status()).isEqualTo(newStatus);
@@ -345,6 +345,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 상품_디테일_상태_변경_성공() {
+			// Given
 			final Integer productDetailId = 1;
 			final ProductStatus requestStatus = ProductStatus.OUT_OF_STOCK;
 
@@ -354,9 +355,11 @@ public class ExternalProductServiceTest {
 
 			given(productDetailRepository.findByProductDetailId(productDetailId)).willReturn(productDetail);
 
+			// When
 			ProductDetailDto result = productService.modifyToProductDetailStatus(productDetailId,
 				requestStatus);
 
+			// Then
 			assertThat(result.status()).isEqualTo(requestStatus);
 		}
 	}
@@ -365,7 +368,7 @@ public class ExternalProductServiceTest {
 	class 재고_테스트 {
 		@Test
 		void 재고_증가_성공() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
 
@@ -373,16 +376,16 @@ public class ExternalProductServiceTest {
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
 
-			// Act
+			// When
 			ProductDetailDto result = productService.increaseToStock(request);
 
-			// Assert
+			// Then
 			assertThat(result.stock()).isEqualTo(150);
 		}
 
 		@Test
 		void 재고_감소_성공() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 40);
 
@@ -394,19 +397,19 @@ public class ExternalProductServiceTest {
 
 			ProductDetailDto result = productService.decreaseToStock(request);
 
-			// Act & Assert
+			// When, Then
 			assertThat(result.stock()).isEqualTo(existStock - request.requestStock());
 		}
 
 		@Test
 		void 재고_증가_실패_상품_못찾은_케이스() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(null);
 
-			// Act & Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.increaseToStock(request))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
@@ -414,7 +417,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 재고_감소_실패_0미만으로_설정한_경우() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
 
@@ -422,7 +425,7 @@ public class ExternalProductServiceTest {
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
 
-			// Act & Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.decreaseToStock(request))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO.getMessage());
@@ -433,7 +436,7 @@ public class ExternalProductServiceTest {
 	class 상품_수정 {
 		@Test
 		void 성공() {
-			// Arrange
+			// Given
 			final List<ImageDto> imageDtos = List.of(
 				new ImageDto("image1.jpg", (short)1, true),
 				new ImageDto("image2.jpg", (short)2, false),
@@ -482,11 +485,13 @@ public class ExternalProductServiceTest {
 					"test file2".getBytes(StandardCharsets.UTF_8))
 			);
 
+			// When
 			when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles)).thenReturn(imageDtos);
 
 			ProductWithSellerRepAndImagesAndProductDetailsDto resultDto = productService.modifyToProduct(
 				productId, modifyProductRequest, mockThumbnailImage, mockMultipartFiles);
 
+			// Then
 			verify(productRepository).findProductWithProductDetailsById(productId);
 			assertThat(resultDto.acidity()).isEqualTo(modifyProductRequest.acidity());
 			assertThat(resultDto.bean()).isEqualTo(modifyProductRequest.bean());
@@ -500,7 +505,7 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 실패_상품을_못찾은_케이스() {
-			// Arrange
+			// Given
 			final Integer productId = 1;
 			final ModifyProductRequest modifyProductRequest = new ModifyProductRequest(
 				false, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN, "수정된", "커피", null, true, (short)4000
@@ -513,28 +518,6 @@ public class ExternalProductServiceTest {
 				null
 			);
 
-			List<Image> mockImages = new ArrayList<>();
-
-			mockImages.add(image);
-
-			final Product product = new Product(
-				productId,
-				ProductCategory.BEAN,
-				seller,
-				0,
-				false,
-				"부산 진구 유명가수가 좋아하는 원두",
-				Bean.ARABICA,
-				Acidity.CINNAMON,
-				"정말 맛있는 원두 단돈 천원",
-				false,
-				null,
-				testTime,
-				testTime,
-				(short)1000,
-				List.of(ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)),
-				mockImages);
-
 			final MockMultipartFile mockThumbnailImage = new MockMultipartFile("thumbnailImage", "test.txt",
 				"multipart/form-data", "test file".getBytes(StandardCharsets.UTF_8));
 			List<MultipartFile> mockMultipartFiles = List.of(
@@ -543,7 +526,7 @@ public class ExternalProductServiceTest {
 			);
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(null);
 
-			// Act & Assert
+			// When, Then
 			assertThatThrownBy(() -> productService.modifyToProduct(
 				productId, modifyProductRequest, mockThumbnailImage, mockMultipartFiles))
 				.isInstanceOf(CustomException.class)
@@ -552,6 +535,9 @@ public class ExternalProductServiceTest {
 
 		@Test
 		void 디테일_수정_성공() {
+
+			// Given
+
 			final int productDetailId = 1;
 
 			final Image image = Image.ofCreate(
@@ -592,8 +578,10 @@ public class ExternalProductServiceTest {
 			given(productDetailRepository.findByProductDetailId(productDetailId)).willReturn(productDetail);
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
+			// When
 			ProductDetailDto result = productService.modifyToProductDetail(productDetailId, request);
 
+			// Then
 			assertThat(result.price()).isEqualTo(request.price());
 			assertThat(result.size()).isEqualTo(request.size());
 			assertThat(result.isDefault()).isEqualTo(request.isDefault());
@@ -604,6 +592,8 @@ public class ExternalProductServiceTest {
 	class 상품_삭제 {
 		@Test
 		void 상품_삭제_성공() {
+
+			// Given
 			final int productDetailId1 = 1;
 			final int productDetailId2 = 2;
 
@@ -648,13 +638,17 @@ public class ExternalProductServiceTest {
 			given(productDetailRepository.findByProductDetailId(productDetailId1)).willReturn(productDetail1);
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
+			// When
 			String response = productService.deleteProductDetail(request);
 
+			// Then
 			assertThat(response).isEqualTo("상품 디테일 삭제를 성공 하였습니다");
 		}
 
 		@Test
 		void 상품_삭제_실패_상품디테일이_하나도_안남은_경우() {
+
+			// Given
 			final int productDetailId1 = 1;
 
 			final Image image = Image.ofCreate(
@@ -695,6 +689,7 @@ public class ExternalProductServiceTest {
 			given(productDetailRepository.findByProductDetailId(productDetailId1)).willReturn(productDetail1);
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
+			// When, Then
 			assertThatThrownBy(() -> productService.deleteProductDetail(request))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
