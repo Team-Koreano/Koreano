@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
-import org.springframework.data.domain.Pageable;
 
 public interface PaymentDetailCustomRepository {
 	PaymentDetail findPaymentDetailByOrderItemId(Long orderItemId);
@@ -16,7 +15,8 @@ public interface PaymentDetailCustomRepository {
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,
-		Pageable pageable
+		Integer page,
+		Integer size
 	);
 	long totalPaymentDetailCount(
 		Integer userId,
