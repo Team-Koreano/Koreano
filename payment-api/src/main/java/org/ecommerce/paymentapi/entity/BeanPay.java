@@ -46,11 +46,11 @@ public class BeanPay {
 
 	private Integer amount = 0;
 
-
-
 	@CreationTimestamp
 	@Column(updatable = false)
 	private LocalDateTime createDateTime;
+
+	private LocalDateTime deleteDateTime;
 
 	public static BeanPay ofCreate(
 		Integer userId, Role role
@@ -88,5 +88,13 @@ public class BeanPay {
 	public void cancelPayment(Integer amount, BeanPay sellerBeanPay) {
 		sellerBeanPay.decreaseBeanPay(amount);
 		this.increaseBeanPay(amount);
+	}
+
+	public void delete() {
+		if(this.deleteDateTime != null)
+			throw new CustomException(ALREADY_DELETE);
+		if(this.amount > 0)
+			throw new CustomException(REMAIN_BEANPAY);
+		this.deleteDateTime = LocalDateTime.now();
 	}
 }

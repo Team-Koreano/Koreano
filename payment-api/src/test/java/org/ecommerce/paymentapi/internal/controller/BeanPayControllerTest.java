@@ -63,17 +63,14 @@ class BeanPayControllerTest {
 			final BeanPayDto beanPayDto = BeanPayMapper.INSTANCE.toDto(beanPay);
 
 			//when
-			when(beanPayService.createBeanPay(request))
-				.thenReturn(beanPayDto);
+			doNothing().when(beanPayService).createBeanPay(request);
 
 			//then
 			mvc.perform(post("/api/internal/beanpay/v1")
 					.contentType(APPLICATION_JSON)
 					.content(mapper.writeValueAsString(request)))
 				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.userId").value(userId))
-				.andExpect(jsonPath("$.role").value(role.toString()));
+				.andExpect(status().isOk());
 		}
 	}
 
