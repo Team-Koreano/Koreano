@@ -81,8 +81,14 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 	}
 
 	@Override
-	public List<PaymentDetail> findBySellerIdAndBetweenCreateDateTime(Integer sellerId,
-		LocalDateTime start, LocalDateTime end, PaymentStatus status, Pageable pageable) {
+	public List<PaymentDetail> findBySellerIdAndBetweenCreateDateTime(
+		Integer sellerId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status,
+		Integer page,
+		Integer size
+	) {
 		return jpaQueryFactory.selectFrom(paymentDetail)
 			.where(
 				paymentDetail.sellerBeanPay.sellerId.eq(sellerId),
@@ -90,15 +96,19 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 				paymentDetail.createDateTime.between(start, end))
 			.leftJoin(paymentDetail.userBeanPay).fetchJoin()
 			.leftJoin(paymentDetail.sellerBeanPay).fetchJoin()
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
+			.offset((long) page * size)
+			.limit(size)
 			.orderBy(paymentDetail.createDateTime.desc())
 			.fetch();
 	}
 
 	@Override
-	public long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(Integer sellerId,
-		LocalDateTime start, LocalDateTime end, PaymentStatus status) {
+	public long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
+		Integer sellerId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status
+	) {
 		return jpaQueryFactory.selectFrom(paymentDetail)
 			.where(
 				paymentDetail.sellerBeanPay.sellerId.eq(sellerId),

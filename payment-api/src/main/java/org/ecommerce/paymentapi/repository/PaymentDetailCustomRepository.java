@@ -30,7 +30,8 @@ public interface PaymentDetailCustomRepository {
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,
-		Pageable pageable
+		Integer page,
+		Integer size
 	);
 	long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
 		Integer userId,
