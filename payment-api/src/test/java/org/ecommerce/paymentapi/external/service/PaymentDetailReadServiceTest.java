@@ -28,9 +28,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentServiceTest {
+class PaymentDetailReadServiceTest {
 	@InjectMocks
-	private PaymentService paymentService;
+	private PaymentDetailReadService paymentDetailReadService;
 
 	@Mock
 	private PaymentDetailRepository paymentDetailRepository;

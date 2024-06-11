@@ -2,29 +2,20 @@ package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
-import java.time.LocalDateTime;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
-import org.ecommerce.paymentapi.dto.PaymentMapper;
 import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
 import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
-import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.external.service.PaymentService;
-import org.ecommerce.paymentapi.utils.PaymentTimeFormatUtil;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.ecommerce.paymentapi.external.service.PaymentDetailReadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -38,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BeanPayController {
 
 	private final BeanPayService beanPayService;
-	private final PaymentService paymentService;
+	private final PaymentDetailReadService paymentDetailReadService;
 
 	@PostMapping("/charge")
 	public Response<PaymentDetailResponse> beforeCharge(@RequestBody final PreChargeRequest request) {

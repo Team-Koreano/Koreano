@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.repository.PaymentDetailCustomRepository;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -45,7 +44,8 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,
-		Pageable pageable
+		Integer page,
+		Integer size
 	) {
 		return jpaQueryFactory.selectFrom(
 				paymentDetail)
@@ -57,8 +57,8 @@ public class PaymentDetailRepositoryImpl implements PaymentDetailCustomRepositor
 			.leftJoin(paymentDetail.chargeInfo).fetchJoin()
 			.leftJoin(paymentDetail.sellerBeanPay).fetchJoin()
 			.leftJoin(paymentDetail.userBeanPay).fetchJoin()
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
+			.offset((long) page * size)
+			.limit(size)
 			.orderBy(paymentDetail.createDateTime.desc())
 			.fetch();
 
