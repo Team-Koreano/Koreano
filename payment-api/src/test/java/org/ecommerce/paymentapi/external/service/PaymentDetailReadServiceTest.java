@@ -28,9 +28,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentServiceTest {
+class PaymentDetailReadServiceTest {
 	@InjectMocks
-	private PaymentService paymentService;
+	private PaymentDetailReadService paymentDetailReadService;
 
 	@Mock
 	private PaymentDetailRepository paymentDetailRepository;
@@ -54,7 +54,8 @@ class PaymentServiceTest {
 
 			//when
 			when(paymentDetailRepository.findByCreatedAtBetween(
-				userId, startDateTime, endDateTime, status, pageable
+				userId, startDateTime, endDateTime, status, pageable.getPageNumber(),
+				pageable.getPageSize()
 			)).thenReturn(paymentDetails);
 
 			when(paymentDetailRepository.totalPaymentDetailCount(userId, startDateTime,
@@ -62,7 +63,7 @@ class PaymentServiceTest {
 
 			//then
 			Page<PaymentDetailDto> actual = assertDoesNotThrow(
-				() -> paymentService.getPaymentDetailsByDateRange(
+				() -> paymentDetailReadService.getPaymentDetailsByDateRange(
 					userId, startDateTime, endDateTime, status, pageable
 				));
 			assertNotEquals(actual.getContent().size(), 0);

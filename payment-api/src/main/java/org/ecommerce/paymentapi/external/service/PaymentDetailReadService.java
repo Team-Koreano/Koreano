@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class PaymentService {
+public class PaymentDetailReadService {
 	private final PaymentDetailRepository paymentDetailRepository;
 
 	/**
@@ -27,11 +27,11 @@ public class PaymentService {
 	 * @author 이우진
 	 *
 	 * @param - 	Integer userId,
-					LocalDateTime start,
-					LocalDateTime end,
-					PaymentStatus status,
-					Pageable pageable
-	 * @return - Page[PaymentDetailDto]
+	 * @param -		LocalDateTime start,
+	 * @param -		LocalDateTime end,
+	 * @param -		PaymentStatus status,
+	 * @param -		Pageable pageable
+	 * @return - 	Page[PaymentDetailDto]
 	 */
 	public Page<PaymentDetailDto> getPaymentDetailsByDateRange(
 		Integer userId,
@@ -42,7 +42,7 @@ public class PaymentService {
 	) {
 		List<PaymentDetail> paymentDetailPage =
 			paymentDetailRepository.findByCreatedAtBetween(
-				userId, start, end, status, pageable
+				userId, start, end, status, pageable.getPageNumber(), pageable.getPageSize()
 			);
 		return new PageImpl<>(
 			paymentDetailPage.stream()

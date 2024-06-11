@@ -39,9 +39,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentServiceTest {
+class PaymentDetailReadServiceTest {
 
-	private static final Logger log = LoggerFactory.getLogger(PaymentServiceTest.class);
+	private static final Logger log = LoggerFactory.getLogger(
+		PaymentDetailReadServiceTest.class);
 	@InjectMocks
 	private PaymentService paymentService;
 
