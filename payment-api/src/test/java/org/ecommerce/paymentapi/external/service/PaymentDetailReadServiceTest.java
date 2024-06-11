@@ -54,7 +54,8 @@ class PaymentDetailReadServiceTest {
 
 			//when
 			when(paymentDetailRepository.findByUserIdAndBetweenCreateDateTime(
-				userId, startDateTime, endDateTime, status, pageable
+				userId, startDateTime, endDateTime, status, pageable.getPageNumber(),
+				pageable.getPageSize()
 			)).thenReturn(paymentDetails);
 
 			when(paymentDetailRepository.userPaymentDetailCountByUserIdAndBetweenCreateDateTime(userId, startDateTime,
@@ -62,7 +63,7 @@ class PaymentDetailReadServiceTest {
 
 			//then
 			Page<PaymentDetailDto> actual = assertDoesNotThrow(
-				() -> paymentService.getUserPaymentDetailsByBetweenDate(
+				() -> paymentDetailReadService.getUserPaymentDetailsByBetweenDate(
 					userId, startDateTime, endDateTime, status, pageable
 				));
 			assertNotEquals(actual.getContent().size(), 0);
@@ -107,7 +108,8 @@ class PaymentDetailReadServiceTest {
 
 			//when
 			when(paymentDetailRepository.findBySellerIdAndBetweenCreateDateTime(
-				sellerId, startDateTime, endDateTime, status, pageable
+				sellerId, startDateTime, endDateTime, status, pageable.getPageNumber(),
+				pageable.getPageSize()
 			)).thenReturn(paymentDetails);
 
 			when(paymentDetailRepository.sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
@@ -115,7 +117,7 @@ class PaymentDetailReadServiceTest {
 
 			//then
 			Page<PaymentDetailDto> actual = assertDoesNotThrow(
-				() -> paymentService.getSellerPaymentDetailByBetweenRange(
+				() -> paymentDetailReadService.getSellerPaymentDetailByBetweenRange(
 					sellerId, startDateTime, endDateTime, status, pageable
 				));
 

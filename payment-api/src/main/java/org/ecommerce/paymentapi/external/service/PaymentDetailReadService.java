@@ -42,7 +42,7 @@ public class PaymentDetailReadService {
 	) {
 		List<PaymentDetail> paymentDetails =
 			paymentDetailRepository.findByUserIdAndBetweenCreateDateTime(
-				userId, start, end, status, pageable
+				userId, start, end, status, pageable.getPageNumber(), pageable.getPageSize()
 			);
 		return new PageImpl<>(
 			paymentDetails.stream()
@@ -73,7 +73,8 @@ public class PaymentDetailReadService {
 	) {
 		List<PaymentDetail> sellerPaymentDetails =
 			paymentDetailRepository.findBySellerIdAndBetweenCreateDateTime(
-				sellerId, start, end, status, pageable);
+				sellerId, start, end, status, pageable.getPageNumber(),
+				pageable.getPageSize());
 
 		return new PageImpl<>(
 			sellerPaymentDetails.stream()
