@@ -42,12 +42,10 @@ public class ProductService {
 
 	/**
 	 상품등록 로직
-	 <p>
 	 상품을 등록하는 메서드 입니다
-	 <p>
-
-	 @param createProductRequest - 상품 등록 데이터
-	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * @author Hong
+	 * @param createProductRequest - 상품 등록 데이터
+	 * @return ProductWithSellerRepAndImagesAndProductDetailsDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductWithSellerRepAndImagesAndProductDetailsDto productRegister(
 		final CreateProductRequest createProductRequest,
@@ -57,20 +55,20 @@ public class ProductService {
 
 		createProductRequest.validate();
 
-		final Product createdProduct = Product.createProduct(
-			createProductRequest.category(),
-			createProductRequest.name(),
-			createProductRequest.bean(),
-			createProductRequest.acidity(),
-			createProductRequest.information(),
-			createProductRequest.isCrush(),
-			createProductRequest.isDecaf(),
-			createProductRequest.capacity(),
-			createProductRequest.deliveryFee(),
-			seller
+		Product savedProduct = productRepository.save(
+			Product.createProduct(
+				createProductRequest.category(),
+				createProductRequest.name(),
+				createProductRequest.bean(),
+				createProductRequest.acidity(),
+				createProductRequest.information(),
+				createProductRequest.isCrush(),
+				createProductRequest.isDecaf(),
+				createProductRequest.capacity(),
+				createProductRequest.deliveryFee(),
+				seller
+			)
 		);
-
-		final Product savedProduct = productRepository.save(createdProduct);
 
 		savedProduct.saveProductDetails(
 			createProductRequest.productDetails().stream().map(productDetailDto -> ProductDetail.ofCreate(
@@ -94,17 +92,16 @@ public class ProductService {
 
 	/**
 	 * 상품 상태 변경
-	 * <p>
 	 * 상품의 상태를 수정하는 메서드입니다
-	 * <p>
 	 * @author Hong
-	 *
 	 * @param productId - 상품의 식별값
 	 * @param status - 상품의 변경할 상태값
-	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * @return ProductWithSellerRepAndImagesAndProductDetailsDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToStatus(final Integer productId,
-		final ProductStatus status) {
+	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToStatus(
+		final Integer productId,
+		final ProductStatus status
+	) {
 
 		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
@@ -120,7 +117,6 @@ public class ProductService {
 	/**
 	 * ProductDetail 을 추가하는 메서드입니다
 	 * @author Hong
-	 *
 	 * @param productId - Product 식별값입니다
 	 * @param addProductDetailRequest - ProductDetail Request Dto 입니다
 	 * @return - ProductDetailDto 입니다
@@ -151,7 +147,6 @@ public class ProductService {
 	/**
 	 * ProductDetail 을 삭제하는 메서드입니다
 	 * @author Hong
-	 *
 	 * @param productDetailId - ProductDetailId 의 식별값입니다
 	 * @return String - 반환될 메세지입니다
 	 */
@@ -174,8 +169,16 @@ public class ProductService {
 		return "상품 디테일 삭제를 성공 하였습니다";
 	}
 
-	public ProductDetailDto modifyToProductDetailStatus(final Integer productDetailId,
-		final ProductStatus status) {
+	/**
+	 * 상품 디테일을 수정하는 로직입니다
+	 * @author Hong
+	 * @param productDetailId - ProductDettail
+	 * @return - ProductDetailDto 입니다
+	 */
+	public ProductDetailDto modifyToProductDetailStatus(
+		final Integer productDetailId,
+		final ProductStatus status
+	) {
 
 		ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
 
@@ -187,6 +190,14 @@ public class ProductService {
 
 		return ProductMapper.INSTANCE.toDto(productDetail);
 	}
+
+	/**
+	 * 1줄 짜리 간결한 설명 ------- (1)
+	 * @author Hong
+	 * @param productDetailId - ProductDetail 식별값입니다
+	 * @param modifyProductDetailRequest - 해당 상품의 상세정보를 수정할 값들이 포함된 DTO 입니다.
+	 * @return - ProductDetailDto 입니다
+	 */
 
 	public ProductDetailDto modifyToProductDetail(final Integer productDetailId,
 		final ModifyProductDetailRequest modifyProductDetailRequest) {
@@ -214,11 +225,8 @@ public class ProductService {
 
 	/**
 	 * 상품 재고 변경
-	 * <p>
 	 * 상품의 재고를 증가시키는 메서드입니다
-	 * <p>
 	 * @author Hong
-	 *
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
@@ -237,11 +245,8 @@ public class ProductService {
 
 	/**
 	 * 상품 재고 변경
-	 * <p>
 	 * 상품의 재고를 감소시키는 메서드입니다
-	 * <p>
 	 * @author Hong
-	 *
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
@@ -259,13 +264,10 @@ public class ProductService {
 	}
 
 	/**
-	 상품 수정
-	 <p>
-	 상품을 수정하는 메서드입니다
-	 <p>
-
-	 @param modifyProduct - 상품을 수정 데이터
-	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * 상품 수정
+	 * 상품을 수정하는 메서드입니다
+	 * @param modifyProduct - 상품을 수정 데이터
+	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
 	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToProduct(
 		final Integer productId,
@@ -273,6 +275,7 @@ public class ProductService {
 		final MultipartFile thumbnailImage,
 		final List<MultipartFile> images
 	) {
+
 		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (product == null) {
@@ -305,7 +308,6 @@ public class ProductService {
 	/**
 	 * 여러 상품의 상태를 한번에 변경하는 메서드 입니다
 	 * @author Hong
-	 *
 	 * @param bulkStatus - RequestDto 입니다.
 	 * @return List<ProductManagementDto>
 	 */
