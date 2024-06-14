@@ -23,13 +23,20 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<Order> findOrdersByUserId(final Integer userId, final Integer year) {
+	public List<Order> findOrdersByUserIdAndYear(
+			final Integer userId,
+			final Integer year,
+			final Integer pageSize,
+			final Integer pageNumber
+	) {
 		return jpaQueryFactory
 				.selectFrom(order)
 				.leftJoin(order.orderItems).fetchJoin()
 				.where(order.userId.eq(userId),
 						generateDateCondition(year))
 				.orderBy(order.orderDatetime.desc())
+				.limit(pageSize)
+				.offset((long)(pageNumber - 1) * pageSize)
 				.fetch();
 	}
 
@@ -48,6 +55,16 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	@Override
 	public Order findOrderById(Long orderId) {
 		return findOrderByIdAndUserId(null, orderId);
+	}
+
+	@Override
+	public Long countOrdersByUserIdAndYear(final Integer userId, final Integer year) {
+		return jpaQueryFactory
+				.select(order.count())
+				.from(order)
+				.leftJoin(order.orderItems)
+				.where(order.userId.eq(userId), generateDateCondition(year))
+				.fetchOne();
 	}
 
 	private BooleanExpression userIdEq(final Integer userId) {

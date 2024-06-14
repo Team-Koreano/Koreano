@@ -1,17 +1,16 @@
 package org.ecommerce.orderapi.order.external.controller;
 
-import java.util.List;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
 import org.ecommerce.orderapi.order.dto.response.CreateOrderResponse;
+import org.ecommerce.orderapi.order.dto.response.InquiryOrderResponse;
 import org.ecommerce.orderapi.order.service.OrderDomainService;
 import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.stock.dto.StockDto;
 import org.ecommerce.orderapi.stock.dto.StockMapper;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,32 +50,29 @@ public class OrderController {
 	}
 
 	@GetMapping
-	public Response<List<CreateOrderResponse>> getOrders(
+	public Response<Page<InquiryOrderResponse>> getOrders(
 			@RequestParam(required = false) final Integer year,
-			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(required = false, defaultValue = "5") final Integer pageSize
 
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderReadService.getOrders(
-								USER_ID, year, PageRequest.of(pageNumber, pageSize))
-						.stream()
-						.map(OrderMapper.INSTANCE::toCreateOrderResponse)
-						.toList()
+				orderReadService.getOrders(USER_ID, year, pageNumber, pageSize)
+						.map(OrderMapper.INSTANCE::toInquiryOrderResponse)
 		);
 	}
 
 	@DeleteMapping("/{orderId}/orderItems/{orderItemId}")
-	public Response<CreateOrderResponse> cancelOrder(
+	public Response<InquiryOrderResponse> cancelOrder(
 			@PathVariable("orderId") final Long orderId,
 			@PathVariable("orderItemId") final Long orderItemId
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				OrderMapper.INSTANCE.toCreateOrderResponse(
+				OrderMapper.INSTANCE.toInquiryOrderResponse(
 						orderDomainService.cancelOrder(USER_ID, orderId, orderItemId)
 				)
 		);
