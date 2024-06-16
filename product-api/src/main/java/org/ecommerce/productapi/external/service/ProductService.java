@@ -210,8 +210,9 @@ public class ProductService {
 
 		if (modifyProductDetailRequest.isDefault()) {
 			productRepository.findProductWithProductDetailsById(
-				productDetail.getProduct().getId()
-			).changeDetailsIsDefault();
+					productDetail.getProduct().getId()
+				)
+				.changeDetailsIsDefault();
 		}
 
 		productDetail.toModifyProductDetail(

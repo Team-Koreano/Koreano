@@ -72,7 +72,9 @@ public class ProductDetail {
 	}
 
 	public void changeIsDefaultFalse() {
-		this.isDefault = false;
+		if (this.isDefault) {
+			this.isDefault = false;
+		}
 	}
 
 	public void increaseStock(Integer stock) {
