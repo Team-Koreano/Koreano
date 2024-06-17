@@ -19,7 +19,7 @@ public class StockDecreasedEventListener {
 
 	private final OrderCompletionService orderCompletionService;
 
-	@TransactionalEventListener(fallbackExecution = true)
+	@TransactionalEventListener
 	public void receive(final StockDecreasedEvent event) {
 		orderCompletionService.completeOrder(event.getOrderId(), event.getOrderItemIds());
 	}
