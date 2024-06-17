@@ -38,6 +38,7 @@ subprojects {
 
     jacoco {
         toolVersion = '0.8.10'
+        reportsDirectory = file("{${buildDir}/reports/jacoco")
         setReportsDirectory(file("${rootDir}/.qodana/code-coverage"))
     }
 
@@ -52,7 +53,7 @@ subprojects {
 
     jacocoTestReport {
         reports {
-            html.required = false
+            html.required = true
             xml.required = true
         }
         finalizedBy 'jacocoTestCoverageVerification'
@@ -68,13 +69,13 @@ subprojects {
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
-                    minimum = 0.00
+                    minimum = 0.50
                 }
 
                 excludes = []
             }
         }
     }
-
+    targetCompatibility = '17'
     sourceCompatibility = '17'
 }
