@@ -38,7 +38,7 @@ subprojects {
 
     jacoco {
         toolVersion = '0.8.10'
-        reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
+        setReportsDirectory(file("${rootDir}/build/code-coverage"))
     }
 
     test {
