@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class RedissonSingleConfig {
 	private final RedisSingleInfo redisSingleInfo;
 
-	@Bean
+	@Bean(name = "singleRedisson")
 	public RedissonClient redissonClient() {
 		RedissonClient redisson = null;
 		Config config = new Config();

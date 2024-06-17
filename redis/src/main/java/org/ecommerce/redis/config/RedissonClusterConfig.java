@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class RedissonClusterConfig {
 	private final RedisClusterInfo redisClusterInfo;
 
-	@Bean
+	@Bean(name = "clusterRedisson")
 	public RedissonClient redissonClient() {
 		RedissonClient redisson = null;
 		Config config = new Config();
