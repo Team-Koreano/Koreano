@@ -25,6 +25,7 @@ jobs:
 
       - name: gradlew 권한을 부여합니다.
         run: chmod +x gradlew
+        working-directory: ./
 
 
       - name: 테스트를 실행합니다.
