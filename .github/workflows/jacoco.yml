@@ -23,6 +23,10 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
+      - name: Grant Execute permission for gradlew # gradlew파일에 실행할 권한을 줍니다.
+        run: chmod +x gradlew
+        shell: bash
+
       - name: Validate Gradle Wrapper
         run: chmod +x ./gradlew --version
         working-directory: ./
