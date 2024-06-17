@@ -45,12 +45,12 @@ jobs:
           pass-emoji: ':green_circle:'
           fail-emoji: ':red_circle:'
 
-      - name: Get the Coverage info
+      - name: Coverage 정보를 가져옵니다
         run: |
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
 
-      - name: Fail PR if overall coverage is less than 50%
+      - name: 만약 Coverage 가 50% 이하이면 PR에 실패합니다
         if: ${{ steps.jacoco.outputs.coverage-overall < 50.0 }}
         uses: actions/github-script@v6
         with:
