@@ -23,36 +23,30 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Grant Execute permission for gradlew # gradlew파일에 실행할 권한을 줍니다.
+      - name: gradlew 권한을 부여합니다.
         run: chmod +x gradlew
-        shell: bash
 
-      - name: Validate Gradle Wrapper
-        run: chmod +x ./gradlew --version
-        working-directory: ./
 
-      - name: Run Tests
+      - name: 테스트를 실행합니다.
         run: ./gradlew test -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
         working-directory: ./
 
-      - name: Add coverage to PR
+      - name: jacocoTestCoverage를 실행하고 리포트를 출력합니다.
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
-          paths: |
-            ${{ github.workspace }}/**/build/reports/jacoco/jacocoTestReport.xml
+          paths: ${{ github.workspace }}/**/build/reports/jacoco/jacocoRootReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 50
           min-coverage-changed-files: 50
+          update-comment: true
           pass-emoji: ':green_circle:'
           fail-emoji: ':red_circle:'
-
 
       - name: Get the Coverage info
         run: |
           echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
           echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
-
 
       - name: Fail PR if overall coverage is less than 50%
         if: ${{ steps.jacoco.outputs.coverage-overall < 50.0 }}
