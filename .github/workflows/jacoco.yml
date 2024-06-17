@@ -30,7 +30,7 @@ jobs:
       - name: Create code coverage folder if not exists
         run: |
           chmod +x gradlew
-          ./gradlew testCoverage
+          ./gradlew test
 
       - name: Run Tests
         run: ./gradlew test -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
