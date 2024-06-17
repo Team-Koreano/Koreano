@@ -8,5 +8,7 @@ public interface OrderItemCustomRepository {
 
 	OrderItem findOrderItemById(final Long orderItemId);
 
-	List<OrderItem> findOrderItemsBySellerIdAndMonth(final Integer sellerId, final Integer month);
+	List<OrderItem> findOrderItemsBySellerIdAndMonth(final Integer sellerId, final Integer month, final Integer pageNumber, final Integer pageSize);
+
+	Long countOrderItemsBySellerIdAndMonth(final Integer sellerId, final Integer month);
 }
