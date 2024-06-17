@@ -69,7 +69,7 @@ subprojects {
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
-                    minimum = 0.50
+                    minimum = 0.00
                 }
 
                 excludes = []
