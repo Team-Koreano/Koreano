@@ -27,11 +27,6 @@ jobs:
         run: chmod +x ./gradlew --version
         working-directory: ./
 
-      - name: Create code coverage folder if not exists
-        run: |
-          chmod +x gradlew
-          ./gradlew test
-
       - name: Run Tests
         run: ./gradlew test -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
         working-directory: ./
@@ -41,7 +36,7 @@ jobs:
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
-            ${{ github.workspace }}/**/build/reports/jacoco/jacocoTestCoverageVerification.xml
+            ${{ github.workspace }}/**/build/reports/jacoco/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 50
           min-coverage-changed-files: 50

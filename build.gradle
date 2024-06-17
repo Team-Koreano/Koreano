@@ -38,8 +38,7 @@ subprojects {
 
     jacoco {
         toolVersion = '0.8.10'
-        reportsDirectory = file("{${buildDir}/reports/jacoco")
-        setReportsDirectory(file("${rootDir}/.qodana/code-coverage"))
+        reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
     }
 
     test {
