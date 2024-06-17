@@ -1,0 +1,21 @@
+spring :
+  application :
+    name: redis
+  data:
+    redis:
+      cluster:
+        max-redirects: 3
+        connect-ip: localhost
+        nodes: localhost:7000, localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005
+      host: localhost
+      port: 6379
+      redisson-prefix: "redis://"
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    password: test
+    
+    
+
+
