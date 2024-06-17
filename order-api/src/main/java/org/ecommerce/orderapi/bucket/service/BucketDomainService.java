@@ -52,23 +52,19 @@ public class BucketDomainService {
 		Bucket bucket =
 				bucketRepository.findByUserIdAndProductId(userId, request.productId());
 
-		if (bucket != null) {
-			Integer newQuantity = bucket.getQuantity() + request.quantity();
-			validateStock(request.productId(), newQuantity);
-			bucket.modifyQuantity(newQuantity);
-			return BucketMapper.INSTANCE.toDto(bucket);
+		if (bucket == null) {
+			bucket = Bucket.ofAdd(
+					userId,
+					request.seller(),
+					request.productId()
+			);
 		}
 
-		validateStock(request.productId(), request.quantity());
+		Integer quantity = bucket.getQuantity() + request.quantity();
+		bucket.appendQuantity(quantity);
+		validateStock(request.productId(), quantity);
 		return BucketMapper.INSTANCE.toDto(
-				bucketRepository.save(
-						Bucket.ofAdd(
-								userId,
-								request.seller(),
-								request.productId(),
-								request.quantity()
-						)
-				)
+				bucketRepository.save(bucket)
 		);
 	}
 
