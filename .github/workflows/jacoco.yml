@@ -35,6 +35,7 @@ jobs:
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
+          title: 📝 Jacoco Test Coverage
           paths: ${{ github.workspace }}/**/build/reports/jacoco/jacocoRootReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 50
