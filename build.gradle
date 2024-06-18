@@ -67,12 +67,12 @@ subprojects {
                     files(classDirectories.files.collect {
                         fileTree(dir: it, excludes: [
                                 "**/*Application*",
-                                "**.*Provider*",
+                                "**/*Mapper*",
+                                "**/*Provider*",
                                 "**/*Config*",
-                                "**/*Dto*",
+                                "**/*Util*",
                                 "**/*Request*",
                                 "**/*Response*",
-                                "**/*Exception*"
                         ] + Qdomains)
                     })
             )
@@ -100,12 +100,11 @@ subprojects {
 
                 excludes = [
                         "**.*Application*",
+                        "**.*Mapper*",
                         "**.*Provider*",
                         "**.*Config*",
-                        "**.*Dto*",
                         "**.*Request*",
                         "**.*Response*",
-                        "**.*Exception*"
                 ] + Qdomains
             }
         }
