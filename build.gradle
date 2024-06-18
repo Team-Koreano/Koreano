@@ -55,21 +55,58 @@ subprojects {
             html.required = true
             xml.required = true
         }
+
+        // 결과 리포트에서 제외할 클래스들
+        def Qdomains = []
+        for (qPattern in '**/QA'..'**/QZ') {
+            Qdomains.add(qPattern + '*')
+        }
+
+        afterEvaluate {
+            classDirectories.setFrom(
+                    files(classDirectories.files.collect {
+                        fileTree(dir: it, excludes: [
+                                "**/*Application*",
+                                "**.*Provider*",
+                                "**/*Config*",
+                                "**/*Dto*",
+                                "**/*Request*",
+                                "**/*Response*",
+                                "**/*Exception*"
+                        ] + Qdomains)
+                    })
+            )
+        }
         finalizedBy 'jacocoTestCoverageVerification'
     }
 
     jacocoTestCoverageVerification {
+        def Qdomains = []
+        for (qPattern in '*.QA'..'*.QZ') {
+            Qdomains.add(qPattern + '*')
+        }
+
         violationRules {
             rule {
                 enabled = true
                 element = 'CLASS'
-                includes = ["**.*Controller", "**.*Service", "**.*Request", "**.*Response", "**.*Dto", "**.*Repository", "**.*Client"]
+                includes = []
 
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
                     minimum = 0.00
                 }
+
+                excludes = [
+                        "**.*Application*",
+                        "**.*Provider*",
+                        "**.*Config*",
+                        "**.*Dto*",
+                        "**.*Request*",
+                        "**.*Response*",
+                        "**.*Exception*"
+                ] + Qdomains
             }
         }
     }
