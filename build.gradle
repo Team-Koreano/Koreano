@@ -63,7 +63,7 @@ subprojects {
             rule {
                 enabled = true
                 element = 'CLASS'
-                includes = ["*.Controller", "*.Service", "*.Request", "*.Response", "*.Dto", "*.Repository", "*.Client"]
+                includes = ["*.*Controller", "*.*Service", "*.*Request", "*.*Response", "*.*Dto", "*.*Repository", "*.*Client"]
 
                 limit {
                     counter = 'LINE'
