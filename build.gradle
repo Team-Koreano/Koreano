@@ -63,15 +63,13 @@ subprojects {
             rule {
                 enabled = true
                 element = 'CLASS'
-                // includes = []
+                includes = ["*.Controller", "*.Service", "*.Request", "*.Response", "*.Dto", "*.Repository", "*.Client"]
 
                 limit {
                     counter = 'LINE'
                     value = 'COVEREDRATIO'
                     minimum = 0.00
                 }
-
-                excludes = []
             }
         }
     }
