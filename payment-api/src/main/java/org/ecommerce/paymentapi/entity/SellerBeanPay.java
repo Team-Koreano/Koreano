@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +22,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Entity
-@Table(name = "seller_beanpay")
+@Table(
+	name = "seller_beanpay",
+	indexes = {
+		@Index(name = "idx_seller_id", columnList = "userId"),
+	})
 public class SellerBeanPay {
 
 	@Id
@@ -40,11 +45,11 @@ public class SellerBeanPay {
 	private LocalDateTime deleteDateTime;
 
 	public static SellerBeanPay ofCreate(
-		Integer userId
+		Integer sellerId
 	) {
-		SellerBeanPay userBeanPay = new SellerBeanPay();
-		userBeanPay.sellerId = userId;
-		return userBeanPay;
+		SellerBeanPay sellerBeanPay = new SellerBeanPay();
+		sellerBeanPay.sellerId = sellerId;
+		return sellerBeanPay;
 	}
 
 	protected void increaseBeanPay(Integer amount) {

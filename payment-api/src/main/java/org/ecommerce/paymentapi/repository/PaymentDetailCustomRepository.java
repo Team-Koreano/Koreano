@@ -1,10 +1,27 @@
 package org.ecommerce.paymentapi.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.ecommerce.paymentapi.entity.PaymentDetail;
+import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 
 public interface PaymentDetailCustomRepository {
 	PaymentDetail findPaymentDetailByOrderItemId(Long orderItemId);
 	PaymentDetail findPaymentDetailById(UUID id);
+	List<PaymentDetail> findByCreatedAtBetween(
+		Integer userId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status,
+		Integer page,
+		Integer size
+	);
+	long totalPaymentDetailCount(
+		Integer userId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status
+	);
 }

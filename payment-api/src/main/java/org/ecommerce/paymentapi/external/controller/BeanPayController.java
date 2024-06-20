@@ -10,6 +10,7 @@ import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
+import org.ecommerce.paymentapi.external.service.PaymentDetailReadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BeanPayController {
 
 	private final BeanPayService beanPayService;
+	private final PaymentDetailReadService paymentDetailReadService;
 
 	@PostMapping("/charge")
 	public Response<PaymentDetailResponse> beforeCharge(@RequestBody final PreChargeRequest request) {
@@ -60,7 +62,5 @@ public class BeanPayController {
 			PaymentDetailMapper.INSTANCE.toResponse(response)
 		);
 	}
-
-
 
 }
