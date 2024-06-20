@@ -1,4 +1,3 @@
-
 package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
@@ -11,14 +10,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.paymentapi.ControllerTest;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
 import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
 import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.ecommerce.paymentapi.dto.response.PaymentDetailResponse;
-import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -44,7 +45,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class BeanPayControllerTest extends ControllerTest {
 
 	private static final Logger log = LoggerFactory.getLogger(
 		BeanPayControllerTest.class);

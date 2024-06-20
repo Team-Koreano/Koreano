@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.ecommerce.paymentapi.ControllerTest;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDtoWithDetail;
 import org.ecommerce.paymentapi.dto.PaymentMapper;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -38,7 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(PaymentController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class PaymentControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class PaymentControllerTest extends ControllerTest {
 
 	@MockBean
 	private PaymentService paymentService;
@@ -77,7 +80,7 @@ class PaymentControllerTest {
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
 			final Integer[] prices = {1000, 1000, 1000};
-			final String[] productNames = new String[]{"product1", "product2",
+			final String[] productNames = new String[] {"product1", "product2",
 				"product3"};
 			final List<SellerBeanPay> sellerUserBeanPays = List.of(
 				new SellerBeanPay(2, 1, 0, LocalDateTime.now(), null),
@@ -85,36 +88,36 @@ class PaymentControllerTest {
 			);
 			final PaymentPriceRequest request =
 				new PaymentPriceRequest(
-				1L,
-				userBeanPay.getUserId(),
-				orderName,
-				List.of(
-					new PaymentDetailPriceRequest(
-						orderItemIds[0],
-						prices[0],
-						quantity[0],
-						deliveryFees[0],
-						sellerIds[0],
-						productNames[0]
-					),
-					new PaymentDetailPriceRequest(
-						orderItemIds[1],
-						prices[1],
-						quantity[1],
-						deliveryFees[1],
-						sellerIds[1],
-						productNames[1]
-					),
-					new PaymentDetailPriceRequest(
-						orderItemIds[2],
-						prices[2],
-						quantity[2],
-						deliveryFees[2],
-						sellerIds[0],
-						productNames[2]
+					1L,
+					userBeanPay.getUserId(),
+					orderName,
+					List.of(
+						new PaymentDetailPriceRequest(
+							orderItemIds[0],
+							prices[0],
+							quantity[0],
+							deliveryFees[0],
+							sellerIds[0],
+							productNames[0]
+						),
+						new PaymentDetailPriceRequest(
+							orderItemIds[1],
+							prices[1],
+							quantity[1],
+							deliveryFees[1],
+							sellerIds[1],
+							productNames[1]
+						),
+						new PaymentDetailPriceRequest(
+							orderItemIds[2],
+							prices[2],
+							quantity[2],
+							deliveryFees[2],
+							sellerIds[0],
+							productNames[2]
+						)
 					)
-				)
-			);
+				);
 
 			final List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> beanPayPaymentPrice = PaymentService.mappedBeanPayPaymentDetailPrice(
 				request, sellerUserBeanPays);
@@ -147,7 +150,6 @@ class PaymentControllerTest {
 
 		}
 
-
 	}
 
 	@Nested
@@ -168,7 +170,7 @@ class PaymentControllerTest {
 			final String orderName = "orderName";
 			final Integer[] quantity = {3, 3, 3};
 			final Integer[] prices = {1000, 1000, 1000};
-			final String[] productNames = new String[]{"product1", "product2",
+			final String[] productNames = new String[] {"product1", "product2",
 				"product3"};
 			final List<SellerBeanPay> sellerUserBeanPays = List.of(
 				new SellerBeanPay(2, 1, 0, LocalDateTime.now(), null),
@@ -251,11 +253,9 @@ class PaymentControllerTest {
 				.andExpect(jsonPath("$.createDateTime").value(paymentDetail.getCreateDateTime()))
 				.andExpect(jsonPath("$.updateDateTime").value(paymentDetail.getUpdateDateTime()));
 
-
 			//then
 
 		}
 	}
-
 
 }
