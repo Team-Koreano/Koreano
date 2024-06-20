@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.common.provider.JwtProvider;
+import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -22,10 +24,9 @@ import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.SellerService;
-import org.ecommerce.userapi.provider.JwtProvider;
+import org.ecommerce.userapi.external.service.SellerTokenService;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
-import org.ecommerce.userapi.security.AuthDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,9 @@ class SellerServiceTest {
 
 	@Mock
 	private JwtProvider jwtProvider;
+
+	@Mock
+	private SellerTokenService sellerTokenService;
 
 	@Mock
 	private PaymentServiceClient paymentServiceClient;
@@ -199,7 +203,7 @@ class SellerServiceTest {
 			final LoginSellerRequest loginRequest = new LoginSellerRequest(email, password);
 			final Seller seller = Seller.ofRegister(email, "John Doe", password, "어쩌구 저쩌구", "01012345678");
 			when(sellerRepository.findSellerByEmailAndIsDeletedIsFalse(email)).thenReturn(seller);
-			when(jwtProvider.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
+			when(sellerTokenService.createSellerTokens(any(), any(), any())).thenReturn("Bearer fake_access_token");
 			when(sellerService.checkIsMatchedPassword(password, seller.getPassword())).thenReturn(true);
 
 			// when
