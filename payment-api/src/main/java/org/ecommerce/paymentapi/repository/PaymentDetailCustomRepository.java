@@ -10,7 +10,7 @@ import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 public interface PaymentDetailCustomRepository {
 	PaymentDetail findPaymentDetailByOrderItemId(Long orderItemId);
 	PaymentDetail findPaymentDetailById(UUID id);
-	List<PaymentDetail> findByCreatedAtBetween(
+	List<PaymentDetail> findByUserIdAndBetweenCreateDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,
@@ -18,7 +18,22 @@ public interface PaymentDetailCustomRepository {
 		Integer page,
 		Integer size
 	);
-	long totalPaymentDetailCount(
+	long userPaymentDetailCountByUserIdAndBetweenCreateDateTime(
+		Integer userId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status
+	);
+
+	List<PaymentDetail> findBySellerIdAndBetweenCreateDateTime(
+		Integer sellerId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status,
+		Integer page,
+		Integer size
+	);
+	long sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,

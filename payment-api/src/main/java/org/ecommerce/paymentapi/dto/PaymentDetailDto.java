@@ -8,12 +8,13 @@ import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 
 public record PaymentDetailDto(
 	 UUID id,
-	 Long paymentDetailId,
 	 Integer userId,
 	 Integer sellerId,
 	 Long orderItemId,
 	 Integer deliveryFee,
+	 Integer totalAmount,
 	 Integer paymentAmount,
+	 Integer price,
 	 Integer quantity,
 	 String paymentName,
 	 String cancelReason,

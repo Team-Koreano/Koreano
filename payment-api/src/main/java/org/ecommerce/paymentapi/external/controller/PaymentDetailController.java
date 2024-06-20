@@ -28,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentDetailController {
 	private final PaymentDetailReadService paymentDetailReadService;
 
-	@GetMapping
-	public Response<Page<PaymentDetailResponse>> getPayments(
+	@GetMapping("/user")
+	public Response<Page<PaymentDetailResponse>> getUserPayments(
 		@RequestParam String startDateTime,
 		@RequestParam String endDateTime,
 		@RequestParam(required = false) PaymentStatus status,
@@ -39,8 +39,33 @@ public class PaymentDetailController {
 		LocalDateTime end = PaymentTimeFormatUtil.stringToDateTime(endDateTime);
 		//TODO: jwt userId 주입 예정
 		Page<PaymentDetailDto> paymentDetailDtoPage =
-			paymentDetailReadService.getPaymentDetailsByDateRange(
+			paymentDetailReadService.getUserPaymentDetailsByBetweenDate(
 				999, start, end, status, pageable
+			);
+		return new Response<>(
+			HttpStatus.OK.value(),
+			new PageImpl<>(
+				paymentDetailDtoPage.getContent().stream()
+					.map(PaymentMapper.INSTANCE::toPaymentDetailResponse)
+					.toList(),
+				pageable,
+				paymentDetailDtoPage.getTotalPages())
+		);
+	}
+
+	@GetMapping("/seller")
+	public Response<Page<PaymentDetailResponse>> getSellerPayments(
+		@RequestParam String startDateTime,
+		@RequestParam String endDateTime,
+		@RequestParam(required = false) PaymentStatus status,
+		Pageable pageable
+	) {
+		LocalDateTime start = PaymentTimeFormatUtil.stringToDateTime(startDateTime);
+		LocalDateTime end = PaymentTimeFormatUtil.stringToDateTime(endDateTime);
+		//TODO: jwt sellerId 주입 예정
+		Page<PaymentDetailDto> paymentDetailDtoPage =
+			paymentDetailReadService.getSellerPaymentDetailByBetweenRange(
+				1000, start, end, status, pageable
 			);
 		return new Response<>(
 			HttpStatus.OK.value(),

@@ -33,22 +33,56 @@ public class PaymentDetailReadService {
 	 * @param -		Pageable pageable
 	 * @return - 	Page[PaymentDetailDto]
 	 */
-	public Page<PaymentDetailDto> getPaymentDetailsByDateRange(
+	public Page<PaymentDetailDto> getUserPaymentDetailsByBetweenDate(
 		Integer userId,
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,
 		Pageable pageable
 	) {
-		List<PaymentDetail> paymentDetailPage =
-			paymentDetailRepository.findByCreatedAtBetween(
+		List<PaymentDetail> paymentDetails =
+			paymentDetailRepository.findByUserIdAndBetweenCreateDateTime(
 				userId, start, end, status, pageable.getPageNumber(), pageable.getPageSize()
 			);
 		return new PageImpl<>(
-			paymentDetailPage.stream()
+			paymentDetails.stream()
 				.map(PaymentMapper.INSTANCE::toPaymentDetailDto)
 				.toList(),
 			pageable,
-			paymentDetailRepository.totalPaymentDetailCount(userId, start, end, status));
+			paymentDetailRepository.userPaymentDetailCountByUserIdAndBetweenCreateDateTime(
+				userId, start, end, status));
+	}
+
+	/**
+	 판매자의 빈페이 내역을 조회합니다.
+	 * @author 이우진
+	 *
+	 * @param - 	Integer sellerId,
+					LocalDateTime start,
+					LocalDateTime end,
+					PaymentStatus status,
+					Pageable pageable
+	 * @return - Page[PaymentDetailDto]
+	 */
+	public Page<PaymentDetailDto> getSellerPaymentDetailByBetweenRange(
+		int sellerId,
+		LocalDateTime start,
+		LocalDateTime end,
+		PaymentStatus status,
+		Pageable pageable
+	) {
+		List<PaymentDetail> sellerPaymentDetails =
+			paymentDetailRepository.findBySellerIdAndBetweenCreateDateTime(
+				sellerId, start, end, status, pageable.getPageNumber(),
+				pageable.getPageSize());
+
+		return new PageImpl<>(
+			sellerPaymentDetails.stream()
+				.map(PaymentMapper.INSTANCE::toPaymentDetailDto)
+				.toList(),
+			pageable,
+			paymentDetailRepository.sellerPaymentDetailCountByUserIdAndBetweenCreatedDateTime(
+				sellerId, start, end, status)
+		);
 	}
 }

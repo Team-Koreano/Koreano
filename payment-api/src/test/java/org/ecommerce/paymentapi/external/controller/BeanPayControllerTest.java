@@ -22,7 +22,6 @@ import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.external.service.PaymentDetailReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -48,9 +47,6 @@ class BeanPayControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
-
-	@MockBean
-	private PaymentDetailReadService paymentDetailReadService;
 
 	@Autowired
 	private MockMvc mvc;
@@ -107,13 +103,14 @@ class BeanPayControllerTest {
 				orderId, amount);
 			final PaymentDetailDto response = new PaymentDetailDto(
 				orderId,
-				1L,
 				1,
 				1,
 				1L,
 				0,
 				0,
 				amount,
+				amount,
+				1,
 				"paymentName",
 				null,
 				null,
@@ -183,8 +180,16 @@ class BeanPayControllerTest {
 		assertEquals(expect, actual);
 	}
 
+
+
+
+
 	private UserBeanPay getUserBeanPay() {
 		return new UserBeanPay(1, 1, 0, LocalDateTime.now(), null);
 	}
+
+
+
+
 
 }
