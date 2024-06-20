@@ -19,12 +19,15 @@ import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+@Execution(ExecutionMode.SAME_THREAD)
 @ActiveProfiles("test")
 @SpringBootTest
 public class LockTestServiceTest {

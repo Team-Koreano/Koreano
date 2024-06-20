@@ -2,7 +2,7 @@ package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -22,13 +22,11 @@ import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
 import org.ecommerce.paymentapi.entity.enumerate.ProcessStatus;
 import org.ecommerce.paymentapi.external.service.BeanPayService;
-import org.ecommerce.paymentapi.external.service.LockTestService;
-import org.ecommerce.paymentapi.internal.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -43,21 +41,14 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @AutoConfigureMockMvc(addFilters = false)
 class BeanPayControllerTest extends ControllerTest {
 
-	private static final Logger log = LoggerFactory.getLogger(
-		BeanPayControllerTest.class);
 	@MockBean
 	private BeanPayService beanPayService;
-
-	@MockBean
-	private PaymentService paymentService;
-
-	@MockBean
-	private LockTestService lockTestService;
 
 	@Autowired
 	private MockMvc mvc;
@@ -114,13 +105,14 @@ class BeanPayControllerTest extends ControllerTest {
 				orderId, amount);
 			final PaymentDetailDto response = new PaymentDetailDto(
 				orderId,
-				1L,
 				1,
 				1,
 				1L,
 				0,
 				0,
 				amount,
+				amount,
+				1,
 				"paymentName",
 				null,
 				null,
@@ -190,8 +182,16 @@ class BeanPayControllerTest extends ControllerTest {
 		assertEquals(expect, actual);
 	}
 
+
+
+
+
 	private UserBeanPay getUserBeanPay() {
 		return new UserBeanPay(1, 1, 0, LocalDateTime.now(), null);
 	}
+
+
+
+
 
 }
