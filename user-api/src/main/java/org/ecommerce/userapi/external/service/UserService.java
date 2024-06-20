@@ -12,9 +12,9 @@ import org.ecommerce.userapi.dto.UserDto;
 import org.ecommerce.userapi.dto.UserMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
 import org.ecommerce.userapi.dto.request.CreateAddressRequest;
-import org.ecommerce.userapi.dto.request.CreateBeanPayRequest;
+import org.ecommerce.userapi.dto.request.CreateUserBeanPayRequest;
 import org.ecommerce.userapi.dto.request.CreateUserRequest;
-import org.ecommerce.userapi.dto.request.DeleteBeanPayRequest;
+import org.ecommerce.userapi.dto.request.DeleteUserBeanPayRequest;
 import org.ecommerce.userapi.dto.request.LoginUserRequest;
 import org.ecommerce.userapi.dto.request.WithdrawalUserRequest;
 import org.ecommerce.userapi.entity.Address;
@@ -79,7 +79,7 @@ public class UserService {
 			passwordEncoder.encode(createRequest.password()),
 			createRequest.gender(), createRequest.age(), createRequest.phoneNumber()));
 
-		paymentServiceClient.createUserBeanPay(new CreateBeanPayRequest(users.getId(), Role.USER));
+		paymentServiceClient.createUserBeanPay(new CreateUserBeanPayRequest(users.getId()));
 
 		return UserMapper.INSTANCE.toDto(users);
 	}
@@ -209,7 +209,7 @@ public class UserService {
 		if (users == null || !checkIsMatchedPassword(withdrawal.password(), users.getPassword()))
 			throw new CustomException(UserErrorCode.IS_NOT_MATCHED_EMAIL_OR_PASSWORD);
 
-		paymentServiceClient.deleteUserBeanPay(new DeleteBeanPayRequest(users.getId(), Role.USER));
+		paymentServiceClient.deleteUserBeanPay(new DeleteUserBeanPayRequest(users.getId()));
 
 		if (!users.isValidUser(withdrawal.email(), withdrawal.phoneNumber())) {
 			throw new CustomException(UserErrorCode.IS_NOT_VALID_USER);
@@ -217,6 +217,8 @@ public class UserService {
 
 		users.withdrawal();
 
+		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
 	private void checkDuplicatedPhoneNumberOrEmail(final String email, final String phoneNumber) {

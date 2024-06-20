@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.orderapi.order.client.BucketServiceClient;
+import org.ecommerce.orderapi.bucket.entity.Bucket;
+import org.ecommerce.orderapi.bucket.repository.BucketRepository;
 import org.ecommerce.orderapi.order.client.PaymentServiceClient;
-import org.ecommerce.orderapi.order.client.ProductServiceClient;
+import org.ecommerce.orderapi.global.client.ProductServiceClient;
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
-import org.ecommerce.orderapi.order.dto.response.BucketResponse;
 import org.ecommerce.orderapi.order.dto.response.PaymentDetailResponse;
 import org.ecommerce.orderapi.order.dto.response.PaymentResponse;
 import org.ecommerce.orderapi.order.dto.response.ProductResponse;
@@ -55,7 +55,7 @@ public class OrderDomainServiceTest {
 	private StockRepository stockRepository;
 
 	@Mock
-	private BucketServiceClient bucketServiceClient;
+	private BucketRepository bucketRepository;
 
 	@Mock
 	private ProductServiceClient productServiceClient;
@@ -94,8 +94,8 @@ public class OrderDomainServiceTest {
 						null
 				)
 		);
-		final List<BucketResponse> bucketServiceResponse = List.of(
-				new BucketResponse(
+		final List<Bucket> buckets = List.of(
+				new Bucket(
 						1L,
 						1,
 						"seller1",
@@ -103,7 +103,7 @@ public class OrderDomainServiceTest {
 						1,
 						LocalDate.of(2024, 5, 1)
 				),
-				new BucketResponse(
+				new Bucket(
 						2L,
 						1,
 						"seller2",
@@ -117,6 +117,7 @@ public class OrderDomainServiceTest {
 						101,
 						"에디오피아 아가체프",
 						1000,
+						0,
 						1,
 						"seller1",
 						AVAILABLE
@@ -125,6 +126,7 @@ public class OrderDomainServiceTest {
 						102,
 						"과테말라 안티구아",
 						2000,
+						0,
 						2,
 						"seller2",
 						AVAILABLE
@@ -226,8 +228,8 @@ public class OrderDomainServiceTest {
 		));
 		given(stockRepository.findByProductIdIn(anySet()))
 				.willReturn(stocks);
-		given(bucketServiceClient.getBuckets(anyInt(), anyList()))
-				.willReturn(bucketServiceResponse);
+		given(bucketRepository.findAllByIdInAndUserId(anyList(), anyInt()))
+				.willReturn(buckets);
 		given(productServiceClient.getProducts(anyList()))
 				.willReturn(productServiceResponse);
 		given(paymentServiceClient.paymentOrder(any()))
