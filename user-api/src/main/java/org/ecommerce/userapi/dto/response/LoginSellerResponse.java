@@ -1,7 +1,7 @@
 package org.ecommerce.userapi.dto.response;
 
 import org.ecommerce.userapi.dto.SellerDto;
-import org.ecommerce.userapi.provider.JwtProvider;
+import org.ecommerce.common.provider.JwtProvider;
 
 public record LoginSellerResponse(
 	String accessToken
