@@ -1,8 +1,15 @@
-spring :
-  application :
+spring:
+  application:
     name: common
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 jasypt:
   encryptor:
     bean: jasyptStringEncryptor
     password: test
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}

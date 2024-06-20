@@ -27,3 +27,6 @@ cloud:
       static: ap-northeast-2
     s3:
       bucket: koreano-bucket
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}

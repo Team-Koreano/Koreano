@@ -3,7 +3,7 @@ spring:
     activation:
       on-profile: local
   application:
-    name : "payment-api"
+    name: "payment-api"
   h2:
     console:
       enabled: true
@@ -38,3 +38,6 @@ toss:
 jasypt:
   encryptor:
     password: test
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}
