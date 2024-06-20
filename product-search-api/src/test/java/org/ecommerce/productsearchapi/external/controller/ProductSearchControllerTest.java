@@ -15,6 +15,7 @@ import org.ecommerce.product.entity.enumerated.Acidity;
 import org.ecommerce.product.entity.enumerated.Bean;
 import org.ecommerce.product.entity.enumerated.ProductCategory;
 import org.ecommerce.product.entity.enumerated.ProductStatus;
+import org.ecommerce.productsearchapi.ControllerTest;
 import org.ecommerce.productsearchapi.document.ProductDocument;
 import org.ecommerce.productsearchapi.dto.ImageDto;
 import org.ecommerce.productsearchapi.dto.PagedSearchDto;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -36,9 +38,10 @@ import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(value = ProductSearchController.class)
 @ExtendWith(MockitoExtension.class)
-public class ProductSearchControllerTest {
+public class ProductSearchControllerTest extends ControllerTest {
 
 	LocalDateTime TEST_DATE_TIME = LocalDateTime.of(2024, 4, 22, 3, 23, 1);
 	@Autowired
@@ -100,7 +103,8 @@ public class ProductSearchControllerTest {
 			.andExpect(jsonPath("$.result.information").value(productDtoWithImageListDto.information()))
 			.andExpect(jsonPath("$.result.status").value(productDtoWithImageListDto.status().getTitle()))
 			.andExpect(jsonPath("$.result.isCrush").value(productDtoWithImageListDto.isCrush()))
-			.andExpect(jsonPath("$.result.createDatetime").value(productDtoWithImageListDto.createDatetime().toString()))
+			.andExpect(
+				jsonPath("$.result.createDatetime").value(productDtoWithImageListDto.createDatetime().toString()))
 			.andExpect(jsonPath("$.result.imageDtoList[0].id").value(imageDtoList.get(0).id()))
 			.andExpect(jsonPath("$.result.imageDtoList[0].isThumbnail").value(imageDtoList.get(0).isThumbnail()))
 			.andExpect(jsonPath("$.result.imageDtoList[0].sequenceNumber").value(
@@ -197,7 +201,8 @@ public class ProductSearchControllerTest {
 		when(elasticSearchService.searchProducts(any(SearchRequest.class), eq(0), eq(2)))
 			.thenReturn(pagedSearchDto);
 		// then
-		mockMvc.perform(get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
+		mockMvc.perform(
+				get("/api/external/product/v1/search?keyword=아메&category=BEAN&bean=ARABICA&acidity=MEDIUM&sortType=NEWEST&pageNumber=0&pageSize=2"))
 			.andExpect(jsonPath("$.result.totalElements").value(pagedSearchDto.totalElements()))
 			.andExpect(jsonPath("$.result.totalPages").value(pagedSearchDto.totalPages()))
 			.andExpect(jsonPath("$.result.currentPage").value(pagedSearchDto.currentPage()))
@@ -240,7 +245,8 @@ public class ProductSearchControllerTest {
 			"[특가 EVENT]&아메리카노 원두&세상에서 제일 존맛 커피", "MEDIUM", "ARABICA", "커피천국에서만 만나볼 수 있는 특별한 커피", "http://img123.com",
 			"size", "capacity", TEST_DATE_TIME);
 		ProductDocument productDocument2 = new ProductDocument(2, "BEAN", 30000, 100, 1, "커피천국", 10, false,
-			"아메리카노 아무나 사먹어", "MEDIUM", "ARABICA", "커피천국에서만 만나볼 수 있는 특별한 커피", "http://img123.com", "size", "capacity", TEST_DATE_TIME);
+			"아메리카노 아무나 사먹어", "MEDIUM", "ARABICA", "커피천국에서만 만나볼 수 있는 특별한 커피", "http://img123.com", "size", "capacity",
+			TEST_DATE_TIME);
 
 		// SearchHit mock 생성
 		SearchHit<ProductDocument> searchHit1 = new SearchHit<>("1", "1", null, 1.0f, null, null, null, null, null,
