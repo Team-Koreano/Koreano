@@ -1,7 +1,7 @@
-package org.ecommerce.userapi.security;
+package org.ecommerce.common.security;
 
-import org.ecommerce.userapi.security.custom.CustomAuthenticationEntryPoint;
-import org.ecommerce.userapi.security.custom.CustomerAccessDeniedHandler;
+import org.ecommerce.common.security.custom.CustomAuthenticationEntryPoint;
+import org.ecommerce.common.security.custom.CustomerAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

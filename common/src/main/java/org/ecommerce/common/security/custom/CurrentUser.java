@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.security.custom;
+package org.ecommerce.common.security.custom;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package org.ecommerce.userapi.security;
+package org.ecommerce.common.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

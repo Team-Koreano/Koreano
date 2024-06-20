@@ -1,6 +1,7 @@
-package org.ecommerce.userapi.config;
+package org.ecommerce.common.config;
 
-import org.ecommerce.userapi.security.CustomAuthProvider;
+import org.ecommerce.common.security.CustomAuthProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ProviderManager;
@@ -15,7 +16,7 @@ public class BeanConfiguration {
 	}
 
 	@Bean
-	public ProviderManager providerManager(CustomAuthProvider authProvider) {
+	public ProviderManager providerManager(@Qualifier("customAuthProvider") CustomAuthProvider authProvider) {
 		return new ProviderManager(authProvider);
 	}
 }

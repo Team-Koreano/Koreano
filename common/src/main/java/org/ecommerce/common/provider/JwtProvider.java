@@ -1,15 +1,14 @@
-package org.ecommerce.userapi.provider;
+package org.ecommerce.common.provider;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
+import org.ecommerce.common.error.CommonErrorCode;
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.exception.UserErrorCode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +23,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -35,8 +33,6 @@ public class JwtProvider {
 	private static final long ONE_HOUR = 3_600;
 	private static final long TWO_WEEKS = ONE_HOUR * 24 * 14;
 
-	private final RedisProvider redisProvider;
-
 	private final SecretKey secretKey;
 
 	public static String prefix(String jwt) {
@@ -45,45 +41,7 @@ public class JwtProvider {
 		return PREFIX + jwt;
 	}
 
-	public String createSellerTokens(Integer sellerId, Set<String> authorization,
-		HttpServletResponse response) {
-
-		final String accessToken = createToken(sellerId,
-			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(sellerId,
-			TWO_WEEKS, secretKey, authorization);
-
-		String accessTokenKey = getAccessTokenKey(sellerId, getRoll(accessToken));
-		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
-
-		String refreshTokenKey = getRefreshTokenKey(sellerId, getRoll(refreshToken));
-		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
-
-		response.addCookie(createCookie(refreshToken));
-
-		return accessToken;
-	}
-
-	public String createUserTokens(Integer userId, Set<String> authorization,
-		HttpServletResponse response) {
-
-		final String accessToken = createToken(userId,
-			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = createToken(userId,
-			TWO_WEEKS, secretKey, authorization);
-
-		String accessTokenKey = getAccessTokenKey(userId, getRoll(accessToken));
-		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
-
-		String refreshTokenKey = getRefreshTokenKey(userId, getRoll(refreshToken));
-		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
-
-		response.addCookie(createCookie(refreshToken));
-
-		return accessToken;
-	}
-
-	private String createToken(Integer id, long lifeCycle, SecretKey secretKey,
+	public String createToken(Integer id, long lifeCycle, SecretKey secretKey,
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
@@ -110,7 +68,7 @@ public class JwtProvider {
 		List<?> authorities = claims.get("authorization", List.class);
 
 		if (authorities == null)
-			throw new CustomException(UserErrorCode.INVALID_SIGNATURE_JWT);
+			throw new CustomException(CommonErrorCode.INVALID_SIGNATURE_JWT);
 
 		Set<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
 			.map(String::valueOf)
@@ -120,17 +78,8 @@ public class JwtProvider {
 		return new UsernamePasswordAuthenticationToken(id, bearerToken, grantedAuthorities);
 	}
 
-	public void removeTokens(String accessTokenKey, String refreshTokenKey) {
-		redisProvider.deleteData(accessTokenKey);
-		redisProvider.deleteData(refreshTokenKey);
-	}
-
 	public String getRoll(String bearerToken) {
 		return parseClaims(cutPreFix(bearerToken)).get("authorization", List.class).get(0).toString();
-	}
-
-	public String getEmail(String bearerToken) {
-		return parseClaims(cutPreFix(bearerToken)).get("email", String.class);
 	}
 
 	public Integer getId(String bearerToken) {
@@ -155,7 +104,7 @@ public class JwtProvider {
 		return request.getHeader(ACCESS_TOKEN_HEADER);
 	}
 
-	private Cookie createCookie(String refreshToken) {
+	public Cookie createCookie(String refreshToken) {
 		Cookie cookie = new Cookie("refreshToken", refreshToken);
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
