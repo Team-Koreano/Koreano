@@ -8,12 +8,14 @@ import org.ecommerce.paymentapi.config.QueryDslConfig;
 import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-
+@Execution(ExecutionMode.SAME_THREAD)
 @Import(QueryDslConfig.class)
 @ActiveProfiles("test")
 @DataJpaTest

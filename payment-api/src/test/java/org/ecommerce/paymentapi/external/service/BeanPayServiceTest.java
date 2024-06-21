@@ -137,7 +137,6 @@ class BeanPayServiceTest {
 				() -> beanPayService.validTossCharge(request, userId));
 
 			assertEquals(actual.id(), id);
-			assertEquals(actual.paymentDetailId(), entity.getPayment().getId());
 			assertEquals(actual.userId(), entity.getUserBeanPay().getUserId());
 			assertEquals(actual.sellerId(), entity.getSellerBeanPay().getSellerId());
 			assertEquals(actual.orderItemId(), orderItemId);

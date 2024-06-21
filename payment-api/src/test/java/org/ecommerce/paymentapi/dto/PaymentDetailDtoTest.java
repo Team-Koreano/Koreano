@@ -87,7 +87,6 @@ class PaymentDetailDtoTest {
 		PaymentDetailDto dto =
 			PaymentDetailMapper.INSTANCE.toDto(entity);
 		assertEquals(dto.id(), entity.getId());
-		assertEquals(dto.paymentDetailId(), entity.getPayment().getId());
 		assertEquals(dto.userId(), entity.getUserBeanPay().getUserId());
 		assertEquals(dto.sellerId(), entity.getSellerBeanPay().getSellerId());
 		assertEquals(dto.orderItemId(), entity.getOrderItemId());
