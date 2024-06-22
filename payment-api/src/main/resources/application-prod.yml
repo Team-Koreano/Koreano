@@ -1,7 +1,7 @@
 spring:
   profiles:
     activation:
-      on-profile: dev
+      on-profile: prod
   application:
     name : "payment-api"
   h2:
@@ -27,6 +27,14 @@ spring:
   sql:
     init:
       mode: always
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      redisson-prefix: "redis://"
+server:
+  port: 8081
+
 
 toss:
   secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)

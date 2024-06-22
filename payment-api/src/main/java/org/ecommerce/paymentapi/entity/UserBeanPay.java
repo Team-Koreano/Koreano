@@ -23,9 +23,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(
-	name = "beanpay",
+	name = "user_beanpay",
 	indexes = {
-		@Index(name = "idx_userId", columnList = "sellerId"),
+		@Index(name = "idx_user_id", columnList = "userId"),
 	}
 )
 public class UserBeanPay {

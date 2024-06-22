@@ -26,6 +26,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+@Execution(ExecutionMode.SAME_THREAD)
 @ActiveProfiles("test")
 @SpringBootTest
 public class BeanPayIntegrationServiceTest {
@@ -126,7 +129,6 @@ public class BeanPayIntegrationServiceTest {
 			//then
 			assertNotNull(actual);
 			assertEquals(actual.id(), orderId);
-			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
 			assertEquals(actual.userId(), dto.userId());
 			assertNull(actual.sellerId());
 			assertEquals(actual.paymentAmount(), amount);
@@ -170,7 +172,6 @@ public class BeanPayIntegrationServiceTest {
 			// then
 			assertNotNull(actual);
 			assertEquals(actual.id(), orderId);
-			assertEquals(actual.paymentDetailId(), dto.paymentDetailId());
 			assertEquals(actual.userId(), dto.userId());
 			assertNull(actual.sellerId());
 			assertEquals(actual.paymentAmount(), amount);

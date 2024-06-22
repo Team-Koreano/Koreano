@@ -20,6 +20,8 @@ import org.ecommerce.paymentapi.internal.service.BeanPayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,6 +33,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 class BeanPayControllerTest {
