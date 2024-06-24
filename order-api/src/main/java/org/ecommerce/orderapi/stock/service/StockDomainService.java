@@ -69,7 +69,7 @@ public class StockDomainService {
 									orderItem.getQuantity()
 							);
 
-					if (result.equals(StockOperationResult.SUCCESS)) {
+					if (result.isSuccess()) {
 						successfulOrderItemIds.add(orderItem.getId());
 						stockOperationMessages.add(
 								StockOperationMessage.of(
