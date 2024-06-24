@@ -60,9 +60,8 @@ public class BucketDomainService {
 			);
 		}
 
-		Integer quantity = bucket.getQuantity() + request.quantity();
-		bucket.appendQuantity(quantity);
-		validateStock(request.productId(), quantity);
+		bucket.appendQuantity(request.quantity());
+		validateStock(request.productId(), bucket.getQuantity());
 		return BucketMapper.INSTANCE.toDto(
 				bucketRepository.save(bucket)
 		);
