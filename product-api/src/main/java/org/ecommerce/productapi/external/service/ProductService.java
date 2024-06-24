@@ -3,18 +3,23 @@ package org.ecommerce.productapi.external.service;
 import java.util.List;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.productapi.dto.ProductDetailDto;
 import org.ecommerce.productapi.dto.ProductMapper;
-import org.ecommerce.productapi.dto.ProductWithSellerRepAndImagesDto;
+import org.ecommerce.productapi.dto.ProductWithSellerRepAndImagesAndProductDetailsDto;
+import org.ecommerce.productapi.dto.request.AddProductDetailRequest;
 import org.ecommerce.productapi.dto.request.CreateProductRequest;
+import org.ecommerce.productapi.dto.request.ModifyProductDetailRequest;
 import org.ecommerce.productapi.dto.request.ModifyProductRequest;
 import org.ecommerce.productapi.dto.request.ModifyProductsStatusRequest;
 import org.ecommerce.productapi.dto.request.ModifyStockRequest;
 import org.ecommerce.productapi.entity.Image;
 import org.ecommerce.productapi.entity.Product;
+import org.ecommerce.productapi.entity.ProductDetail;
 import org.ecommerce.productapi.entity.SellerRep;
 import org.ecommerce.productapi.entity.enumerated.ProductStatus;
 import org.ecommerce.productapi.exception.ProductErrorCode;
 import org.ecommerce.productapi.provider.S3Provider;
+import org.ecommerce.productapi.repository.ProductDetailRepository;
 import org.ecommerce.productapi.repository.ProductRepository;
 import org.ecommerce.productapi.repository.SellerRepository;
 import org.springframework.stereotype.Service;
@@ -33,57 +38,73 @@ public class ProductService {
 	private final ProductRepository productRepository;
 	private final SellerRepository sellerRepository;
 	private final S3Provider s3Provider;
+	private final ProductDetailRepository productDetailRepository;
 
 	/**
 	 상품등록 로직
-	 <p>
 	 상품을 등록하는 메서드 입니다
-	 <p>
-
-	 @param product - 상품 등록 데이터
-	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * @author Hong
+	 * @param createProductRequest - 상품 등록 데이터
+	 * @return ProductWithSellerRepAndImagesAndProductDetailsDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductWithSellerRepAndImagesDto productRegister(final CreateProductRequest product,
-		MultipartFile thumbnailImage, final List<MultipartFile> images) {
+	public ProductWithSellerRepAndImagesAndProductDetailsDto productRegister(
+		final CreateProductRequest createProductRequest,
+		final MultipartFile thumbnailImage,
+		final List<MultipartFile> images
+	) {
 
-		final Product createdProduct = Product.createProduct(
-			product.category(),
-			product.price(),
-			product.stock(),
-			product.name(),
-			product.bean(),
-			product.acidity(),
-			product.information(),
-			product.isCrush(),
-			product.isDecaf(),
-			product.size(),
-			product.capacity(),
-			product.deliveryFee(),
-			seller
+		createProductRequest.validate();
+
+		Product savedProduct = productRepository.save(
+			Product.createProduct(
+				createProductRequest.category(),
+				createProductRequest.name(),
+				createProductRequest.bean(),
+				createProductRequest.acidity(),
+				createProductRequest.information(),
+				createProductRequest.isCrush(),
+				createProductRequest.isDecaf(),
+				createProductRequest.capacity(),
+				createProductRequest.deliveryFee(),
+				seller
+			)
 		);
 
-		final Product savedProduct = productRepository.save(createdProduct);
+		savedProduct.saveProductDetails(
+			createProductRequest.productDetails().stream().map(productDetailDto -> ProductDetail.ofCreate(
+				savedProduct,
+				productDetailDto.price(),
+				productDetailDto.stock(),
+				productDetailDto.size(),
+				productDetailDto.isDefault(),
+				productDetailDto.status())
+			).toList()
+		);
 
-		savedProduct.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
-			.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(), savedProduct))
-			.toList());
+		savedProduct.saveImages(
+			s3Provider.uploadImageFiles(thumbnailImage, images).stream()
+				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(),
+					savedProduct))
+				.toList());
 
 		return ProductMapper.INSTANCE.toDto(savedProduct);
 	}
 
 	/**
 	 * 상품 상태 변경
-	 * <p>
-	 * 상품의 상태를 수정하는 메서드입니다 
-	 * <p>
+	 * 상품의 상태를 수정하는 메서드입니다
 	 * @author Hong
-	 *
 	 * @param productId - 상품의 식별값
-	 * @param status - 상품의 변경할 상태값  
-	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * @param status - 상품의 변경할 상태값
+	 * @return ProductWithSellerRepAndImagesAndProductDetailsDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductWithSellerRepAndImagesDto modifyToStatus(final Integer productId, final ProductStatus status) {
-		Product product = productRepository.findProductById(productId);
+	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToStatus(
+		final Integer productId,
+		final ProductStatus status
+	) {
+
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
+
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
 		}
@@ -94,92 +115,190 @@ public class ProductService {
 	}
 
 	/**
-	 * 상품 재고 변경
-	 * <p>
-	 * 상품의 재고를 증가시키는 메서드입니다 
-	 * <p>
+	 * ProductDetail 을 추가하는 메서드입니다
 	 * @author Hong
-	 *
-	 * @param stock - 상품의 재고값
-	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * @param productId - Product 식별값입니다
+	 * @param addProductDetailRequest - ProductDetail Request Dto 입니다
+	 * @return - ProductDetailDto 입니다
 	 */
-	public ProductWithSellerRepAndImagesDto increaseToStock(ModifyStockRequest stock) {
 
-		Product product = productRepository.findProductById(stock.productId());
+	public ProductDetailDto addProductDetail(
+		final Integer productId,
+		final AddProductDetailRequest addProductDetailRequest
+	) {
+		final Product product = productRepository.findProductById(productId);
 
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
 		}
-		product.increaseStock(stock.requestStock());
 
-		return ProductMapper.INSTANCE.toDto(product);
+		return ProductMapper.INSTANCE.toDto(
+			product
+				.addProductDetail(
+					addProductDetailRequest.price(),
+					addProductDetailRequest.stock(),
+					addProductDetailRequest.size(),
+					addProductDetailRequest.isDefault(),
+					addProductDetailRequest.status()
+				)
+		);
+	}
+
+	/**
+	 * ProductDetail 을 삭제하는 메서드입니다
+	 * @author Hong
+	 * @param productDetailId - ProductDetailId 의 식별값입니다
+	 * @return String - 반환될 메세지입니다
+	 */
+	public String deleteProductDetail(final Integer productDetailId) {
+
+		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
+
+		if (productDetail == null) {
+			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT_DETAIL);
+		}
+
+		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
+
+		if (product == null) {
+			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
+		}
+
+		product.deleteProductDetail(productDetail);
+
+		return "상품 디테일 삭제를 성공 하였습니다";
+	}
+
+	/**
+	 * 상품 디테일을 수정하는 로직입니다
+	 * @author Hong
+	 * @param productDetailId - ProductDettail
+	 * @return - ProductDetailDto 입니다
+	 */
+	public ProductDetailDto modifyToProductDetailStatus(
+		final Integer productDetailId,
+		final ProductStatus status
+	) {
+
+		ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
+
+		if (productDetail == null) {
+			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
+		}
+
+		productDetail.toModifyStatus(status);
+
+		return ProductMapper.INSTANCE.toDto(productDetail);
+	}
+
+	/**
+	 * 1줄 짜리 간결한 설명 ------- (1)
+	 * @author Hong
+	 * @param productDetailId - ProductDetail 식별값입니다
+	 * @param modifyProductDetailRequest - 해당 상품의 상세정보를 수정할 값들이 포함된 DTO 입니다.
+	 * @return - ProductDetailDto 입니다
+	 */
+
+	public ProductDetailDto modifyToProductDetail(final Integer productDetailId,
+		final ModifyProductDetailRequest modifyProductDetailRequest) {
+
+		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
+
+		if (productDetail == null) {
+			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT_DETAIL);
+		}
+
+		if (modifyProductDetailRequest.isDefault()) {
+			productRepository.findProductWithProductDetailsById(
+					productDetail.getProduct().getId()
+				)
+				.changeDetailsIsDefault();
+		}
+
+		productDetail.toModifyProductDetail(
+			modifyProductDetailRequest.price(),
+			modifyProductDetailRequest.size(),
+			modifyProductDetailRequest.isDefault()
+		);
+
+		return ProductMapper.INSTANCE.toDto(productDetail);
 	}
 
 	/**
 	 * 상품 재고 변경
-	 * <p>
-	 * 상품의 재고를 감소시키는 메서드입니다
-	 * <p>
+	 * 상품의 재고를 증가시키는 메서드입니다
 	 * @author Hong
-	 *
 	 * @param stock - 상품의 재고값
 	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductWithSellerRepAndImagesDto decreaseToStock(final ModifyStockRequest stock) {
+	public ProductDetailDto increaseToStock(ModifyStockRequest stock) {
 
-		Product product = productRepository.findProductById(stock.productId());
+		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(stock.productDetailId());
 
-		if (product == null)
+		if (productDetail == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
-		if (!product.checkStock(stock.requestStock()))
-			throw new CustomException(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
+		}
 
-		return ProductMapper.INSTANCE.toDto(product);
+		productDetail.increaseStock(stock.requestStock());
+
+		return ProductMapper.INSTANCE.toDto(productDetail);
 	}
 
 	/**
-	 상품 수정
-	 <p>
-	 상품을 수정하는 메서드입니다
-	 <p>
-
-	 @param modifyProduct - 상품을 수정 데이터
-	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 * 상품 재고 변경
+	 * 상품의 재고를 감소시키는 메서드입니다
+	 * @author Hong
+	 * @param stock - 상품의 재고값
+	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductWithSellerRepAndImagesDto modifyToProduct(
+	public ProductDetailDto decreaseToStock(final ModifyStockRequest stock) {
+
+		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(stock.productDetailId());
+
+		if (productDetail == null) {
+			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
+		}
+		if (!productDetail.checkStock(stock.requestStock()))
+			throw new CustomException(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
+
+		return ProductMapper.INSTANCE.toDto(productDetail);
+	}
+
+	/**
+	 * 상품 수정
+	 * 상품을 수정하는 메서드입니다
+	 * @param modifyProduct - 상품을 수정 데이터
+	 * @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
+	 */
+	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToProduct(
 		final Integer productId,
 		final ModifyProductRequest modifyProduct,
-		MultipartFile thumbnailImage,
-		List<MultipartFile> images
+		final MultipartFile thumbnailImage,
+		final List<MultipartFile> images
 	) {
 
-		Product product = productRepository.findProductById(productId);
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
-		if (product == null)
+		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
+		}
 
-		if (thumbnailImage != null || images != null) {
-
+		if (thumbnailImage != null || !images.isEmpty()) {
 			s3Provider.deleteFile(product.getImagesUrl());
-
 			product.deleteImages();
-
 			product.saveImages(s3Provider.uploadImageFiles(thumbnailImage, images).stream()
-				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(),
-					product))
+				.map(image -> Image.ofCreate(image.imageUrl(), image.isThumbnail(), image.sequenceNumber(), product))
 				.toList());
 		}
 
 		product.toModify(
 			modifyProduct.category(),
-			modifyProduct.price(),
 			modifyProduct.name(),
 			modifyProduct.bean(),
 			modifyProduct.acidity(),
 			modifyProduct.information(),
 			modifyProduct.isCrush(),
 			modifyProduct.isDecaf(),
-			modifyProduct.size(),
 			modifyProduct.capacity(),
 			modifyProduct.deliveryFee()
 		);
@@ -190,15 +309,14 @@ public class ProductService {
 	/**
 	 * 여러 상품의 상태를 한번에 변경하는 메서드 입니다
 	 * @author Hong
-	 *
 	 * @param bulkStatus - RequestDto 입니다.
 	 * @return List<ProductManagementDto>
 	 */
-	public List<ProductWithSellerRepAndImagesDto> bulkModifyStatus(
+	public List<ProductWithSellerRepAndImagesAndProductDetailsDto> bulkModifyStatus(
 		final ModifyProductsStatusRequest bulkStatus
 	) {
 
-		List<Product> products = productRepository.findProductsByIds(bulkStatus.productId());
+		final List<Product> products = productRepository.findProductWithProductDetailsByIds(bulkStatus.productId());
 
 		if (products.isEmpty()) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
@@ -206,8 +324,7 @@ public class ProductService {
 
 		products.forEach(product -> product.toModifyStatus(bulkStatus.productStatus()));
 
-		// return ProductMapper.INSTANCE.toDtos(products);
-		return null;
+		return ProductMapper.INSTANCE.toDtos(products);
 	}
 
 	/**
@@ -217,7 +334,7 @@ public class ProductService {
 	 * product ID로 단일 레코드를 조회한다.
 	 */
 	@Transactional(readOnly = true)
-	public ProductWithSellerRepAndImagesDto getProductById(final Integer productId) {
+	public ProductWithSellerRepAndImagesAndProductDetailsDto getProductById(final Integer productId) {
 
 		final Product product = productRepository.findProductById(productId);
 

@@ -11,9 +11,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record ModifyProductRequest(
 	Boolean isDecaf,
-	@NotNull(message = ProductErrorMessages.priceNotNull)
-	@Min(value = 0, message = ProductErrorMessages.isCanNotBeBelowZero)
-	Integer price,
 	Acidity acidity,
 	Bean bean,
 	ProductCategory category,
@@ -21,7 +18,6 @@ public record ModifyProductRequest(
 	String information,
 	@NotBlank(message = ProductErrorMessages.nameNotBlank)
 	String name,
-	String size,
 	String capacity,
 	Boolean isCrush,
 	@Min(value = 0, message = ProductErrorMessages.isCanNotBeBelowZero)

@@ -10,7 +10,6 @@ public interface CategoryResponse {
 	}
 
 	record DefaultResponse(
-		String size,
 		String capacity) implements CategoryResponse {
 	}
 }

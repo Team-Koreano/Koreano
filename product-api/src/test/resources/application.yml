@@ -1,0 +1,40 @@
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile: test
+  application:
+    name: product-management-api
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    generate-ddl: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: sa
+    password: 1234
+jasypt:
+  encryptor:
+    password: test
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(ROo1Lg6OWjlnGHhzA6zc6aXvyuQ5DDYsObl5GtKSoVE=)
+      secret-key: ENC(hhNjqFDlOO/ZIencYvXzCp6TsGqIhSa8rZCvszSEYy/EhY4PcA60gCbd3Bz1ub4AZ7bgt0cx8Ks=)
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: koreano-bucket

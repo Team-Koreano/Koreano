@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 import org.ecommerce.productapi.dto.ImageDto;
-import org.ecommerce.productapi.dto.ProductWithSellerRepAndImagesDto;
+import org.ecommerce.productapi.dto.ProductWithSellerRepAndImagesAndProductDetailsDto;
 
 public record DetailResponse(
 	Integer id,
@@ -27,25 +27,26 @@ public record DetailResponse(
 	LocalDateTime createDatetime,
 	LinkedList<ImageDto> imageDtoList
 ) {
-	public static DetailResponse of(final ProductWithSellerRepAndImagesDto productWithSellerRepAndImagesDto) {
+	public static DetailResponse of(
+		final ProductWithSellerRepAndImagesAndProductDetailsDto productWithSellerRepAndImagesAndProductDetailsDto) {
 		return new DetailResponse(
-			productWithSellerRepAndImagesDto.id(),
-			productWithSellerRepAndImagesDto.isDecaf(),
-			productWithSellerRepAndImagesDto.price(),
-			productWithSellerRepAndImagesDto.sellerRep().id(),
-			productWithSellerRepAndImagesDto.sellerRep().bizName(),
-			productWithSellerRepAndImagesDto.stock(),
-			productWithSellerRepAndImagesDto.acidity().getTitle(),
-			productWithSellerRepAndImagesDto.bean().getTitle(),
-			productWithSellerRepAndImagesDto.category().getTitle(),
-			productWithSellerRepAndImagesDto.information(),
-			productWithSellerRepAndImagesDto.name(),
-			productWithSellerRepAndImagesDto.status().getTitle(),
-			productWithSellerRepAndImagesDto.isCrush(),
-			productWithSellerRepAndImagesDto.favoriteCount(),
-			productWithSellerRepAndImagesDto.deliveryFee(),
-			productWithSellerRepAndImagesDto.createDatetime(),
-			productWithSellerRepAndImagesDto.images()
+			productWithSellerRepAndImagesAndProductDetailsDto.id(),
+			productWithSellerRepAndImagesAndProductDetailsDto.isDecaf(),
+			productWithSellerRepAndImagesAndProductDetailsDto.price(),
+			productWithSellerRepAndImagesAndProductDetailsDto.sellerRep().id(),
+			productWithSellerRepAndImagesAndProductDetailsDto.sellerRep().bizName(),
+			productWithSellerRepAndImagesAndProductDetailsDto.stock(),
+			productWithSellerRepAndImagesAndProductDetailsDto.acidity().getTitle(),
+			productWithSellerRepAndImagesAndProductDetailsDto.bean().getTitle(),
+			productWithSellerRepAndImagesAndProductDetailsDto.category().getTitle(),
+			productWithSellerRepAndImagesAndProductDetailsDto.information(),
+			productWithSellerRepAndImagesAndProductDetailsDto.name(),
+			productWithSellerRepAndImagesAndProductDetailsDto.status().getTitle(),
+			productWithSellerRepAndImagesAndProductDetailsDto.isCrush(),
+			productWithSellerRepAndImagesAndProductDetailsDto.favoriteCount(),
+			productWithSellerRepAndImagesAndProductDetailsDto.deliveryFee(),
+			productWithSellerRepAndImagesAndProductDetailsDto.createDatetime(),
+			productWithSellerRepAndImagesAndProductDetailsDto.images()
 				.stream()
 				.sorted(Comparator.comparingInt(ImageDto::sequenceNumber))
 				.collect(Collectors.toCollection(LinkedList::new))
