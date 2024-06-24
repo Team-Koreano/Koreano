@@ -51,9 +51,9 @@ public class OrderController {
 
 	@GetMapping
 	public Response<Page<InquiryOrderResponse>> getOrders(
-			@RequestParam(required = false) final Integer year,
-			@RequestParam(required = false, defaultValue = "1") final Integer pageNumber,
-			@RequestParam(required = false, defaultValue = "5") final Integer pageSize
+			@RequestParam(name = "year", required = false) final Integer year,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "1") final Integer pageNumber,
+			@RequestParam(name = "pageSize", required = false, defaultValue = "5") final Integer pageSize
 
 	) {
 
