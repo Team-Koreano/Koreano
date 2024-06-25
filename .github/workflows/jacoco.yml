@@ -21,7 +21,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-          cache: 'gradle'
+          cache: 'none'
 
       - name: gradlew 권한을 부여합니다.
         run: chmod +x gradlew
