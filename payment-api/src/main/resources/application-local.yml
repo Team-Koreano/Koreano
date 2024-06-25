@@ -35,6 +35,8 @@ spring:
       redisson-prefix: "redis://"
 toss:
   secretKey: test
+  server:
+    url: https://api.tosspayments.com/v1/payments
 jasypt:
   encryptor:
     password: test

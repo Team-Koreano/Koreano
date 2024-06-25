@@ -37,3 +37,5 @@ spring:
 
 toss:
   secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)
+  server:
+    url: https://api.tosspayments.com/v1/payments

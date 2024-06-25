@@ -1,7 +1,5 @@
 package org.ecommerce.paymentapi.aop;
 
-import static org.ecommerce.paymentapi.entity.enumerate.LockName.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,9 +13,9 @@ import org.ecommerce.paymentapi.entity.enumerate.LockName;
 public @interface DistributedLock {
 
 
-	LockName lockName() default BEANPAY;
+	LockName[] lockName();
 
-	String[] uniqueKey();
+	String[] keys();
 
 	TimeUnit timeUnit() default TimeUnit.SECONDS;
 

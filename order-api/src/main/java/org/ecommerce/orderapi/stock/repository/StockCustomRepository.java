@@ -9,4 +9,6 @@ public interface StockCustomRepository {
 	Map<Integer, Stock> findStocksByProductIdIn(final List<Integer> productIds);
 
 	Stock findStockByOrderItemId(final Long orderItemId);
+
+	Stock findStockByProductId(final Integer productId);
 }

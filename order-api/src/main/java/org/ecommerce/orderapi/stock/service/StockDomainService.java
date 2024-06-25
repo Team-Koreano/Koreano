@@ -94,9 +94,9 @@ public class StockDomainService {
 	 */
 	public void saveMock() {
 		stockRepository.saveAll(List.of(
-				Stock.of(101, 10),
-				Stock.of(102, 20),
-				Stock.of(103, 30)
+				Stock.of(101, 100),
+				Stock.of(102, 200),
+				Stock.of(103, 300)
 		));
 	}
 
@@ -188,6 +188,7 @@ public class StockDomainService {
 	 * @param orderItemId- 주문 항목 번호
 	 * @return - 주문 항목
 	 */
+	@VisibleForTesting
 	public OrderItem getOrderItem(final Long orderItemId) {
 		OrderItem orderItem = orderItemRepository.findOrderItemById(orderItemId);
 		if (orderItem == null) {

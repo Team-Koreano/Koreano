@@ -36,11 +36,18 @@ public class StockRepositoryImpl implements StockCustomRepository {
 	}
 
 	@Override
-	public Stock findStockByOrderItemId(Long orderItemId) {
+	public Stock findStockByOrderItemId(final Long orderItemId) {
 		return jpaQueryFactory.selectFrom(stock)
 				.leftJoin(stock.stockHistories, stockHistory).fetchJoin()
 				.where(stockHistory.orderItemId.eq(orderItemId))
 				.orderBy(stockHistory.operationDatetime.desc())
+				.fetchFirst();
+	}
+
+	@Override
+	public Stock findStockByProductId(final Integer productId) {
+		return jpaQueryFactory.selectFrom(stock)
+				.where(stock.productId.eq(productId))
 				.fetchFirst();
 	}
 }

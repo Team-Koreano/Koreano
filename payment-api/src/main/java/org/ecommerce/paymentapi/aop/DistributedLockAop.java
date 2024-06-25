@@ -55,14 +55,14 @@ public class DistributedLockAop {
 		DistributedLock distributedLock
 	) {
 		Set<String> keys = new HashSet<>();
-		IntStream.range(0, distributedLock.uniqueKey().length).forEach(i -> {
+		IntStream.range(0, distributedLock.keys().length).forEach(i -> {
 			Arrays.stream(CustomSpringELParser.getDynamicValue(
 					signature.getParameterNames(),
 					joinPoint.getArgs(),
-					distributedLock.uniqueKey()[i]
-				)).map(value -> distributedLock.lockName().name()
+					distributedLock.keys()[i]
+				)).map(value -> distributedLock.lockName()[i].name()
 					.concat(REDISSON_LOCK_PREFIX)
-					.concat((String) value))
+					.concat(String.valueOf(value)))
 				.forEach(keys::add);
 		});
 		return keys.toArray(String[]::new);

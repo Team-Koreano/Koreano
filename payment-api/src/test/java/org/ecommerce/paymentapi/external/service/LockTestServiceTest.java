@@ -1,6 +1,5 @@
 package org.ecommerce.paymentapi.external.service;
 
-import static org.ecommerce.paymentapi.entity.enumerate.Role.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -10,20 +9,25 @@ import java.util.concurrent.Executors;
 
 import org.ecommerce.paymentapi.dto.request.PaymentDetailPriceRequest;
 import org.ecommerce.paymentapi.dto.request.PaymentPriceRequest;
-import org.ecommerce.paymentapi.entity.BeanPay;
+import org.ecommerce.paymentapi.entity.SellerBeanPay;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.internal.service.PaymentService;
-import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
 import org.ecommerce.paymentapi.repository.PaymentRepository;
+import org.ecommerce.paymentapi.repository.SellerBeanPayRepository;
+import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+@Execution(ExecutionMode.SAME_THREAD)
 @ActiveProfiles("test")
 @SpringBootTest
 public class LockTestServiceTest {
@@ -33,7 +37,10 @@ public class LockTestServiceTest {
 	private LockTestService lockTestService;
 
 	@Autowired
-	private BeanPayRepository beanPayRepository;
+	private UserBeanPayRepository userBeanPayRepository;
+
+	@Autowired
+	private SellerBeanPayRepository sellerBeanPayRepository;
 
 	@Autowired
 	private PaymentRepository paymentRepository;
@@ -52,17 +59,17 @@ public class LockTestServiceTest {
 	private final Integer threadCount = 32;
 	private final Integer startMoney = 1_000_000;
 	private Integer beanPayId = null;
-	private BeanPay userBeanPay = null;
+	private UserBeanPay userBeanPay = null;
 
 
 	@BeforeEach
 	public void before() {
-		BeanPay userBeanPay = BeanPay.ofCreate(1, USER);
-		BeanPay sellerBeanPay = new BeanPay(null, 1, SELLER, 0, null);
-		BeanPay sellerBeanPay2 = new BeanPay(null, 2, SELLER, 0, null);
-		this.userBeanPay = beanPayRepository.saveAndFlush(userBeanPay);
-		beanPayRepository.saveAndFlush(sellerBeanPay);
-		beanPayRepository.saveAndFlush(sellerBeanPay2);
+		UserBeanPay userBeanPay = UserBeanPay.ofCreate(1);
+		SellerBeanPay sellerUserBeanPay = new SellerBeanPay(null, 1, 0, null, null);
+		SellerBeanPay sellerUserBeanPay2 = new SellerBeanPay(null, 2, 0, null, null);
+		this.userBeanPay = userBeanPayRepository.saveAndFlush(userBeanPay);
+		sellerBeanPayRepository.saveAndFlush(sellerUserBeanPay);
+		sellerBeanPayRepository.saveAndFlush(sellerUserBeanPay2);
 		beanPayId = userBeanPay.getId();
 	}
 
@@ -70,7 +77,8 @@ public class LockTestServiceTest {
 	public void after() {
 		paymentDetailRepository.deleteAll();
 		paymentRepository.deleteAll();
-		beanPayRepository.deleteAll();
+		userBeanPayRepository.deleteAll();
+		sellerBeanPayRepository.deleteAll();
 	}
 
 	@Test
@@ -98,11 +106,11 @@ public class LockTestServiceTest {
 		latch.await();
 		//then
 		Long endTime = System.currentTimeMillis();
-		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		UserBeanPay userBeanPay = userBeanPayRepository.findById(beanPayId).get();
+		log.info("Actual total chargeAmount : {}", userBeanPay.getAmount());
 		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
-		assertNotEquals(totalAmount, beanPay.getAmount());
+		assertNotEquals(totalAmount, userBeanPay.getAmount());
 
 	}
 
@@ -132,11 +140,11 @@ public class LockTestServiceTest {
 		latch.await();
 		//then
 		Long endTime = System.currentTimeMillis();
-		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		UserBeanPay userBeanPay = userBeanPayRepository.findById(beanPayId).get();
+		log.info("Actual total chargeAmount : {}", userBeanPay.getAmount());
 		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
-		assertEquals(totalAmount, beanPay.getAmount());
+		assertEquals(totalAmount, userBeanPay.getAmount());
 	}
 
 	@Test
@@ -172,11 +180,11 @@ public class LockTestServiceTest {
 		latch.await();
 		//then
 		Long endTime = System.currentTimeMillis();
-		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		UserBeanPay userBeanPay = userBeanPayRepository.findById(beanPayId).get();
+		log.info("Actual total chargeAmount : {}", userBeanPay.getAmount());
 		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
-		assertEquals(totalAmount, beanPay.getAmount());
+		assertEquals(totalAmount, userBeanPay.getAmount());
 	}
 
 	@Test
@@ -204,11 +212,11 @@ public class LockTestServiceTest {
 		latch.await();
 		//then
 		Long endTime = System.currentTimeMillis();
-		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		UserBeanPay userBeanPay = userBeanPayRepository.findById(beanPayId).get();
+		log.info("Actual total chargeAmount : {}", userBeanPay.getAmount());
 		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
-		assertEquals(totalAmount, beanPay.getAmount());
+		assertEquals(totalAmount, userBeanPay.getAmount());
 
 	}
 
@@ -237,11 +245,11 @@ public class LockTestServiceTest {
 		latch.await();
 		//then
 		Long endTime = System.currentTimeMillis();
-		BeanPay beanPay = beanPayRepository.findById(beanPayId).get();
-		log.info("Actual total chargeAmount : {}", beanPay.getAmount());
+		UserBeanPay userBeanPay = userBeanPayRepository.findById(beanPayId).get();
+		log.info("Actual total chargeAmount : {}", userBeanPay.getAmount());
 		log.info("expect total chargeAmount : {}", totalAmount);
 		log.info("total Time : {}", (endTime - startTime) + "ms");
-		assertEquals(totalAmount, beanPay.getAmount());
+		assertEquals(totalAmount, userBeanPay.getAmount());
 
 	}
 
