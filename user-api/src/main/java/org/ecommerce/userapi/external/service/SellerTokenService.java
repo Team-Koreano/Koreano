@@ -7,6 +7,7 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.provider.JwtProvider;
 import org.ecommerce.userapi.provider.RedisProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,8 +16,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SellerTokenService {
-	private static final long ONE_HOUR = 3_600;
-	private static final long TWO_WEEKS = ONE_HOUR * 24 * 14;
+
+	@Value("${jwt.valid.access}")
+	private static long ONE_HOUR;
+
+	@Value("${jwt.valid.refresh}")
+	private static long TWO_WEEKS;
 
 	private final SecretKey secretKey;
 
@@ -27,10 +32,13 @@ public class SellerTokenService {
 	public String createSellerTokens(Integer sellerId, Set<String> authorization,
 		HttpServletResponse response) {
 
-		final String accessToken = jwtProvider.createToken(sellerId,
-			ONE_HOUR, secretKey, authorization);
-		final String refreshToken = jwtProvider.createToken(sellerId,
-			TWO_WEEKS, secretKey, authorization);
+		final String accessToken = jwtProvider.createToken(
+			sellerId, ONE_HOUR, secretKey, authorization
+		);
+		
+		final String refreshToken = jwtProvider.createToken(
+			sellerId, TWO_WEEKS, secretKey, authorization
+		);
 
 		String accessTokenKey = jwtProvider.getAccessTokenKey(sellerId, jwtProvider.getRoll(accessToken));
 		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);

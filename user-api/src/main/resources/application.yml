@@ -16,8 +16,10 @@ spring:
       host: 127.0.0.1
       port: 6379
 jwt:
+  valid:
+    access: ENC(rKslQE0s5b/jAfdLX3voxA==)
+    refresh: ENC(00xp0hXb+x78a5//Ht+1Gw==)
   secret: ${SECRET_KEY_SOURCE}
-
 
 payment-service:
   url: http://localhost:8085/api/internal/beanpay/v1
