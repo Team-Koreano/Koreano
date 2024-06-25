@@ -12,7 +12,7 @@ import redis.embedded.RedisCluster;
 
 @Configuration
 public class LocalRedisConfig{
-	private final int START_REDIS_PORT = 1000;
+	private final int START_REDIS_PORT = 12_345;
 	private final int CLUSTER_AMOUNT = 3;
 	private final Redis redisServer;
 
