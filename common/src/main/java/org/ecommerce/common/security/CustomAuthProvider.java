@@ -6,18 +6,14 @@ import java.util.Set;
 import org.ecommerce.common.error.CommonErrorCode;
 import org.ecommerce.common.error.CustomException;
 import org.ecommerce.common.provider.JwtProvider;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@Primary
-@Component
 @RequiredArgsConstructor
 public class CustomAuthProvider implements AuthenticationProvider {
 
