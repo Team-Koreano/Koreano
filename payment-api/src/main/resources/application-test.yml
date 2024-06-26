@@ -28,6 +28,12 @@ spring:
   sql:
     init:
       mode: never
+  data:
+    redis:
+      host: localhost
+      port: 16379
+      redisson-prefix: "redis://"
+
 toss:
   secretKey: test
   server:
