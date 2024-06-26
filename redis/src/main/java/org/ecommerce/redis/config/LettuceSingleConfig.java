@@ -19,11 +19,12 @@ public class LettuceSingleConfig {
 	@Value("${spring.data.redis.port}")
 	private int redisPort;
 
+	@Bean
 	public RedisConnectionFactory redisConnectionFactory(){
 		return new LettuceConnectionFactory(redisHost,redisPort);
 	}
 
-	@Bean(name = "singleRedisTemplate")
+	@Bean
 	public RedisTemplate<String, Object> redisTemplate(){
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 

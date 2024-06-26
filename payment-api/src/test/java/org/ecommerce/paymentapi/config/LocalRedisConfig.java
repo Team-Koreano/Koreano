@@ -1,29 +1,23 @@
 package org.ecommerce.paymentapi.config;
 
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import org.ecommerce.redis.config.RedisSingleInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import redis.embedded.Redis;
-import redis.embedded.RedisCluster;
+import redis.embedded.RedisServer;
 
 @Configuration
 public class LocalRedisConfig{
-	private final int START_REDIS_PORT = 7001;
-	private final int CLUSTER_AMOUNT = 6;
-	private final Redis redisServer;
+	private RedisSingleInfo redisSingleInfo;
+	private Redis redisServer;
 
-	public LocalRedisConfig() {
-		this.redisServer = RedisCluster.builder()
-			.serverPorts(
-				IntStream.range(START_REDIS_PORT, START_REDIS_PORT + CLUSTER_AMOUNT)
-				.boxed()
-				.collect(Collectors.toList()))
-			.build();
-		// this.redisServer = new RedisServer(START_REDIS_PORT);
+	@Autowired
+	public LocalRedisConfig(RedisSingleInfo redisSingleInfo) {
+		this.redisSingleInfo = redisSingleInfo;
+		this.redisServer = new RedisServer(redisSingleInfo.getPort());
 	}
 
 	@PostConstruct
