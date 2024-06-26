@@ -12,8 +12,8 @@ import redis.embedded.RedisCluster;
 
 @Configuration
 public class LocalRedisConfig{
-	private final int START_REDIS_PORT = 12_345;
-	private final int CLUSTER_AMOUNT = 3;
+	private final int START_REDIS_PORT = 7001;
+	private final int CLUSTER_AMOUNT = 6;
 	private final Redis redisServer;
 
 	public LocalRedisConfig() {
@@ -23,6 +23,7 @@ public class LocalRedisConfig{
 				.boxed()
 				.collect(Collectors.toList()))
 			.build();
+		// this.redisServer = new RedisServer(START_REDIS_PORT);
 	}
 
 	@PostConstruct
