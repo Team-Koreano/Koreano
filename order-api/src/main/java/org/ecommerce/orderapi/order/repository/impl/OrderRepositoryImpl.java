@@ -26,8 +26,8 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 	public List<Order> findOrdersByUserIdAndYear(
 			final Integer userId,
 			final Integer year,
-			final Integer pageSize,
-			final Integer pageNumber
+			final Integer pageNumber,
+			final Integer pageSize
 	) {
 		return jpaQueryFactory
 				.selectFrom(order)

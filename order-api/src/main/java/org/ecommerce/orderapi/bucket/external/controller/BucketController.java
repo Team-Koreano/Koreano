@@ -1,7 +1,5 @@
 package org.ecommerce.orderapi.bucket.external.controller;
 
-import java.util.List;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.bucket.dto.BucketMapper;
 import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
@@ -9,7 +7,7 @@ import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.response.BucketResponse;
 import org.ecommerce.orderapi.bucket.service.BucketDomainService;
 import org.ecommerce.orderapi.bucket.service.BucketReadService;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,17 +34,14 @@ public class BucketController {
 	private final static Integer USER_ID = 1;
 
 	@GetMapping
-	public Response<List<BucketResponse>> getBuckets(
+	public Response<Page<BucketResponse>> getBuckets(
 			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber,
 			@RequestParam(name = "pageSize", required = false, defaultValue = "10") final Integer pageSize
 	) {
 
 		return new Response<>(HttpStatus.OK.value(),
-				bucketReadService.getAllBuckets(USER_ID,
-								PageRequest.of(pageNumber, pageSize))
-						.stream()
+				bucketReadService.getAllBuckets(USER_ID, pageNumber, pageSize)
 						.map(BucketMapper.INSTANCE::toResponse)
-						.toList()
 		);
 	}
 
