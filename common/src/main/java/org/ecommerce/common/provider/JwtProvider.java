@@ -9,7 +9,6 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.error.CommonErrorCode;
 import org.ecommerce.common.error.CustomException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,8 +32,8 @@ public class JwtProvider {
 	private static final String CLAIM_ID = "id";
 	private static final String CLAIM_AUTHORIZATION = "authorization";
 	private static final String PREFIX = "Bearer ";
-	@Value("${jwt.valid.refresh}")
-	private long TWO_WEEKS;
+
+	private static final Integer COOKIE_EXPIRE_TIME = 1_209_600;
 
 	private final SecretKey secretKey;
 
@@ -112,7 +111,7 @@ public class JwtProvider {
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
 		cookie.setPath("/");
-		cookie.setMaxAge((int)TWO_WEEKS);
+		cookie.setMaxAge(COOKIE_EXPIRE_TIME);
 		return cookie;
 	}
 }

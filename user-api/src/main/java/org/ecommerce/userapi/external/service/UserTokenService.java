@@ -7,7 +7,6 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.provider.JwtProvider;
 import org.ecommerce.userapi.provider.RedisProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,13 +15,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserTokenService {
+	private final static long ACCESS_VALID_TIME = 3_600;
 
-	@Value("${jwt.valid.access}")
-	private long ONE_HOUR;
-
-	@Value("${jwt.valid.refresh}")
-	private long TWO_WEEKS;
-
+	private final static long REFRESH_VALID_TIME = ACCESS_VALID_TIME * 24 * 14;
+	
 	private final SecretKey secretKey;
 
 	private final RedisProvider redisProvider;
@@ -33,18 +29,18 @@ public class UserTokenService {
 		HttpServletResponse response) {
 
 		final String accessToken = jwtProvider.createToken(
-			sellerId, ONE_HOUR, secretKey, authorization
+			sellerId, ACCESS_VALID_TIME, secretKey, authorization
 		);
 
 		final String refreshToken = jwtProvider.createToken(
-			sellerId, TWO_WEEKS, secretKey, authorization
+			sellerId, REFRESH_VALID_TIME, secretKey, authorization
 		);
 
 		String accessTokenKey = jwtProvider.getAccessTokenKey(sellerId, jwtProvider.getRoll(accessToken));
-		redisProvider.setData(accessTokenKey, accessToken, ONE_HOUR, TimeUnit.SECONDS);
+		redisProvider.setData(accessTokenKey, accessToken, ACCESS_VALID_TIME, TimeUnit.SECONDS);
 
 		String refreshTokenKey = jwtProvider.getRefreshTokenKey(sellerId, jwtProvider.getRoll(refreshToken));
-		redisProvider.setData(refreshTokenKey, refreshToken, TWO_WEEKS, TimeUnit.SECONDS);
+		redisProvider.setData(refreshTokenKey, refreshToken, REFRESH_VALID_TIME, TimeUnit.SECONDS);
 
 		response.addCookie(jwtProvider.createCookie(refreshToken));
 
