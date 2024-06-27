@@ -1,5 +1,7 @@
 package org.ecommerce.userapi.external.controller;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -13,8 +15,6 @@ import org.ecommerce.userapi.dto.response.CreateAccountResponse;
 import org.ecommerce.userapi.dto.response.CreateSellerResponse;
 import org.ecommerce.userapi.dto.response.LoginSellerResponse;
 import org.ecommerce.userapi.external.service.SellerService;
-import org.ecommerce.common.security.AuthDetails;
-import org.ecommerce.common.security.custom.CurrentUser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,9 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/external/sellers/v1")
 public class SellerController {
-
-	// TODO : 계좌, 주소 테이블 생성 로직 구현
-	//  AccessToken 만료시 RefreshToken 을 통해 Reissue 로직 구현
 
 	private final SellerService sellerService;
 
