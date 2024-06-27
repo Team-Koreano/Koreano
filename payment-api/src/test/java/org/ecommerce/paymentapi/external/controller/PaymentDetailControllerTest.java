@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.ecommerce.paymentapi.ControllerTest;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.entity.enumerate.PaymentStatus;
@@ -39,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(PaymentDetailController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class PaymentDetailControllerTest {
+class PaymentDetailControllerTest extends ControllerTest {
 
 	@MockBean
 	private PaymentDetailReadService paymentDetailReadService;

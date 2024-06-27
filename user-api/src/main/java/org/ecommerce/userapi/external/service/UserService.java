@@ -3,6 +3,8 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.common.provider.JwtProvider;
+import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -22,12 +24,10 @@ import org.ecommerce.userapi.entity.Users;
 import org.ecommerce.userapi.entity.UsersAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
-import org.ecommerce.userapi.security.AuthDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +57,8 @@ public class UserService {
 	private final RedisProvider redisProvider;
 
 	private final PaymentServiceClient paymentServiceClient;
+
+	private final UserTokenService userTokenService;
 
 	//TODO : 계좌에 관한 RUD API 개발
 	//TODO : 주소에 관한 RUD API 개발
@@ -107,7 +109,7 @@ public class UserService {
 		final Set<String> authorization = Set.of(Role.USER.getCode());
 
 		return UserMapper.INSTANCE.toDto(
-			jwtProvider.createUserTokens(user.getId(), authorization, response));
+			userTokenService.createUserTokens(user.getId(), authorization, response));
 	}
 
 	/**
@@ -120,7 +122,7 @@ public class UserService {
 	 @param authDetails - 사용자의 정보가 들어간 userDetail 입니다
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtProvider.removeTokens(
+		userTokenService.removeTokens(
 			jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
 			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll())
 		);
@@ -190,7 +192,7 @@ public class UserService {
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return UserMapper.INSTANCE.toDto(
-			jwtProvider.createUserTokens(jwtProvider.getId(refreshToken),
+			userTokenService.createUserTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
@@ -217,7 +219,7 @@ public class UserService {
 
 		users.withdrawal();
 
-		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+		userTokenService.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
 			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 

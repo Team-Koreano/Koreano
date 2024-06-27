@@ -1,11 +1,10 @@
-package org.ecommerce.userapi.security;
+package org.ecommerce.common.security;
 
 import java.io.IOException;
 
-import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.provider.JwtProvider;
-import org.ecommerce.userapi.provider.RedisProvider;
-import org.ecommerce.userapi.security.custom.ResponseConfigurer;
+import org.ecommerce.common.error.CommonErrorCode;
+import org.ecommerce.common.provider.JwtProvider;
+import org.ecommerce.common.security.custom.ResponseConfigurer;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,34 +27,30 @@ public class JwtFilter extends OncePerRequestFilter implements ResponseConfigure
 
 	private final ProviderManager providerManager;
 	private final JwtProvider jwtProvider;
-	private final RedisProvider redisProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
+
 		String bearerToken = jwtProvider.resolveToken(request);
 
 		try {
 			if (bearerToken != null) {
-				boolean isLogin = redisProvider.hasKey(
-					jwtProvider.getAccessTokenKey(jwtProvider.getId(bearerToken), jwtProvider.getRoll(bearerToken)));
-				if (isLogin) {
-					// Authentication 검증 전
-					Authentication beforeAuthentication = jwtProvider.parseAuthentication(bearerToken);
-					// Authentication 검증 후
-					Authentication afterAuthenticate = providerManager.authenticate(beforeAuthentication);
-					// Context 에 저장
-					SecurityContextHolder.getContext().setAuthentication(afterAuthenticate);
-				}
+				// Authentication 검증 전
+				Authentication beforeAuthentication = jwtProvider.parseAuthentication(bearerToken);
+				// Authentication 검증 후
+				Authentication afterAuthenticate = providerManager.authenticate(beforeAuthentication);
+				// Context 에 저장
+				SecurityContextHolder.getContext().setAuthentication(afterAuthenticate);
 			}
 		} catch (ExpiredJwtException e) {
-			responseSetting(response, UserErrorCode.EXPIRED_JWT);
+			responseSetting(response, CommonErrorCode.EXPIRED_JWT);
 			return;
 		} catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-			responseSetting(response, UserErrorCode.INVALID_SIGNATURE_JWT);
+			responseSetting(response, CommonErrorCode.INVALID_SIGNATURE_JWT);
 			return;
 		} catch (IllegalArgumentException e) {
-			responseSetting(response, UserErrorCode.EMPTY_JWT);
+			responseSetting(response, CommonErrorCode.EMPTY_JWT);
 			return;
 		}
 

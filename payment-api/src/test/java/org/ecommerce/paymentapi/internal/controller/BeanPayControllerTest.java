@@ -1,4 +1,3 @@
-
 package org.ecommerce.paymentapi.internal.controller;
 
 import static org.mockito.Mockito.*;
@@ -7,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.ecommerce.paymentapi.ControllerTest;
 import org.ecommerce.paymentapi.dto.SellerBeanPayDto;
 import org.ecommerce.paymentapi.dto.SellerBeanPayMapper;
 import org.ecommerce.paymentapi.dto.UserBeanPayDto;
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -36,7 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class BeanPayControllerTest extends ControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
@@ -78,6 +80,7 @@ class BeanPayControllerTest {
 				.andExpect(status().isOk());
 		}
 	}
+
 	@Nested
 	class 유저_빈페이_삭제 {
 		@Test
@@ -97,6 +100,7 @@ class BeanPayControllerTest {
 				.andExpect(status().isOk());
 		}
 	}
+
 	@Nested
 	class 판매자_빈페이_생성 {
 		@Test
@@ -119,6 +123,7 @@ class BeanPayControllerTest {
 				.andExpect(status().isOk());
 		}
 	}
+
 	@Nested
 	class 판매자_빈페이_삭제 {
 		@Test
@@ -138,6 +143,5 @@ class BeanPayControllerTest {
 				.andExpect(status().isOk());
 		}
 	}
-
 
 }

@@ -1,4 +1,3 @@
-
 package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.utils.BeanPayTimeFormatUtil.*;
@@ -11,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.ecommerce.common.vo.Response;
+import org.ecommerce.paymentapi.ControllerTest;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
 import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -43,7 +44,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(BeanPayController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-class BeanPayControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class BeanPayControllerTest extends ControllerTest {
 
 	@MockBean
 	private BeanPayService beanPayService;
