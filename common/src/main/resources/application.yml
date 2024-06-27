@@ -1,11 +1,14 @@
 spring:
   application:
     name: common
-    
+
 jasypt:
   encryptor:
     bean: jasyptStringEncryptor
     password: test
 
 jwt:
+  valid:
+    refresh: ENC(00xp0hXb+x78a5//Ht+1Gw==)
   secret: ${SECRET_KEY_SOURCE}
+
