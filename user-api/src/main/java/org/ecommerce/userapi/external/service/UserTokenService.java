@@ -18,10 +18,10 @@ import lombok.RequiredArgsConstructor;
 public class UserTokenService {
 
 	@Value("${jwt.valid.access}")
-	private static long ONE_HOUR;
+	private long ONE_HOUR;
 
 	@Value("${jwt.valid.refresh}")
-	private static long TWO_WEEKS;
+	private long TWO_WEEKS;
 
 	private final SecretKey secretKey;
 

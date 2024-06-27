@@ -18,10 +18,10 @@ import lombok.RequiredArgsConstructor;
 public class SellerTokenService {
 
 	@Value("${jwt.valid.access}")
-	private static long ONE_HOUR;
+	private long ONE_HOUR;
 
 	@Value("${jwt.valid.refresh}")
-	private static long TWO_WEEKS;
+	private long TWO_WEEKS;
 
 	private final SecretKey secretKey;
 
@@ -35,7 +35,7 @@ public class SellerTokenService {
 		final String accessToken = jwtProvider.createToken(
 			sellerId, ONE_HOUR, secretKey, authorization
 		);
-		
+
 		final String refreshToken = jwtProvider.createToken(
 			sellerId, TWO_WEEKS, secretKey, authorization
 		);
