@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 
 import org.ecommerce.common.error.CommonErrorCode;
 import org.ecommerce.common.error.CustomException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,10 +29,12 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
-	private static final String ACCESS_TOKEN_HEADER = HttpHeaders.AUTHORIZATION;
+	private static final String TOKEN_HEADER = HttpHeaders.AUTHORIZATION;
+	private static final String CLAIM_ID = "id";
+	private static final String CLAIM_AUTHORIZATION = "authorization";
 	private static final String PREFIX = "Bearer ";
-	private static final long ONE_HOUR = 3_600;
-	private static final long TWO_WEEKS = ONE_HOUR * 24 * 14;
+	@Value("${jwt.valid.refresh}")
+	private long TWO_WEEKS;
 
 	private final SecretKey secretKey;
 
@@ -45,8 +48,8 @@ public class JwtProvider {
 		Set<String> authorization) {
 		Date now = new Date();
 		return Jwts.builder()
-			.claim("id", id)
-			.claim("authorization", authorization)
+			.claim(CLAIM_ID, id)
+			.claim(CLAIM_AUTHORIZATION, authorization)
 			.setIssuedAt(now)
 			.setExpiration(new Date(now.getTime() + lifeCycle * 1000))
 			.signWith(SignatureAlgorithm.HS256, secretKey)
@@ -64,8 +67,8 @@ public class JwtProvider {
 
 	public UsernamePasswordAuthenticationToken parseAuthentication(String bearerToken) {
 		Claims claims = parseClaims(cutPreFix(bearerToken));
-		Integer id = claims.get("id", Integer.class);
-		List<?> authorities = claims.get("authorization", List.class);
+		Integer id = claims.get(CLAIM_ID, Integer.class);
+		List<?> authorities = claims.get(CLAIM_AUTHORIZATION, List.class);
 
 		if (authorities == null)
 			throw new CustomException(CommonErrorCode.INVALID_SIGNATURE_JWT);
@@ -79,11 +82,11 @@ public class JwtProvider {
 	}
 
 	public String getRoll(String bearerToken) {
-		return parseClaims(cutPreFix(bearerToken)).get("authorization", List.class).get(0).toString();
+		return parseClaims(cutPreFix(bearerToken)).get(CLAIM_AUTHORIZATION, List.class).get(0).toString();
 	}
 
 	public Integer getId(String bearerToken) {
-		return parseClaims(cutPreFix(bearerToken)).get("id", Integer.class);
+		return parseClaims(cutPreFix(bearerToken)).get(CLAIM_ID, Integer.class);
 	}
 
 	public String getRefreshTokenKey(Integer id, String auth) {
@@ -101,7 +104,7 @@ public class JwtProvider {
 	}
 
 	public String resolveToken(HttpServletRequest request) {
-		return request.getHeader(ACCESS_TOKEN_HEADER);
+		return request.getHeader(TOKEN_HEADER);
 	}
 
 	public Cookie createCookie(String refreshToken) {
