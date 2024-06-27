@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: dev
 
 product-search-service:
   url: http://localhost:8082/api/internal/product-search/v1

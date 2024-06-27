@@ -19,7 +19,7 @@ public class OrderCreatedEventListener {
 
 	private final BucketCleanupService bucketCleanupService;
 
-	@TransactionalEventListener(fallbackExecution = true)
+	@TransactionalEventListener
 	public void receive(final OrderCreatedEvent event) {
 		bucketCleanupService.deleteBuckets(event.getBucketIds());
 	}
