@@ -1,8 +1,12 @@
-spring :
-  application :
+spring:
+  application:
     name: common
 
 jasypt:
   encryptor:
     bean: jasyptStringEncryptor
     password: test
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}
+

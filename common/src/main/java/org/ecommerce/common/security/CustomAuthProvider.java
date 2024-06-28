@@ -1,21 +1,19 @@
-package org.ecommerce.userapi.security;
+package org.ecommerce.common.security;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import org.ecommerce.common.error.CommonErrorCode;
 import org.ecommerce.common.error.CustomException;
-import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.provider.JwtProvider;
+import org.ecommerce.common.provider.JwtProvider;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@Component
 @RequiredArgsConstructor
 public class CustomAuthProvider implements AuthenticationProvider {
 
@@ -38,7 +36,7 @@ public class CustomAuthProvider implements AuthenticationProvider {
 
 		if (!authDetails.getId().equals(authentication.getPrincipal()) ||
 			!authentication.getAuthorities().contains(parsedGrant)) {
-			throw new CustomException(UserErrorCode.AUTHENTICATION_FAILED);
+			throw new CustomException(CommonErrorCode.AUTHENTICATION_FAILED);
 		}
 		return new UsernamePasswordAuthenticationToken(authDetails, bearerToken, authorities);
 	}

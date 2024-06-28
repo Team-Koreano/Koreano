@@ -54,6 +54,8 @@ dependencies {
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     testImplementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 
+    //security
+    testImplementation 'org.springframework.security:spring-security-test'
     // es
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 }

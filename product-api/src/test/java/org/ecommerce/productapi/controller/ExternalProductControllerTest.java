@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.ecommerce.productapi.ControllerTest;
 import org.ecommerce.productapi.config.MockS3Config;
 import org.ecommerce.productapi.dto.ImageDto;
 import org.ecommerce.productapi.dto.ProductDetailDto;
@@ -60,11 +61,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Import(MockS3Config.class)
-@AutoConfigureMockMvc
 @WebMvcTest(ProductController.class)
 @MockBean(JpaMetamodelMappingContext.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-class ExternalProductControllerTest {
+class ExternalProductControllerTest extends ControllerTest {
 
 	private static final SellerRep testSeller = new SellerRep(2, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.parse(

@@ -33,7 +33,7 @@ import org.ecommerce.userapi.external.service.UserService;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
-import org.ecommerce.userapi.security.AuthDetails;
+import org.ecommerce.common.security.AuthDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

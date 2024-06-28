@@ -44,6 +44,9 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     testImplementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+
+    //security
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 compileJava {
     options.compilerArgs << '-parameters'
@@ -56,14 +59,14 @@ dependencyManagement {
     }
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
+tasks.register("prepareKotlinBuildScriptModel") {}
 
 def generated = 'src/main/generated'
 
 def querydslDir = layout.buildDirectory.dir(generated).get().asFile
 
 sourceSets {
-    main.java.srcDirs += [ querydslDir ]
+    main.java.srcDirs += [querydslDir]
 }
 
 tasks.withType(JavaCompile).configureEach {
