@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.bucket.external.controller;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.bucket.dto.BucketMapper;
 import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
@@ -30,36 +32,36 @@ public class BucketController {
 	private final BucketDomainService bucketDomainService;
 	private final BucketReadService bucketReadService;
 
-	// todo jwt 도입 후 로직 변경
-	private final static Integer USER_ID = 1;
-
 	@GetMapping
 	public Response<Page<BucketResponse>> getBuckets(
-			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber,
+			@CurrentUser final AuthDetails authDetails,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(name = "pageSize", required = false, defaultValue = "10") final Integer pageSize
 	) {
 
 		return new Response<>(HttpStatus.OK.value(),
-				bucketReadService.getAllBuckets(USER_ID, pageNumber, pageSize)
+				bucketReadService.getAllBuckets(authDetails.getId(), pageNumber, pageSize)
 						.map(BucketMapper.INSTANCE::toResponse)
 		);
 	}
 
 	@PostMapping
 	public Response<BucketResponse> addBucket(
+			@CurrentUser final AuthDetails authDetails,
 			@RequestBody @Valid final AddBucketRequest request
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				BucketMapper.INSTANCE.toResponse(
-						bucketDomainService.addBucket(USER_ID, request)
+						bucketDomainService.addBucket(authDetails.getId(), request)
 				)
 		);
 	}
 
 	@PutMapping("/{bucketId}")
 	public Response<BucketResponse> updateBucket(
+			@CurrentUser final AuthDetails authDetails,
 			@PathVariable("bucketId") final Long bucketId,
 			@RequestBody @Valid final ModifyBucketRequest request
 	) {
@@ -67,19 +69,21 @@ public class BucketController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				BucketMapper.INSTANCE.toResponse(
-						bucketDomainService.modifyBucket(USER_ID, bucketId, request)
+						bucketDomainService.modifyBucket(
+								authDetails.getId(), bucketId, request)
 				)
 		);
 	}
 
 	@DeleteMapping("/{bucketId}")
 	public Response<BucketResponse> deleteBucket(
+			@CurrentUser final AuthDetails authDetails,
 			@PathVariable("bucketId") final Long bucketId
 	) {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				BucketMapper.INSTANCE.toResponse(
-						bucketDomainService.deleteBucket(USER_ID, bucketId)
+						bucketDomainService.deleteBucket(authDetails.getId(), bucketId)
 				)
 		);
 	}
