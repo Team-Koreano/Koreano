@@ -49,6 +49,12 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    //security
+    testImplementation 'org.springframework.security:spring-security-test'
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
@@ -56,7 +62,7 @@ dependencies {
     }
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
+tasks.register("prepareKotlinBuildScriptModel") {}
 
 
 clean {

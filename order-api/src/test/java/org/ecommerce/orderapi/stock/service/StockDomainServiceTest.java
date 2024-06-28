@@ -23,6 +23,7 @@ import org.ecommerce.orderapi.order.repository.OrderItemRepository;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.ecommerce.orderapi.stock.entity.Stock;
 import org.ecommerce.orderapi.stock.entity.StockHistory;
+import org.ecommerce.orderapi.stock.event.publisher.StockDecreasedEventKafkaPublisher;
 import org.ecommerce.orderapi.stock.repository.StockRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,9 @@ public class StockDomainServiceTest {
 
 	@Mock
 	private ApplicationEventPublisher applicationEventPublisher;
+
+	@Mock
+	private StockDecreasedEventKafkaPublisher stockDecreasedEventKafkaPublisher;
 
 	@Test
 	void 재고_감소() {

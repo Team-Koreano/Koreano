@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.common.provider.JwtProvider;
+import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -27,11 +29,10 @@ import org.ecommerce.userapi.entity.enumerated.Gender;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.UserService;
-import org.ecommerce.userapi.provider.JwtProvider;
+import org.ecommerce.userapi.external.service.UserTokenService;
 import org.ecommerce.userapi.repository.AddressRepository;
 import org.ecommerce.userapi.repository.UserRepository;
 import org.ecommerce.userapi.repository.UsersAccountRepository;
-import org.ecommerce.userapi.security.AuthDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,9 @@ class UserServiceTest {
 
 	@Mock
 	private PaymentServiceClient paymentServiceClient;
+
+	@Mock
+	private UserTokenService userTokenService;
 
 	@BeforeEach
 	public void 기초_셋팅() {
@@ -266,7 +270,7 @@ class UserServiceTest {
 			when(userRepository.findUsersByEmailAndIsDeletedIsFalse(email)).thenReturn(user);
 
 			//when
-			when(jwtProvider.createUserTokens(any(), any(), any())).thenReturn("Bearer fake_token");
+			when(userTokenService.createUserTokens(any(), any(), any())).thenReturn("Bearer fake_token");
 			when(userService.checkIsMatchedPassword(password, user.getPassword())).thenReturn(true);
 
 			//then

@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: product-api
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 0KB
+      enabled: true
+  datasource:
+    url: ENC(dQ7QRTJdnmnGE3t8op9hx7c6ifIjmRu9Tnk8tMo9WOPpp2Dhdldriyo/KKc2Gd3lMkR1spD2S3xEcP3TDZdmykSOcVywwlrglwlMM+Q3qleTgP8i2HMLvw==)
+    password: ENC(YxJQuhf34uOnbS8x9xFeh/8hC4BO3OdX)
+    username: ENC(JiKWkC8d7XLu+oiWGKVaPg==)
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  # es 계정정보는 여러 테스트 후 세팅 안정되면 변경 예정
+  elasticsearch:
+    username: elastic
+    password: changeme
+    uris: http://localhost:9200
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(ROo1Lg6OWjlnGHhzA6zc6aXvyuQ5DDYsObl5GtKSoVE=)
+      secret-key: ENC(hhNjqFDlOO/ZIencYvXzCp6TsGqIhSa8rZCvszSEYy/EhY4PcA60gCbd3Bz1ub4AZ7bgt0cx8Ks=)
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: koreano-bucket
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}

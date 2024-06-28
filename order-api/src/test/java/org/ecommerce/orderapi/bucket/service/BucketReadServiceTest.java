@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 
 @ExtendWith(MockitoExtension.class)
 public class BucketReadServiceTest {
@@ -30,7 +30,8 @@ public class BucketReadServiceTest {
 	void 장바구니_조회() {
 		// given
 		Integer userId = 1;
-		PageRequest pageRequest = PageRequest.of(0, 10);
+		Integer pageNumber = 1;
+		Integer pageSize = 2;
 		List<Bucket> buckets = List.of(
 				new Bucket(1L,
 						1,
@@ -47,22 +48,23 @@ public class BucketReadServiceTest {
 						LocalDate.of(2024, 5, 2)
 				)
 		);
-		given(bucketRepository.findAllByUserId(anyInt()))
+		given(bucketRepository.findAllByUserId(anyInt(), anyInt(), anyInt()))
 				.willReturn(buckets);
 
 		// when
-		final List<BucketDto> bucketDtos =
-				bucketReadService.getAllBuckets(userId, pageRequest);
+		final Page<BucketDto> bucketDtos =
+				bucketReadService.getAllBuckets(userId, pageNumber, pageSize);
 
 		// then
-		assertEquals(buckets.size(), bucketDtos.size());
-		assertEquals(buckets.get(0).getId(), bucketDtos.get(0).id());
-		assertEquals(buckets.get(0).getSeller(), bucketDtos.get(0).seller());
-		assertEquals(buckets.get(0).getProductId(), bucketDtos.get(0).productId());
-		assertEquals(buckets.get(0).getQuantity(), bucketDtos.get(0).quantity());
-		assertEquals(buckets.get(1).getId(), bucketDtos.get(1).id());
-		assertEquals(buckets.get(1).getSeller(), bucketDtos.get(1).seller());
-		assertEquals(buckets.get(1).getProductId(), bucketDtos.get(1).productId());
-		assertEquals(buckets.get(1).getQuantity(), bucketDtos.get(1).quantity());
+		List<BucketDto> content = bucketDtos.getContent();
+		assertEquals(buckets.size(), content.size());
+		assertEquals(buckets.get(0).getId(), content.get(0).id());
+		assertEquals(buckets.get(0).getSeller(), content.get(0).seller());
+		assertEquals(buckets.get(0).getProductId(), content.get(0).productId());
+		assertEquals(buckets.get(0).getQuantity(), content.get(0).quantity());
+		assertEquals(buckets.get(1).getId(), content.get(1).id());
+		assertEquals(buckets.get(1).getSeller(), content.get(1).seller());
+		assertEquals(buckets.get(1).getProductId(), content.get(1).productId());
+		assertEquals(buckets.get(1).getQuantity(), content.get(1).quantity());
 	}
 }

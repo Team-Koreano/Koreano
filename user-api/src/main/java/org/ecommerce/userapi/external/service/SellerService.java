@@ -3,6 +3,8 @@ package org.ecommerce.userapi.external.service;
 import java.util.Set;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.common.provider.JwtProvider;
+import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
@@ -18,11 +20,9 @@ import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
 import org.ecommerce.userapi.exception.UserErrorCode;
-import org.ecommerce.userapi.provider.JwtProvider;
 import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
 import org.ecommerce.userapi.repository.SellerRepository;
-import org.ecommerce.userapi.security.AuthDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +50,8 @@ public class SellerService {
 	private final SellerAccountRepository sellerAccountRepository;
 
 	private final PaymentServiceClient paymentServiceClient;
+
+	private final SellerTokenService sellerTokenService;
 
 	//TODO : 계좌에 관한 RUD API 개발
 
@@ -95,7 +97,7 @@ public class SellerService {
 		final Set<String> authorization = Set.of(Role.SELLER.getCode());
 
 		return SellerMapper.INSTANCE.toDto(
-			jwtProvider.createSellerTokens(seller.getId(), authorization,
+			sellerTokenService.createSellerTokens(seller.getId(), authorization,
 				response));
 	}
 
@@ -109,7 +111,7 @@ public class SellerService {
 	 * @author 홍종민
 	 */
 	public void logoutRequest(final AuthDetails authDetails) {
-		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+		sellerTokenService.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
 			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 
@@ -155,7 +157,7 @@ public class SellerService {
 		final String refreshToken = redisProvider.getData(refreshTokenKey);
 
 		return SellerMapper.INSTANCE.toDto(
-			jwtProvider.createSellerTokens(jwtProvider.getId(refreshToken),
+			sellerTokenService.createSellerTokens(jwtProvider.getId(refreshToken),
 				Set.of(jwtProvider.getRoll(refreshToken)), response));
 	}
 
@@ -183,7 +185,7 @@ public class SellerService {
 
 		seller.withdrawal();
 
-		jwtProvider.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
+		sellerTokenService.removeTokens(jwtProvider.getAccessTokenKey(authDetails.getId(), authDetails.getRoll()),
 			jwtProvider.getRefreshTokenKey(authDetails.getId(), authDetails.getRoll()));
 	}
 

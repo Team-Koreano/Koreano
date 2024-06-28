@@ -1,0 +1,9 @@
+SECRET_KEY_SOURCE: test
+spring:
+  profiles:
+    active: test
+jwt:
+  secret: test
+jasypt:
+  encryptor:
+    password: test

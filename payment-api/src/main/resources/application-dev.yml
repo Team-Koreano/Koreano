@@ -3,7 +3,7 @@ spring:
     activation:
       on-profile: dev
   application:
-    name : "payment-api"
+    name: "payment-api"
   h2:
     console:
       enabled: true
@@ -29,9 +29,12 @@ spring:
       mode: always
   data:
     redis:
-      host: localhost
+      host: 127.0.0.1
       port: 6379
       redisson-prefix: "redis://"
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}
 
 toss:
   secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)

@@ -1,16 +1,13 @@
 package org.ecommerce.orderapi.order.service;
 
-import java.util.List;
-
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
-import org.ecommerce.orderapi.order.entity.Order;
 import org.ecommerce.orderapi.order.repository.OrderRepository;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,32 +28,25 @@ public class OrderReadService {
 	 *
 	 * @param userId- 유저 번호
 	 * @param year- 조회 연도
-	 * @param pageable- 페이징 정보
+	 * @param pageNumber- 페이지 번호
+	 * @param pageSize- 페이지 사이즈
 	 * @return - 주문 리스트
 	 */
-	public List<OrderDtoWithOrderItemDtoList> getOrders(
+	public Page<OrderDtoWithOrderItemDtoList> getOrders(
 			final Integer userId,
 			final Integer year,
-			final Pageable pageable
+			final Integer pageNumber,
+			final Integer pageSize
 	) {
-		return getPageContent(orderRepository.findOrdersByUserId(userId, year), pageable)
-				.stream()
-				.map(OrderMapper.INSTANCE::toOrderDtoWithOrderItemDtoList)
-				.toList();
+		return new PageImpl<>(
+				orderRepository.findOrdersByUserIdAndYear(
+								userId, year, pageNumber, pageSize)
+						.stream()
+						.map(OrderMapper.INSTANCE::toOrderDtoWithOrderItemDtoList)
+						.toList(),
+				PageRequest.of(pageNumber, pageSize),
+				orderRepository.countOrdersByUserIdAndYear(userId, year)
+		);
 	}
 
-	/**
-	 * 주문 리스트 페이징 메소드입니다.
-	 * @author ${Juwon}
-	 *
-	 * @param orders- 주문 리스트
-	 * @param pageable- 페이징 정보
-	 * @return - 주문 리스트
-	 */
-	@VisibleForTesting
-	public List<Order> getPageContent(final List<Order> orders, final Pageable pageable) {
-		int start = (int)pageable.getOffset();
-		int end = Math.min((start + pageable.getPageSize()), orders.size());
-		return orders.subList(start, end);
-	}
 }

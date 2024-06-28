@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.ecommerce.orderapi.ControllerTest;
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
@@ -21,8 +22,11 @@ import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
@@ -33,7 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(OrderController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class OrderControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+public class OrderControllerTest extends ControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -129,66 +134,71 @@ public class OrderControllerTest {
 		// given
 		final Integer userId = 1;
 		final Integer year = null;
-		final Integer pageNumber = 1;
-		final Integer pageSize = 5;
-		List<OrderDtoWithOrderItemDtoList> orderDtoWithOrderItemDtoList = List.of(
-				new OrderDtoWithOrderItemDtoList(
-						1L,
-						1,
-						"userName",
-						"receiveName",
-						"010-777-7777",
-						"동백",
-						"백동",
-						"빠른 배송 부탁드려요.",
-						10000,
-						APPROVE,
-						LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
-						LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
-						LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
-						List.of(
-								new OrderItemDto(
-										1L,
-										101,
-										"productName1",
-										10000,
-										1,
-										10000,
-										0,
-										10000,
-										1,
-										"seller1",
-										OPEN,
-										null,
-										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
-										LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
+		final int pageNumber = 1;
+		final int pageSize = 5;
+		final long total = 1L;
+		Page<OrderDtoWithOrderItemDtoList> expectResult = new PageImpl<>(
+				List.of(
+						new OrderDtoWithOrderItemDtoList(
+								1L,
+								1,
+								"userName",
+								"receiveName",
+								"010-777-7777",
+								"동백",
+								"백동",
+								"빠른 배송 부탁드려요.",
+								10000,
+								APPROVE,
+								LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
+								LocalDateTime.of(2024, 4, 22, 0, 1, 0, 1),
+								LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
+								List.of(
+										new OrderItemDto(
+												1L,
+												101,
+												"productName1",
+												10000,
+												1,
+												10000,
+												0,
+												10000,
+												1,
+												"seller1",
+												OPEN,
+												null,
+												LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
+												LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1)
+										)
 								)
 						)
-				)
+				),
+				PageRequest.of(pageNumber, pageSize),
+				total
 		);
 		given(orderReadService.getOrders(
-				userId, year, PageRequest.of(pageNumber, pageSize)))
-				.willReturn(orderDtoWithOrderItemDtoList);
+				userId, year, pageNumber, pageSize))
+				.willReturn(expectResult);
 
 		// when
 		// then
-		OrderDtoWithOrderItemDtoList orderDto = orderDtoWithOrderItemDtoList.get(0);
+		OrderDtoWithOrderItemDtoList orderDto = expectResult.getContent().get(0);
 		OrderItemDto orderItemDto = orderDto.orderItemDtoList().get(0);
 		mockMvc.perform(get("/api/external/orders/v1?year=&pageNumber=1"))
 				.andDo(print())
-				.andExpect(jsonPath("$.result.[0].id").value(orderDto.id()))
-				.andExpect(jsonPath("$.result.[0].userId").value(orderDto.userId()))
-				.andExpect(jsonPath("$.result.[0].receiveName")
+				.andExpect(jsonPath("$.result.content[0].id").value(orderDto.id()))
+				.andExpect(jsonPath("$.result.content[0].userId").value(orderDto.userId()))
+				.andExpect(jsonPath("$.result.content[0].receiveName")
 						.value(orderDto.receiveName()))
-				.andExpect(jsonPath("$.result.[0].address1")
+				.andExpect(jsonPath("$.result.content[0].address1")
 						.value(orderDto.address1()))
-				.andExpect(jsonPath("$.result.[0].address2")
+				.andExpect(jsonPath("$.result.content[0].address2")
 						.value(orderDto.address2()))
-				.andExpect(jsonPath("$.result.[0].deliveryComment")
+				.andExpect(jsonPath("$.result.content[0].deliveryComment")
 						.value(orderDto.deliveryComment()))
-				.andExpect(jsonPath("$.result.[0].orderDatetime")
+				.andExpect(jsonPath("$.result.content[0].orderDatetime")
 						.value(orderDto.orderDatetime().toString()))
-				.andExpect(jsonPath("$.result.[0].orderItemResponses[0].status")
+				.andExpect(jsonPath("$.result.content[0].orderItemResponses[0].status")
 						.value(orderItemDto.status().toString()))
 				.andExpect(status().isOk());
 

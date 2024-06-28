@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 
+import org.ecommerce.orderapi.ControllerTest;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
 import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
@@ -17,8 +17,12 @@ import org.ecommerce.orderapi.bucket.service.BucketDomainService;
 import org.ecommerce.orderapi.bucket.service.BucketReadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BucketController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class ExternalBucketControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+public class ExternalBucketControllerTest extends ControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -45,7 +50,10 @@ public class ExternalBucketControllerTest {
 	@Test
 	void 장바구니_조회() throws Exception {
 		// given
-		final List<BucketDto> bucketDtos =
+		final int pageNumber = 1;
+		final int pageSize = 10;
+		final long total = 2L;
+		final Page<BucketDto> bucketDtos = new PageImpl<>(
 				Arrays.asList(
 						new BucketDto(
 								1L,
@@ -64,28 +72,33 @@ public class ExternalBucketControllerTest {
 								LocalDate.of(2024, 4, 14
 								)
 						)
-				);
-		when(bucketReadService.getAllBuckets(anyInt(), any())).thenReturn(bucketDtos);
+				),
+				PageRequest.of(pageNumber, pageSize),
+				total
+		);
+		when(bucketReadService.getAllBuckets(anyInt(), anyInt(), anyInt()))
+				.thenReturn(bucketDtos);
 
 		// when
 		// then
+		BucketDto bucketDto = bucketDtos.getContent().get(0);
 		mockMvc.perform(get("/api/external/buckets/v1"))
-				.andExpect(jsonPath("$.result[0].id").value(bucketDtos.get(0).id()))
-				.andExpect(jsonPath("$.result[0].seller")
-						.value(bucketDtos.get(0).seller()))
-				.andExpect(jsonPath("$.result[0].productId")
-						.value(bucketDtos.get(0).productId()))
-				.andExpect(jsonPath("$.result[0].quantity")
-						.value(bucketDtos.get(0).quantity()))
-				.andExpect(jsonPath("$.result[1].id").value(bucketDtos.get(1).id()))
-				.andExpect(jsonPath("$.result[1].seller")
-						.value(bucketDtos.get(1).seller()))
-				.andExpect(jsonPath("$.result[1].productId")
-						.value(bucketDtos.get(1).productId()))
-				.andExpect(jsonPath("$.result[1].quantity")
-						.value(bucketDtos.get(1).quantity()))
-				.andExpect(status().isOk())
-				.andDo(print());
+				.andDo(print())
+				.andExpect(jsonPath("$.result.content[0].id").value(bucketDto.id()))
+				.andExpect(jsonPath("$.result.content[0].seller")
+						.value(bucketDto.seller()))
+				.andExpect(jsonPath("$.result.content[0].productId")
+						.value(bucketDto.productId()))
+				.andExpect(jsonPath("$.result.content[0].quantity")
+						.value(bucketDto.quantity()))
+				.andExpect(jsonPath("$.result.content[0].id").value(bucketDto.id()))
+				.andExpect(jsonPath("$.result.content[0].seller")
+						.value(bucketDto.seller()))
+				.andExpect(jsonPath("$.result.content[0].productId")
+						.value(bucketDto.productId()))
+				.andExpect(jsonPath("$.result.content[0].quantity")
+						.value(bucketDto.quantity()))
+				.andExpect(status().isOk());
 	}
 
 	@Test
