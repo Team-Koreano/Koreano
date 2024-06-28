@@ -35,7 +35,7 @@ public class BucketController {
 	@GetMapping
 	public Response<Page<BucketResponse>> getBuckets(
 			@CurrentUser final AuthDetails authDetails,
-			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(name = "pageSize", required = false, defaultValue = "10") final Integer pageSize
 	) {
 

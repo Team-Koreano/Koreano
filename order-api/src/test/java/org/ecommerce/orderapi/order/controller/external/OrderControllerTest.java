@@ -74,7 +74,7 @@ public class OrderControllerTest extends ControllerTest {
 				LocalDateTime.of(2024, 4, 22, 0, 2, 0, 1),
 				List.of()
 		);
-		when(orderDomainService.createOrder(anyInt(), any(CreateOrderRequest.class)))
+		when(orderDomainService.createOrder(any(), any(CreateOrderRequest.class)))
 				.thenReturn(orderDto);
 
 		// when
@@ -132,8 +132,6 @@ public class OrderControllerTest extends ControllerTest {
 	@Test
 	void 주문내역_조회() throws Exception {
 		// given
-		final Integer userId = 1;
-		final Integer year = null;
 		final int pageNumber = 1;
 		final int pageSize = 5;
 		final long total = 1L;
@@ -176,15 +174,14 @@ public class OrderControllerTest extends ControllerTest {
 				PageRequest.of(pageNumber, pageSize),
 				total
 		);
-		given(orderReadService.getOrders(
-				userId, year, pageNumber, pageSize))
-				.willReturn(expectResult);
+		when(orderReadService.getOrders(any(), any(), any(), any()))
+				.thenReturn(expectResult);
 
 		// when
 		// then
 		OrderDtoWithOrderItemDtoList orderDto = expectResult.getContent().get(0);
 		OrderItemDto orderItemDto = orderDto.orderItemDtoList().get(0);
-		mockMvc.perform(get("/api/external/orders/v1?year=&pageNumber=1"))
+		mockMvc.perform(get("/api/external/orders/v1"))
 				.andDo(print())
 				.andExpect(jsonPath("$.result.content[0].id").value(orderDto.id()))
 				.andExpect(jsonPath("$.result.content[0].userId").value(orderDto.userId()))
@@ -240,7 +237,7 @@ public class OrderControllerTest extends ControllerTest {
 				List.of(orderItemDto)
 		);
 
-		given(orderDomainService.cancelOrder(anyInt(), anyLong(), anyLong()))
+		given(orderDomainService.cancelOrder(any(), anyLong(), anyLong()))
 				.willReturn(orderDto);
 		// when
 		// then

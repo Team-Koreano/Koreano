@@ -76,7 +76,7 @@ public class ExternalBucketControllerTest extends ControllerTest {
 				PageRequest.of(pageNumber, pageSize),
 				total
 		);
-		when(bucketReadService.getAllBuckets(anyInt(), anyInt(), anyInt()))
+		when(bucketReadService.getAllBuckets(any(), anyInt(), anyInt()))
 				.thenReturn(bucketDtos);
 
 		// when
@@ -106,7 +106,7 @@ public class ExternalBucketControllerTest extends ControllerTest {
 		// given
 		final BucketDto bucketDto = new BucketDto(
 				1L, 1, "seller1", 101, 3, LocalDate.of(2024, 4, 14));
-		when(bucketDomainService.addBucket(anyInt(), any(AddBucketRequest.class)))
+		when(bucketDomainService.addBucket(any(), any(AddBucketRequest.class)))
 				.thenReturn(bucketDto);
 
 		// when
@@ -179,7 +179,7 @@ public class ExternalBucketControllerTest extends ControllerTest {
 				3,
 				LocalDate.of(2024, 4, 14)
 		);
-		given(bucketDomainService.modifyBucket(anyInt(), anyLong(),
+		given(bucketDomainService.modifyBucket(any(), anyLong(),
 				any(ModifyBucketRequest.class)))
 				.willReturn(bucketDto);
 
@@ -224,7 +224,7 @@ public class ExternalBucketControllerTest extends ControllerTest {
 				10,
 				LocalDate.of(2024, 5, 28)
 		);
-		when(bucketDomainService.deleteBucket(anyInt(), anyLong())).thenReturn(bucketDto);
+		when(bucketDomainService.deleteBucket(any(), anyLong())).thenReturn(bucketDto);
 
 		// when
 		// then
