@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.order.external.controller;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
@@ -33,24 +35,23 @@ public class OrderController {
 	private final StockDomainService stockDomainService;
 	private final OrderDomainService orderDomainService;
 
-	// todo jwt 도입 후 로직 변경
-	private final static Integer USER_ID = 1;
-
 	@PostMapping
 	public Response<CreateOrderResponse> createOrder(
+			@CurrentUser final AuthDetails authDetails,
 			@RequestBody @Valid final CreateOrderRequest createRequest
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toCreateOrderResponse(
-						orderDomainService.createOrder(USER_ID, createRequest)
+						orderDomainService.createOrder(authDetails.getId(), createRequest)
 				)
 		);
 	}
 
 	@GetMapping
 	public Response<Page<InquiryOrderResponse>> getOrders(
+			@CurrentUser final AuthDetails authDetails,
 			@RequestParam(name = "year", required = false) final Integer year,
 			@RequestParam(name = "pageNumber", required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(name = "pageSize", required = false, defaultValue = "5") final Integer pageSize
@@ -59,13 +60,14 @@ public class OrderController {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
-				orderReadService.getOrders(USER_ID, year, pageNumber, pageSize)
+				orderReadService.getOrders(authDetails.getId(), year, pageNumber, pageSize)
 						.map(OrderMapper.INSTANCE::toInquiryOrderResponse)
 		);
 	}
 
 	@DeleteMapping("/{orderId}/orderItems/{orderItemId}")
 	public Response<InquiryOrderResponse> cancelOrder(
+			@CurrentUser final AuthDetails authDetails,
 			@PathVariable("orderId") final Long orderId,
 			@PathVariable("orderItemId") final Long orderItemId
 	) {
@@ -73,7 +75,7 @@ public class OrderController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				OrderMapper.INSTANCE.toInquiryOrderResponse(
-						orderDomainService.cancelOrder(USER_ID, orderId, orderItemId)
+						orderDomainService.cancelOrder(authDetails.getId(), orderId, orderItemId)
 				)
 		);
 	}

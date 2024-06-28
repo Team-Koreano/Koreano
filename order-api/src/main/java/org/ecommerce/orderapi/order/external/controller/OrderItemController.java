@@ -1,5 +1,7 @@
 package org.ecommerce.orderapi.order.external.controller;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemResponse;
@@ -22,10 +24,12 @@ public class OrderItemController {
 
 	private final OrderItemReadService orderItemReadService;
 
-	private final static Integer SELLER_ID = 1;
-
+	/**
+	 * seller가 사용하는 API
+	 */
 	@GetMapping
 	public Response<Page<InquiryOrderItemResponse>> getOrderItems(
+			@CurrentUser final AuthDetails authDetails,
 			@RequestParam(required = false) final Integer month,
 			@RequestParam(required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(required = false, defaultValue = "10") final Integer pageSize
@@ -34,7 +38,7 @@ public class OrderItemController {
 		return new Response<>(
 				HttpStatus.OK.value(),
 				orderItemReadService.getOrderItems(
-								SELLER_ID, month, pageNumber, pageSize)
+								authDetails.getId(), month, pageNumber, pageSize)
 						.map(OrderMapper.INSTANCE::toInquiryOrderItemResponse)
 		);
 	}
