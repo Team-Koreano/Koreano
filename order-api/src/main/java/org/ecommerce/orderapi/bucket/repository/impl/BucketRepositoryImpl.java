@@ -21,9 +21,16 @@ public class BucketRepositoryImpl implements BucketCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<Bucket> findAllByUserId(final Integer userId) {
+	public List<Bucket> findAllByUserId(
+			final Integer userId,
+			final Integer pageNumber,
+			final Integer pageSize
+	) {
 		return jpaQueryFactory.selectFrom(bucket)
 				.where(bucket.userId.eq(userId))
+				.orderBy(bucket.createDate.desc())
+				.limit(pageSize)
+				.offset((long)(pageNumber - 1) * pageSize)
 				.fetch();
 	}
 
@@ -62,5 +69,14 @@ public class BucketRepositoryImpl implements BucketCustomRepository {
 				.where(bucket.userId.eq(userId),
 						bucket.productId.eq(productId))
 				.fetchFirst();
+	}
+
+	@Override
+	public Long countBucketsByUserId(Integer userId) {
+		return jpaQueryFactory
+				.select(bucket.count())
+				.from(bucket)
+				.where(bucket.userId.eq(userId))
+				.fetchOne();
 	}
 }

@@ -3,6 +3,7 @@ package org.ecommerce.orderapi.stock.service;
 import static org.ecommerce.orderapi.order.exception.OrderErrorCode.*;
 import static org.ecommerce.orderapi.stock.exception.StockErrorCode.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +17,11 @@ import org.ecommerce.orderapi.order.repository.OrderRepository;
 import org.ecommerce.orderapi.stock.aop.StockLock;
 import org.ecommerce.orderapi.stock.dto.StockDto;
 import org.ecommerce.orderapi.stock.dto.StockMapper;
+import org.ecommerce.orderapi.stock.dto.StockOperationMessage;
 import org.ecommerce.orderapi.stock.entity.Stock;
 import org.ecommerce.orderapi.stock.entity.enumerated.StockOperationResult;
 import org.ecommerce.orderapi.stock.event.StockDecreasedEvent;
+import org.ecommerce.orderapi.stock.event.publisher.StockDecreasedEventKafkaPublisher;
 import org.ecommerce.orderapi.stock.repository.StockRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class StockDomainService {
 	private final OrderRepository orderRepository;
 	private final OrderItemRepository orderItemRepository;
 	private final ApplicationEventPublisher applicationEventPublisher;
+	private final StockDecreasedEventKafkaPublisher stockDecreasedEventKafkaPublisher;
 
 	/**
 	 * 재고를 감소하는 메소드입니다.
@@ -55,23 +59,30 @@ public class StockDomainService {
 		final Map<Integer, Stock> stockMap = getStockMap(productIds);
 
 		final Set<Long> successfulOrderItemIds = new HashSet<>();
+		final List<StockOperationMessage> stockOperationMessages = new ArrayList<>();
 		orderItems.forEach(
 				orderItem -> {
+					Stock stock = stockMap.get(orderItem.getProductId());
 					StockOperationResult result =
-							stockMap.get(orderItem.getProductId())
-									.decreaseTotal(
-											orderItem.getId(),
-											orderItem.getQuantity()
-									);
+							stock.decreaseTotal(
+									orderItem.getId(),
+									orderItem.getQuantity()
+							);
 
-					if (result.equals(StockOperationResult.SUCCESS)) {
+					if (result.isSuccess()) {
 						successfulOrderItemIds.add(orderItem.getId());
+						stockOperationMessages.add(
+								StockOperationMessage.of(
+										stock.getProductId(),
+										stock.getTotal())
+						);
 					}
 				}
 		);
 
 		applicationEventPublisher.publishEvent(
 				new StockDecreasedEvent(orderId, successfulOrderItemIds));
+		stockDecreasedEventKafkaPublisher.publish(stockOperationMessages);
 	}
 
 	/**

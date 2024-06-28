@@ -1,13 +1,11 @@
 package org.ecommerce.orderapi.order.external.controller;
 
-import java.util.List;
-
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.orderapi.order.dto.OrderMapper;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemResponse;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemStatusHistoryResponse;
 import org.ecommerce.orderapi.order.service.OrderItemReadService;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,19 +25,17 @@ public class OrderItemController {
 	private final static Integer SELLER_ID = 1;
 
 	@GetMapping
-	public Response<List<InquiryOrderItemResponse>> getOrderItems(
+	public Response<Page<InquiryOrderItemResponse>> getOrderItems(
 			@RequestParam(required = false) final Integer month,
-			@RequestParam(required = false, defaultValue = "0") final Integer pageNumber,
+			@RequestParam(required = false, defaultValue = "1") final Integer pageNumber,
 			@RequestParam(required = false, defaultValue = "10") final Integer pageSize
 	) {
 
 		return new Response<>(
 				HttpStatus.OK.value(),
 				orderItemReadService.getOrderItems(
-								SELLER_ID, month, PageRequest.of(pageNumber, pageSize))
-						.stream()
+								SELLER_ID, month, pageNumber, pageSize)
 						.map(OrderMapper.INSTANCE::toInquiryOrderItemResponse)
-						.toList()
 		);
 	}
 
