@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import org.ecommerce.orderapi.ControllerTest;
 import org.ecommerce.orderapi.bucket.dto.BucketDto;
 import org.ecommerce.orderapi.bucket.dto.request.AddBucketRequest;
 import org.ecommerce.orderapi.bucket.dto.request.ModifyBucketRequest;
@@ -16,6 +17,7 @@ import org.ecommerce.orderapi.bucket.service.BucketDomainService;
 import org.ecommerce.orderapi.bucket.service.BucketReadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -30,7 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BucketController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class ExternalBucketControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+public class ExternalBucketControllerTest extends ControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;

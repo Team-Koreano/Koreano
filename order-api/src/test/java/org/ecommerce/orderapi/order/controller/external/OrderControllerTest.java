@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.ecommerce.orderapi.ControllerTest;
 import org.ecommerce.orderapi.order.dto.OrderDtoWithOrderItemDtoList;
 import org.ecommerce.orderapi.order.dto.OrderItemDto;
 import org.ecommerce.orderapi.order.dto.request.CreateOrderRequest;
@@ -21,6 +22,7 @@ import org.ecommerce.orderapi.order.service.OrderReadService;
 import org.ecommerce.orderapi.stock.service.StockDomainService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -35,7 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(OrderController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-public class OrderControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+public class OrderControllerTest extends ControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
