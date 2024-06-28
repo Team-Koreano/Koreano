@@ -67,7 +67,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 class ExternalProductControllerTest extends ControllerTest {
 
-	private static final SellerRep testSeller = new SellerRep(2, "TEST");
+	private static final SellerRep testSeller = new SellerRep(1, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.parse(
 		"2024-04-14T17:41:52+09:00",
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -149,10 +149,20 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		saveImages(imageDtos, product);
 
-		when(productService.productRegister(productRequest, mockThumbnailImage, mockMultipartFiles))
+		when(productService.productRegister(
+				eq(productRequest),
+				eq(mockThumbnailImage),
+				any(),
+				eq(mockMultipartFiles)
+			)
+		)
 			.thenReturn(expectedResponse);
 
-		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles))
+		when(s3Provider.uploadImageFiles(
+				mockThumbnailImage,
+				mockMultipartFiles
+			)
+		)
 			.thenReturn(imageDtos);
 
 		// When & Then
@@ -264,7 +274,8 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse = ProductMapper.INSTANCE.toDto(product);
 
-		when(productService.modifyToStatus(productId, status)).thenReturn(expectedResponse);
+		when(productService.modifyToStatus(eq(productId), eq(status), any())).thenReturn(
+			expectedResponse);
 
 		// When & Then
 		ResultActions perform = mockMvc.perform(
@@ -289,7 +300,7 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.increaseToStock(request)).thenReturn(expectedResponse);
+		when(productService.increaseToStock(eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/detail/stock/increase")
@@ -337,7 +348,14 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse = ProductMapper.INSTANCE.toDto(product);
 
-		when(productService.modifyToProduct(productId, request, mockThumbnailImage, mockMultipartFiles))
+		when(productService.modifyToProduct(
+				eq(productId),
+				eq(request),
+				eq(mockThumbnailImage),
+				eq(mockMultipartFiles),
+				any()
+			)
+		)
 			.thenReturn(expectedResponse);
 
 		// When & Then
@@ -414,7 +432,7 @@ class ExternalProductControllerTest extends ControllerTest {
 		final List<ProductWithSellerRepAndImagesAndProductDetailsDto> expectedResponse = ProductMapper.INSTANCE.toDtos(
 			products);
 
-		when(productService.bulkModifyStatus(eq(request))).thenReturn(expectedResponse);
+		when(productService.bulkModifyStatus(eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/status")
@@ -438,7 +456,8 @@ class ExternalProductControllerTest extends ControllerTest {
 		final ProductDetail productDetail = new ProductDetail(2, null, 6000, 30, "1kg", true, ProductStatus.AVAILABLE);
 		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.addProductDetail(productId, request)).thenReturn(expectedResponse);
+		when(productService.addProductDetail(eq(productId), eq(request), any())).thenReturn(
+			expectedResponse);
 
 		// When & Then
 		mockMvc.perform(post("/api/external/product/v1/detail/{productId}", productId)
@@ -460,7 +479,15 @@ class ExternalProductControllerTest extends ControllerTest {
 			ProductStatus.AVAILABLE);
 		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.modifyToProductDetail(productDetailId, request)).thenReturn(expectedResponse);
+		when(productService.modifyToProductDetail(
+				eq(productDetailId),
+				eq(request),
+				any()
+			)
+		)
+			.thenReturn(
+				expectedResponse
+			);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/detail/{productDetailId}", productDetailId)
@@ -481,8 +508,14 @@ class ExternalProductControllerTest extends ControllerTest {
 		final ProductDetail productDetail = new ProductDetail(productDetailId, null, 5000, 0, "500g", false, status);
 		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.modifyToProductDetailStatus(productDetailId, status)).thenReturn(
-			expectedResponse);
+		when(productService.modifyToProductDetailStatus(
+				eq(productDetailId),
+				eq(status),
+				any()
+			)
+		).thenReturn(
+			expectedResponse
+		);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/detail/{productDetailId}/{status}", productDetailId, status)
@@ -497,7 +530,8 @@ class ExternalProductControllerTest extends ControllerTest {
 		final int productDetailId = 1;
 		final String expectedMessage = "상품 디테일 삭제를 성공 하였습니다";
 
-		when(productService.deleteProductDetail(productDetailId)).thenReturn(expectedMessage);
+		when(productService.deleteProductDetail(eq(productDetailId), any())).thenReturn(
+			expectedMessage);
 
 		// When & Then
 		mockMvc.perform(delete("/api/external/product/v1/detail/{productDetailId}", productDetailId)
@@ -519,7 +553,7 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.decreaseToStock(request)).thenReturn(expectedResponse);
+		when(productService.decreaseToStock(eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/detail/stock/decrease")

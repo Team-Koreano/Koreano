@@ -8,8 +8,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.ecommerce.common.error.CustomException;
+import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.productapi.dto.ImageDto;
 import org.ecommerce.productapi.dto.ProductDetailDto;
 import org.ecommerce.productapi.dto.ProductWithSellerRepAndImagesAndProductDetailsDto;
@@ -31,6 +33,7 @@ import org.ecommerce.productapi.external.service.ProductService;
 import org.ecommerce.productapi.provider.S3Provider;
 import org.ecommerce.productapi.repository.ProductDetailRepository;
 import org.ecommerce.productapi.repository.ProductRepository;
+import org.ecommerce.productapi.repository.SellerRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +53,8 @@ public class ExternalProductServiceTest {
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
 	private static final SellerRep seller = new SellerRep(1, "TEST");
 
+	private static final AuthDetails authDetails = new AuthDetails(1, "TEST");
+
 	@InjectMocks
 	private ProductService productService;
 
@@ -61,6 +66,9 @@ public class ExternalProductServiceTest {
 
 	@Mock
 	private S3Provider s3Provider;
+
+	@Mock
+	private SellerRepository sellerRepository;
 
 	@Nested
 	class 상품_등록 {
@@ -102,6 +110,8 @@ public class ExternalProductServiceTest {
 			);
 
 			given(productRepository.save(any(Product.class))).willReturn(product);
+			given(sellerRepository.findById(seller.getId())).willReturn(Optional.of(seller));
+
 			final ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
 
 			final MockMultipartFile mockThumbnailImage = new MockMultipartFile(
@@ -128,7 +138,9 @@ public class ExternalProductServiceTest {
 			final ProductWithSellerRepAndImagesAndProductDetailsDto productDto = productService.productRegister(
 				productRequest,
 				mockThumbnailImage,
-				mockMultipartFiles);
+				authDetails.getId(),
+				mockMultipartFiles
+			);
 
 			// Then
 			verify(productRepository, times(1)).save(captor.capture());
@@ -181,9 +193,11 @@ public class ExternalProductServiceTest {
 
 			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
-				productRequest,
-				mockThumbnailImage,
-				mockMultipartFiles)
+					productRequest,
+					mockThumbnailImage,
+					authDetails.getId(),
+					mockMultipartFiles
+				)
 			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
@@ -218,9 +232,11 @@ public class ExternalProductServiceTest {
 
 			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
-				productRequest,
-				mockThumbnailImage,
-				mockMultipartFiles)
+					productRequest,
+					mockThumbnailImage,
+					authDetails.getId(),
+					mockMultipartFiles
+				)
 			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.ONLY_ONE_DEFAULT_PRODUCT_ALLOWED.getMessage());
@@ -254,9 +270,11 @@ public class ExternalProductServiceTest {
 
 			// When, Then
 			assertThatThrownBy(() -> productService.productRegister(
-				productRequest,
-				mockThumbnailImage,
-				mockMultipartFiles)
+					productRequest,
+					mockThumbnailImage,
+					authDetails.getId(),
+					mockMultipartFiles
+				)
 			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
@@ -297,8 +315,11 @@ public class ExternalProductServiceTest {
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
 			// When
-			ProductWithSellerRepAndImagesAndProductDetailsDto result = productService.modifyToStatus(productId,
-				newStatus);
+			ProductWithSellerRepAndImagesAndProductDetailsDto result = productService.modifyToStatus(
+				productId,
+				newStatus,
+				authDetails.getId()
+			);
 
 			// Then
 			assertThat(result.productDetails().get(0).status()).isEqualTo(newStatus);
@@ -314,8 +335,10 @@ public class ExternalProductServiceTest {
 
 			// When, Then
 			assertThatThrownBy(() -> productService.modifyToStatus(
-				productId,
-				newStatus)
+					productId,
+					newStatus,
+					authDetails.getId()
+				)
 			)
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
@@ -380,7 +403,10 @@ public class ExternalProductServiceTest {
 			final ModifyProductsStatusRequest request = new ModifyProductsStatusRequest(productIds, newStatus);
 
 			// When
-			List<ProductWithSellerRepAndImagesAndProductDetailsDto> result = productService.bulkModifyStatus(request);
+			List<ProductWithSellerRepAndImagesAndProductDetailsDto> result = productService.bulkModifyStatus(
+				request,
+				authDetails.getId()
+			);
 
 			// Then
 			assertThat(result).hasSize(2);
@@ -394,9 +420,32 @@ public class ExternalProductServiceTest {
 			final Integer productDetailId = 1;
 			final ProductStatus requestStatus = ProductStatus.OUT_OF_STOCK;
 
+			final Product product = new Product(
+				1,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
+
 			final ProductDetail productDetail = new ProductDetail(
 				1,
-				null,
+				product,
 				1000,
 				50,
 				"Small",
@@ -405,10 +454,13 @@ public class ExternalProductServiceTest {
 			);
 
 			given(productDetailRepository.findByProductDetailId(productDetailId)).willReturn(productDetail);
-
+			given(productRepository.findProductWithProductDetailsById(product.getId())).willReturn(product);
 			// When
-			ProductDetailDto result = productService.modifyToProductDetailStatus(productDetailId,
-				requestStatus);
+			ProductDetailDto result = productService.modifyToProductDetailStatus(
+				productDetailId,
+				requestStatus,
+				authDetails.getId()
+			);
 
 			// Then
 			assertThat(result.status()).isEqualTo(requestStatus);
@@ -422,10 +474,31 @@ public class ExternalProductServiceTest {
 			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
-
+			final Product product = new Product(
+				1,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
 			final ProductDetail productDetail = new ProductDetail(
 				1,
-				null,
+				product,
 				1000,
 				50,
 				"Small",
@@ -434,9 +507,12 @@ public class ExternalProductServiceTest {
 			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
-
+			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 			// When
-			ProductDetailDto result = productService.increaseToStock(request);
+			ProductDetailDto result = productService.increaseToStock(
+				request,
+				authDetails.getId()
+			);
 
 			// Then
 			assertThat(result.stock()).isEqualTo(150);
@@ -449,9 +525,32 @@ public class ExternalProductServiceTest {
 			final ModifyStockRequest request = new ModifyStockRequest(1, 40);
 
 			int existStock = 50;
+			final Product product = new Product(
+				1,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
+
 			ProductDetail productDetail = new ProductDetail(
 				1,
-				null,
+				product,
 				1000,
 				existStock,
 				"Small",
@@ -460,8 +559,12 @@ public class ExternalProductServiceTest {
 			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
+			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
-			ProductDetailDto result = productService.decreaseToStock(request);
+			ProductDetailDto result = productService.decreaseToStock(
+				request,
+				authDetails.getId()
+			);
 
 			// When, Then
 			assertThat(result.stock()).isEqualTo(existStock - request.requestStock());
@@ -476,7 +579,7 @@ public class ExternalProductServiceTest {
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(null);
 
 			// When, Then
-			assertThatThrownBy(() -> productService.increaseToStock(request))
+			assertThatThrownBy(() -> productService.increaseToStock(request, authDetails.getId()))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.NOT_FOUND_PRODUCT.getMessage());
 		}
@@ -486,10 +589,32 @@ public class ExternalProductServiceTest {
 			// Given
 			final Integer productId = 1;
 			final ModifyStockRequest request = new ModifyStockRequest(1, 100);
+			final Product product = new Product(
+				1,
+				ProductCategory.BEAN,
+				seller,
+				0,
+				false,
+				"부산 진구 유명가수가 좋아하는 원두",
+				Bean.ARABICA,
+				Acidity.CINNAMON,
+				"정말 맛있는 원두 단돈 천원",
+				false,
+				null,
+				testTime,
+				testTime,
+				(short)1000,
+				List.of(
+					ProductDetail.ofCreate(null, 1000, 50, "500g", true, ProductStatus.AVAILABLE)
+				),
+				List.of(
+					Image.ofCreate("wwww.test.test", true, (short)1, null)
+				)
+			);
 
 			ProductDetail productDetail = new ProductDetail(
 				1,
-				null,
+				product,
 				1000,
 				50,
 				"Small",
@@ -498,9 +623,9 @@ public class ExternalProductServiceTest {
 			);
 
 			given(productDetailRepository.findByProductDetailId(productId)).willReturn(productDetail);
-
+			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 			// When, Then
-			assertThatThrownBy(() -> productService.decreaseToStock(request))
+			assertThatThrownBy(() -> productService.decreaseToStock(request, authDetails.getId()))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO.getMessage());
 		}
@@ -584,7 +709,8 @@ public class ExternalProductServiceTest {
 				productId,
 				modifyProductRequest,
 				mockThumbnailImage,
-				mockMultipartFiles
+				mockMultipartFiles,
+				authDetails.getId()
 			);
 
 			// Then
@@ -638,7 +764,8 @@ public class ExternalProductServiceTest {
 					productId,
 					modifyProductRequest,
 					mockThumbnailImage,
-					mockMultipartFiles
+					mockMultipartFiles,
+					authDetails.getId()
 				)
 			)
 				.isInstanceOf(CustomException.class)
@@ -709,7 +836,11 @@ public class ExternalProductServiceTest {
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
 			// When
-			ProductDetailDto result = productService.modifyToProductDetail(productDetailId, request);
+			ProductDetailDto result = productService.modifyToProductDetail(
+				productDetailId,
+				request,
+				authDetails.getId()
+			);
 
 			// Then
 			assertThat(result.price()).isEqualTo(request.price());
@@ -726,7 +857,6 @@ public class ExternalProductServiceTest {
 			// Given
 			final int productDetailId1 = 1;
 			final int productDetailId2 = 2;
-
 			final Image image = Image.ofCreate(
 				"test",
 				true,
@@ -771,7 +901,7 @@ public class ExternalProductServiceTest {
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
 			// When
-			String response = productService.deleteProductDetail(request);
+			String response = productService.deleteProductDetail(request, authDetails.getId());
 
 			// Then
 			assertThat(response).isEqualTo("상품 디테일 삭제를 성공 하였습니다");
@@ -831,7 +961,7 @@ public class ExternalProductServiceTest {
 			given(productRepository.findProductWithProductDetailsById(productId)).willReturn(product);
 
 			// When, Then
-			assertThatThrownBy(() -> productService.deleteProductDetail(request))
+			assertThatThrownBy(() -> productService.deleteProductDetail(request, authDetails.getId()))
 				.isInstanceOf(CustomException.class)
 				.hasMessage(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL.getMessage());
 		}

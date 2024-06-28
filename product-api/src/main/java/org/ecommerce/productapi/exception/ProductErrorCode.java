@@ -19,7 +19,8 @@ public enum ProductErrorCode implements ErrorCode {
 	FAILED_PRODUCT_UPLOAD("상품 등록에 실패하였습니다.", HttpStatus.BAD_REQUEST.value()),
 	NOT_FOUND_PRODUCT_ID("존재하지 않는 상품 ID 입니다.", HttpStatus.BAD_REQUEST.value()),
 	ONLY_ONE_DEFAULT_PRODUCT_ALLOWED("대표 상품은 한개만 지정 할 수 있습니다", HttpStatus.BAD_REQUEST.value()),
-	IS_NOT_ENOUGH_PRODUCT_DETAIL("최소 한개 이상의 상품 상세가 존재해야 합니다.", HttpStatus.BAD_REQUEST.value());
+	IS_NOT_ENOUGH_PRODUCT_DETAIL("최소 한개 이상의 상품 상세가 존재해야 합니다.", HttpStatus.BAD_REQUEST.value()),
+	IS_NOT_MATCH_SELLER("판매자 정보가 일치하지 않습니다. ", HttpStatus.BAD_REQUEST.value());
 
 	ProductErrorCode(String message, int code) {
 		this.message = message;

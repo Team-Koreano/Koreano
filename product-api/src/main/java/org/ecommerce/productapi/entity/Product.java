@@ -198,10 +198,6 @@ public class Product {
 		this.productDetails.addAll(productDetails);
 	}
 
-	public void saveProductDetail(ProductDetail productDetail) {
-		this.productDetails.add(productDetail);
-	}
-
 	public List<String> getImagesUrl() {
 		return this.images.stream()
 			.map(Image::getImageUrl)
@@ -222,4 +218,9 @@ public class Product {
 		}
 		this.productDetails.remove(productDetail);
 	}
+
+	public boolean isValidSeller(Integer sellerId) {
+		return this.getSellerRep().getId().equals(sellerId);
+	}
+
 }
