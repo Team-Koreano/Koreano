@@ -53,7 +53,7 @@ public class Payment {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "beanpay_user_id", nullable = false)
-	private BeanPay userBeanPay;
+	private UserBeanPay userBeanPay;
 
 	@Column(name = "total_amount", nullable = false)
 	private Integer totalPaymentAmount = 0;
@@ -85,10 +85,10 @@ public class Payment {
 	private Boolean isVisible = Boolean.TRUE;
 
 	public static Payment ofPayment(
-		final BeanPay userBeanPay,
+		final UserBeanPay userBeanPay,
 		final Long orderId,
 		final String orderName,
-		final List<Pair<BeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap
+		final List<Pair<SellerBeanPay, PaymentDetailPriceRequest>> beanPayPaymentDetailPriceMap
 	) {
 		Payment payment = new Payment();
 		payment.orderId = orderId;
@@ -98,7 +98,7 @@ public class Payment {
 
 		beanPayPaymentDetailPriceMap.forEach((beanPayPaymentDetailPrice) -> {
 
-			BeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
+			SellerBeanPay sellerBeanPay = beanPayPaymentDetailPrice.getFirst();
 			PaymentDetailPriceRequest paymentDetailPrice = beanPayPaymentDetailPrice.getSecond();
 			//결제 디테일 생성
 			payment.paymentDetails.add(
@@ -129,17 +129,15 @@ public class Payment {
 	}
 
 	public PaymentDetail cancelPaymentDetail(Long orderItemId, String message) {
-		PaymentDetail cancelPaymentDetail = this.paymentDetails.stream()
+		return this.paymentDetails.stream()
 			.filter(paymentDetail ->
 				paymentDetail.getOrderItemId().equals(orderItemId))
 			.findFirst()
 			.orElseThrow(() -> new CustomException(PaymentDetailErrorCode.NOT_FOUND_ID))
 			.cancelPaymentDetail(message);
-		decreaseTotalAmount(cancelPaymentDetail.getPaymentAmount());
-		return cancelPaymentDetail;
 	}
 
-	private void decreaseTotalAmount(Integer amount) {
+	protected void decreaseTotalAmount(Integer amount) {
 		if(this.totalPaymentAmount - amount < 0)
 			throw new CustomException(INVALID_AMOUNT);
 		this.totalPaymentAmount -= amount;

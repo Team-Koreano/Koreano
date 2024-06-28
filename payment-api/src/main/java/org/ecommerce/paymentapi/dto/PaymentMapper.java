@@ -22,7 +22,7 @@ public interface PaymentMapper {
 	PaymentWithDetailResponse toPaymentWithDetailResponse(PaymentDtoWithDetail paymentDto);
 
 	@Mapping(source = "userBeanPay.userId", target = "userId")
-	@Mapping(source = "sellerBeanPay.userId", target = "sellerId")
+	@Mapping(source = "sellerBeanPay.sellerId", target = "sellerId")
 	@Mapping(source = "chargeInfo.paymentKey", target = "paymentKey")
 	@Mapping(source = "chargeInfo.payType", target = "payType")
 	@Mapping(source = "chargeInfo.approveDateTime", target = "approveDateTime")

@@ -35,10 +35,9 @@ subprojects {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
         }
     }
-
     jacoco {
         toolVersion = '0.8.10'
-        setReportsDirectory(file("${rootDir}/.qodana/code-coverage"))
+        setReportsDirectory(file("${rootDir}/build/code-coverage"))
     }
 
     test {
@@ -51,19 +50,47 @@ subprojects {
     }
 
     jacocoTestReport {
+        dependsOn test
         reports {
-            html.required = false
+            html.required = true
             xml.required = true
+        }
+
+        // 결과 리포트에서 제외할 클래스들
+        def Qdomains = []
+        for (qPattern in '**/QA'..'**/QZ') {
+            Qdomains.add(qPattern + '*')
+        }
+
+        afterEvaluate {
+            classDirectories.setFrom(
+                    files(classDirectories.files.collect {
+                        fileTree(dir: it, excludes: [
+                                "**/*Application*",
+                                "**/*Mapper*",
+                                "**/*Provider*",
+                                "**/*Config*",
+                                "**/*Util*",
+                                "**/*Request*",
+                                "**/*Response*",
+                        ] + Qdomains)
+                    })
+            )
         }
         finalizedBy 'jacocoTestCoverageVerification'
     }
 
     jacocoTestCoverageVerification {
+        def Qdomains = []
+        for (qPattern in '*.QA'..'*.QZ') {
+            Qdomains.add(qPattern + '*')
+        }
+
         violationRules {
             rule {
                 enabled = true
                 element = 'CLASS'
-                // includes = []
+                includes = []
 
                 limit {
                     counter = 'LINE'
@@ -71,10 +98,16 @@ subprojects {
                     minimum = 0.00
                 }
 
-                excludes = []
+                excludes = [
+                        "**.*Application*",
+                        "**.*Mapper*",
+                        "**.*Provider*",
+                        "**.*Config*",
+                        "**.*Request*",
+                        "**.*Response*",
+                ] + Qdomains
             }
         }
     }
-
     sourceCompatibility = '17'
 }

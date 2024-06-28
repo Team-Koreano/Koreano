@@ -1,0 +1,58 @@
+name: Jacoco
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: gradlew 권한을 부여합니다.
+        run: chmod +x gradlew
+        working-directory: ./
+
+
+      - name: 테스트를 실행합니다.
+        run: ./gradlew test -Djasypt.encryptor.password=${{ secrets.JASYPT_PASSWORD }}
+        working-directory: ./
+
+      - name: jacocoTestCoverage를 실행하고 리포트를 출력합니다.
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          title: 📝 Jacoco Test Coverage
+          paths: ${{ github.workspace }}/**/build/code-coverage/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 50
+          min-coverage-changed-files: 50
+          update-comment: true
+          pass-emoji: ':green_circle:'
+          fail-emoji: ':red_circle:'
+
+      - name: Coverage 정보를 가져옵니다
+        run: |
+          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+          
+      - name: 만약 Coverage 가 50% 이하이면 PR에 실패합니다
+        if: ${{ steps.jacoco.outputs.coverage-overall < 50.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Overall coverage is less than 50%!')

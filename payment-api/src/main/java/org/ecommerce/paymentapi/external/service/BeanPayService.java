@@ -14,13 +14,12 @@ import org.ecommerce.paymentapi.dto.request.PreChargeRequest;
 import org.ecommerce.paymentapi.dto.request.TossFailRequest;
 import org.ecommerce.paymentapi.dto.request.TossPaymentRequest;
 import org.ecommerce.paymentapi.dto.response.TossPaymentResponse;
-import org.ecommerce.paymentapi.entity.BeanPay;
 import org.ecommerce.paymentapi.entity.PaymentDetail;
-import org.ecommerce.paymentapi.entity.enumerate.Role;
+import org.ecommerce.paymentapi.entity.UserBeanPay;
 import org.ecommerce.paymentapi.exception.BeanPayErrorCode;
 import org.ecommerce.paymentapi.exception.PaymentDetailErrorCode;
-import org.ecommerce.paymentapi.repository.BeanPayRepository;
 import org.ecommerce.paymentapi.repository.PaymentDetailRepository;
+import org.ecommerce.paymentapi.repository.UserBeanPayRepository;
 import org.ecommerce.paymentapi.utils.TossKey;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BeanPayService {
 
 	private final TossKey tossKey;
-	private final BeanPayRepository beanPayRepository;
+	private final UserBeanPayRepository beanPayRepository;
 	private final TossServiceClient tossServiceClient;
 	private final PaymentDetailRepository paymentDetailRepository;
 
@@ -46,8 +45,8 @@ public class BeanPayService {
 	@Transactional
 	public PaymentDetailDto beforeCharge(final PreChargeRequest request) {
 
-		final BeanPay beanPay = getBeanPay(request.userId(), Role.USER);
-		final PaymentDetail paymentDetail = beanPay.beforeCharge(request.chargeAmount());
+		final UserBeanPay userBeanPay = getUserBeanPay(request.userId());
+		final PaymentDetail paymentDetail = userBeanPay.beforeCharge(request.chargeAmount());
 
 		return PaymentDetailMapper.INSTANCE.toDto(
 			paymentDetailRepository.save(paymentDetail)
@@ -55,12 +54,11 @@ public class BeanPayService {
 
 	}
 
-	private BeanPay getBeanPay(final Integer userId, final Role role) {
-		final BeanPay beanPay = beanPayRepository.findBeanPayByUserIdAndRole(
-			userId, role);
-		if(beanPay == null)
+	private UserBeanPay getUserBeanPay(final Integer userId) {
+		final UserBeanPay userBeanPay = beanPayRepository.findUserBeanPayByUserId(userId);
+		if(userBeanPay == null)
 			new CustomException(BeanPayErrorCode.NOT_FOUND_ID);
-		return beanPay;
+		return userBeanPay;
 	}
 
 	/**
@@ -69,12 +67,11 @@ public class BeanPayService {
 	 @return - BeanPayDto response
 	 */
 	@DistributedLock(
-		lockName = BEANPAY,
-		uniqueKey = "#userId + #role.name()")
+		lockName = USER_BEANPAY,
+		keys = "#userId")
 	public PaymentDetailDto validTossCharge(
 		final TossPaymentRequest request,
-		final Integer userId,
-		final Role role
+		final Integer userId
 	) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(),
 			request.chargeAmount());
