@@ -22,6 +22,10 @@ public record TossPaymentRequest(
 
 	@NotNull(message = NOT_NULL_AMOUNT)
 	@Min(value = 0, message = NOT_UNDER_ZERO_AMOUNT)
-	Integer chargeAmount
+	Integer amount,
+
+	@NotNull(message = NOT_NULL_USER_ID)
+	@Min(value = 1, message = NOT_UNDER_ONE_USER_ID)
+	Integer userId
 ) {
 }

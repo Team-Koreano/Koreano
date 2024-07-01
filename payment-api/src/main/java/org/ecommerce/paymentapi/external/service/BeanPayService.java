@@ -43,9 +43,9 @@ public class BeanPayService {
 	 @return - BeanPayDto
 	 */
 	@Transactional
-	public PaymentDetailDto beforeCharge(final PreChargeRequest request) {
+	public PaymentDetailDto beforeCharge(Integer userId, PreChargeRequest request) {
 
-		final UserBeanPay userBeanPay = getUserBeanPay(request.userId());
+		final UserBeanPay userBeanPay = getUserBeanPay(userId);
 		final PaymentDetail paymentDetail = userBeanPay.beforeCharge(request.chargeAmount());
 
 		return PaymentDetailMapper.INSTANCE.toDto(
@@ -68,13 +68,12 @@ public class BeanPayService {
 	 */
 	@DistributedLock(
 		lockName = USER_BEANPAY,
-		keys = "#userId")
+		keys = "#request.userId()")
 	public PaymentDetailDto validTossCharge(
-		final TossPaymentRequest request,
-		final Integer userId
+		final TossPaymentRequest request
 	) {
 		log.info("request : {} {} {}", request.paymentKey(), request.orderId(),
-			request.chargeAmount());
+			request.amount());
 		PaymentDetail paymentDetail = getPaymentDetail(request.orderId());
 		try {
 			validateBeanPayDetail(paymentDetail, request);
@@ -113,7 +112,7 @@ public class BeanPayService {
 	 */
 	private void validateBeanPayDetail(final PaymentDetail paymentDetail,
 		final TossPaymentRequest request) throws CustomException {
-		if (!paymentDetail.validCharge(request.orderId(), request.chargeAmount())) {
+		if (!paymentDetail.validCharge(request.orderId(), request.amount())) {
 			throw new CustomException(PaymentDetailErrorCode.VERIFICATION_FAIL);
 		}
 	}
@@ -128,7 +127,6 @@ public class BeanPayService {
 		final ResponseEntity<TossPaymentResponse> response =
 			tossServiceClient.approvePayment(
 				tossKey.getAuthorizationKey(), request);
-
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			log.error("토스 결제 승인 실패");
 			throw new CustomException(PaymentDetailErrorCode.TOSS_RESPONSE_FAIL);

@@ -82,12 +82,12 @@ public class BeanPayIntegrationServiceTest {
 		final Integer amount = 10_000;
 		final Integer userId = 1;
 		final PreChargeRequest request = new PreChargeRequest(
-			userId,
 			amount
 		);
 
 		//when
-		PaymentDetailDto actual = externalBeanPayService.beforeCharge(request);
+		PaymentDetailDto actual =
+			externalBeanPayService.beforeCharge(userId, request);
 
 		//then
 		assertEquals(actual.paymentAmount(), amount);
@@ -103,10 +103,10 @@ public class BeanPayIntegrationServiceTest {
 			final Integer amount = 10_000;
 			final Integer userId = 1;
 			final PreChargeRequest preCharge = new PreChargeRequest(
-				userId,
 				amount
 			);
-			PaymentDetailDto dto = externalBeanPayService.beforeCharge(preCharge);
+			PaymentDetailDto dto =
+				externalBeanPayService.beforeCharge(userId, preCharge);
 
 			//given
 			final String paymentType = "paymentType";
@@ -115,7 +115,7 @@ public class BeanPayIntegrationServiceTest {
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 			final UUID orderId = dto.id();
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				orderId, amount);
+				orderId, amount, userId);
 			final TossPaymentResponse response = new TossPaymentResponse(paymentKey, orderName,
 				paymentType, amount, approveDateTime);
 			final ResponseEntity<TossPaymentResponse> tossResponse =
@@ -124,7 +124,7 @@ public class BeanPayIntegrationServiceTest {
 			//when
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request))
 				.thenReturn(tossResponse);
-			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId);
+			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request);
 
 			//then
 			assertNotNull(actual);
@@ -145,10 +145,10 @@ public class BeanPayIntegrationServiceTest {
 			final Integer amount = 10_000;
 			final Integer userId = 1;
 			final PreChargeRequest preCharge = new PreChargeRequest(
-				userId,
 				amount
 			);
-			PaymentDetailDto dto = externalBeanPayService.beforeCharge(preCharge);
+			PaymentDetailDto dto =
+				externalBeanPayService.beforeCharge(userId, preCharge);
 
 			//given
 			final String paymentType = "paymentType";
@@ -157,7 +157,7 @@ public class BeanPayIntegrationServiceTest {
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 			final UUID orderId = dto.id();
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				orderId, amount);
+				orderId, amount, userId);
 			final TossPaymentResponse response = new TossPaymentResponse(paymentKey, orderName,
 				paymentType, amount, approveDateTime);
 			final ResponseEntity<TossPaymentResponse> tossResponse =
@@ -166,8 +166,8 @@ public class BeanPayIntegrationServiceTest {
 			//when
 			when(tossServiceClient.approvePayment(tossKey.getAuthorizationKey(), request))
 				.thenReturn(tossResponse);
-			externalBeanPayService.validTossCharge(request, userId);
-			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request, userId);
+			externalBeanPayService.validTossCharge(request);
+			PaymentDetailDto actual = externalBeanPayService.validTossCharge(request);
 
 			// then
 			assertNotNull(actual);
@@ -228,10 +228,9 @@ public class BeanPayIntegrationServiceTest {
 
 		private PaymentDetailDto 사전결제(Integer userId, Integer amount) {
 			final PreChargeRequest preCharge = new PreChargeRequest(
-				userId,
 				amount
 			);
-			return externalBeanPayService.beforeCharge(preCharge);
+			return externalBeanPayService.beforeCharge(userId, preCharge);
 		}
 	}
 }

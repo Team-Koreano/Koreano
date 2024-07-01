@@ -66,22 +66,24 @@ class BeanPayControllerTest extends ControllerTest {
 			.build();
 	}
 
+
 	@Test
 	void 사전결제객체_생성() throws Exception {
 		//given
-		final PreChargeRequest request = new PreChargeRequest(1, 10_000);
+		final PreChargeRequest request = new PreChargeRequest(10_000);
 		final UserBeanPay userBeanPay = getUserBeanPay();
 		final PaymentDetail entity = userBeanPay.beforeCharge(10000);
 		final PaymentDetailDto dto = PaymentDetailMapper.INSTANCE.toDto(entity);
 
-		when(beanPayService.beforeCharge(request)).thenReturn(dto);
+		when(beanPayService.beforeCharge(any(), eq(request))).thenReturn(dto);
 		final Response<PaymentDetailResponse> response = new Response<>(200,
 			PaymentDetailMapper.INSTANCE.toResponse(dto));
 
 		//when
 		MvcResult mvcResult =
 			mvc.perform(post("/api/external/beanpay/v1/charge").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsBytes(request))).andExpect(status().isOk()).andReturn();
+				.content(mapper.writeValueAsBytes(request)))
+				.andExpect(status().isOk()).andReturn();
 
 		//then
 		String actual = mvcResult.getResponse().getContentAsString();
@@ -102,7 +104,7 @@ class BeanPayControllerTest extends ControllerTest {
 			final Integer amount = 1000;
 			final String approveDateTime = "2024-04-14T17:41:52+09:00";
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				orderId, amount);
+				orderId, amount, userId);
 			final PaymentDetailDto response = new PaymentDetailDto(
 				orderId,
 				1,
@@ -127,15 +129,16 @@ class BeanPayControllerTest extends ControllerTest {
 			final Response<PaymentDetailResponse> result = new Response<>(200,
 				PaymentDetailMapper.INSTANCE.toResponse(response));
 
-			when(beanPayService.validTossCharge(request, userId)).thenReturn(response);
+			when(beanPayService.validTossCharge(request)).thenReturn(response);
 
 			//when
 			MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/success")
 					.contentType(MediaType.APPLICATION_JSON)
+					.param("userId", String.valueOf(userId))
 					.param("orderId", String.valueOf(request.orderId()))
 					.param("paymentKey", request.paymentKey())
 					.param("paymentType", request.paymentType())
-					.param("chargeAmount", String.valueOf(request.chargeAmount())))
+					.param("amount", String.valueOf(request.amount())))
 				.andExpect(status().isOk())
 				.andReturn();
 
@@ -169,6 +172,7 @@ class BeanPayControllerTest extends ControllerTest {
 		//when
 		MvcResult mvcResult = mvc.perform(get("/api/external/beanpay/v1/fail")
 				.contentType(MediaType.APPLICATION_JSON)
+				.param("userId", String.valueOf(userId))
 				.param("orderId", String.valueOf(request.orderId()))
 				.param("errorCode", request.errorCode())
 				.param("errorMessage", request.errorMessage()))

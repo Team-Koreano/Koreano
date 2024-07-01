@@ -10,4 +10,6 @@ public class TossErrorMessage {
 	public static final String NOT_NULL_ORDER_ID = "충전 ID를 입력해주세요";
 	public static final String NOT_UNDER_ZERO_AMOUNT = "0원 이상을 입력해주세요";
 	public static final String NOT_NULL_AMOUNT = "금액을 입력해주세요";
+	public static final String NOT_NULL_USER_ID = "유저ID를 전달해주세요";
+	public static final String NOT_UNDER_ONE_USER_ID = "1이상의 유저ID를 전달해주세요";
 }

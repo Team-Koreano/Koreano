@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Execution(ExecutionMode.SAME_THREAD)
 @WebMvcTest(PaymentDetailController.class)
 @MockBean(JpaMetamodelMappingContext.class)
+@AutoConfigureMockMvc(addFilters = false)
 class PaymentDetailControllerTest extends ControllerTest {
 
 	@MockBean
@@ -64,7 +66,6 @@ class PaymentDetailControllerTest extends ControllerTest {
 	@Test
 	void 구매자_빈페이_내역조회() throws Exception {
 		//given
-		final Integer userId = 1;
 		final String startTime = "20240505000000";
 		final String endTime = "20240606000000";
 		final int size = 10;
@@ -78,7 +79,7 @@ class PaymentDetailControllerTest extends ControllerTest {
 		final LocalDateTime endDateTime = PaymentTimeFormatUtil.stringToDateTime(endTime);
 
 		given(paymentDetailReadService.getUserPaymentDetailsByBetweenDate(
-			anyInt(),
+			any(),
 			eq(startDateTime),
 			eq(endDateTime),
 			eq(status),
@@ -120,7 +121,6 @@ class PaymentDetailControllerTest extends ControllerTest {
 	@Test
 	void 판매자_빈페이_내역조회() throws Exception {
 		//given
-		final Integer sellerId = 1;
 		final String startTime = "20240505000000";
 		final String endTime = "20240606000000";
 		final int size = 10;
@@ -133,8 +133,9 @@ class PaymentDetailControllerTest extends ControllerTest {
 		final LocalDateTime startDateTime = PaymentTimeFormatUtil.stringToDateTime(startTime);
 		final LocalDateTime endDateTime = PaymentTimeFormatUtil.stringToDateTime(endTime);
 
+
 		given(paymentDetailReadService.getSellerPaymentDetailByBetweenRange(
-			anyInt(),
+			any(),
 			eq(startDateTime),
 			eq(endDateTime),
 			eq(status),
