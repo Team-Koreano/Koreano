@@ -115,19 +115,34 @@ public class Product {
 		this.images = images;
 	}
 
-	public static Product createProduct(final ProductCategory category,
-		String name, Bean bean, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String capacity,
-		short deliveryFee, SellerRep seller) {
-		return category == ProductCategory.BEAN
-			? createBean(category, name, bean, acidity, information, isCrush, isDecaf, seller, null,
-			deliveryFee)
-			: createBean(category, name, Bean.NONE, Acidity.NONE, information, null, null, seller,
-			capacity, deliveryFee);
+	public static Product createProduct(
+		final ProductCategory category,
+		final String name,
+		final Bean bean,
+		final Acidity acidity,
+		final String information,
+		final Boolean isCrush,
+		final Boolean isDecaf,
+		final String capacity,
+		final short deliveryFee,
+		final SellerRep seller) {
+		return category == ProductCategory.BEAN ?
+			createBean(category, name, bean, acidity, information, isCrush, isDecaf, seller, null, deliveryFee) :
+			createBean(category, name, Bean.NONE, Acidity.NONE, information, null, null, seller, capacity, deliveryFee);
 	}
 
-	private static Product createBean(ProductCategory category, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, SellerRep sellerRep,
-		String capacity, short deliveryFee) {
+	private static Product createBean(
+		final ProductCategory category,
+		final String name,
+		final Bean bean,
+		final Acidity acidity,
+		final String information,
+		final Boolean isCrush,
+		final Boolean isDecaf,
+		final SellerRep sellerRep,
+		final String capacity,
+		final short deliveryFee
+	) {
 		Product product = new Product();
 		product.category = category;
 		product.name = name;
@@ -146,24 +161,37 @@ public class Product {
 		this.productDetails.forEach(ProductDetail::changeIsDefaultFalse);
 	}
 
-	public ProductDetail addProductDetail(Integer price, Integer stock, String size, Boolean isDefault,
-		ProductStatus status) {
-		ProductDetail productDetail = ProductDetail.ofCreate(
-			this,
-			price,
-			stock,
-			size,
-			isDefault,
-			status
-		);
-		this.productDetails.add(
-			productDetail
-		);
+	public ProductDetail addProductDetail(
+		final Integer price,
+		final Integer stock,
+		final String size,
+		final Boolean isDefault,
+		final ProductStatus status) {
+
+		ProductDetail productDetail =
+			ProductDetail.ofCreate(
+				this,
+				price,
+				stock,
+				size,
+				isDefault,
+				status
+			);
+
+		this.productDetails.add(productDetail);
+
 		return productDetail;
 	}
 
-	public void toModify(ProductCategory category, String name, Bean bean
-		, Acidity acidity, String information, Boolean isCrush, Boolean isDecaf, String capacity,
+	public void toModify(
+		final ProductCategory category,
+		final String name,
+		final Bean bean,
+		final Acidity acidity,
+		final String information,
+		final Boolean isCrush,
+		final Boolean isDecaf,
+		final String capacity,
 		short deliveryFee) {
 		this.category = category;
 		this.name = name;
@@ -176,7 +204,7 @@ public class Product {
 		this.deliveryFee = deliveryFee;
 	}
 
-	public void toModifyStatus(ProductStatus productStatus) {
+	public void toModifyStatus(final ProductStatus productStatus) {
 		this.productDetails.forEach(productDetail ->
 			productDetail.toModifyStatus(productStatus)
 		);
@@ -190,16 +218,12 @@ public class Product {
 			.orElse(null);
 	}
 
-	public void saveImages(List<Image> images) {
+	public void saveImages(final List<Image> images) {
 		this.images.addAll(images);
 	}
 
-	public void saveProductDetails(List<ProductDetail> productDetails) {
+	public void saveProductDetails(final List<ProductDetail> productDetails) {
 		this.productDetails.addAll(productDetails);
-	}
-
-	public void saveProductDetail(ProductDetail productDetail) {
-		this.productDetails.add(productDetail);
 	}
 
 	public List<String> getImagesUrl() {
@@ -216,10 +240,61 @@ public class Product {
 		return this.getProductDetails().size() > 1;
 	}
 
-	public void deleteProductDetail(ProductDetail productDetail) {
+	public void deleteProductDetail(final Integer productDetailId) {
+		ProductDetail productDetail = findProductDetail(productDetailId);
+
 		if (!this.checkHasEnoughDetails()) {
 			throw new CustomException(ProductErrorCode.IS_NOT_ENOUGH_PRODUCT_DETAIL);
 		}
 		this.productDetails.remove(productDetail);
+	}
+
+	public boolean isValidSeller(Integer sellerId) {
+		return this.getSellerRep().getId().equals(sellerId);
+	}
+
+	public void modifyProductDetail(
+		final Integer productDetailId,
+		final Integer price,
+		final String size,
+		final boolean isDefault
+	) {
+		findProductDetail(productDetailId)
+			.toModifyProductDetail(
+				price,
+				size,
+				isDefault
+			);
+	}
+
+	public void increaseStock(
+		final Integer productDetailId,
+		final Integer stock) {
+		findProductDetail(productDetailId)
+			.increaseStock(stock);
+	}
+
+	public void decreaseStock(
+		final Integer productDetailId,
+		final Integer stock) {
+		findProductDetail(productDetailId)
+			.checkStock(stock);
+	}
+
+	private ProductDetail findProductDetail(final Integer productDetailId) {
+		return this.productDetails.stream().filter(
+				productDetail -> productDetail.getId().equals(productDetailId))
+			.findFirst()
+			.orElseThrow(
+				() -> new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT_DETAIL)
+			);
+	}
+
+	public void toModifyProductDetailStatus(
+		final Integer productDetailId,
+		final ProductStatus status
+	) {
+		findProductDetail(productDetailId)
+			.toModifyStatus(status);
 	}
 }

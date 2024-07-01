@@ -21,7 +21,7 @@ def querydslDir = layout.buildDirectory.dir(generated).get().asFile
 dependencies {
     implementation(project(':common'))
 
-        //공통 모듈
+    //공통 모듈
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -58,10 +58,13 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     // es
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 sourceSets {
-    main.java.srcDirs += [ querydslDir ]
+    main.java.srcDirs += [querydslDir]
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -72,4 +75,4 @@ clean.doLast {
     file(querydslDir).deleteDir()
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
+tasks.register("prepareKotlinBuildScriptModel") {}

@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: product-api
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 0KB
+      enabled: true
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 100 #최대 pool 크기
+      minimum-idle: 10 #최소 pool 크기
+      idle-timeout: 600000 #연결위한 최대 유후 시간
+      max-lifetime: 1800000 #반납된 커넥션의 최대 수명
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  elasticsearch:
+    username: elastic
+    password: changeme
+    uris: http://localhost:9200
+  config:
+    activate:
+      on-profile: local
+cloud:
+  aws:
+    credentials:
+      access-key: ENC(ROo1Lg6OWjlnGHhzA6zc6aXvyuQ5DDYsObl5GtKSoVE=)
+      secret-key: ENC(hhNjqFDlOO/ZIencYvXzCp6TsGqIhSa8rZCvszSEYy/EhY4PcA60gCbd3Bz1ub4AZ7bgt0cx8Ks=)
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: koreano-bucket
+
+jwt:
+  secret: ${SECRET_KEY_SOURCE}

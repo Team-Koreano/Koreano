@@ -1,6 +1,8 @@
 package org.ecommerce.productapi.entity;
 
+import org.ecommerce.common.error.CustomException;
 import org.ecommerce.productapi.entity.enumerated.ProductStatus;
+import org.ecommerce.productapi.exception.ProductErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,12 +65,11 @@ public class ProductDetail {
 		this.status = status;
 	}
 
-	public boolean checkStock(int stock) {
-		if (hasEnoughStock(stock)) {
-			decreaseStock(stock);
-			return true;
+	public void checkStock(int stock) {
+		if (!hasEnoughStock(stock)) {
+			throw new CustomException(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
 		}
-		return false;
+		decreaseStock(stock);
 	}
 
 	public void changeIsDefaultFalse() {

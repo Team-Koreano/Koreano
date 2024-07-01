@@ -38,6 +38,7 @@ import org.ecommerce.productapi.external.service.ElasticSearchService;
 import org.ecommerce.productapi.external.service.ProductService;
 import org.ecommerce.productapi.provider.S3Provider;
 import org.ecommerce.productapi.repository.ImageRepository;
+import org.ecommerce.productapi.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 class ExternalProductControllerTest extends ControllerTest {
 
-	private static final SellerRep testSeller = new SellerRep(2, "TEST");
+	private static final SellerRep testSeller = new SellerRep(1, "TEST");
 	private static final LocalDateTime testTime = LocalDateTime.parse(
 		"2024-04-14T17:41:52+09:00",
 		DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -81,6 +82,9 @@ class ExternalProductControllerTest extends ControllerTest {
 
 	@Autowired
 	private WebApplicationContext context;
+
+	@MockBean
+	private ProductRepository productRepository;
 
 	@MockBean
 	private ProductService productService;
@@ -114,7 +118,7 @@ class ExternalProductControllerTest extends ControllerTest {
 		final CreateProductRequest productRequest = new CreateProductRequest(
 			true, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN, "부산 커피 단돈 5000천원", "맛있는 커피", true, null,
 			(short)3000,
-			List.of(new ProductDetailDto(5000, 20, "500g", true, ProductStatus.AVAILABLE))
+			List.of(new ProductDetailDto(1, 5000, 20, "500g", true, ProductStatus.AVAILABLE))
 		);
 
 		final Product product = new Product(
@@ -149,10 +153,20 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		saveImages(imageDtos, product);
 
-		when(productService.productRegister(productRequest, mockThumbnailImage, mockMultipartFiles))
+		when(productService.productRegister(
+				eq(productRequest),
+				eq(mockThumbnailImage),
+				any(),
+				eq(mockMultipartFiles)
+			)
+		)
 			.thenReturn(expectedResponse);
 
-		when(s3Provider.uploadImageFiles(mockThumbnailImage, mockMultipartFiles))
+		when(s3Provider.uploadImageFiles(
+				mockThumbnailImage,
+				mockMultipartFiles
+			)
+		)
 			.thenReturn(imageDtos);
 
 		// When & Then
@@ -204,7 +218,7 @@ class ExternalProductControllerTest extends ControllerTest {
 		final CreateProductRequest productRequest = new CreateProductRequest(
 			true, Acidity.CINNAMON, Bean.ARABICA, ProductCategory.BEAN, "부산 커피 단돈 5000천원", "맛있는 커피", true, null,
 			(short)3000,
-			List.of(new ProductDetailDto(5000, 20, "500g", true, ProductStatus.AVAILABLE))
+			List.of(new ProductDetailDto(1, 5000, 20, "500g", true, ProductStatus.AVAILABLE))
 		);
 
 		final MockMultipartFile productJson = new MockMultipartFile(
@@ -264,7 +278,8 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse = ProductMapper.INSTANCE.toDto(product);
 
-		when(productService.modifyToStatus(productId, status)).thenReturn(expectedResponse);
+		when(productService.modifyToStatus(eq(productId), eq(status), any())).thenReturn(
+			expectedResponse);
 
 		// When & Then
 		ResultActions perform = mockMvc.perform(
@@ -281,22 +296,43 @@ class ExternalProductControllerTest extends ControllerTest {
 		// Given
 		final int productDetailId = 1;
 		final int changedStock = 10;
+		final Integer productId = 1;
 
 		final ModifyStockRequest request = new ModifyStockRequest(productDetailId, changedStock);
 
 		ProductDetail productDetail = new ProductDetail(productDetailId, null, 1000, 50, "500g", true,
 			ProductStatus.AVAILABLE);
 
-		ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
+		final Product product = new Product(
+			productId,
+			ProductCategory.BEAN,
+			testSeller,
+			0,
+			false,
+			"부산 진구 유명가수가 좋아하는 원두",
+			Bean.ARABICA,
+			Acidity.CINNAMON,
+			"정말 맛있는 원두 단돈 천원",
+			false,
+			null,
+			testTime,
+			testTime,
+			(short)1000,
+			List.of(productDetail),
+			List.of()
+		);
 
-		when(productService.increaseToStock(request)).thenReturn(expectedResponse);
+		ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse = ProductMapper.INSTANCE.toDto(product);
+
+		when(productService.increaseToStock(eq(productId), eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
-		mockMvc.perform(put("/api/external/product/v1/detail/stock/increase")
+		mockMvc.perform(put("/api/external/product/v1/detail/{productId}/stock/increase", productId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
+			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.stock").value(productDetail.getStock()));
+			.andExpect(jsonPath("$.result.productDetails[0].stock").value(productDetail.getStock()));
 	}
 
 	@Test
@@ -337,7 +373,14 @@ class ExternalProductControllerTest extends ControllerTest {
 
 		ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse = ProductMapper.INSTANCE.toDto(product);
 
-		when(productService.modifyToProduct(productId, request, mockThumbnailImage, mockMultipartFiles))
+		when(productService.modifyToProduct(
+				eq(productId),
+				eq(request),
+				eq(mockThumbnailImage),
+				eq(mockMultipartFiles),
+				any()
+			)
+		)
 			.thenReturn(expectedResponse);
 
 		// When & Then
@@ -414,7 +457,7 @@ class ExternalProductControllerTest extends ControllerTest {
 		final List<ProductWithSellerRepAndImagesAndProductDetailsDto> expectedResponse = ProductMapper.INSTANCE.toDtos(
 			products);
 
-		when(productService.bulkModifyStatus(eq(request))).thenReturn(expectedResponse);
+		when(productService.bulkModifyStatus(eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
 		mockMvc.perform(put("/api/external/product/v1/status")
@@ -438,7 +481,8 @@ class ExternalProductControllerTest extends ControllerTest {
 		final ProductDetail productDetail = new ProductDetail(2, null, 6000, 30, "1kg", true, ProductStatus.AVAILABLE);
 		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.addProductDetail(productId, request)).thenReturn(expectedResponse);
+		when(productService.addProductDetail(eq(productId), eq(request), any())).thenReturn(
+			expectedResponse);
 
 		// When & Then
 		mockMvc.perform(post("/api/external/product/v1/detail/{productId}", productId)
@@ -454,54 +498,126 @@ class ExternalProductControllerTest extends ControllerTest {
 	void 상품_상세_수정() throws Exception {
 		// Given
 		final int productDetailId = 1;
+		final int productId = 1;
 		final ModifyProductDetailRequest request = new ModifyProductDetailRequest(7000, "750g", true);
 
 		final ProductDetail productDetail = new ProductDetail(productDetailId, null, 7000, 25, "750g", false,
 			ProductStatus.AVAILABLE);
-		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.modifyToProductDetail(productDetailId, request)).thenReturn(expectedResponse);
+		final Product product = new Product(
+			productId,
+			ProductCategory.BEAN,
+			testSeller,
+			0,
+			false,
+			"부산 진구 유명가수가 좋아하는 원두",
+			Bean.ARABICA,
+			Acidity.CINNAMON,
+			"정말 맛있는 원두 단돈 천원",
+			false,
+			null,
+			testTime,
+			testTime,
+			(short)1000,
+			List.of(productDetail),
+			List.of()
+		);
+
+		final ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse =
+			ProductMapper.INSTANCE.toDto(product);
+
+		when(productService.modifyToProductDetail(
+				eq(productId),
+				eq(productDetailId),
+				eq(request),
+				any()
+			)
+		)
+			.thenReturn(
+				expectedResponse
+			);
 
 		// When & Then
-		mockMvc.perform(put("/api/external/product/v1/detail/{productDetailId}", productDetailId)
+		mockMvc.perform(put("/api/external/product/v1/detail/{productId}/{productDetailId}", productId, productDetailId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.price").value(productDetail.getPrice()))
-			.andExpect(jsonPath("$.result.stock").value(productDetail.getStock()))
-			.andExpect(jsonPath("$.result.isDefault").value(productDetail.getIsDefault()));
+			.andExpect(jsonPath("$.result.productDetails[0].price").value(productDetail.getPrice()))
+			.andExpect(jsonPath("$.result.productDetails[0].stock").value(productDetail.getStock()))
+			.andExpect(jsonPath("$.result.productDetails[0].isDefault").value(productDetail.getIsDefault()));
 	}
 
 	@Test
 	void 상품_상세_상태_변경() throws Exception {
 		// Given
+		final int productId = 1;
 		final int productDetailId = 1;
 		final ProductStatus status = ProductStatus.OUT_OF_STOCK;
-
 		final ProductDetail productDetail = new ProductDetail(productDetailId, null, 5000, 0, "500g", false, status);
-		final ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
 
-		when(productService.modifyToProductDetailStatus(productDetailId, status)).thenReturn(
-			expectedResponse);
+		final Product product = new Product(
+			productId,
+			ProductCategory.BEAN,
+			testSeller,
+			0,
+			false,
+			"부산 진구 유명가수가 좋아하는 원두",
+			Bean.ARABICA,
+			Acidity.CINNAMON,
+			"정말 맛있는 원두 단돈 천원",
+			false,
+			null,
+			testTime,
+			testTime,
+			(short)1000,
+			List.of(productDetail),
+			List.of()
+		);
+
+		final ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse =
+			ProductMapper.INSTANCE.toDto(product);
+
+		when(productService.modifyToProductDetailStatus(
+				eq(productId),
+				eq(productDetailId),
+				eq(status),
+				any()
+			)
+		).thenReturn(
+			expectedResponse
+		);
 
 		// When & Then
-		mockMvc.perform(put("/api/external/product/v1/detail/{productDetailId}/{status}", productDetailId, status)
-				.contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(
+				put(
+					"/api/external/product/v1/detail/{productId}/{productDetailId}/{status}",
+					productId,
+					productDetailId,
+					status
+				)
+					.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.status").value(status.name()));
+			.andExpect(jsonPath("$.result.productDetails[0].status").value(status.name()));
 	}
 
 	@Test
 	void 상품_상세_삭제() throws Exception {
 		// Given
+		final int productId = 1;
 		final int productDetailId = 1;
 		final String expectedMessage = "상품 디테일 삭제를 성공 하였습니다";
 
-		when(productService.deleteProductDetail(productDetailId)).thenReturn(expectedMessage);
+		when(productService.deleteProductDetail(eq(productId), eq(productDetailId), any())).thenReturn(
+			expectedMessage);
 
 		// When & Then
-		mockMvc.perform(delete("/api/external/product/v1/detail/{productDetailId}", productDetailId)
-				.contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(
+				delete(
+					"/api/external/product/v1/detail/{productId}/{productDetailId}",
+					productId,
+					productDetailId
+				)
+					.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result").value(expectedMessage));
 	}
@@ -511,22 +627,42 @@ class ExternalProductControllerTest extends ControllerTest {
 		// Given
 		final int productDetailId = 1;
 		final int decreasedStock = 5;
+		final int productId = 1;
 
 		final ModifyStockRequest request = new ModifyStockRequest(productDetailId, decreasedStock);
-
-		ProductDetail productDetail = new ProductDetail(productDetailId, null, 1000, 45, "500g", true,
+		final ProductDetail productDetail = new ProductDetail(productDetailId, null, 1000, 45, "500g", true,
 			ProductStatus.AVAILABLE);
 
-		ProductDetailDto expectedResponse = ProductMapper.INSTANCE.toDto(productDetail);
+		final Product product = new Product(
+			productId,
+			ProductCategory.BEAN,
+			testSeller,
+			0,
+			false,
+			"부산 진구 유명가수가 좋아하는 원두",
+			Bean.ARABICA,
+			Acidity.CINNAMON,
+			"정말 맛있는 원두 단돈 천원",
+			false,
+			null,
+			testTime,
+			testTime,
+			(short)1000,
+			List.of(productDetail),
+			List.of()
+		);
 
-		when(productService.decreaseToStock(request)).thenReturn(expectedResponse);
+		final ProductWithSellerRepAndImagesAndProductDetailsDto expectedResponse =
+			ProductMapper.INSTANCE.toDto(product);
+
+		when(productService.decreaseToStock(eq(productId), eq(request), any())).thenReturn(expectedResponse);
 
 		// When & Then
-		mockMvc.perform(put("/api/external/product/v1/detail/stock/decrease")
+		mockMvc.perform(put("/api/external/product/v1/detail/{productId}/stock/decrease", productId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.stock").value(productDetail.getStock()));
+			.andExpect(jsonPath("$.result.productDetails[0]..stock").value(productDetail.getStock()));
 	}
 
 	private void verifyImages(final List<Image> images, final int index, final List<ImageDto> imageDtos) {

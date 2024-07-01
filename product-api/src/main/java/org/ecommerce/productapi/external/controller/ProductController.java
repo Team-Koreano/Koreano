@@ -2,6 +2,8 @@ package org.ecommerce.productapi.external.controller;
 
 import java.util.List;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.productapi.dto.PagedSearchDto;
 import org.ecommerce.productapi.dto.ProductDto;
@@ -49,13 +51,15 @@ public class ProductController {
 	public Response<ProductResponse> register(
 		@Valid @RequestPart(value = "product") final CreateProductRequest createProductRequest,
 		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
-		@RequestPart(value = "images", required = false) final List<MultipartFile> images) {
-
+		@RequestPart(value = "images", required = false) final List<MultipartFile> images,
+		@CurrentUser final AuthDetails authDetails
+	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
 				productService.productRegister(
 					createProductRequest,
 					thumbnailImage,
+					authDetails.getId(),
 					images
 				)
 			)
@@ -64,60 +68,86 @@ public class ProductController {
 
 	@PostMapping("/detail/{productId}")
 	public Response<ProductDetailResponse> addProductDetail(
+		@PathVariable(name = "productId") final Integer productId,
 		@Valid @RequestBody final AddProductDetailRequest addProductDetailRequest,
-		@PathVariable(name = "productId") final Integer productId
+		@CurrentUser final AuthDetails authDetails
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
-				productService.addProductDetail(productId, addProductDetailRequest)
-			)
-		);
-	}
-
-	@PutMapping("/detail/{productDetailId}")
-	public Response<ProductDetailResponse> modifyProductDetail(
-		@Valid @RequestBody final ModifyProductDetailRequest modifyProductDetailRequest,
-		@PathVariable(name = "productDetailId") final Integer productDetailId
-	) {
-		return new Response<>(HttpStatus.OK.value(),
-			ProductMapper.INSTANCE.toResponse(
-				productService.modifyToProductDetail(productDetailId, modifyProductDetailRequest)
-			)
-		);
-	}
-
-	@PutMapping("/detail/{productDetailId}/{status}")
-	public Response<ProductDetailResponse> modifyToDetailStatus(
-		@PathVariable("productDetailId") final Integer productDetailId,
-		@PathVariable("status") final ProductStatus status
-	) {
-		return new Response<>(HttpStatus.OK.value(),
-			ProductMapper.INSTANCE.toResponse(
-				productService.modifyToProductDetailStatus(
-					productDetailId,
-					status
+				productService.addProductDetail(
+					productId,
+					addProductDetailRequest,
+					authDetails.getId()
 				)
 			)
 		);
 	}
 
-	@DeleteMapping("detail/{productDetailId}")
-	public Response<String> deleteProductDetail(
-		@PathVariable(name = "productDetailId") final Integer productDetailId
+	@PutMapping("/detail/{productId}/{productDetailId}")
+	public Response<ProductResponse> modifyProductDetail(
+		@PathVariable(name = "productId") final Integer productId,
+		@PathVariable(name = "productDetailId") final Integer productDetailId,
+		@Valid @RequestBody final ModifyProductDetailRequest modifyProductDetailRequest,
+		@CurrentUser final AuthDetails authDetails
 	) {
-		return new Response<>(HttpStatus.OK.value(), (productService.deleteProductDetail(productDetailId)));
+		return new Response<>(HttpStatus.OK.value(),
+			ProductMapper.INSTANCE.toResponse(
+				productService.modifyToProductDetail(
+					productId,
+					productDetailId,
+					modifyProductDetailRequest,
+					authDetails.getId()
+				)
+			)
+		);
+	}
+
+	@PutMapping("/detail/{productId}/{productDetailId}/{status}")
+	public Response<ProductResponse> modifyToDetailStatus(
+		@PathVariable("productId") final Integer productId,
+		@PathVariable("productDetailId") final Integer productDetailId,
+		@PathVariable("status") final ProductStatus status,
+		@CurrentUser final AuthDetails authDetails
+	) {
+		return new Response<>(HttpStatus.OK.value(),
+			ProductMapper.INSTANCE.toResponse(
+				productService.modifyToProductDetailStatus(
+					productId,
+					productDetailId,
+					status,
+					authDetails.getId()
+				)
+			)
+		);
+	}
+
+	@DeleteMapping("detail/{productId}/{productDetailId}")
+	public Response<String> deleteProductDetail(
+		@PathVariable(name = "productId") final Integer productId,
+		@PathVariable(name = "productDetailId") final Integer productDetailId,
+		@CurrentUser final AuthDetails authDetails
+	) {
+		return new Response<>(HttpStatus.OK.value(), (
+			productService.deleteProductDetail(
+				productId,
+				productDetailId,
+				authDetails.getId())
+		)
+		);
 	}
 
 	@PutMapping("/{productId}/{status}")
 	public Response<ProductResponse> modifyToStatus(
 		@PathVariable("productId") final Integer productId,
-		@PathVariable("status") final ProductStatus status
+		@PathVariable("status") final ProductStatus status,
+		@CurrentUser final AuthDetails authDetails
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
 				productService.modifyToStatus(
 					productId,
-					status
+					status,
+					authDetails.getId()
 				)
 			)
 		);
@@ -125,33 +155,50 @@ public class ProductController {
 
 	@PutMapping("/status")
 	public Response<List<ProductResponse>> bulkModifyStatus(
-		@RequestBody final ModifyProductsStatusRequest bulkStatus
+		@RequestBody final ModifyProductsStatusRequest bulkStatus,
+		@CurrentUser final AuthDetails authDetails
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
-				productService.bulkModifyStatus(bulkStatus)
+				productService.bulkModifyStatus(
+					bulkStatus,
+					authDetails.getId()
+				)
 			)
 		);
 	}
 
-	@PutMapping("/detail/stock/increase")
-	public Response<ProductDetailResponse> increaseToStock(
-		@Valid @RequestBody final ModifyStockRequest stock
+	@PutMapping("/detail/{productId}/stock/increase")
+	public Response<ProductResponse> increaseToStock(
+		@PathVariable(name = "productId") final Integer productId,
+		@Valid @RequestBody final ModifyStockRequest stock,
+		@CurrentUser final AuthDetails authDetails
+
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
-				productService.increaseToStock(stock)
+				productService.increaseToStock(
+					productId,
+					stock,
+					authDetails.getId()
+				)
 			)
 		);
 	}
 
-	@PutMapping("/detail/stock/decrease")
-	public Response<ProductDetailResponse> decreaseToStock(
-		@Valid @RequestBody final ModifyStockRequest stock
+	@PutMapping("/detail/{productId}/stock/decrease")
+	public Response<ProductResponse> decreaseToStock(
+		@PathVariable(name = "productId") final Integer productId,
+		@Valid @RequestBody final ModifyStockRequest stock,
+		@CurrentUser final AuthDetails authDetails
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
-				productService.decreaseToStock(stock)
+				productService.decreaseToStock(
+					productId,
+					stock,
+					authDetails.getId()
+				)
 			)
 		);
 	}
@@ -161,7 +208,8 @@ public class ProductController {
 		@PathVariable("productId") final Integer productId,
 		@Valid @RequestPart(value = "modifyProduct") final ModifyProductRequest modifyProduct,
 		@RequestPart(value = "thumbnailImage", required = false) final MultipartFile thumbnailImage,
-		@RequestPart(value = "images", required = false) final List<MultipartFile> images
+		@RequestPart(value = "images", required = false) final List<MultipartFile> images,
+		@CurrentUser final AuthDetails authDetails
 	) {
 		return new Response<>(HttpStatus.OK.value(),
 			ProductMapper.INSTANCE.toResponse(
@@ -169,7 +217,9 @@ public class ProductController {
 					productId,
 					modifyProduct,
 					thumbnailImage,
-					images)
+					images,
+					authDetails.getId()
+				)
 			)
 		);
 	}

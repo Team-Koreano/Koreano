@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record ProductDetailDto(
+	@NotNull(message = ProductErrorMessages.productDetailIdIsNotNull)
+	@Min(value = 0, message = ProductErrorMessages.isCanNotBeBelowZero)
+	Integer productDetailId,
 	@NotNull(message = ProductErrorMessages.priceNotNull)
 	@Min(value = 0, message = ProductErrorMessages.isCanNotBeBelowZero)
 	Integer price,
