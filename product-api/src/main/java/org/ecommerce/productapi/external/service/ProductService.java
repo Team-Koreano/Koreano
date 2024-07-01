@@ -33,8 +33,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductService {
 
-	// TODO : 향후 Replication 후 삭제
-	private static final SellerRep seller = new SellerRep(1, "TEST");
 	private final ProductRepository productRepository;
 	private final SellerRepository sellerRepository;
 	private final S3Provider s3Provider;
@@ -74,15 +72,16 @@ public class ProductService {
 			)
 		);
 
-		savedProduct.saveProductDetails(
-			createProductRequest.productDetails().stream().map(productDetailDto -> ProductDetail.ofCreate(
-				savedProduct,
-				productDetailDto.price(),
-				productDetailDto.stock(),
-				productDetailDto.size(),
-				productDetailDto.isDefault(),
-				productDetailDto.status())
-			).toList()
+		savedProduct.saveProductDetails(productDetailRepository.saveAll(
+				createProductRequest.productDetails().stream().map(productDetailDto -> ProductDetail.ofCreate(
+					savedProduct,
+					productDetailDto.price(),
+					productDetailDto.stock(),
+					productDetailDto.size(),
+					productDetailDto.isDefault(),
+					productDetailDto.status())
+				).toList()
+			)
 		);
 
 		savedProduct.saveImages(
@@ -147,14 +146,15 @@ public class ProductService {
 		}
 
 		return ProductMapper.INSTANCE.toDto(
-			product
-				.addProductDetail(
+			productDetailRepository.save(
+				product.addProductDetail(
 					addProductDetailRequest.price(),
 					addProductDetailRequest.stock(),
 					addProductDetailRequest.size(),
 					addProductDetailRequest.isDefault(),
 					addProductDetailRequest.status()
 				)
+			)
 		);
 	}
 
@@ -165,17 +165,12 @@ public class ProductService {
 	 @return String - 반환될 메세지입니다
 	 */
 	public String deleteProductDetail(
+		final Integer productId,
 		final Integer productDetailId,
 		final Integer sellerId
 	) {
 
-		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
-
-		if (productDetail == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT_DETAIL);
-		}
-
-		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
@@ -185,7 +180,7 @@ public class ProductService {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_SELLER);
 		}
 
-		product.deleteProductDetail(productDetail);
+		product.deleteProductDetail(productDetailId);
 		return "상품 디테일 삭제를 성공 하였습니다";
 	}
 
@@ -195,19 +190,14 @@ public class ProductService {
 	 @param productDetailId - ProductDettail
 	 @return - ProductDetailDto 입니다
 	 */
-	public ProductDetailDto modifyToProductDetailStatus(
+	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToProductDetailStatus(
+		final Integer productId,
 		final Integer productDetailId,
 		final ProductStatus status,
 		final Integer sellerId
 	) {
 
-		ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
-
-		if (productDetail == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
-		}
-
-		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
@@ -217,9 +207,9 @@ public class ProductService {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_SELLER);
 		}
 
-		productDetail.toModifyStatus(status);
+		product.toModifyProductDetailStatus(productDetailId, status);
 
-		return ProductMapper.INSTANCE.toDto(productDetail);
+		return ProductMapper.INSTANCE.toDto(product);
 	}
 
 	/**
@@ -230,17 +220,13 @@ public class ProductService {
 	 * @return - ProductDetailDto 입니다
 	 */
 
-	public ProductDetailDto modifyToProductDetail(
+	public ProductWithSellerRepAndImagesAndProductDetailsDto modifyToProductDetail(
+		final Integer productId,
 		final Integer productDetailId,
 		final ModifyProductDetailRequest modifyProductDetailRequest,
 		final Integer sellerId) {
 
-		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(productDetailId);
-
-		if (productDetail == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT_DETAIL);
-		}
-		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
@@ -251,19 +237,17 @@ public class ProductService {
 		}
 
 		if (modifyProductDetailRequest.isDefault()) {
-			productRepository.findProductWithProductDetailsById(
-					productDetail.getProduct().getId()
-				)
-				.changeDetailsIsDefault();
+			product.changeDetailsIsDefault();
 		}
 
-		productDetail.toModifyProductDetail(
+		product.modifyProductDetail(
+			productDetailId,
 			modifyProductDetailRequest.price(),
 			modifyProductDetailRequest.size(),
 			modifyProductDetailRequest.isDefault()
 		);
 
-		return ProductMapper.INSTANCE.toDto(productDetail);
+		return ProductMapper.INSTANCE.toDto(product);
 	}
 
 	/**
@@ -273,18 +257,13 @@ public class ProductService {
 	 @param stock - 상품의 재고값
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductDetailDto increaseToStock(
+	public ProductWithSellerRepAndImagesAndProductDetailsDto increaseToStock(
+		final Integer productId,
 		final ModifyStockRequest stock,
 		final Integer sellerId
 	) {
 
-		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(stock.productDetailId());
-
-		if (productDetail == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
-		}
-
-		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (product == null) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
@@ -294,9 +273,12 @@ public class ProductService {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_SELLER);
 		}
 
-		productDetail.increaseStock(stock.requestStock());
+		product.increaseStock(
+			stock.productDetailId(),
+			stock.requestStock()
+		);
 
-		return ProductMapper.INSTANCE.toDto(productDetail);
+		return ProductMapper.INSTANCE.toDto(product);
 	}
 
 	/**
@@ -306,32 +288,24 @@ public class ProductService {
 	 @param stock - 상품의 재고값
 	 @return ProductManagementDto - 사용자에게 전달해주기 위한 Response Dto 입니다.
 	 */
-	public ProductDetailDto decreaseToStock(
+	public ProductWithSellerRepAndImagesAndProductDetailsDto decreaseToStock(
+		final Integer productId,
 		final ModifyStockRequest stock,
 		final Integer sellerId
 	) {
 
-		final ProductDetail productDetail = productDetailRepository.findByProductDetailId(stock.productDetailId());
-
-		if (productDetail == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
-		}
-
-		final Product product = productRepository.findProductWithProductDetailsById(productDetail.getProduct().getId());
-
-		if (product == null) {
-			throw new CustomException(ProductErrorCode.NOT_FOUND_PRODUCT);
-		}
+		final Product product = productRepository.findProductWithProductDetailsById(productId);
 
 		if (!product.isValidSeller(sellerId)) {
 			throw new CustomException(ProductErrorCode.NOT_FOUND_SELLER);
 		}
 
-		if (!productDetail.checkStock(stock.requestStock())) {
-			throw new CustomException(ProductErrorCode.CAN_NOT_BE_SET_TO_BELOW_ZERO);
-		}
+		product.decreaseStock(
+			stock.productDetailId(),
+			stock.requestStock()
+		);
 
-		return ProductMapper.INSTANCE.toDto(productDetail);
+		return ProductMapper.INSTANCE.toDto(product);
 	}
 
 	/**
