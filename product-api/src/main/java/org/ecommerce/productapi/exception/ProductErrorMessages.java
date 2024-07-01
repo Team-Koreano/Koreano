@@ -1,6 +1,7 @@
 package org.ecommerce.productapi.exception;
 
 public class ProductErrorMessages {
+	public static final String productDetailIdIsNotNull = "상품 상세의 식별값을 작성해 주세요";
 	public static final String isDecafNotNull = "카페인 여부를 선택해 주세요";
 	public static final String priceNotNull = "가격을 작성해 주세요";
 	public static final String stockNotNull = "재고 수량을 작성해 주세요";
