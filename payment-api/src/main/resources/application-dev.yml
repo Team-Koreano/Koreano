@@ -32,11 +32,12 @@ spring:
       host: 127.0.0.1
       port: 6379
       redisson-prefix: "redis://"
-
+server:
+  port: 8081
 jwt:
   secret: ${SECRET_KEY_SOURCE}
 
 toss:
-  secretKey: ENC(86ig+oZXxY6PDB8CYxIdqZVTM1sQCwW793bAtqQUzDH/yNl2loimvtFfQZhGa7e6)
+  secretKey: ENC(uixx6b1CWCcJNa+4SVtMWqbX05iTlQ3uA0YxJGaEqSaghpI/sv5K6K+xLkyLxg8w)
   server:
     url: https://api.tosspayments.com/v1/payments

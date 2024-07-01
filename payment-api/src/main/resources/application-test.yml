@@ -33,6 +33,8 @@ spring:
       host: 127.0.0.1
       port: 16379
       redisson-prefix: "redis://"
+server:
+  port: 8081
 toss:
   secretKey: test
   server:
