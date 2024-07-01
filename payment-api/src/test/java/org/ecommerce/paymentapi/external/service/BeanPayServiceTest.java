@@ -62,7 +62,8 @@ class BeanPayServiceTest {
 	void 사전충전객체_생성() {
 
 		//given
-		final PreChargeRequest request = new PreChargeRequest(1, 10_000);
+		final Integer userId = 1;
+		final PreChargeRequest request = new PreChargeRequest( 10_000);
 		final UserBeanPay userBeanPay = getUserBeanPay();
 		final PaymentDetail entity = userBeanPay.beforeCharge(userBeanPay.getAmount());
 		final PaymentDetailDto response = PaymentDetailMapper.INSTANCE.toDto(entity);
@@ -73,7 +74,8 @@ class BeanPayServiceTest {
 
 
 		//when
-		final PaymentDetailDto actual = beanPayService.beforeCharge(request);
+		final PaymentDetailDto actual =
+			beanPayService.beforeCharge(userId, request);
 
 		//then
 		assertThat(actual).usingRecursiveComparison().isEqualTo(response);
@@ -100,7 +102,7 @@ class BeanPayServiceTest {
 
 
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				id, paymentAmount);
+				id, paymentAmount, userId);
 			final PaymentDetail entity = new PaymentDetail(
 				id,
 				new Payment(),
@@ -134,7 +136,7 @@ class BeanPayServiceTest {
 
 			//then
 			PaymentDetailDto actual = assertDoesNotThrow(
-				() -> beanPayService.validTossCharge(request, userId));
+				() -> beanPayService.validTossCharge(request));
 
 			assertEquals(actual.id(), id);
 			assertEquals(actual.userId(), entity.getUserBeanPay().getUserId());
@@ -163,7 +165,7 @@ class BeanPayServiceTest {
 			final Integer amount = 1000;
 
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				orderId, amount);
+				orderId, amount, userId);
 
 			//when
 			when(paymentDetailRepository.findPaymentDetailById(request.orderId())).thenThrow(
@@ -171,7 +173,7 @@ class BeanPayServiceTest {
 
 			//then
 			CustomException returnException = assertThrows(CustomException.class, () -> {
-				beanPayService.validTossCharge(request, userId);
+				beanPayService.validTossCharge(request);
 			});
 			assertEquals(returnException.getErrorCode(), NOT_FOUND_ID);
 		}
@@ -196,7 +198,7 @@ class BeanPayServiceTest {
 
 
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				id, paymentAmount);
+				id, paymentAmount, userId);
 			final PaymentDetail paymentDetail = new PaymentDetail(
 				id,
 				new Payment(),
@@ -235,7 +237,7 @@ class BeanPayServiceTest {
 				paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertNotNull(findPaymentDetail);
 			assertEquals(findPaymentDetail.getFailReason(), VERIFICATION_FAIL.getMessage());
 			assertEquals(ProcessStatus.FAILED, findPaymentDetail.getProcessStatus());
@@ -260,7 +262,7 @@ class BeanPayServiceTest {
 
 
 			final TossPaymentRequest request = new TossPaymentRequest(paymentType, paymentKey,
-				id, paymentAmount);
+				id, paymentAmount, userId);
 			final PaymentDetail paymentDetail = new PaymentDetail(
 				id,
 				new Payment(),
@@ -294,7 +296,7 @@ class BeanPayServiceTest {
 			PaymentDetail findPaymentDetail = paymentDetailRepository.findPaymentDetailById(request.orderId());
 
 			//then
-			assertDoesNotThrow(() -> beanPayService.validTossCharge(request, userId));
+			assertDoesNotThrow(() -> beanPayService.validTossCharge(request));
 			assertNotNull(findPaymentDetail);
 			assertEquals(findPaymentDetail.getFailReason(),
 				TOSS_RESPONSE_FAIL.getMessage());

@@ -34,15 +34,16 @@ public class TossDtoTest {
 			final String paymentKey = "paymentKey";
 			final String paymentType = "카드";
 			final Integer amount = 1000;
+			final Integer userId = 1;
 
 			//when
 			final TossPaymentRequest request =
-				new TossPaymentRequest(paymentType, paymentKey, orderId, amount);
+				new TossPaymentRequest(paymentType, paymentKey, orderId, amount, userId);
 
 			//then
 			assertEquals(orderId, request.orderId());
 			assertEquals(paymentKey, request.paymentKey());
-			assertEquals(amount, request.chargeAmount());
+			assertEquals(amount, request.amount());
 			assertEquals(paymentType, request.paymentType());
 		}
 		@Test
@@ -52,10 +53,11 @@ public class TossDtoTest {
 			final String paymentKey = "";
 			final String paymentType = "";
 			final Integer amount = -1;
+			final Integer userId = 1;
 
 			//when
 			final TossPaymentRequest request =
-				new TossPaymentRequest(paymentType, paymentKey, orderId, amount);
+				new TossPaymentRequest(paymentType, paymentKey, orderId, amount, userId);
 
 			//then
 			Set<ConstraintViolation<TossPaymentRequest>> violations =

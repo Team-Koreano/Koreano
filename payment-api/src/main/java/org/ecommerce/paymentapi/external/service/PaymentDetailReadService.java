@@ -65,7 +65,7 @@ public class PaymentDetailReadService {
 	 * @return - Page[PaymentDetailDto]
 	 */
 	public Page<PaymentDetailDto> getSellerPaymentDetailByBetweenRange(
-		int sellerId,
+		Integer sellerId,
 		LocalDateTime start,
 		LocalDateTime end,
 		PaymentStatus status,

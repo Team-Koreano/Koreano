@@ -2,6 +2,8 @@ package org.ecommerce.paymentapi.external.controller;
 
 import static org.ecommerce.paymentapi.entity.enumerate.ProcessStatus.*;
 
+import org.ecommerce.common.security.AuthDetails;
+import org.ecommerce.common.security.custom.CurrentUser;
 import org.ecommerce.common.vo.Response;
 import org.ecommerce.paymentapi.dto.PaymentDetailDto;
 import org.ecommerce.paymentapi.dto.PaymentDetailMapper;
@@ -30,8 +32,11 @@ public class BeanPayController {
 	private final BeanPayService beanPayService;
 
 	@PostMapping("/charge")
-	public Response<PaymentDetailResponse> beforeCharge(@RequestBody final PreChargeRequest request) {
-		final PaymentDetailDto response = beanPayService.beforeCharge(request);
+	public Response<PaymentDetailResponse> beforeCharge(
+		@CurrentUser AuthDetails auth,
+		@RequestBody final PreChargeRequest request) {
+		final PaymentDetailDto response =
+			beanPayService.beforeCharge(auth.getId(), request);
 		return new Response<>(
 			HttpStatus.OK.value(),
 			PaymentDetailMapper.INSTANCE.toResponse(response)
@@ -39,10 +44,11 @@ public class BeanPayController {
 	}
 
 	@GetMapping("/success")
-	public Response<PaymentDetailResponse> validCharge(@Valid final TossPaymentRequest request) {
+	public Response<PaymentDetailResponse> validCharge(
+		@Valid final TossPaymentRequest request) {
 		//TODO: Jwt 회원 Id 적용 예정
 		final PaymentDetailResponse response =
-			PaymentDetailMapper.INSTANCE.toResponse(beanPayService.validTossCharge(request, 1));
+			PaymentDetailMapper.INSTANCE.toResponse(beanPayService.validTossCharge(request));
 		if(response.processStatus() == FAILED) {
 			return new Response<>(HttpStatus.BAD_REQUEST.value(), response);
 		}
