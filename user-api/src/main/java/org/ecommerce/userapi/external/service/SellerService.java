@@ -8,6 +8,7 @@ import org.ecommerce.common.security.AuthDetails;
 import org.ecommerce.userapi.client.PaymentServiceClient;
 import org.ecommerce.userapi.dto.AccountDto;
 import org.ecommerce.userapi.dto.AccountMapper;
+import org.ecommerce.userapi.dto.SellerCreateMessage;
 import org.ecommerce.userapi.dto.SellerDto;
 import org.ecommerce.userapi.dto.SellerMapper;
 import org.ecommerce.userapi.dto.request.CreateAccountRequest;
@@ -19,6 +20,7 @@ import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.Role;
+import org.ecommerce.userapi.event.publisher.SellerCreateEventKafkaPublisher;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.provider.RedisProvider;
 import org.ecommerce.userapi.repository.SellerAccountRepository;
@@ -53,6 +55,8 @@ public class SellerService {
 
 	private final SellerTokenService sellerTokenService;
 
+	private final SellerCreateEventKafkaPublisher sellerCreateEventKafkaPublisher;
+
 	//TODO : 계좌에 관한 RUD API 개발
 
 	/**
@@ -70,6 +74,13 @@ public class SellerService {
 			requestSeller.address(), requestSeller.phoneNumber()));
 
 		paymentServiceClient.createSellerBeanPay(new CreateSellerBeanPayRequest(seller.getId()));
+
+		sellerCreateEventKafkaPublisher.publish(
+			SellerCreateMessage.of(
+				seller.getId(),
+				seller.getName()
+			)
+		);
 
 		return SellerMapper.INSTANCE.toDto(seller);
 	}
