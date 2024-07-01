@@ -22,6 +22,7 @@ import org.ecommerce.userapi.dto.request.WithdrawalSellerRequest;
 import org.ecommerce.userapi.entity.Seller;
 import org.ecommerce.userapi.entity.SellerAccount;
 import org.ecommerce.userapi.entity.enumerated.UserStatus;
+import org.ecommerce.userapi.event.publisher.SellerCreateEventKafkaPublisher;
 import org.ecommerce.userapi.exception.UserErrorCode;
 import org.ecommerce.userapi.external.service.SellerService;
 import org.ecommerce.userapi.external.service.SellerTokenService;
@@ -54,6 +55,9 @@ class SellerServiceTest {
 
 	@Mock
 	private JwtProvider jwtProvider;
+	
+	@Mock
+	private SellerCreateEventKafkaPublisher sellerCreateEventKafkaPublisher;
 
 	@Mock
 	private SellerTokenService sellerTokenService;
