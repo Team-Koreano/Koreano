@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "seller_beanpay",
 	indexes = {
-		@Index(name = "idx_seller_id", columnList = "userId"),
+		@Index(name = "idx_seller_id", columnList = "sellerId"),
 	})
 public class SellerBeanPay {
 
