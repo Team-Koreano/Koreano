@@ -35,14 +35,33 @@ public class OrderItemRepositoryImpl implements OrderItemCustomRepository {
 	@Override
 	public List<OrderItem> findOrderItemsBySellerIdAndMonth(
 			final Integer sellerId,
-			final Integer month
+			final Integer month,
+			final Integer pageNumber,
+			final Integer pageSize
 	) {
 		return jpaQueryFactory
 				.selectFrom(orderItem)
 				.leftJoin(orderItem.order, order).fetchJoin()
 				.where(orderItem.sellerId.eq(sellerId),
 						generateDateCondition(month))
+				.orderBy(orderItem.order.orderDatetime.desc())
+				.limit(pageSize)
+				.offset((long)(pageNumber - 1) * pageSize)
 				.fetch();
+	}
+
+	@Override
+	public Long countOrderItemsBySellerIdAndMonth(
+			final Integer sellerId,
+			final Integer month
+	) {
+		return jpaQueryFactory
+				.select(orderItem.count())
+				.from(orderItem)
+				.leftJoin(orderItem.order, order).fetchJoin()
+				.where(orderItem.sellerId.eq(sellerId),
+						generateDateCondition(month))
+				.fetchOne();
 	}
 
 	private BooleanExpression generateDateCondition(final Integer month) {

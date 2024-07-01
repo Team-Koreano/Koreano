@@ -22,7 +22,7 @@ public class RedisRepositoryConfig {
 	private int redisPort;
 
 	@Bean
-	@DependsOn("org.ecommerce.orderapi.config.EmbeddedRedisConfig")
+	@DependsOn("org.ecommerce.orderapi.global.config.EmbeddedRedisConfig")
 	@Conditional(DevProfileCondition.class)
 	public RedissonClient redissonClient() {
 		Config config = new Config();

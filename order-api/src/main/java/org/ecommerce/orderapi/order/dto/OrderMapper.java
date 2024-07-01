@@ -3,6 +3,7 @@ package org.ecommerce.orderapi.order.dto;
 import org.ecommerce.orderapi.order.dto.response.CreateOrderResponse;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemResponse;
 import org.ecommerce.orderapi.order.dto.response.InquiryOrderItemStatusHistoryResponse;
+import org.ecommerce.orderapi.order.dto.response.InquiryOrderResponse;
 import org.ecommerce.orderapi.order.dto.response.OrderItemResponse;
 import org.ecommerce.orderapi.order.dto.response.OrderResponse;
 import org.ecommerce.orderapi.order.dto.response.OrderStatusHistoryResponse;
@@ -36,6 +37,10 @@ public interface OrderMapper {
 
 	@Mapping(source = "orderDtoWithOrderItemDtoList.orderItemDtoList", target = "orderItemResponses")
 	CreateOrderResponse toCreateOrderResponse(
+			OrderDtoWithOrderItemDtoList orderDtoWithOrderItemDtoList);
+
+	@Mapping(source = "orderDtoWithOrderItemDtoList.orderItemDtoList", target = "orderItemResponses")
+	InquiryOrderResponse toInquiryOrderResponse(
 			OrderDtoWithOrderItemDtoList orderDtoWithOrderItemDtoList);
 
 	@Mapping(source = "orderItem.order", target = "orderDto")

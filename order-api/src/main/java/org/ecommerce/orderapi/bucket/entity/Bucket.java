@@ -43,7 +43,7 @@ public class Bucket {
 	private Integer productId;
 
 	@Column(nullable = false)
-	private Integer quantity;
+	private Integer quantity = 0;
 
 	@CreationTimestamp
 	@Column
@@ -52,21 +52,28 @@ public class Bucket {
 	public static Bucket ofAdd(
 			final Integer userId,
 			final String seller,
-			final Integer productId,
-			final Integer quantity
+			final Integer productId
 	) {
 		Bucket bucket = new Bucket();
 		bucket.userId = userId;
 		bucket.seller = seller;
 		bucket.productId = productId;
-		bucket.quantity = quantity;
 		return bucket;
 	}
 
 	public void modifyQuantity(final Integer newQuantity) {
-		if (newQuantity > MAXIMUM_PRODUCT_QUANTITY) {
+		this.quantity = newQuantity;
+		validateQuantity();
+	}
+
+	public void appendQuantity(final Integer quantity) {
+		this.quantity += quantity;
+		validateQuantity();
+	}
+
+	private void validateQuantity() {
+		if (this.quantity > MAXIMUM_PRODUCT_QUANTITY) {
 			throw new CustomException(TOO_MANY_QUANTITY_IN_BUCKET);
 		}
-		this.quantity = newQuantity;
 	}
 }
