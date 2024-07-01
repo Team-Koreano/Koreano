@@ -31,6 +31,7 @@ public interface ProductMapper {
 	@Named(value = "entityToDto")
 	ProductWithSellerRepAndImagesAndProductDetailsDto toDto(Product product);
 
+	@Mapping(source = "id", target = "productDetailId")
 	ProductDetailDto toDto(ProductDetail productDetail);
 
 	@IterableMapping(qualifiedByName = "entityToDto")
