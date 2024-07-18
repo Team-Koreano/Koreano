@@ -1,4 +1,4 @@
-package org.ecommerce.paymentapi.config;
+package org.ecommerce.redis.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "spring.data.redis")
-public class RedisProperties {
+public class RedisSingleInfo {
 	private String host;
 	private int port;
 	private String REDISSON_PREFIX;

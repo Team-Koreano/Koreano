@@ -1,0 +1,12 @@
+spring :
+  application :
+    name: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      redisson-prefix: "redis://"
+
+    
+
+

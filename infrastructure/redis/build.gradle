@@ -1,0 +1,21 @@
+plugins {
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//lombok
+	implementation 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+	// redis client
+	implementation 'org.redisson:redisson-spring-boot-starter:3.29.0'
+	implementation 'it.ozimov:embedded-redis:0.7.2'
+	testImplementation 'it.ozimov:embedded-redis:0.7.2'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
+}
+
+tasks.register("prepareKotlinBuildScriptModel"){}

@@ -8,7 +8,8 @@ import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGe
 @EnableFeignClients
 @SpringBootApplication(scanBasePackages = {
 	"org.ecommerce.common",
-	"org.ecommerce.paymentapi"
+	"org.ecommerce.paymentapi",
+	"org.ecommerce.redis"
 }, nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
 public class PaymentApiApplication {
 

@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DistributedLockAop {
 	private static final String REDISSON_LOCK_PREFIX = "LOCK";
-
 	private final RedissonClient redissonClient;
 	private final AopForTransaction aopForTransaction;
 

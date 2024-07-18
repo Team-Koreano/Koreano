@@ -1,0 +1,16 @@
+# 파일 규격 버전
+version: "3.1"
+
+# 실행하려는 컨테이너들 정의
+services:
+  redis_container:
+    image: redis:7.0.0
+    volumes:
+      - ./config/redis.conf:/etc/redis.conf
+    restart: always
+    ports:
+      - "6379:6379"
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    command: redis-server /etc/redis.conf

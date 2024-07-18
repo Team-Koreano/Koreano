@@ -30,9 +30,10 @@ spring:
       mode: always
   data:
     redis:
-      host: 127.0.0.1
+      host: localhost
       port: 6379
       redisson-prefix: "redis://"
+
 toss:
   secretKey: test
   server:
